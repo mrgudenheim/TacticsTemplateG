@@ -95,7 +95,7 @@ func set_palette_data(palette_bytes: PackedByteArray) -> void:
 	for i: int in num_colors:
 		var color: Color = Color.BLACK
 		var color_bits: int = palette_bytes.decode_u16(palette_data_start + (i*2))
-		var alpha_bit: int = (color_bits & 0b1000_0000_0000_0000) >> 15 # first bit is alpha
+		# var alpha_bit: int = (color_bits & 0b1000_0000_0000_0000) >> 15 # first bit is alpha
 		#color.a8 = 1 - () # first bit is alpha (if bit is zero, color is opaque)
 		var b5: int = (color_bits & 0b0111_1100_0000_0000) >> 10 # then 5 bits each: blue, green, red
 		var g5: int = (color_bits & 0b0000_0011_1110_0000) >> 5
@@ -152,6 +152,8 @@ func set_pixel_colors(palette_id: int = 0) -> void:
 	var new_pixel_colors: PackedColorArray = []
 	var new_size: int = color_indices.size()
 	var err: int = new_pixel_colors.resize(new_size)
+	if err != OK:
+		push_warning(err)
 	#pixel_colors.resize(color_indices.size())
 	new_pixel_colors.fill(Color.BLACK)
 	for i: int in color_indices.size():
