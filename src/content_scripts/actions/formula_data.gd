@@ -8,6 +8,7 @@ extends Resource
 #@export var is_modified_by_undead: bool = false
 
 @export var formula: Formulas = Formulas.V1
+@export var formula_text: String = ""
 @export var values: PackedFloat64Array = [100.0, 1.0]
 @export var reverse_sign: bool = true
 @export var user_faith_modifier: FaithModifier = FaithModifier.NONE
@@ -142,7 +143,25 @@ func get_result(user: Unit, target: Unit, element: Action.ElementTypes) -> float
 	return result
 
 
+func get_expression_result(user: Unit, target: Unit) -> float:
+	var expression: Expression = Expression.new()
+
+	var error: Error = expression.parse(formula_text, ["user", 'target'])
+	if error != OK:
+		push_error(expression.get_error_text())
+		return 0.0
+	var result: float = expression.execute([user, target])
+	if not expression.has_execute_failed():
+		return result
+	
+	push_error(formula_text + " execute failed")
+	return 0.0
+
+
 func get_base_value(user: Unit, target: Unit) -> float:
+	# if user != null and target != null:
+	# 	var new_value: float = get_expression_result("user.stats[user.StatType.HP].modified_value * 5", user, target)
+	# 	return new_value
 	var base_value: float = values[0]
 	var wp: int 
 	if not user == null:

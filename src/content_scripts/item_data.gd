@@ -211,6 +211,8 @@ func _init(idx: int = 0) -> void:
 		match item_type:
 			ItemType.FISTS:
 				weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.PA_BRAVE_X_PA
+				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "(user.stats[user.StatType.PHYSICAL_ATTACK].modified_value * user.stats[user.StatType.BRAVE].modified_value / 100.0) * user.stats[user.StatType.PHYSICAL_ATTACK].modified_value"
+				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "(user.stats[user.StatType.PHYSICAL_ATTACK].modified_value * user.stats[user.StatType.BRAVE].modified_value / 100.0) * user.stats[user.StatType.PHYSICAL_ATTACK].modified_value"
 			ItemType.KNIFE, ItemType.NINJA_BLADE, ItemType.BOW, ItemType.SHURIKEN:
 				weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.AVG_PA_SP_X_V1
 			ItemType.SWORD, ItemType.ROD, ItemType.CROSSBOW, ItemType.SPEAR:
