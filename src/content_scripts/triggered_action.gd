@@ -42,7 +42,7 @@ var action: Action
 @export var trigger_timing: TriggerTiming = TriggerTiming.TARGETTED_POST_ACTION
 @export var targeting: TargetingTypes = TargetingTypes.SELF
 @export var trigger_chance_formula: FormulaData = FormulaData.new(
-	FormulaData.Formulas.BRAVE_X_V1, [1.0],
+	"user.brave", [1.0],
 	FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, 
 	false, false,
 	false

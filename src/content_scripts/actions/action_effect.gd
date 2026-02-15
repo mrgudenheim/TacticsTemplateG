@@ -1,7 +1,7 @@
 class_name ActionEffect
 extends Resource
 
-@export var base_power_formula: FormulaData = FormulaData.new(FormulaData.Formulas.PA_X_V1, [5, 0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, true, true)
+@export var base_power_formula: FormulaData = FormulaData.new("0.0", [5, 0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, true, true)
 @export var type: EffectType = EffectType.UNIT_STAT
 @export var effect_stat_type: Unit.StatType = Unit.StatType.HP
 @export var show_ui: bool = true

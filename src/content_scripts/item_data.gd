@@ -210,33 +210,34 @@ func _init(idx: int = 0) -> void:
 		
 		match item_type:
 			ItemType.FISTS:
-				weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.PA_BRAVE_X_PA
+				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.PA_BRAVE_X_PA
 				# weapon_attack_action.target_effects[0].base_power_formula.formula_text = "(user.stats[user.StatType.PHYSICAL_ATTACK].modified_value * user.stats[user.StatType.BRAVE].modified_value / 100.0) * user.stats[user.StatType.PHYSICAL_ATTACK].modified_value"
 				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "(user.physical_attack * user.brave / 100.0) * user.physical_attack"
 			ItemType.KNIFE, ItemType.NINJA_BLADE, ItemType.BOW, ItemType.SHURIKEN:
-				weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.AVG_PA_SP_X_V1
+				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.AVG_PA_SP_X_V1
 				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "((user.physical_attack + user.speed) / 2.0) * %d" % weapon_power
 			ItemType.SWORD, ItemType.ROD, ItemType.CROSSBOW, ItemType.SPEAR:
-				weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.PA_X_V1
+				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.PA_X_V1
 				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "user.physical_attack * %d" % weapon_power
 			ItemType.KNIGHT_SWORD, ItemType.KATANA:
-				weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.PA_BRAVE_X_V1
+				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.PA_BRAVE_X_V1
 				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "(user.physical_attack * user.brave / 100.0) * %d" % weapon_power
 			ItemType.AXE, ItemType.FLAIL, ItemType.BAG:
-				weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.RANDOM_PA_X_V1
+				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.RANDOM_PA_X_V1
 				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "randi_range(1, user.physical_attack) * %d" % weapon_power
 			ItemType.STAFF, ItemType.POLE:
-				weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.MA_X_V1
+				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.MA_X_V1
 				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "user.magical_attack * %d" % weapon_power
 			ItemType.GUN:
-				weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.V1_X_V1
+				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.V1_X_V1
 				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "%d * %d" % [weapon_power, weapon_power]
 				weapon_attack_action.has_vertical_tolerance_from_user = false
 			ItemType.INSTRUMENT, ItemType.BOOK, ItemType.CLOTH:
-				weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.MA_X_V1
+				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.MA_X_V1
 				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "user.magical_attack * %d" % weapon_power
 		
-		weapon_attack_action.description = "Attack Base Damage = " + FormulaData.formula_descriptions[weapon_attack_action.target_effects[0].base_power_formula.formula]
+		# weapon_attack_action.description = "Attack Base Damage = " + FormulaData.formula_descriptions[weapon_attack_action.target_effects[0].base_power_formula.formula]
+		weapon_attack_action.description = "Attack Base Damage = " + weapon_attack_action.target_effects[0].base_power_formula.formula_text
 		weapon_attack_action.target_status_chance = 19 # https://ffhacktics.com/wiki/Weapon_Damage_Calculation
 		
 		match weapon_formula_id:
@@ -262,7 +263,7 @@ func _init(idx: int = 0) -> void:
 					new_secondary_action.display_name = "Magic Gun " + new_secondary_action.display_name
 					new_secondary_action.add_to_global_list()
 					new_secondary_action.area_of_effect_range = 0
-					new_secondary_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.WP_X_V1
+					# new_secondary_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.WP_X_V1
 					new_secondary_action.target_effects[0].base_power_formula.values[0] = original_action_effect_power_value * weapon_power
 					new_secondary_action.target_effects[0].base_power_formula.formula_text = str(original_action_effect_power_value * weapon_power)
 					new_secondary_action.mp_cost = 0

@@ -40,7 +40,7 @@ enum DurationType {
 var delayed_action: ActionInstance # charging
 @export var num_allowed: int = 1
 @export var removed_on_damaged: bool = false # TODO should these statuses instead be included in actions remove_status list? ex. sleep
-@export var ai_score_formula: FormulaData = FormulaData.new(FormulaData.Formulas.TARGET_CURRENT_HP_X_V1)
+@export var ai_score_formula: FormulaData = FormulaData.new("target.hp")
 
 # var visual_effect # TODO icons, sprite coloring, spritesheet, animation (haste, dead, etc.), float, etc.
 
