@@ -202,6 +202,7 @@ func setup_item_select(unit: Unit, slot: EquipmentSlot) -> void:
 		if item_select_button.sprite_rect.texture.atlas == null:
 			item_select_button.sprite_rect.texture.atlas = RomReader.item_bin_texture
 			var item_graphic_id: int = item_select_button.item_data.item_graphic_id
+			@warning_ignore("integer_division")
 			var row: int = item_graphic_id / 15 # 15 columns of icons
 			var col: int = item_graphic_id % 15
 			item_select_button.sprite_rect.texture.region = Rect2(col * 16, 32 + (row * 16), 16, 16)
