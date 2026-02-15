@@ -65,8 +65,10 @@ func set_data(spr_file: PackedByteArray = RomReader.get_file_data(file_name), ov
 	
 	var num_palette_bytes: int = num_colors * 2
 	var palette_bytes: PackedByteArray = spr_file.slice(0, num_palette_bytes)
+	@warning_ignore("integer_division")
 	var num_bytes_top: int = (width * 256) /2
 	var top_pixels_bytes: PackedByteArray = spr_file.slice(num_palette_bytes, num_palette_bytes + num_bytes_top)
+	@warning_ignore("integer_division")
 	var num_bytes_portrait_rows: int = (width * PORTRAIT_HEIGHT) /2
 	var portrait_rows_pixels: PackedByteArray = spr_file.slice(num_palette_bytes + num_bytes_top, num_palette_bytes + num_bytes_top + num_bytes_portrait_rows)
 	var spr_compressed_bytes: PackedByteArray = spr_file.slice(0x9200) if has_compressed else PackedByteArray()
@@ -127,10 +129,12 @@ func set_palette_data(palette_bytes: PackedByteArray) -> void:
 
 func set_color_indices(pixel_bytes: PackedByteArray) -> Array[int]:
 	var new_color_indicies: Array[int] = []
+	@warning_ignore("integer_division")
 	new_color_indicies.resize(pixel_bytes.size() * (8 / bits_per_pixel))
 	
 	for i: int in new_color_indicies.size():
-		var pixel_offset: int = (i * bits_per_pixel)/8
+		@warning_ignore("integer_division")
+		var pixel_offset: int = (i * bits_per_pixel) / 8
 		var byte: int = pixel_bytes.decode_u8(pixel_offset)
 		
 		if bits_per_pixel == 4:
@@ -157,10 +161,11 @@ func set_pixel_colors(palette_id: int = 0) -> void:
 
 
 func get_rgba8_image() -> Image:
+	@warning_ignore("integer_division")
 	height = color_indices.size() / width
 	var image:Image = Image.create_empty(width, height, false, Image.FORMAT_RGBA8)
-	for x in width:
-		for y in height:
+	for x: int in width:
+		for y: int in height:
 			var color:Color = pixel_colors[x + (y * width)]
 			var color8:Color = Color8(color.r8, color.g8, color.b8, color.a8) # use Color8 function to prevent issues with format conversion changing color by 1/255
 			image.set_pixel(x,y, color8) # spr stores pixel data left to right, top to bottm
@@ -172,6 +177,7 @@ func decompress(compressed_bytes: PackedByteArray) -> PackedByteArray:
 	var num_pixels_compressed: int = 200 * width if has_compressed else 0
 	
 	var decompressed_bytes: PackedByteArray = []
+	@warning_ignore("integer_division")
 	decompressed_bytes.resize(num_pixels_compressed / 2)
 	decompressed_bytes.fill(0)
 	
@@ -228,6 +234,7 @@ func decompress(compressed_bytes: PackedByteArray) -> PackedByteArray:
 			half_byte_index += 1
 	
 	# full bytes to half bytes
+	@warning_ignore("integer_division")
 	for index: int in decompressed_full_bytes.size() / 2:
 		decompressed_bytes[index] = decompressed_full_bytes[index * 2] << 4
 		decompressed_bytes[index] = decompressed_bytes[index] | decompressed_full_bytes[(index * 2) + 1]
@@ -368,6 +375,7 @@ func create_frame_grid(anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: 
 		
 		for frame_idx: int in shp.frames.size():
 			var cell_x: int = frame_idx % num_cells_wide
+			@warning_ignore("integer_division")
 			var cell_y: int = (frame_idx / num_cells_wide) + (16 * sp2_id)
 			
 			var frame_image: Image = shp.get_assembled_frame(frame_idx, spritesheet, anim_ptr_idx, other_idx, wep_v_offset, submerged_depth)
@@ -376,9 +384,9 @@ func create_frame_grid(anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: 
 	return frame_grid
 
 
-func create_frame_grid_texture(palette_idx = 0, anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: int = 0, submerged_depth: int = 0, different_shp_name: String = "") -> ImageTexture:
+func create_frame_grid_texture(palette_idx: int = 0, anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: int = 0, submerged_depth: int = 0, different_shp_name: String = "") -> ImageTexture:
 	set_pixel_colors(palette_idx)
 	spritesheet = get_rgba8_image()
 	
-	var new_texture = ImageTexture.create_from_image(create_frame_grid(anim_ptr_idx, other_idx, wep_v_offset, submerged_depth, different_shp_name))
+	var new_texture: ImageTexture = ImageTexture.create_from_image(create_frame_grid(anim_ptr_idx, other_idx, wep_v_offset, submerged_depth, different_shp_name))
 	return new_texture
