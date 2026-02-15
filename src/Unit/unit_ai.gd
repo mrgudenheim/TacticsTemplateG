@@ -44,7 +44,7 @@ func choose_action(unit: Unit) -> void:
 	#if not unit.paths_set:
 		#await unit.paths_updated
 	
-	var eligible_actions: Array[ActionInstance] = unit.actions_data.values().filter(func(action_instance: ActionInstance): return action_instance.is_usable() and not action_instance.potential_targets.is_empty())
+	var eligible_actions: Array[ActionInstance] = unit.actions_data.values().filter(func(action_instance: ActionInstance) -> bool: return action_instance.is_usable() and not action_instance.potential_targets.is_empty())
 	if eligible_actions.size() > 1:
 		eligible_actions.erase(wait_action_instance) # don't choose to wait if another action is eligible
 	else:
@@ -207,7 +207,7 @@ func choose_action(unit: Unit) -> void:
 		var chosen_action: ActionInstance = eligible_actions.pick_random()
 		await action_targeted(unit, chosen_action) # random target
 
-func action_targeted(unit: Unit, chosen_action: ActionInstance, target: TerrainTile = null, hover_target = null) -> void:
+func action_targeted(unit: Unit, chosen_action: ActionInstance, target: TerrainTile = null, hover_target: TerrainTile = null) -> void:
 	#chosen_action.show_potential_targets() # TODO fix move targeting when updating paths/pathfinding is takes longer than delay (large maps with 10+ units)
 	chosen_action.potential_targets = await chosen_action.action.targeting_strategy.get_potential_targets(chosen_action)
 	chosen_action.start_targeting()
