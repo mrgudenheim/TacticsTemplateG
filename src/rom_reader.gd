@@ -727,7 +727,7 @@ func process_frame_bin() -> void:
 	for i: int in frame_bin.num_colors:
 		var color: Color = Color.BLACK
 		var color_bits: int = palette_bytes.decode_u16(i*2)
-		var alpha_bit: int = (color_bits & 0b1000_0000_0000_0000) >> 15 # first bit is alpha
+		# var alpha_bit: int = (color_bits & 0b1000_0000_0000_0000) >> 15 # first bit is alpha
 		#color.a8 = 1 - () # first bit is alpha (if bit is zero, color is opaque)
 		color.b8 = (color_bits & 0b0111_1100_0000_0000) >> 10 # then 5 bits each: blue, green, red
 		color.g8 = (color_bits & 0b0000_0011_1110_0000) >> 5
@@ -736,9 +736,9 @@ func process_frame_bin() -> void:
 		# convert 5 bit channels to 8 bit
 		#color.a8 = 255 * color.a8 # first bit is alpha (if bit is zero, color is opaque)
 		color.a8 = 255 # TODO use alpha correctly
-		color.b8 = roundi(255 * (color.b8 / float(31))) # then 5 bits each: blue, green, red
-		color.g8 = roundi(255 * (color.g8 / float(31)))
-		color.r8 = roundi(255 * (color.r8 / float(31)))
+		color.b8 = roundi(255 * (color.b8 / 31.0)) # then 5 bits each: blue, green, red
+		color.g8 = roundi(255 * (color.g8 / 31.0))
+		color.r8 = roundi(255 * (color.r8 / 31.0))
 		
 		# psx transparency: https://www.psxdev.net/forum/viewtopic.php?t=953
 		# TODO use Material3D blend mode Add for mode 1 or 3, where brightness builds up from a dark background instead of normal "mix" transparency
@@ -753,10 +753,12 @@ func process_frame_bin() -> void:
 	
 	# set color indicies
 	var new_color_indicies: Array[int] = []
+	@warning_ignore("integer_division")
 	new_color_indicies.resize(pixel_bytes.size() * (8 / frame_bin.bits_per_pixel))
 	
 	for i: int in new_color_indicies.size():
-		var pixel_offset: int = (i * frame_bin.bits_per_pixel)/8
+		@warning_ignore("integer_division")
+		var pixel_offset: int = (i * frame_bin.bits_per_pixel) / 8
 		var byte: int = pixel_bytes.decode_u8(pixel_offset)
 		
 		if frame_bin.bits_per_pixel == 4:
@@ -774,6 +776,8 @@ func process_frame_bin() -> void:
 	var new_pixel_colors: PackedColorArray = []
 	var new_size: int = frame_bin.color_indices.size()
 	var err: int = new_pixel_colors.resize(new_size)
+	if err != OK:
+		push_error(err)
 	#pixel_colors.resize(color_indices.size())
 	new_pixel_colors.fill(Color.BLACK)
 	for i: int in frame_bin.color_indices.size():
@@ -782,6 +786,7 @@ func process_frame_bin() -> void:
 	frame_bin.pixel_colors = new_pixel_colors
 	
 	# get_rgba8_image() -> Image:
+	@warning_ignore("integer_division")
 	frame_bin.height = frame_bin.color_indices.size() / frame_bin.width
 	var image:Image = Image.create_empty(frame_bin.width, frame_bin.height, false, Image.FORMAT_RGBA8)
 	for x: int in frame_bin.width:
