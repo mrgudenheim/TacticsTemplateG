@@ -64,7 +64,7 @@ func setup(unit: Unit) -> void:
 
 	update_ui(unit)
 
-	visibility_changed.connect(func(): update_ui(unit))
+	visibility_changed.connect(func() -> void: update_ui(unit))
 
 
 func update_ui(unit: Unit) -> void:
@@ -226,7 +226,7 @@ func get_total_evade_factor(unit: Unit, unit_passive_effects: Array[PassiveEffec
 	var evade_factors: Dictionary[EvadeData.EvadeSource, float] = {}
 
 	for evade_source: EvadeData.EvadeSource in evade_values.keys():
-		if unit_passive_effects.any(func(passive_effect): return passive_effect.include_evade_sources.has(evade_source)):
+		if unit_passive_effects.any(func(passive_effect: PassiveEffect) -> void: return passive_effect.include_evade_sources.has(evade_source)):
 			var evade_value: float = evade_values[evade_source]
 			for passive_effect: PassiveEffect in unit_passive_effects:
 				if passive_effect.evade_source_modifiers_targeted.has(evade_source):
