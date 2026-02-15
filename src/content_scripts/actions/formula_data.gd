@@ -181,13 +181,13 @@ func get_base_value(user: Unit, target: Unit) -> float:
 		Formulas.AVG_PA_SP_X_V1:
 			base_value = ((user.physical_attack + user.speed) / 2.0) * values[0]
 		Formulas.PA_BRAVE_X_V1:
-			base_value = (user.physical_attack * user.brave_current / 100.0) * values[0]
+			base_value = (user.physical_attack * user.brave / 100.0) * values[0]
 		Formulas.RANDOM_PA_X_V1:
 			base_value = randi_range(1, user.physical_attack) * values[0]
 		Formulas.V1_X_V1:
 			base_value = values[0] * values[0]
 		Formulas.PA_BRAVE_X_PA:
-			base_value = (user.physical_attack * user.brave_current / 100.0) * user.physical_attack
+			base_value = (user.physical_attack * user.brave / 100.0) * user.physical_attack
 		Formulas.MA_PLUS_V1:
 			base_value = user.magical_attack + values[0] # MAplusV1
 		Formulas.MA_PLUS_V1_X_MA_DIV_2:
@@ -227,7 +227,7 @@ func get_base_value(user: Unit, target: Unit) -> float:
 		Formulas.USER_CURRENT_HP_MINUS_V1:
 			base_value = user.hp_current - values[0] # 0x17, 0x3e TARGET_CURRENT_HP
 		Formulas.TARGET_CURRENT_MP_MINUS_V1:
-			base_value = target.mp_current - values[0] # 0x16 mute TARGET_CURRENT_MP
+			base_value = target.mp - values[0] # 0x16 mute TARGET_CURRENT_MP
 		Formulas.TARGET_CURRENT_HP_MINUS_V1:
 			base_value = target.hp_current - values[0] # 0x17, 0x3e TARGET_CURRENT_HP
 		Formulas.USER_MISSING_HP_X_V1:
@@ -239,7 +239,7 @@ func get_base_value(user: Unit, target: Unit) -> float:
 		Formulas.RANDOM_V1_V2:
 			base_value = randi_range(roundi(values[0]), roundi(values[1])) # 0x4b RANDOM_RANGE
 		Formulas.BRAVE_X_V1:
-			base_value = user.brave_current * values[0] # reactions
+			base_value = user.brave * values[0] # reactions
 			
 			
 			#base_value = action_modifier / 100.0 # % treat value as a percent when actually applying effect
@@ -252,11 +252,11 @@ func get_base_value(user: Unit, target: Unit) -> float:
 
 
 func faith_modify(value: float, unit: Unit) -> float:
-	return value * unit.faith_current / 100.0
+	return value * unit.faith / 100.0
 
 
 func unfaith_modify(value: float, unit: Unit) -> float:
-	return value * (100 - unit.faith_current) / 100.0
+	return value * (100 - unit.faith) / 100.0
 
 
 func zodiac_modify(value: float, user: Unit, target: Unit) -> float:
