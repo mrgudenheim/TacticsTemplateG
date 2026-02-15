@@ -10,11 +10,11 @@ var item: ItemData:
 
 static func create_from_dictionary(property_dict: Dictionary) -> EquipmentSlot:
 	var new_equipment_slot: EquipmentSlot = EquipmentSlot.new()
-	for property_name in property_dict.keys():
+	for property_name: String in property_dict.keys():
 		if property_name == "slot_types":
-			var array = property_dict[property_name]
+			var array: Array = property_dict[property_name]
 			var new_slot_types: Array[ItemData.SlotType] = []
-			for type in array:
+			for type: String in array:
 				new_slot_types.append(ItemData.SlotType[type])
 			new_equipment_slot.set(property_name, new_slot_types)
 		else:
