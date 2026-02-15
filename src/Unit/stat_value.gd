@@ -15,7 +15,7 @@ var modifiers: Array[Modifier] = [] # should only come from passive_effects
 
 static func create_from_dictionary(property_dict: Dictionary) -> StatValue:
 	var new_clamped_value: StatValue = StatValue.new()
-	for property_name in property_dict.keys():
+	for property_name: String in property_dict.keys():
 		new_clamped_value.set(property_name, property_dict[property_name])
 
 	new_clamped_value.emit_changed()
@@ -51,7 +51,7 @@ func get_unclampped_modified_value(preview_value: int = current_value) -> int:
 
 
 func get_modified_value(preview_value: int = current_value) -> int:
-	var temp_modified_value = get_unclampped_modified_value(preview_value)
+	var temp_modified_value: int = get_unclampped_modified_value(preview_value)
 	temp_modified_value = clampi(temp_modified_value, min_value, max_value)
 	
 	return temp_modified_value
@@ -124,5 +124,5 @@ func remove_modifier(modifier: Modifier) -> void:
 	value_changed.emit(self)
 
 
-func update_max_from_clamped_value(max_clamped: StatValue):
+func update_max_from_clamped_value(max_clamped: StatValue) -> void:
 	set_max_value(max_clamped.get_modified_value())
