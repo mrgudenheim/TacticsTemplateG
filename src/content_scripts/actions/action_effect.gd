@@ -138,7 +138,7 @@ static func create_from_json(json_string: String) -> ActionEffect:
 
 static func create_from_dictionary(property_dict: Dictionary) -> ActionEffect:
 	var new_action_effect: ActionEffect = ActionEffect.new()
-	for property_name in property_dict.keys():
+	for property_name: String in property_dict.keys():
 		if property_name == "base_power_formula":
 			var new_formula_data: FormulaData = FormulaData.create_from_dictionary(property_dict[property_name])
 			new_action_effect.set(property_name, new_formula_data)

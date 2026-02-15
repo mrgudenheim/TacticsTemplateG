@@ -94,7 +94,7 @@ var ai_controller: UnitAi = UnitAi.new()
 
 var is_defeated: bool:
 	get:
-		return current_statuses.any(func(status: StatusEffect): return status.counts_as_ko) # returns false when no statuses
+		return current_statuses.any(func(status: StatusEffect) -> bool: return status.counts_as_ko) # returns false when no statuses
 
 @export var unit_nickname: String = "Unit Nickname"
 @export var job_nickname: String = "Job Nickname"
@@ -510,9 +510,9 @@ static func calc_battle_stats(
 
 
 func generate_random_abilities() -> void:
-	var random_reaction: Ability = RomReader.abilities.values().filter(func(ability: Ability): return ability.slot_type == Ability.SlotType.REACTION).pick_random()
-	var random_support: Ability = RomReader.abilities.values().filter(func(ability: Ability): return ability.slot_type == Ability.SlotType.SUPPORT).pick_random()
-	var random_movement: Ability = RomReader.abilities.values().filter(func(ability: Ability): return ability.slot_type == Ability.SlotType.MOVEMENT).pick_random()
+	var random_reaction: Ability = RomReader.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.REACTION).pick_random()
+	var random_support: Ability = RomReader.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.SUPPORT).pick_random()
+	var random_movement: Ability = RomReader.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.MOVEMENT).pick_random()
 
 	ability_slots[2].ability_unique_name = random_reaction.unique_name
 	ability_slots[3].ability_unique_name =  random_support.unique_name
@@ -802,7 +802,7 @@ func add_status(new_status: StatusEffect, ignore_immunity: bool = false) -> void
 		return
 	
 	for status_prevents_id: String in new_status.status_cant_stack: # prevent application based on flags
-		if current_statuses.any(func(status: StatusEffect): return status.unique_name == status_prevents_id):
+		if current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_prevents_id):
 			return
 	
 	var existing_statuses: Array[StatusEffect] = current_statuses.filter(func(status: StatusEffect) -> bool: return status.status_id == new_status.status_id) # TODO use filter to allow for multiple of the same status, ex. double charging

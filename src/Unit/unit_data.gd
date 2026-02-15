@@ -34,20 +34,20 @@ extends Resource
 
 static func create_from_dictionary(property_dict: Dictionary) -> UnitData:
 	var new_unit_data: UnitData = UnitData.new()
-	for property_name in property_dict.keys():
+	for property_name: String in property_dict.keys():
 		if property_name == "tile_position":
-			var vector_as_array = property_dict[property_name]
+			var vector_as_array: Array = property_dict[property_name]
 			var new_tile_position: Vector3i = Vector3i(roundi(vector_as_array[0]), roundi(vector_as_array[1]), roundi(vector_as_array[2]))
 			new_unit_data.set(property_name, new_tile_position)
 		elif property_name == "ability_slots":
-			var array = property_dict[property_name]
+			var array: Array = property_dict[property_name]
 			var new_ability_slots: Array[AbilitySlot] = []
 			for ability_slot_dictionary: Dictionary in array:
 				var new_ability_slot: AbilitySlot = AbilitySlot.create_from_dictionary(ability_slot_dictionary)
 				new_ability_slots.append(new_ability_slot)
 			new_unit_data.set(property_name, new_ability_slots)
 		elif property_name == "equip_slots":
-			var array = property_dict[property_name]
+			var array: Array = property_dict[property_name]
 			var new_equip_slots: Array[EquipmentSlot] = []
 			for equip_slot_dictionary: Dictionary in array:
 				var new_equip_slot: EquipmentSlot = EquipmentSlot.create_from_dictionary(equip_slot_dictionary)

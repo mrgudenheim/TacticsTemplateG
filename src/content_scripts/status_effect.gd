@@ -42,7 +42,7 @@ var delayed_action: ActionInstance # charging
 @export var removed_on_damaged: bool = false # TODO should these statuses instead be included in actions remove_status list? ex. sleep
 @export var ai_score_formula: FormulaData = FormulaData.new(FormulaData.Formulas.TARGET_CURRENT_HP_X_V1)
 
-var visual_effect # TODO icons, sprite coloring, spritesheet, animation (haste, dead, etc.), float, etc.
+# var visual_effect # TODO icons, sprite coloring, spritesheet, animation (haste, dead, etc.), float, etc.
 
 @export var spritesheet_file_name: String = ""
 @export var palette_idx_offset: int = 0
@@ -129,8 +129,8 @@ func get_ai_score(user: Unit, target: Unit, remove: bool = false) -> float:
 	if not remove and target.immune_statuses.has(unique_name):
 		return 0.0
 	
-	var current_statuses: Array[StatusEffect] = target.current_statuses.filter(func(status: StatusEffect): return status.unique_name == unique_name)
-	if remove and current_statuses.all(func(status: StatusEffect): return status.duration_type != StatusEffect.DurationType.PERMANENT):
+	var current_statuses: Array[StatusEffect] = target.current_statuses.filter(func(status: StatusEffect) -> bool: return status.unique_name == unique_name)
+	if remove and current_statuses.all(func(status: StatusEffect) -> bool: return status.duration_type != StatusEffect.DurationType.PERMANENT):
 		return 0.0
 	
 	score = ai_score_formula.get_base_value(user, target)
@@ -138,10 +138,10 @@ func get_ai_score(user: Unit, target: Unit, remove: bool = false) -> float:
 		score = -score
 	
 	if not remove and current_statuses.size() >= num_allowed: # re-applying existing status
-		if current_statuses.all(func(status: StatusEffect): return status.duration_type == StatusEffect.DurationType.PERMANENT):
+		if current_statuses.all(func(status: StatusEffect) -> bool: return status.duration_type == StatusEffect.DurationType.PERMANENT):
 			return 0.0
 		
-		var ticking_statuses: Array[StatusEffect] = current_statuses.filter(func(status: StatusEffect): return status.duration_type == StatusEffect.DurationType.TICKS)
+		var ticking_statuses: Array[StatusEffect] = current_statuses.filter(func(status: StatusEffect) -> bool: return status.duration_type == StatusEffect.DurationType.TICKS)
 		if not ticking_statuses.is_empty():
 			score = score * ticking_statuses[0].duration * duration
 	
@@ -191,7 +191,7 @@ static func create_from_json(json_string: String) -> StatusEffect:
 
 static func create_from_dictionary(property_dict: Dictionary) -> StatusEffect:
 	var new_status_effect: StatusEffect = StatusEffect.new()
-	for property_name in property_dict.keys():
+	for property_name: String in property_dict.keys():
 		if property_name.contains("color"):
 			var new_color: Color = Color.BLACK
 			var color_rgb_array: Array = property_dict[property_name]
