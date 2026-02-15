@@ -145,12 +145,11 @@ func get_result(user: Unit, target: Unit, element: Action.ElementTypes) -> float
 
 func get_expression_result(user: Unit, target: Unit) -> float:
 	var expression: Expression = Expression.new()
-
-	var error: Error = expression.parse(formula_text, ["user", 'target'])
+	var error: Error = expression.parse(formula_text, ["user", "target", "values"])
 	if error != OK:
 		push_error(expression.get_error_text())
 		return 0.0
-	var result: float = expression.execute([user, target])
+	var result: float = expression.execute([user, target, values])
 	if not expression.has_execute_failed():
 		return result
 	
@@ -159,10 +158,8 @@ func get_expression_result(user: Unit, target: Unit) -> float:
 
 
 func get_base_value(user: Unit, target: Unit) -> float:
-	# if user != null and target != null:
-	# 	var new_value: float = get_expression_result("user.stats[user.StatType.HP].modified_value * 5", user, target)
-	# 	return new_value
 	var base_value: float = values[0]
+	base_value = get_expression_result(user, target)
 	var wp: int 
 	if not user == null:
 		wp = user.primary_weapon.weapon_power
