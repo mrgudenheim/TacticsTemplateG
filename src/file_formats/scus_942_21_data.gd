@@ -295,7 +295,7 @@ func init_from_scus() -> void:
 	for id: int in num_entries:
 		jp_costs[id] = ability_data_bytes.decode_u16(id * entry_size)
 		chance_to_learn[id] = ability_data_bytes.decode_u8((id * entry_size) + 2)
-		ability_types[id] = ability_data_bytes.decode_u8((id * entry_size) + 3) % 16
+		ability_types[id] = FftAbilityData.AbilityType.values()[ability_data_bytes.decode_u8((id * entry_size) + 3) % 16]
 	
 	# ability data normal
 	ranges.resize(RomReader.NUM_ABILITIES)
