@@ -783,7 +783,7 @@ func process_clock_tick() -> void:
 			unit.remove_status(status)
 	
 	for unit: Unit in units: # increment each units ct by speed
-		if not unit.current_statuses.any(func(status: StatusEffect): return status.freezes_ct): # check status that prevent ct gain (stop, sleep, etc.)
+		if not unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.freezes_ct): # check status that prevent ct gain (stop, sleep, etc.)
 			var ct_gain: int = unit.speed
 			for status: StatusEffect in unit.current_statuses:
 				ct_gain = status.passive_effect.ct_gain_modifier.apply(ct_gain)
@@ -817,7 +817,7 @@ func check_end_conditions() -> bool:
 	for team: Team in teams:
 		team.check_end_conditions(self)
 	
-	if teams.any(func(team: Team): return team.state == Team.State.WON):
+	if teams.any(func(team: Team) -> bool: return team.state == Team.State.WON):
 		battle_is_running = false
 		return true
 	
@@ -939,7 +939,7 @@ func get_random_stand_terrain_tile() -> TerrainTile:
 		if tile.no_stand_select != 0 or tile.no_walk != 0:
 			continue
 		
-		if units.any(func(unit: Unit): return unit.tile_position == tile):
+		if units.any(func(unit: Unit) -> bool: return unit.tile_position == tile):
 			continue
 		
 		break

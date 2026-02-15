@@ -244,7 +244,7 @@ func is_usable(action_instance: ActionInstance) -> bool:
 					user_has_equipment = true
 					break
 		
-		var action_not_prevented_by_status: bool = not action_instance.action.status_prevents_use_any.any(func(status_id: String): return action_instance.user.current_status_ids.has(status_id))
+		var action_not_prevented_by_status: bool = not action_instance.action.status_prevents_use_any.any(func(status_id: String) -> bool: return action_instance.user.current_status_ids.has(status_id))
 		
 		action_is_usable = (user_has_enough_move_points 
 				and user_has_enough_action_points 
@@ -322,7 +322,7 @@ func get_total_hit_chance(user: Unit, target: Unit, evade_direction: EvadeData.D
 	var evade_factors: Dictionary[EvadeData.EvadeSource, float] = {}
 	if applicable_evasion_type != EvadeData.EvadeType.NONE:
 		for evade_source: EvadeData.EvadeSource in evade_values.keys():
-			if target_passive_effects.any(func(passive_effect: PassiveEffect): return passive_effect.include_evade_sources.has(evade_source)):
+			if target_passive_effects.any(func(passive_effect: PassiveEffect) -> bool: return passive_effect.include_evade_sources.has(evade_source)):
 				var evade_value: float = evade_values[evade_source]
 				for passive_effect: PassiveEffect in user_passive_effects:
 					if passive_effect.evade_source_modifiers_user.has(evade_source):
@@ -531,7 +531,7 @@ func apply_status(unit: Unit, status_list: Array[String], status_list_type: Stat
 		var status_success: bool = randi_range(0, 99) < target_status_chance
 		if status_success:
 			for status_id: String in status_list:
-				if will_remove_status and unit.current_statuses.any(func(status: StatusEffect): return status.unique_name == status_id):
+				if will_remove_status and unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_id):
 					unit.remove_status_id(status_id)
 					unit.show_popup_text(RomReader.status_effects[status_id].status_effect_name) # TODO different text for removing status
 				elif not will_remove_status:
@@ -541,7 +541,7 @@ func apply_status(unit: Unit, status_list: Array[String], status_list_type: Stat
 		for status_id: String in status_list:
 			var status_success: bool = randi_range(0, 99) < target_status_chance
 			if status_success:
-				if will_remove_status and unit.current_statuses.any(func(status: StatusEffect): return status.unique_name == status_id):
+				if will_remove_status and unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_id):
 					unit.remove_status_id(status_id)
 					unit.show_popup_text(RomReader.status_effects[status_id].status_effect_name) # TODO different text for removing status
 				elif not will_remove_status:
@@ -551,13 +551,13 @@ func apply_status(unit: Unit, status_list: Array[String], status_list_type: Stat
 		var status_success: bool = randi_range(0, 99) < target_status_chance
 		if status_success:
 			if will_remove_status:
-				var removable_status_list: Array[String] = status_list.filter(func(status_id: String): return unit.current_status_ids.has(status_id))
+				var removable_status_list: Array[String] = status_list.filter(func(status_id: String) -> bool: return unit.current_status_ids.has(status_id))
 				if not removable_status_list.is_empty():
 					var status_id: String = removable_status_list.pick_random()
 					unit.remove_status_id(status_id)
 					unit.show_popup_text(RomReader.status_effects[status_id].status_effect_name) # TODO different text for removing status
 			elif not will_remove_status:
-				var addable_status_list: Array[String] = status_list.filter(func(status_id: String): return not unit.current_status_ids.has(status_id))
+				var addable_status_list: Array[String] = status_list.filter(func(status_id: String) -> bool: return not unit.current_status_ids.has(status_id))
 				if not addable_status_list.is_empty():
 					var status_id: String = addable_status_list.pick_random()
 					unit.show_popup_text(RomReader.status_effects[status_id].status_effect_name)
