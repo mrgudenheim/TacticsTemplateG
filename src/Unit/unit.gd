@@ -468,7 +468,7 @@ static func calc_battle_stats(
 		new_stats: Dictionary[Unit.StatType, StatValue],
 		set_to_max: bool = true,
 		use_larger_values: bool = false) -> void:
-	var base_hp: int = new_stats_raw[StatType.HP_MAX] * current_job.hp_multiplier / 0x190000
+	var base_hp: int = roundi(new_stats_raw[StatType.HP_MAX] * current_job.hp_multiplier / 0x190000)
 	# if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(animation_manager.global_seq.file_name): # lucavi
 	if use_larger_values:
 		new_stats[StatType.HP_MAX].max_value = 99999
@@ -476,7 +476,7 @@ static func calc_battle_stats(
 	new_stats[StatType.HP_MAX].base_value = base_hp
 	new_stats[StatType.HP_MAX].set_value(new_stats[StatType.HP_MAX].base_value)
 	
-	var base_mp: int = new_stats_raw[StatType.MP_MAX] * current_job.mp_multiplier / 0x190000
+	var base_mp: int = roundi(new_stats_raw[StatType.MP_MAX] * current_job.mp_multiplier / 0x190000)
 	# if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(animation_manager.global_seq.file_name): # lucavi
 	if use_larger_values:
 		new_stats[StatType.MP_MAX].max_value = 99999
@@ -484,13 +484,13 @@ static func calc_battle_stats(
 	new_stats[StatType.MP_MAX].base_value = base_mp
 	new_stats[StatType.MP_MAX].set_value(new_stats[StatType.MP_MAX].base_value)
 	
-	new_stats[StatType.SPEED].base_value = new_stats_raw[StatType.SPEED] * current_job.speed_multiplier / 0x190000
+	new_stats[StatType.SPEED].base_value = roundi(new_stats_raw[StatType.SPEED] * current_job.speed_multiplier / 0x190000)
 	new_stats[StatType.SPEED].set_value(new_stats[StatType.SPEED].base_value)
 	
-	new_stats[StatType.PHYSICAL_ATTACK].base_value = new_stats_raw[StatType.PHYSICAL_ATTACK] * current_job.pa_multiplier / 0x190000
+	new_stats[StatType.PHYSICAL_ATTACK].base_value = roundi(new_stats_raw[StatType.PHYSICAL_ATTACK] * current_job.pa_multiplier / 0x190000)
 	new_stats[StatType.PHYSICAL_ATTACK].set_value(new_stats[StatType.PHYSICAL_ATTACK].base_value)
 	
-	new_stats[StatType.MAGIC_ATTACK].base_value = new_stats_raw[StatType.MAGIC_ATTACK] * current_job.ma_multiplier / 0x190000
+	new_stats[StatType.MAGIC_ATTACK].base_value = roundi(new_stats_raw[StatType.MAGIC_ATTACK] * current_job.ma_multiplier / 0x190000)
 	new_stats[StatType.MAGIC_ATTACK].set_value(new_stats[StatType.MAGIC_ATTACK].base_value)
 	
 	new_stats[StatType.MOVE].base_value = current_job.move
@@ -788,12 +788,15 @@ func hp_changed(clamped_value: StatValue) -> void:
 	if global_battle_manager == null: # TODO should statuses be applied outside battle?
 		return
 	
+	@warning_ignore("integer_division")
+	var critical_hp_threshold: int = clamped_value.max_value / 5
+
 	if clamped_value.current_value == 0:
 		await add_status(RomReader.status_effects["dead"].duplicate(), true) # add dead
-	elif clamped_value.current_value < clamped_value.max_value / 5: # critical
+	elif clamped_value.current_value < critical_hp_threshold: # critical
 		if not current_status_ids.has("critical"):
 			await add_status(RomReader.status_effects["critical"].duplicate()) # add critical
-	elif clamped_value.current_value >= clamped_value.max_value / 5: # not critical
+	elif clamped_value.current_value >= critical_hp_threshold: # not critical
 		remove_status_id("critical") # remove critical
 
 
@@ -997,7 +1000,7 @@ func use_attack() -> void:
 	
 	# execute atttack
 	#debug_menu.anim_id_spin.value = (RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) + int(is_back_facing) # TODO lookup based on target relative height
-	current_animation_id_fwd = (RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) # TODO lookup based on target relative height
+	current_animation_id_fwd = roundi(RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) # TODO lookup based on target relative height
 	set_base_animation_ptr_id(current_animation_id_fwd)
 	
 	# TODO implement proper timeout for abilities that execute using an infinite loop animation
@@ -1037,7 +1040,7 @@ func use_ability(pos: Vector3) -> void:
 		#animation_executing_id = 0x3e * 2 # TODO look up based on equiped weapon and target relative height
 		#animation_manager.unit_debug_menu.anim_id_spin.value = 0x3e * 2 # TODO look up based on equiped weapon and target relative height
 		#debug_menu.anim_id_spin.value = (RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) + int(is_back_facing) # TODO lookup based on target relative height
-		current_animation_id_fwd = (RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) # TODO lookup based on target relative height
+		current_animation_id_fwd = roundi(RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) # TODO lookup based on target relative height
 		set_base_animation_ptr_id(current_animation_id_fwd)
 	else:
 		var ability_animation_executing_id: int = ability_data.animation_executing_id
