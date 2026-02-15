@@ -181,7 +181,7 @@ func choose_action(unit: Unit) -> void:
 			var move_target: TerrainTile = shortest_path_target
 			var move_cost: int = shortest_path_cost
 			if move_target != null:
-				while move_cost > unit.move_current:
+				while move_cost > unit.move:
 					#if unit.path_costs[move_target] > unit.move_current:
 						#break
 					move_target = unit.map_paths[move_target]

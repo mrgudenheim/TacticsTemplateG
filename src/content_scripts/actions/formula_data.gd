@@ -171,50 +171,50 @@ func get_base_value(user: Unit, target: Unit) -> float:
 		Formulas.V1:
 			base_value = values[0]
 		Formulas.PA_X_V1:
-			base_value = user.physical_attack_current * values[0]
+			base_value = user.physical_attack * values[0]
 		Formulas.MA_X_V1:
-			base_value = user.magical_attack_current * values[0]
+			base_value = user.magical_attack * values[0]
 		Formulas.WP_X_V1:
 			base_value = wp * values[0]
 		Formulas.AVG_PA_MA_X_V1:
-			base_value = ((user.physical_attack_current + user.magical_attack_current) / 2.0) * values[0]
+			base_value = ((user.physical_attack + user.magical_attack) / 2.0) * values[0]
 		Formulas.AVG_PA_SP_X_V1:
-			base_value = ((user.physical_attack_current + user.speed_current) / 2.0) * values[0]
+			base_value = ((user.physical_attack + user.speed) / 2.0) * values[0]
 		Formulas.PA_BRAVE_X_V1:
-			base_value = (user.physical_attack_current * user.brave_current / 100.0) * values[0]
+			base_value = (user.physical_attack * user.brave_current / 100.0) * values[0]
 		Formulas.RANDOM_PA_X_V1:
-			base_value = randi_range(1, user.physical_attack_current) * values[0]
+			base_value = randi_range(1, user.physical_attack) * values[0]
 		Formulas.V1_X_V1:
 			base_value = values[0] * values[0]
 		Formulas.PA_BRAVE_X_PA:
-			base_value = (user.physical_attack_current * user.brave_current / 100.0) * user.physical_attack_current
+			base_value = (user.physical_attack * user.brave_current / 100.0) * user.physical_attack
 		Formulas.MA_PLUS_V1:
-			base_value = user.magical_attack_current + values[0] # MAplusV1
+			base_value = user.magical_attack + values[0] # MAplusV1
 		Formulas.MA_PLUS_V1_X_MA_DIV_2:
-			base_value = (user.magical_attack_current + values[0]) * user.magical_attack_current / 2.0 # 0x1e, 0x1f, 0x5e, 0x5f, 0x60 rafa/malak
+			base_value = (user.magical_attack + values[0]) * user.magical_attack / 2.0 # 0x1e, 0x1f, 0x5e, 0x5f, 0x60 rafa/malak
 		Formulas.PA_PLUS_V1_X_MA_DIV_2:
-			base_value = (user.physical_attack_current + values[0]) * user.magical_attack_current / 2.0 # 0x24 geomancy
+			base_value = (user.physical_attack + values[0]) * user.magical_attack / 2.0 # 0x24 geomancy
 		Formulas.PA_PLUS_WP_PLUS_V1:
-			base_value = user.physical_attack_current + wp + values[0] # 0x25 break equipment
+			base_value = user.physical_attack + wp + values[0] # 0x25 break equipment
 		Formulas.SP_PLUS_V1:
-			base_value = user.speed_current + values[0] # 0x26 steal equipment SPplusX
+			base_value = user.speed + values[0] # 0x26 steal equipment SPplusX
 		Formulas.LVL_X_SP_X_V1:
-			base_value = user.level * user.speed_current * values[0] # 0x27 steal gil LVLxSP
+			base_value = user.level * user.speed * values[0] # 0x27 steal gil LVLxSP
 		Formulas.MIN_TARGET_EXP_OR_SP_PLUS_V1:
-			base_value = minf(target.unit_exp, user.speed_current + values[0]) # 0x28 steal exp
+			base_value = minf(target.unit_exp, user.speed + values[0]) # 0x28 steal exp
 		Formulas.PA_PLUS_V1:
-			base_value = user.physical_attack_current + values[0] # 0x2b, 0x2c PAplusY
+			base_value = user.physical_attack + values[0] # 0x2b, 0x2c PAplusY
 		Formulas.PA_X_WP_PLUS_V1:
-			base_value = user.physical_attack_current * (wp + values[0]) # 0x2d agrais sword skills
+			base_value = user.physical_attack * (wp + values[0]) # 0x2d agrais sword skills
 		Formulas.PA_X_WP_X_V1:
-			base_value = user.physical_attack_current * wp * values[0] # 0x2e, 0x2f, 0x30
+			base_value = user.physical_attack * wp * values[0] # 0x2e, 0x2f, 0x30
 		Formulas.PA_X_PA_PLUS_V1_DIV_2:
-			base_value = (user.physical_attack_current + values[0]) * user.physical_attack_current / 2.0 # 0x31 monk skills
+			base_value = (user.physical_attack + values[0]) * user.physical_attack / 2.0 # 0x31 monk skills
 		Formulas.RANDOM_V1_X_PA_X_3_PLUS_V2_DIV_2:
-			base_value = randi_range(1, roundi(values[0])) * ((user.physical_attack_current * 3) + values[1]) / 2.0 # 0x32 repeating fist # TODO 2 variables rndm to X, PA + Y
+			base_value = randi_range(1, roundi(values[0])) * ((user.physical_attack * 3) + values[1]) / 2.0 # 0x32 repeating fist # TODO 2 variables rndm to X, PA + Y
 			#base_value = user.physical_attack_current * values[0] / 2.0 # 0x34 chakra
 		Formulas.RANDOM_V1_X_PA:
-			base_value = user.physical_attack_current * randi_range(1, roundi(values[0])) # 0x37
+			base_value = user.physical_attack * randi_range(1, roundi(values[0])) # 0x37
 		Formulas.USER_MAX_HP_X_V1:
 			base_value = user.hp_max * values[0] # 0x3c wish, energy USER_MAX_HP
 		Formulas.USER_MAX_MP_X_V1:

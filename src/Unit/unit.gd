@@ -196,23 +196,23 @@ var mp_current: int = 70:
 
 var physical_attack_base: int = 5:
 	get: return stats[StatType.PHYSICAL_ATTACK].base_value
-var physical_attack_current: int = 5:
+var physical_attack: int = 5:
 	get: return stats[StatType.PHYSICAL_ATTACK].modified_value
 var magical_attack_base: int = 5:
 	get: return stats[StatType.MAGIC_ATTACK].base_value
-var magical_attack_current: int = 5:
+var magical_attack: int = 5:
 	get: return stats[StatType.MAGIC_ATTACK].modified_value
 var speed_base: int = 5:
 	get: return stats[StatType.SPEED].base_value
-var speed_current: int = 5:
+var speed: int = 5:
 	get: return stats[StatType.SPEED].modified_value
 var move_base: int = 5:
 	get: return stats[StatType.MOVE].base_value
-var move_current: int = 5:
+var move: int = 5:
 	get: return stats[StatType.MOVE].modified_value
 var jump_base: int = 5:
 	get: return stats[StatType.JUMP].base_value
-var jump_current: int = 3:
+var jump: int = 3:
 	get: return stats[StatType.JUMP].modified_value
 
 var always_statuses: PackedStringArray = []

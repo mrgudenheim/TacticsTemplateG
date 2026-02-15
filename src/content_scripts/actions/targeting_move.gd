@@ -10,7 +10,7 @@ func get_potential_targets(action_instance: ActionInstance) -> Array[TerrainTile
 	for tile: TerrainTile in action_instance.user.path_costs.keys():
 		if tile == action_instance.user.tile_position:
 			continue
-		if action_instance.user.path_costs[tile] > action_instance.user.move_current:
+		if action_instance.user.path_costs[tile] > action_instance.user.move:
 			continue # don't highlight tiles beyond move range
 		potential_targets.append(tile)
 	
@@ -64,8 +64,8 @@ func target_tile(tile: TerrainTile, action_instance: ActionInstance, event: Inpu
 		
 		# show preview path
 		var path: Array[TerrainTile] = get_map_path(action_instance.user.tile_position, tile, action_instance.user.map_paths)
-		var path_in_range: Array[TerrainTile] = path.filter(func(tile: TerrainTile): return action_instance.user.path_costs[tile] <= action_instance.user.move_current) # TODO allow parameter instead of move_current
-		var path_out_of_range: Array[TerrainTile] = path.filter(func(tile: TerrainTile): return action_instance.user.path_costs[tile] > action_instance.user.move_current) # TODO allow parameter instead of move_current
+		var path_in_range: Array[TerrainTile] = path.filter(func(tile: TerrainTile): return action_instance.user.path_costs[tile] <= action_instance.user.move) # TODO allow parameter instead of move_current
+		var path_out_of_range: Array[TerrainTile] = path.filter(func(tile: TerrainTile): return action_instance.user.path_costs[tile] > action_instance.user.move) # TODO allow parameter instead of move_current
 		
 		action_instance.clear_targets(action_instance.preview_targets_highlights)
 		action_instance.preview_targets.clear()
@@ -79,7 +79,7 @@ func target_tile(tile: TerrainTile, action_instance: ActionInstance, event: Inpu
 	# handle clicking tile
 	if event.is_action_pressed("primary_action"):
 		if action_instance.user.path_costs.has(tile):
-			if action_instance.user.path_costs[tile] <= action_instance.user.move_current: # TODO allow parameter instead of move_current
+			if action_instance.user.path_costs[tile] <= action_instance.user.move: # TODO allow parameter instead of move_current
 				action_instance.submitted_targets = get_map_path(action_instance.user.tile_position, tile, action_instance.user.map_paths)
 				if action_instance.submitted_targets.is_empty():
 					push_error(action_instance.user.unit_nickname + " trying to use Move without any targets")
@@ -187,7 +187,7 @@ func get_map_path_neighbors(user: Unit, current_tile: TerrainTile, map_tiles: Di
 					continue
 				elif user.prohibited_terrain.has(tile.surface_type_id): # lava, etc.
 					continue
-				elif not user.ignore_height and abs(tile.height_mid - current_tile.height_mid) > user.jump_current: # restrict movement based on current jomp, TODO allow jump height as parameter?
+				elif not user.ignore_height and abs(tile.height_mid - current_tile.height_mid) > user.jump: # restrict movement based on current jomp, TODO allow jump height as parameter?
 					continue
 				elif units.any(func(unit: Unit): return unit.tile_position == tile and not unit.is_defeated): # prevent moving on top or through other units
 					continue # TODO allow moving through knocked out units
@@ -204,7 +204,7 @@ func get_map_path_neighbors(user: Unit, current_tile: TerrainTile, map_tiles: Di
 
 func get_leaping_neighbors(user: Unit, current_tile: TerrainTile, map_tiles: Dictionary[Vector2i, Array], units: Array[Unit], offset_direction: Vector2i, walk_neighbors: Array[TerrainTile]) -> Array[TerrainTile]:
 	var leap_neighbors: Array[TerrainTile] = []
-	var max_leap_distance: int = user.jump_current / 2
+	var max_leap_distance: int = user.jump / 2
 	
 	if max_leap_distance == 0:
 		return leap_neighbors
@@ -222,7 +222,7 @@ func get_leaping_neighbors(user: Unit, current_tile: TerrainTile, map_tiles: Dic
 					continue
 				elif user.prohibited_terrain.has(tile.surface_type_id): # lava, etc.
 					continue
-				elif not user.ignore_height and abs(tile.height_mid - current_tile.height_mid) > user.jump_current: # restrict movement based on current jomp
+				elif not user.ignore_height and abs(tile.height_mid - current_tile.height_mid) > user.jump: # restrict movement based on current jomp
 					continue
 				elif tile.height_mid > current_tile.height_mid: # can't leap up
 					continue
