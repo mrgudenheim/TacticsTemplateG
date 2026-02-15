@@ -23,7 +23,7 @@ func start_targeting(action_instance: ActionInstance) -> void:
 	if not action_instance.battle_manager.map_input_event.is_connected(action_instance.on_map_input_event):
 		action_instance.battle_manager.map_input_event.connect(action_instance.on_map_input_event)
 	
-	for unit in action_instance.battle_manager.units:
+	for unit: Unit in action_instance.battle_manager.units:
 		if not unit.unit_input_event.is_connected(action_instance.on_unit_hovered):
 			unit.unit_input_event.connect(action_instance.on_unit_hovered)
 	
@@ -35,7 +35,7 @@ func stop_targeting(action_instance: ActionInstance) -> void:
 	if action_instance.battle_manager.map_input_event.is_connected(action_instance.on_map_input_event):
 		action_instance.battle_manager.map_input_event.disconnect(action_instance.on_map_input_event)
 	
-	for unit in action_instance.battle_manager.units:
+	for unit: Unit in action_instance.battle_manager.units:
 		if unit.unit_input_event.is_connected(action_instance.on_unit_hovered):
 			unit.unit_input_event.disconnect(action_instance.on_unit_hovered)
 	
@@ -64,8 +64,8 @@ func target_tile(tile: TerrainTile, action_instance: ActionInstance, event: Inpu
 		
 		# show preview path
 		var path: Array[TerrainTile] = get_map_path(action_instance.user.tile_position, tile, action_instance.user.map_paths)
-		var path_in_range: Array[TerrainTile] = path.filter(func(tile: TerrainTile): return action_instance.user.path_costs[tile] <= action_instance.user.move) # TODO allow parameter instead of move_current
-		var path_out_of_range: Array[TerrainTile] = path.filter(func(tile: TerrainTile): return action_instance.user.path_costs[tile] > action_instance.user.move) # TODO allow parameter instead of move_current
+		var path_in_range: Array[TerrainTile] = path.filter(func(path_tile: TerrainTile) -> bool: return action_instance.user.path_costs[path_tile] <= action_instance.user.move) # TODO allow parameter instead of move_current
+		var path_out_of_range: Array[TerrainTile] = path.filter(func(path_tile: TerrainTile) -> bool: return action_instance.user.path_costs[path_tile] > action_instance.user.move) # TODO allow parameter instead of move_current
 		
 		action_instance.clear_targets(action_instance.preview_targets_highlights)
 		action_instance.preview_targets.clear()
@@ -132,7 +132,7 @@ func get_map_paths(user: Unit, map_tiles: Dictionary[Vector2i, Array], units: Ar
 							break
 					frontier.append(next) # add at end if highest cost
 				elif new_cost < cost_so_far[next]:
-					var current_priority = frontier.bsearch(next)
+					var current_priority: int = frontier.bsearch(next)
 					cost_so_far[next] = new_cost
 					if current_priority == 0:
 						pass # don't need to change priority
@@ -189,7 +189,7 @@ func get_map_path_neighbors(user: Unit, current_tile: TerrainTile, map_tiles: Di
 					continue
 				elif not user.ignore_height and abs(tile.height_mid - current_tile.height_mid) > user.jump: # restrict movement based on current jomp, TODO allow jump height as parameter?
 					continue
-				elif units.any(func(unit: Unit): return unit.tile_position == tile and not unit.is_defeated): # prevent moving on top or through other units
+				elif units.any(func(unit: Unit) -> bool: return unit.tile_position == tile and not unit.is_defeated): # prevent moving on top or through other units
 					continue # TODO allow moving through knocked out units
 				# TODO prevent trying to move vertically through floors/ceilings
 				else:
@@ -204,6 +204,7 @@ func get_map_path_neighbors(user: Unit, current_tile: TerrainTile, map_tiles: Di
 
 func get_leaping_neighbors(user: Unit, current_tile: TerrainTile, map_tiles: Dictionary[Vector2i, Array], units: Array[Unit], offset_direction: Vector2i, walk_neighbors: Array[TerrainTile]) -> Array[TerrainTile]:
 	var leap_neighbors: Array[TerrainTile] = []
+	@warning_ignore("integer_division")
 	var max_leap_distance: int = user.jump / 2
 	
 	if max_leap_distance == 0:
@@ -227,17 +228,17 @@ func get_leaping_neighbors(user: Unit, current_tile: TerrainTile, map_tiles: Dic
 				elif tile.height_mid > current_tile.height_mid: # can't leap up
 					continue
 				# TODO prevent trying to move vertically through floors/ceilings
-				elif units.any(func(unit: Unit): return unit.tile_position == tile): # prevent moving on top or through other units
+				elif units.any(func(unit: Unit) -> bool: return unit.tile_position == tile): # prevent moving on top or through other units
 					continue # TODO allow moving through knocked out units
-				elif intermediate_tiles.any(func(intermediate_tile: TerrainTile): return intermediate_tile.height_mid > current_tile.height_mid): # prevent leaping through taller intermediate tiles
+				elif intermediate_tiles.any(func(intermediate_tile: TerrainTile) -> bool: return intermediate_tile.height_mid > current_tile.height_mid): # prevent leaping through taller intermediate tiles
 					continue # TODO fix leap check for leaping under a bridge/ceiling
-				elif intermediate_tiles.any(func(intermediate_tile: TerrainTile): 
+				elif intermediate_tiles.any(func(intermediate_tile: TerrainTile) -> bool: 
 					var can_leap: bool = true
-					if units.any(func(unit: Unit): return unit.tile_position == intermediate_tile):
+					if units.any(func(unit: Unit) -> bool: return unit.tile_position == intermediate_tile):
 						can_leap = current_tile.height_mid >= intermediate_tile.height_mid + 3 # prevent leaping over units taller than starting height
 					return not can_leap): 
 					continue
-				elif intermediate_tiles.any(func(intermediate_tile: TerrainTile): # prevent leaping when walking would be fine
+				elif intermediate_tiles.any(func(intermediate_tile: TerrainTile) -> bool: # prevent leaping when walking would be fine
 						var intermediate_is_taller_then_final: bool = intermediate_tile.height_mid >= tile.height_mid # TODO more complex check for if there is actually a path from the intermediate tile
 						var intermediate_is_walkable: bool = walk_neighbors.has(intermediate_tile) or leap_neighbors.has(intermediate_tile)
 						return (intermediate_is_taller_then_final and intermediate_is_walkable)
