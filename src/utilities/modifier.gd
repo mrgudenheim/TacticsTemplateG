@@ -8,7 +8,8 @@ enum ModifierType {
 }
 
 @export var type: ModifierType = ModifierType.ADD
-@export var value_formula: FormulaData = FormulaData.new(FormulaData.Formulas.V1)
+@export var value_formula: FormulaData = FormulaData.new("0.0")
+@export var formula_text: String = "value + 0.0"
 @export var order: int = 1 # order to be appliede
 # TODO track modifier source?
 
@@ -39,7 +40,7 @@ func _init(new_value: float = 1.0, new_type: ModifierType = ModifierType.ADD, ne
 	type = new_type
 	order = new_order
 
-	value_formula = FormulaData.new(FormulaData.Formulas.V1, [new_value])
+	value_formula = FormulaData.new("%.2f" % new_value, [new_value])
 	value_formula.reverse_sign = false
 	value_formula.is_modified_by_element = false
 	value_formula.is_modified_by_zodiac = false
@@ -58,19 +59,35 @@ func _init(new_value: float = 1.0, new_type: ModifierType = ModifierType.ADD, ne
 # 			return -1
 
 
-func apply(to_value: int, user: Unit = null, target: Unit = null) -> int:
-	var formula_result: float = value_formula.get_base_value(user, target)
+func get_expression_result(value: float, user: Unit, target: Unit) -> float:
+	var expression: Expression = Expression.new()
+	var error: Error = expression.parse(formula_text, ["user", "target", "value"])
+	if error != OK:
+		push_error(expression.get_error_text())
+		return 0.0
+	var result: float = expression.execute([user, target, value])
+	if not expression.has_execute_failed():
+		return result
+	
+	push_error(formula_text + " execute failed")
+	return 0.0
 
-	match type:
-		ModifierType.ADD:
-			return roundi(to_value + formula_result)
-		ModifierType.MULT:
-			return roundi(to_value * formula_result)
-		ModifierType.SET:
-			return roundi(formula_result)
-		_:
-			push_warning("Modifier type unknown: " + str(type))
-			return -1
+
+func apply(to_value: int, user: Unit = null, target: Unit = null) -> int:
+	# var formula_result: float = value_formula.get_base_value(user, target)
+	var formula_result: float = get_expression_result(to_value, user, target)
+	return roundi(formula_result)
+
+	# match type:
+	# 	ModifierType.ADD:
+	# 		return roundi(to_value + formula_result)
+	# 	ModifierType.MULT:
+	# 		return roundi(to_value * formula_result)
+	# 	ModifierType.SET:
+	# 		return roundi(formula_result)
+	# 	_:
+	# 		push_warning("Modifier type unknown: " + str(type))
+	# 		return -1
 
 
 func to_dictionary() -> Dictionary:
