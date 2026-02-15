@@ -901,7 +901,7 @@ func initialize_map_tiles() -> void:
 				continue
 			
 			var total_location: Vector2i = tile.location
-			var map_scale: Vector2i = Vector2i(map_chunk.mesh_instance.scale.x, map_chunk.mesh_instance.scale.z)
+			var map_scale: Vector2i = Vector2i(roundi(map_chunk.mesh_instance.scale.x), roundi(map_chunk.mesh_instance.scale.z))
 			total_location = total_location * map_scale
 			var mirror_shift: Vector2i = map_scale # ex. (0,0) should be (-1, -1) when mirrored across x and y
 			if map_scale.x == 1:
@@ -909,14 +909,14 @@ func initialize_map_tiles() -> void:
 			if map_scale.y == 1:
 				mirror_shift.y = 0
 			total_location = total_location + mirror_shift
-			total_location = total_location + Vector2i(map_chunk.position.x, map_chunk.position.z)
+			total_location = total_location + Vector2i(roundi(map_chunk.position.x), roundi(map_chunk.position.z))
 			if not total_map_tiles.has(total_location):
 				total_map_tiles[total_location] = []
 			var total_tile: TerrainTile = tile.duplicate()
 			total_tile.location = total_location
 			total_tile.tile_scale.x = map_chunk.mesh_instance.scale.x
 			total_tile.tile_scale.z = map_chunk.mesh_instance.scale.z
-			total_tile.height_bottom += map_chunk.position.y / MapData.HEIGHT_SCALE
+			total_tile.height_bottom += roundi(map_chunk.position.y / MapData.HEIGHT_SCALE)
 			total_tile.height_mid = total_tile.height_bottom + (total_tile.slope_height / 2.0)
 			total_map_tiles[total_location].append(total_tile)
 
@@ -981,7 +981,7 @@ func on_map_input_event(camera: Camera3D, event: InputEvent, event_position: Vec
 
 func get_tile(input_position: Vector3) -> TerrainTile:
 	var tile_location: Vector2i = Vector2i(floor(input_position.x), floor(input_position.z))
-	var tile: TerrainTile
+	var tile: TerrainTile = null
 	if total_map_tiles.has(tile_location):
 		var current_vert_error: float = 999.9
 		for new_tile: TerrainTile in total_map_tiles[tile_location]:
