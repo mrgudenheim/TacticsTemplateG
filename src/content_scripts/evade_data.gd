@@ -81,7 +81,7 @@ static func create_from_json(json_string: String) -> EvadeData:
 
 static func create_from_dictionary(property_dict: Dictionary) -> EvadeData:
 	var new_evade_data: EvadeData = EvadeData.new()
-	for property_name in property_dict.keys():
+	for property_name: String in property_dict.keys():
 		if property_name == "type":
 			var new_type: EvadeType = EvadeType[property_dict[property_name]]
 			new_evade_data.set(property_name, new_type)
