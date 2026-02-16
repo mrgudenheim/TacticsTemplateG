@@ -19,69 +19,11 @@ extends Resource
 @export var is_modified_by_zodiac: bool = true
 #@export var healing_damages_undead: bool = false # needs to be on Action since formula does not know if value will be used for healing
 
-# applicable evasion is defined on Action
-#@export var physical_evasion_applies: bool = false
-#@export var magical_evasion_applies: bool = false
-#@export var no_evasion_applies: bool = false
-
-# TODO default description of "Formula description could not be found"
-# static var formula_descriptions: Dictionary[Formulas, String] = {
-# 	Formulas.PA_X_V1: "PAxWP",
-# 	Formulas.MA_X_V1: "MAxWP",
-# 	Formulas.AVG_PA_MA_X_V1: "AVG_PA_MAxWP",
-# 	Formulas.AVG_PA_SP_X_V1: "AVG_PA_SPxWP",
-# 	Formulas.PA_BRAVE_X_V1: "PA_BRAVExWP",
-# 	Formulas.RANDOM_PA_X_V1: "RANDOM_PAxWP",
-# 	Formulas.V1_X_V1: "WPxWP",
-# 	Formulas.PA_BRAVE_X_PA: "PA_BRAVExPA",
-# }
-
 enum FaithModifier {
 	NONE,
 	FAITH,
 	UNFAITH,
 }
-
-# TODO remove specific formulas and allow any string using Expression
-# https://docs.godotengine.org/en/stable/classes/class_expression.html
-# enum Formulas {
-# 	V1,
-# 	PA_X_V1,
-# 	MA_X_V1,
-# 	WP_X_V1,
-# 	AVG_PA_MA_X_V1,
-# 	AVG_PA_SP_X_V1,
-# 	PA_BRAVE_X_V1,
-# 	RANDOM_PA_X_V1,
-# 	V1_X_V1,
-# 	PA_BRAVE_X_PA,
-# 	MA_PLUS_V1,
-# 	MA_PLUS_V1_X_MA_DIV_2,
-# 	PA_PLUS_V1_X_MA_DIV_2,
-# 	PA_PLUS_WP_PLUS_V1,
-# 	SP_PLUS_V1,
-# 	LVL_X_SP_X_V1,
-# 	MIN_TARGET_EXP_OR_SP_PLUS_V1,
-# 	PA_PLUS_V1,
-# 	PA_X_WP_PLUS_V1,
-# 	PA_X_WP_X_V1,
-# 	PA_X_PA_PLUS_V1_DIV_2,
-# 	RANDOM_V1_X_PA_X_3_PLUS_V2_DIV_2,
-# 	RANDOM_V1_X_PA,
-# 	USER_MAX_HP_X_V1,
-# 	USER_MAX_MP_X_V1,
-# 	TARGET_MAX_HP_X_V1,
-# 	TARGET_MAX_MP_X_V1,
-# 	USER_CURRENT_HP_MINUS_V1,
-# 	TARGET_CURRENT_MP_MINUS_V1,
-# 	TARGET_CURRENT_HP_MINUS_V1,
-# 	USER_MISSING_HP_X_V1,
-# 	TARGET_MISSING_HP_X_V1,
-# 	TARGET_CURRENT_HP_X_V1,
-# 	RANDOM_V1_V2,
-# 	BRAVE_X_V1,
-# }
-
 
 static func create_from_json(json_string: String) -> FormulaData:
 	var property_dict: Dictionary = JSON.parse_string(json_string)
@@ -160,87 +102,6 @@ func get_expression_result(user: Unit, target: Unit) -> float:
 func get_base_value(user: Unit, target: Unit) -> float:
 	var base_value: float = values[0]
 	base_value = get_expression_result(user, target)
-	# var wp: int 
-	# if not user == null:
-	# 	wp = user.primary_weapon.weapon_power
-	
-	# match formula:
-	# 	Formulas.V1:
-	# 		base_value = values[0]
-	# 	Formulas.PA_X_V1:
-	# 		base_value = user.physical_attack * values[0]
-	# 	Formulas.MA_X_V1:
-	# 		base_value = user.magical_attack * values[0]
-	# 	Formulas.WP_X_V1:
-	# 		base_value = wp * values[0]
-	# 	Formulas.AVG_PA_MA_X_V1:
-	# 		base_value = ((user.physical_attack + user.magical_attack) / 2.0) * values[0]
-	# 	Formulas.AVG_PA_SP_X_V1:
-	# 		base_value = ((user.physical_attack + user.speed) / 2.0) * values[0]
-	# 	Formulas.PA_BRAVE_X_V1:
-	# 		base_value = (user.physical_attack * user.brave / 100.0) * values[0]
-	# 	Formulas.RANDOM_PA_X_V1:
-	# 		base_value = randi_range(1, user.physical_attack) * values[0]
-	# 	Formulas.V1_X_V1:
-	# 		base_value = values[0] * values[0]
-	# 	Formulas.PA_BRAVE_X_PA:
-	# 		base_value = (user.physical_attack * user.brave / 100.0) * user.physical_attack
-	# 	Formulas.MA_PLUS_V1:
-	# 		base_value = user.magical_attack + values[0] # MAplusV1
-	# 	Formulas.MA_PLUS_V1_X_MA_DIV_2:
-	# 		base_value = (user.magical_attack + values[0]) * user.magical_attack / 2.0 # 0x1e, 0x1f, 0x5e, 0x5f, 0x60 rafa/malak
-	# 	Formulas.PA_PLUS_V1_X_MA_DIV_2:
-	# 		base_value = (user.physical_attack + values[0]) * user.magical_attack / 2.0 # 0x24 geomancy
-	# 	Formulas.PA_PLUS_WP_PLUS_V1:
-	# 		base_value = user.physical_attack + wp + values[0] # 0x25 break equipment
-	# 	Formulas.SP_PLUS_V1:
-	# 		base_value = user.speed + values[0] # 0x26 steal equipment SPplusX
-	# 	Formulas.LVL_X_SP_X_V1:
-	# 		base_value = user.level * user.speed * values[0] # 0x27 steal gil LVLxSP
-	# 	Formulas.MIN_TARGET_EXP_OR_SP_PLUS_V1:
-	# 		base_value = minf(target.unit_exp, user.speed + values[0]) # 0x28 steal exp
-	# 	Formulas.PA_PLUS_V1:
-	# 		base_value = user.physical_attack + values[0] # 0x2b, 0x2c PAplusY
-	# 	Formulas.PA_X_WP_PLUS_V1:
-	# 		base_value = user.physical_attack * (wp + values[0]) # 0x2d agrais sword skills
-	# 	Formulas.PA_X_WP_X_V1:
-	# 		base_value = user.physical_attack * wp * values[0] # 0x2e, 0x2f, 0x30
-	# 	Formulas.PA_X_PA_PLUS_V1_DIV_2:
-	# 		base_value = (user.physical_attack + values[0]) * user.physical_attack / 2.0 # 0x31 monk skills
-	# 	Formulas.RANDOM_V1_X_PA_X_3_PLUS_V2_DIV_2:
-	# 		base_value = randi_range(1, roundi(values[0])) * ((user.physical_attack * 3) + values[1]) / 2.0 # 0x32 repeating fist # TODO 2 variables rndm to X, PA + Y
-	# 		#base_value = user.physical_attack_current * values[0] / 2.0 # 0x34 chakra
-	# 	Formulas.RANDOM_V1_X_PA:
-	# 		base_value = user.physical_attack * randi_range(1, roundi(values[0])) # 0x37
-	# 	Formulas.USER_MAX_HP_X_V1:
-	# 		base_value = user.hp_max * values[0] # 0x3c wish, energy USER_MAX_HP
-	# 	Formulas.USER_MAX_MP_X_V1:
-	# 		base_value = user.mp_max * values[0] # USER_MAX_MP
-	# 	Formulas.TARGET_MAX_HP_X_V1:
-	# 		base_value = target.hp_max * values[0] # 0x09 wish, energy TARGET_MAX_HP
-	# 	Formulas.TARGET_MAX_MP_X_V1:
-	# 		base_value = target.mp_max * values[0] # 0x09 wish, energy TARGET_MAX_HP
-		
-	# 	Formulas.USER_CURRENT_HP_MINUS_V1:
-	# 		base_value = user.hp_current - values[0] # 0x17, 0x3e TARGET_CURRENT_HP
-	# 	Formulas.TARGET_CURRENT_MP_MINUS_V1:
-	# 		base_value = target.mp - values[0] # 0x16 mute TARGET_CURRENT_MP
-	# 	Formulas.TARGET_CURRENT_HP_MINUS_V1:
-	# 		base_value = target.hp_current - values[0] # 0x17, 0x3e TARGET_CURRENT_HP
-	# 	Formulas.USER_MISSING_HP_X_V1:
-	# 		base_value = (user.hp_max - user.hp_current) * values[0] # 0x43 USER_MISSING_HP
-	# 	Formulas.TARGET_MISSING_HP_X_V1:
-	# 		base_value = (target.hp_max - target.hp_current) * values[0] # 0x45 TARGET_MISSING_HP
-	# 	Formulas.TARGET_CURRENT_HP_X_V1:
-	# 		base_value = target.hp_current * values[0] # TARGET_CURRENT_HP, ai status score
-	# 	Formulas.RANDOM_V1_V2:
-	# 		base_value = randi_range(roundi(values[0]), roundi(values[1])) # 0x4b RANDOM_RANGE
-	# 	Formulas.BRAVE_X_V1:
-	# 		base_value = user.brave * values[0] # reactions
-			
-			
-			#base_value = action_modifier / 100.0 # % treat value as a percent when actually applying effect
-			# TODO target ct?
 			
 	if reverse_sign:
 		base_value = -base_value

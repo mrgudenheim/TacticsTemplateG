@@ -8,7 +8,6 @@ enum ModifierType {
 }
 
 @export var type: ModifierType = ModifierType.ADD
-# @export var value_formula: FormulaData = FormulaData.new("0.0")
 @export var formula_text: String = "value + 0.0"
 @export var order: int = 1 # order to be appliede
 # TODO track modifier source?
@@ -41,24 +40,6 @@ func _init(new_formula_text: String = "value + 0.0", new_type: ModifierType = Mo
 	order = new_order
 	formula_text = new_formula_text
 
-	# value_formula = FormulaData.new("%.2f" % new_value, [new_value])
-	# value_formula.reverse_sign = false
-	# value_formula.is_modified_by_element = false
-	# value_formula.is_modified_by_zodiac = false
-
-
-# func apply(to_value: int) -> int:
-# 	match type:
-# 		ModifierType.ADD:
-# 			return roundi(to_value + value)
-# 		ModifierType.MULT:
-# 			return roundi(to_value * value)
-# 		ModifierType.SET:
-# 			return roundi(value)
-# 		_:
-# 			push_warning("Modifier type unknown: " + str(type))
-# 			return -1
-
 
 func get_expression_result(value: float, user: Unit, target: Unit) -> float:
 	var expression: Expression = Expression.new()
@@ -78,17 +59,6 @@ func apply(to_value: int, user: Unit = null, target: Unit = null) -> int:
 	# var formula_result: float = value_formula.get_base_value(user, target)
 	var formula_result: float = get_expression_result(to_value, user, target)
 	return roundi(formula_result)
-
-	# match type:
-	# 	ModifierType.ADD:
-	# 		return roundi(to_value + formula_result)
-	# 	ModifierType.MULT:
-	# 		return roundi(to_value * formula_result)
-	# 	ModifierType.SET:
-	# 		return roundi(formula_result)
-	# 	_:
-	# 		push_warning("Modifier type unknown: " + str(type))
-	# 		return -1
 
 
 func to_dictionary() -> Dictionary:
