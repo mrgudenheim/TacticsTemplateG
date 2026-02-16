@@ -65,7 +65,7 @@ func update_potential_targets() -> void:
 	clear_targets(potential_targets_highlights)
 	potential_targets.clear()
 	
-	potential_targets = await action.targeting_strategy.get_potential_targets(self)
+	potential_targets = action.targeting_strategy.get_potential_targets(self)
 	update_potential_targets_highlights()
 	
 	potential_targets_are_set = true
@@ -132,7 +132,7 @@ func stop_targeting() -> void:
 func get_target_units(target_tiles: Array[TerrainTile]) -> Array[Unit]:
 	var target_units: Array[Unit] = []
 	for target_tile: TerrainTile in target_tiles:
-		var units_on_tile: Array[Unit] = battle_manager.units.filter(func(unit: Unit): return unit.tile_position == target_tile)
+		var units_on_tile: Array[Unit] = battle_manager.units.filter(func(unit: Unit) -> bool: return unit.tile_position == target_tile)
 		
 		for unit: Unit in units_on_tile:
 			if unit.get_nullify_statuses().is_empty(): # TODO check all passives not just statuses
@@ -140,9 +140,9 @@ func get_target_units(target_tiles: Array[TerrainTile]) -> Array[Unit]:
 				continue
 			
 			var action_ignores_all_null_statuses: bool = unit.get_nullify_statuses().all(
-				func(status: StatusEffect): return action.ignores_statuses.has(status.unique_name))
+				func(status: StatusEffect) -> bool: return action.ignores_statuses.has(status.unique_name))
 			var action_removes_null_status: bool = unit.get_nullify_statuses().any(
-				func(status: StatusEffect): return action.will_remove_target_status and action.target_status_list.has(status.unique_name)) # ignore action unless it would remove nullify
+				func(status: StatusEffect) -> bool: return action.will_remove_target_status and action.target_status_list.has(status.unique_name)) # ignore action unless it would remove nullify
 		
 			if action_ignores_all_null_statuses or action_removes_null_status:
 				target_units.append(unit)
@@ -277,7 +277,7 @@ func get_statuses_text(target: Unit) -> String:
 	return total_status_text
 
 
-func get_secondary_actions_text(target: Unit) -> String:
+func get_secondary_actions_text(_target: Unit) -> String:
 	# TODO show effects and statuses from secondary actions?
 	if action.secondary_actions2.is_empty():
 		return ""
@@ -297,7 +297,7 @@ func get_secondary_actions_text(target: Unit) -> String:
 	return total_secondary_action_text
 
 
-func on_map_input_event(camera: Camera3D, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
+func on_map_input_event(_camera: Camera3D, event: InputEvent, event_position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
 	#push_warning(event_position)
 	var tile: TerrainTile = battle_manager.get_tile(event_position)
 	if tile == null:
