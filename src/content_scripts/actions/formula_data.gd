@@ -258,6 +258,8 @@ func unfaith_modify(value: float, unit: Unit) -> float:
 
 func zodiac_modify(value: float, user: Unit, target: Unit) -> float:
 	# TODO user vs target zodiac compatability
+	if user.zodiac != target.zodiac:
+		value = value * 1.25
 	
 	return value
 
