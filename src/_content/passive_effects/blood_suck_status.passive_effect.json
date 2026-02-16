@@ -1,48 +1,18 @@
 {
 	"action_charge_time_modifier": {
+		"formula_text": "value + 0.0",
 		"order": 1,
-		"type": "MULT",
-		"value_formula": {
-			"formula": "V1",
-			"is_modified_by_element": false,
-			"is_modified_by_zodiac": false,
-			"reverse_sign": false,
-			"target_faith_modifier": "NONE",
-			"user_faith_modifier": "NONE",
-			"values": [
-				1.0
-			]
-		}
+		"type": "MULT"
 	},
 	"action_max_range_modifier": {
+		"formula_text": "value + 0.0",
 		"order": 1,
-		"type": "MULT",
-		"value_formula": {
-			"formula": "V1",
-			"is_modified_by_element": false,
-			"is_modified_by_zodiac": false,
-			"reverse_sign": false,
-			"target_faith_modifier": "NONE",
-			"user_faith_modifier": "NONE",
-			"values": [
-				1.0
-			]
-		}
+		"type": "MULT"
 	},
 	"action_mp_modifier": {
+		"formula_text": "value + 0.0",
 		"order": 1,
-		"type": "MULT",
-		"value_formula": {
-			"formula": "V1",
-			"is_modified_by_element": false,
-			"is_modified_by_zodiac": false,
-			"reverse_sign": false,
-			"target_faith_modifier": "NONE",
-			"user_faith_modifier": "NONE",
-			"values": [
-				1.0
-			]
-		}
+		"type": "MULT"
 	},
 	"add_applicable_target_jobs": [],
 	"add_applicable_target_stat_bases": [],
@@ -54,34 +24,14 @@
 	"ai_strategy": "BEST",
 	"can_react": false,
 	"ct_gain_modifier": {
+		"formula_text": "value + 0.0",
 		"order": 1,
-		"type": "MULT",
-		"value_formula": {
-			"formula": "V1",
-			"is_modified_by_element": false,
-			"is_modified_by_zodiac": false,
-			"reverse_sign": false,
-			"target_faith_modifier": "NONE",
-			"user_faith_modifier": "NONE",
-			"values": [
-				1.0
-			]
-		}
+		"type": "MULT"
 	},
 	"depth_modifier": {
+		"formula_text": "value + 0.0",
 		"order": 1,
-		"type": "MULT",
-		"value_formula": {
-			"formula": "V1",
-			"is_modified_by_element": false,
-			"is_modified_by_zodiac": false,
-			"reverse_sign": false,
-			"target_faith_modifier": "NONE",
-			"user_faith_modifier": "NONE",
-			"values": [
-				1.0
-			]
-		}
+		"type": "MULT"
 	},
 	"effect_range": 0,
 	"element_absorb": [],
@@ -96,67 +46,27 @@
 
 	},
 	"hit_chance_modifier_targeted": {
+		"formula_text": "value + 0.0",
 		"order": 1,
-		"type": "MULT",
-		"value_formula": {
-			"formula": "V1",
-			"is_modified_by_element": false,
-			"is_modified_by_zodiac": false,
-			"reverse_sign": false,
-			"target_faith_modifier": "NONE",
-			"user_faith_modifier": "NONE",
-			"values": [
-				1.0
-			]
-		}
+		"type": "MULT"
 	},
 	"hit_chance_modifier_user": {
+		"formula_text": "value + 0.0",
 		"order": 1,
-		"type": "MULT",
-		"value_formula": {
-			"formula": "V1",
-			"is_modified_by_element": false,
-			"is_modified_by_zodiac": false,
-			"reverse_sign": false,
-			"target_faith_modifier": "NONE",
-			"user_faith_modifier": "NONE",
-			"values": [
-				1.0
-			]
-		}
+		"type": "MULT"
 	},
 	"ignore_height": false,
 	"include_evade_sources": [],
 	"nullify_targeted": false,
 	"power_modifier_targeted": {
+		"formula_text": "value + 0.0",
 		"order": 1,
-		"type": "MULT",
-		"value_formula": {
-			"formula": "V1",
-			"is_modified_by_element": false,
-			"is_modified_by_zodiac": false,
-			"reverse_sign": false,
-			"target_faith_modifier": "NONE",
-			"user_faith_modifier": "NONE",
-			"values": [
-				1.0
-			]
-		}
+		"type": "MULT"
 	},
 	"power_modifier_user": {
+		"formula_text": "value + 0.0",
 		"order": 1,
-		"type": "MULT",
-		"value_formula": {
-			"formula": "V1",
-			"is_modified_by_element": false,
-			"is_modified_by_zodiac": false,
-			"reverse_sign": false,
-			"target_faith_modifier": "NONE",
-			"user_faith_modifier": "NONE",
-			"values": [
-				1.0
-			]
-		}
+		"type": "MULT"
 	},
 	"remove_prohibited_terrain": [],
 	"requires_user_item_type": [],
