@@ -450,14 +450,17 @@ func init_statuses() -> void:
 		status_effects[idx].ai_score_formula.values[0] = RomReader.battle_bin_data.ai_status_priorities[idx] / 128.0
 	
 	# haste
-	status_effects[28].passive_effect.ct_gain_modifier.value_formula.values = [1.5]
+	# status_effects[28].passive_effect.ct_gain_modifier.value_formula.values = [1.5]
+	status_effects[28].passive_effect.ct_gain_modifier.formula_text = "value * 1.5"
 	# slow
-	status_effects[29].passive_effect.ct_gain_modifier.value_formula.values = [0.5]
+	# status_effects[29].passive_effect.ct_gain_modifier.value_formula.values = [0.5]
+	status_effects[29].passive_effect.ct_gain_modifier.formula_text = "value * 0.5"
 	
 	# freeze ct flag
 	for status: StatusEffect in status_effects:
 		if status.freezes_ct:
-			status.passive_effect.ct_gain_modifier.value_formula.values = [0.0]
+			# status.passive_effect.ct_gain_modifier.value_formula.values = [0.0]
+			status.passive_effect.ct_gain_modifier.formula_text = "value * 0.0"
 		status.passive_effect.can_react = not (status.checks_02 & 0x80 == 0x80) # cant react flag
 		status.passive_effect.nullify_targeted = status.checks_02 & 0x20 == 0x20 # ignore attacks flag
 	
@@ -465,31 +468,35 @@ func init_statuses() -> void:
 	# status_effects[38].passive_effect.hit_chance_modifier_targeted.value = 0.0
 	
 	# defending
-	status_effects[6].passive_effect.hit_chance_modifier_targeted.value_formula.values = [0.5]
+	# status_effects[6].passive_effect.hit_chance_modifier_targeted.value_formula.values = [0.5]
+	status_effects[6].passive_effect.hit_chance_modifier_targeted.formula_text = "value * 0.5"
 	
 	# protect, shell
 	for idx: int in [26, 27]:
-		#status_effects[idx].passive_effect.hit_chance_modifier_targeted.value_formula.values = [0.66]
-		status_effects[idx].passive_effect.power_modifier_targeted.value_formula.values = [0.66]
+		# status_effects[idx].passive_effect.hit_chance_modifier_targeted.value_formula.values = [0.66]
+		# status_effects[idx].passive_effect.power_modifier_targeted.value_formula.values = [0.66]
+		status_effects[idx].passive_effect.power_modifier_targeted.formula_text = "value * 0.66"
 	
 	# chicken, frog, sleeping, charging
 	for idx: int in [21, 22, 35, 4]:
 		#status_effects[idx].passive_effect.hit_chance_modifier_targeted.value_formula.values = [1.5]
-		status_effects[idx].passive_effect.power_modifier_targeted.value_formula.values = [1.5]
+		# status_effects[idx].passive_effect.power_modifier_targeted.value_formula.values = [1.5]
+		status_effects[idx].passive_effect.power_modifier_targeted.formula_text = "value * 1.5"
 	
 	# dark, confuse
 	for idx: int in [10, 11]:
-		status_effects[idx].passive_effect.hit_chance_modifier_user.value_formula.values = [0.5]
+		# status_effects[idx].passive_effect.hit_chance_modifier_user.value_formula.values = [0.5]
+		status_effects[idx].passive_effect.hit_chance_modifier_user.formula_text = "value * 0.5"
 	
 	# dont act, sleep, stop, confuse, charging, performing
 	for idx: int in [37, 35, 30, 11, 4, 7]:
 		# status_effects[idx].passive_effect.evade_modifier_targeted.type = Modifier.ModifierType.SET
 		# status_effects[idx].passive_effect.evade_modifier_targeted.value = 1.0
 		status_effects[idx].passive_effect.evade_source_modifiers_targeted = {
-			EvadeData.EvadeSource.JOB: Modifier.new(0, Modifier.ModifierType.SET),
-			EvadeData.EvadeSource.SHIELD: Modifier.new(0, Modifier.ModifierType.SET),
-			EvadeData.EvadeSource.ACCESSORY: Modifier.new(0, Modifier.ModifierType.SET),
-			EvadeData.EvadeSource.WEAPON: Modifier.new(0, Modifier.ModifierType.SET),
+			EvadeData.EvadeSource.JOB: Modifier.new("0", Modifier.ModifierType.SET),
+			EvadeData.EvadeSource.SHIELD: Modifier.new("0", Modifier.ModifierType.SET),
+			EvadeData.EvadeSource.ACCESSORY: Modifier.new("0", Modifier.ModifierType.SET),
+			EvadeData.EvadeSource.WEAPON: Modifier.new("0", Modifier.ModifierType.SET),
 		}
 	
 	# user is transparent
@@ -497,10 +504,10 @@ func init_statuses() -> void:
 	# status_effects[19].passive_effect.evade_modifier_user.type = Modifier.ModifierType.SET
 	# status_effects[19].passive_effect.evade_modifier_user.value = 1.0
 	status_effects[19].passive_effect.evade_source_modifiers_user = {
-		EvadeData.EvadeSource.JOB: Modifier.new(0, Modifier.ModifierType.SET),
-		EvadeData.EvadeSource.SHIELD: Modifier.new(0, Modifier.ModifierType.SET),
-		EvadeData.EvadeSource.ACCESSORY: Modifier.new(0, Modifier.ModifierType.SET),
-		EvadeData.EvadeSource.WEAPON: Modifier.new(0, Modifier.ModifierType.SET),
+		EvadeData.EvadeSource.JOB: Modifier.new("0", Modifier.ModifierType.SET),
+		EvadeData.EvadeSource.SHIELD: Modifier.new("0", Modifier.ModifierType.SET),
+		EvadeData.EvadeSource.ACCESSORY: Modifier.new("0", Modifier.ModifierType.SET),
+		EvadeData.EvadeSource.WEAPON: Modifier.new("0", Modifier.ModifierType.SET),
 	}
 	
 	
@@ -519,19 +526,19 @@ func init_statuses() -> void:
 	RomReader.fft_abilities[0x0c8].ability_action.status_prevents_use_any.erase("blood_suck") # can use blood suck
 	
 	# faith
-	status_effects[32].passive_effect.stat_modifiers[Unit.StatType.FAITH] = Modifier.new(100.0, Modifier.ModifierType.SET)
+	status_effects[32].passive_effect.stat_modifiers[Unit.StatType.FAITH] = Modifier.new("100.0", Modifier.ModifierType.SET)
 	# innocent
-	status_effects[33].passive_effect.stat_modifiers[Unit.StatType.FAITH] = Modifier.new(0.0, Modifier.ModifierType.SET)
+	status_effects[33].passive_effect.stat_modifiers[Unit.StatType.FAITH] = Modifier.new("0.0", Modifier.ModifierType.SET)
 	
 	# float
 	# TODO handle ignore depth and add height
 	status_effects[17].passive_effect.element_cancel = [Action.ElementTypes.EARTH]
 	var terrain_modifier_dict: Dictionary[int, Modifier] = {
-		0x0e : Modifier.new(1, Modifier.ModifierType.SET),
-		0x0f: Modifier.new(1, Modifier.ModifierType.SET),
-		0x10 : Modifier.new(1, Modifier.ModifierType.SET),
-		0x11 : Modifier.new(1, Modifier.ModifierType.SET),
-		0x2d : Modifier.new(1, Modifier.ModifierType.SET),
+		0x0e : Modifier.new("1", Modifier.ModifierType.SET),
+		0x0f: Modifier.new("1", Modifier.ModifierType.SET),
+		0x10 : Modifier.new("1", Modifier.ModifierType.SET),
+		0x11 : Modifier.new("1", Modifier.ModifierType.SET),
+		0x2d : Modifier.new("1", Modifier.ModifierType.SET),
 	}
 	status_effects[17].passive_effect.terrain_cost_modifiers = terrain_modifier_dict
 	status_effects[17].passive_effect.remove_prohibited_terrain = [

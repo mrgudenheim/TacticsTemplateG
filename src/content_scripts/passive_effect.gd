@@ -10,15 +10,15 @@ const FILE_SUFFIX: String = "passive_effect"
 @export var requires_user_item_type: PackedStringArray = [] # item unique names
 
 # Action modifiers
-@export var hit_chance_modifier_user: Modifier = Modifier.new(1.0, Modifier.ModifierType.MULT)
-@export var hit_chance_modifier_targeted: Modifier = Modifier.new(1.0, Modifier.ModifierType.MULT)
+@export var hit_chance_modifier_user: Modifier = Modifier.new("value + 0.0", Modifier.ModifierType.MULT)
+@export var hit_chance_modifier_targeted: Modifier = Modifier.new("value + 0.0", Modifier.ModifierType.MULT)
 @export var evade_source_modifiers_user: Dictionary[EvadeData.EvadeSource, Modifier] = {}
 @export var evade_source_modifiers_targeted: Dictionary[EvadeData.EvadeSource, Modifier] = {}
-@export var power_modifier_user: Modifier = Modifier.new(1.0, Modifier.ModifierType.MULT)
-@export var power_modifier_targeted: Modifier = Modifier.new(1.0, Modifier.ModifierType.MULT)
-@export var action_charge_time_modifier: Modifier = Modifier.new(1.0, Modifier.ModifierType.MULT)
-@export var action_mp_modifier: Modifier = Modifier.new(1.0, Modifier.ModifierType.MULT)
-@export var action_max_range_modifier: Modifier = Modifier.new(1.0, Modifier.ModifierType.MULT)
+@export var power_modifier_user: Modifier = Modifier.new("value + 0.0", Modifier.ModifierType.MULT)
+@export var power_modifier_targeted: Modifier = Modifier.new("value + 0.0", Modifier.ModifierType.MULT)
+@export var action_charge_time_modifier: Modifier = Modifier.new("value + 0.0", Modifier.ModifierType.MULT)
+@export var action_mp_modifier: Modifier = Modifier.new("value + 0.0", Modifier.ModifierType.MULT)
+@export var action_max_range_modifier: Modifier = Modifier.new("value + 0.0", Modifier.ModifierType.MULT)
 # used to modify Action required_target_job_uname, required_target_status_uname, required_target_stat_basis
 @export var add_applicable_target_jobs: PackedStringArray = [] # job unique names
 @export var add_applicable_target_statuses: PackedStringArray = [] # status unique names
@@ -35,14 +35,14 @@ var added_actions: Array[Action] = []
 var added_triggered_actions: Array[TriggeredAction] = []
 @export var added_equipment_types_equipable: Array[ItemData.ItemType] = [] # equip_x support abilities
 @export var stat_modifiers: Dictionary[Unit.StatType, Modifier] = {}
-@export var ct_gain_modifier: Modifier = Modifier.new(1.0, Modifier.ModifierType.MULT)
+@export var ct_gain_modifier: Modifier = Modifier.new("value + 0.0", Modifier.ModifierType.MULT)
 
 # move modifiers
 @export var ignore_height: bool = false
 @export var terrain_cost_modifiers: Dictionary[int, Modifier] = {} # [TerrainTile.surface_type_id, modifier]
 @export var add_prohibited_terrain: PackedInt32Array = [] # TerrainTile.surface_type_id
 @export var remove_prohibited_terrain: PackedInt32Array = [] # TerrainTile.surface_type_id
-@export var depth_modifier: Modifier = Modifier.new(1.0, Modifier.ModifierType.MULT) # TODO handle depth
+@export var depth_modifier: Modifier = Modifier.new("value + 0.0", Modifier.ModifierType.MULT) # TODO handle depth
 
 @export var element_absorb: Array[Action.ElementTypes] = []
 @export var element_cancel: Array[Action.ElementTypes] = []

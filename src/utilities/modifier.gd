@@ -8,7 +8,7 @@ enum ModifierType {
 }
 
 @export var type: ModifierType = ModifierType.ADD
-@export var value_formula: FormulaData = FormulaData.new("0.0")
+# @export var value_formula: FormulaData = FormulaData.new("0.0")
 @export var formula_text: String = "value + 0.0"
 @export var order: int = 1 # order to be appliede
 # TODO track modifier source?
@@ -36,14 +36,15 @@ static func create_from_dictionary(property_dict: Dictionary) -> Modifier:
 	return new_modifier
 
 
-func _init(new_value: float = 1.0, new_type: ModifierType = ModifierType.ADD, new_order: int = 1) -> void:
+func _init(new_formula_text: String = "value + 0.0", new_type: ModifierType = ModifierType.ADD, new_order: int = 1) -> void:
 	type = new_type
 	order = new_order
+	formula_text = new_formula_text
 
-	value_formula = FormulaData.new("%.2f" % new_value, [new_value])
-	value_formula.reverse_sign = false
-	value_formula.is_modified_by_element = false
-	value_formula.is_modified_by_zodiac = false
+	# value_formula = FormulaData.new("%.2f" % new_value, [new_value])
+	# value_formula.reverse_sign = false
+	# value_formula.is_modified_by_element = false
+	# value_formula.is_modified_by_zodiac = false
 
 
 # func apply(to_value: int) -> int:

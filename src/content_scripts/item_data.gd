@@ -347,8 +347,8 @@ func _init(idx: int = 0) -> void:
 		sub_index = idx - 0x90
 		hp_modifier = RomReader.scus_data.armour_hp_modifier[sub_index]
 		mp_modifier = RomReader.scus_data.armour_mp_modifier[sub_index]
-		passive_effect.stat_modifiers[Unit.StatType.HP_MAX] = Modifier.new(hp_modifier)
-		passive_effect.stat_modifiers[Unit.StatType.MP_MAX] = Modifier.new(mp_modifier)
+		passive_effect.stat_modifiers[Unit.StatType.HP_MAX] = Modifier.new("value + " + str(hp_modifier), Modifier.ModifierType.ADD)
+		passive_effect.stat_modifiers[Unit.StatType.MP_MAX] = Modifier.new("value + " + str(mp_modifier), Modifier.ModifierType.ADD)
 		
 	elif idx < 0xf0: # accessory data
 		sub_index = idx - 0xd0
@@ -365,7 +365,8 @@ func _init(idx: int = 0) -> void:
 
 	# remove empty modifiers
 	for key: Unit.StatType in passive_effect.stat_modifiers.keys():
-		if passive_effect.stat_modifiers[key].value_formula.values[0] == 0:
+		# if passive_effect.stat_modifiers[key].value_formula.values[0] == 0:
+		if passive_effect.stat_modifiers[key].formula_text == "value + 0":
 			passive_effect.stat_modifiers.erase(key)
 	
 	add_to_global_list()
@@ -384,11 +385,11 @@ func set_item_attributes(item_attribute: ScusData.ItemAttribute) -> void:
 	move_modifier = item_attribute.move_modifier
 	jump_modifier = item_attribute.jump_modifier
 	
-	passive_effect.stat_modifiers[Unit.StatType.PHYSICAL_ATTACK] = Modifier.new(item_attribute.pa_modifier)
-	passive_effect.stat_modifiers[Unit.StatType.MAGIC_ATTACK] = Modifier.new(item_attribute.ma_modifier)
-	passive_effect.stat_modifiers[Unit.StatType.SPEED] = Modifier.new(item_attribute.sp_modifier)
-	passive_effect.stat_modifiers[Unit.StatType.MOVE] = Modifier.new(item_attribute.move_modifier)
-	passive_effect.stat_modifiers[Unit.StatType.JUMP] = Modifier.new(item_attribute.jump_modifier)
+	passive_effect.stat_modifiers[Unit.StatType.PHYSICAL_ATTACK] = Modifier.new("value + " + str(item_attribute.pa_modifier), Modifier.ModifierType.ADD)
+	passive_effect.stat_modifiers[Unit.StatType.MAGIC_ATTACK] = Modifier.new("value + " + str(item_attribute.ma_modifier), Modifier.ModifierType.ADD)
+	passive_effect.stat_modifiers[Unit.StatType.SPEED] = Modifier.new("value + " + str(item_attribute.sp_modifier), Modifier.ModifierType.ADD)
+	passive_effect.stat_modifiers[Unit.StatType.MOVE] = Modifier.new("value + " + str(item_attribute.move_modifier), Modifier.ModifierType.ADD)
+	passive_effect.stat_modifiers[Unit.StatType.JUMP] = Modifier.new("value + " + str(item_attribute.jump_modifier), Modifier.ModifierType.ADD)
 	
 	passive_effect.status_always = item_attribute.status_always
 	passive_effect.status_immune = item_attribute.status_immune

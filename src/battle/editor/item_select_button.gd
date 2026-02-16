@@ -36,7 +36,8 @@ func update_ui(new_item_data: ItemData) -> void:
 	for stat_type: Unit.StatType in passive_effect.stat_modifiers.keys():
 		var stat_modifier: Modifier = passive_effect.stat_modifiers[stat_type]
 		var modifier_label: Label = Label.new()
-		modifier_label.text = Unit.StatType.keys()[stat_type] + ": +" + str(roundi(stat_modifier.value_formula.values[0]))
+		# modifier_label.text = Unit.StatType.keys()[stat_type] + ": +" + str(roundi(stat_modifier.value_formula.values[0]))
+		modifier_label.text = Unit.StatType.keys()[stat_type] + ": " + stat_modifier.formula_text.trim_prefix("value").remove_chars(" ")
 		list.add_child(modifier_label)
 
 	## update evade
