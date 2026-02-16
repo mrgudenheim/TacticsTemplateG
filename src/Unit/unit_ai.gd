@@ -104,7 +104,7 @@ func choose_action(unit: Unit) -> void:
 				unit.tile_position = potential_move
 				
 				for action_instance: ActionInstance in non_move_actions:
-					action_instance.potential_targets = await action_instance.action.targeting_strategy.get_potential_targets(action_instance)
+					action_instance.potential_targets = action_instance.action.targeting_strategy.get_potential_targets(action_instance)
 					for potential_target: TerrainTile in action_instance.potential_targets: # TODO handle ai score for auto targeting
 						#action_instance.tile_hovered.emit(potential_target, action_instance, simulated_input) # set preview targets
 						#action_instance.action.targeting_strategy.target_tile(potential_target, action_instance, simulated_input)
@@ -148,7 +148,7 @@ func choose_action(unit: Unit) -> void:
 		
 		if move_action_instance.is_usable() and not move_action_instance.potential_targets.is_empty():
 			# find closest enemy and move towards
-			var shortest_path_cost: int = -1
+			var shortest_path_cost: float = -1.0
 			var shortest_path_target: TerrainTile
 			for other_unit: Unit in unit.global_battle_manager.units:
 				if other_unit.team != unit.team and not other_unit.is_defeated: # if enemy
@@ -171,7 +171,7 @@ func choose_action(unit: Unit) -> void:
 					
 					for adjacent_tile: TerrainTile in adjacent_tiles:
 						if unit.path_costs.keys().has(adjacent_tile):
-							if shortest_path_cost == -1:
+							if shortest_path_cost == -1.0:
 								shortest_path_cost = unit.path_costs[adjacent_tile]
 								shortest_path_target = adjacent_tile
 							elif unit.path_costs[adjacent_tile] < shortest_path_cost:
@@ -179,13 +179,13 @@ func choose_action(unit: Unit) -> void:
 								shortest_path_target = adjacent_tile
 			
 			var move_target: TerrainTile = shortest_path_target
-			var move_cost: int = shortest_path_cost
+			var move_cost: int = roundi(shortest_path_cost)
 			if move_target != null:
 				while move_cost > unit.move:
 					#if unit.path_costs[move_target] > unit.move_current:
 						#break
 					move_target = unit.map_paths[move_target]
-					move_cost = unit.path_costs[move_target]
+					move_cost = roundi(unit.path_costs[move_target])
 			
 			# move to target or else move randomly is no path to any target
 			await action_targeted(unit, move_action_instance, move_target, shortest_path_target)
@@ -209,7 +209,7 @@ func choose_action(unit: Unit) -> void:
 
 func action_targeted(unit: Unit, chosen_action: ActionInstance, target: TerrainTile = null, hover_target: TerrainTile = null) -> void:
 	#chosen_action.show_potential_targets() # TODO fix move targeting when updating paths/pathfinding is takes longer than delay (large maps with 10+ units)
-	chosen_action.potential_targets = await chosen_action.action.targeting_strategy.get_potential_targets(chosen_action)
+	chosen_action.potential_targets = chosen_action.action.targeting_strategy.get_potential_targets(chosen_action)
 	chosen_action.start_targeting()
 	if chosen_action.action.auto_target:
 		await chosen_action.action_completed
