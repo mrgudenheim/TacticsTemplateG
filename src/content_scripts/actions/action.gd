@@ -272,7 +272,7 @@ func use(action_instance: ActionInstance) -> void:
 	if use_strategy == null: # default use
 		await apply_standard(action_instance)
 	else:
-		await use_strategy.use(action_instance)
+		use_strategy.use(action_instance)
 
 
 func get_total_hit_chance(user: Unit, target: Unit, evade_direction: EvadeData.Directions) -> int:
@@ -307,14 +307,14 @@ func get_total_hit_chance(user: Unit, target: Unit, evade_direction: EvadeData.D
 	var modified_hit_chance: float = base_hit_chance
 	if passive_power_modifier_applies_to_hit_chance:
 		for passive_effect: PassiveEffect in user_passive_effects:
-			modified_hit_chance = passive_effect.power_modifier_user.apply(modified_hit_chance, user)
+			modified_hit_chance = passive_effect.power_modifier_user.apply(roundi(modified_hit_chance), user)
 		for passive_effect: PassiveEffect in target_passive_effects:
-			modified_hit_chance = passive_effect.power_modifier_targeted.apply(modified_hit_chance, target)
+			modified_hit_chance = passive_effect.power_modifier_targeted.apply(roundi(modified_hit_chance), target)
 	else:
 		for passive_effect: PassiveEffect in user_passive_effects:
-			modified_hit_chance = passive_effect.hit_chance_modifier_user.apply(modified_hit_chance, user)
+			modified_hit_chance = passive_effect.hit_chance_modifier_user.apply(roundi(modified_hit_chance), user)
 		for passive_effect: PassiveEffect in target_passive_effects:
-			modified_hit_chance = passive_effect.hit_chance_modifier_targeted.apply(modified_hit_chance, target)
+			modified_hit_chance = passive_effect.hit_chance_modifier_targeted.apply(roundi(modified_hit_chance), target)
 
 	var evade_values: Dictionary[EvadeData.EvadeSource, int] = target.get_evade_values(applicable_evasion_type, evade_direction)
 	
@@ -326,11 +326,11 @@ func get_total_hit_chance(user: Unit, target: Unit, evade_direction: EvadeData.D
 				var evade_value: float = evade_values[evade_source]
 				for passive_effect: PassiveEffect in user_passive_effects:
 					if passive_effect.evade_source_modifiers_user.has(evade_source):
-						evade_value = passive_effect.evade_source_modifiers_user[evade_source].apply(evade_value)
+						evade_value = passive_effect.evade_source_modifiers_user[evade_source].apply(roundi(evade_value))
 				
 				for passive_effect: PassiveEffect in target_passive_effects:
 					if passive_effect.evade_source_modifiers_targeted.has(evade_source):
-						evade_value = passive_effect.evade_source_modifiers_targeted[evade_source].apply(evade_value)
+						evade_value = passive_effect.evade_source_modifiers_targeted[evade_source].apply(roundi(evade_value))
 				
 				var evade_factor: float = max(0.0, 1 - (evade_value / 100.0))
 
@@ -370,7 +370,7 @@ func get_evade_direction(user: Unit, target: Unit) -> EvadeData.Directions:
 
 func get_evade_values(target: Unit, evade_direction: EvadeData.Directions) -> Dictionary[EvadeData.EvadeSource, int]:
 	var evade_values: Dictionary[EvadeData.EvadeSource, int] = {}
-	for evade_source: EvadeData.EvadeSource in EvadeData.EvadeSource.size():
+	for evade_source: int in EvadeData.EvadeSource.size():
 		var evade_value: int = target.get_evade(evade_source, applicable_evasion_type, evade_direction)
 		evade_values[evade_source] = evade_value
 	
@@ -384,7 +384,7 @@ func animate_evade(target_unit: Unit, evade_direction: EvadeData.Directions, use
 	var temp_facing: Vector3 = Vector3(dir_to_target.x, 0, dir_to_target.y).normalized()
 	target_unit.update_unit_facing(temp_facing)
 	
-	var evade_anim_id: int = -1
+	# var evade_anim_id: int = -1
 	var sum_of_weight: int = 0
 	var evade_values: Dictionary[EvadeData.EvadeSource, int] = target_unit.get_evade_values(applicable_evasion_type, evade_direction)
 	for evade_source_value: int in evade_values.values():
@@ -417,7 +417,7 @@ func apply_standard(action_instance: ActionInstance) -> void:
 	var mod_animation_executing_id: int = animation_executing_id
 	if not action_instance.submitted_targets.is_empty():
 		if animation_executing_id == 0 and use_weapon_animation:
-			mod_animation_executing_id = RomReader.battle_bin_data.weapon_animation_ids[action_instance.user.primary_weapon.item_type].y * 2
+			mod_animation_executing_id = roundi(RomReader.battle_bin_data.weapon_animation_ids[action_instance.user.primary_weapon.item_type].y) * 2
 			var angle_to_target: float = ((action_instance.submitted_targets[0].height_mid - action_instance.user.tile_position.height_mid) 
 					/ (action_instance.submitted_targets[0].location - action_instance.user.tile_position.location).length())
 			if angle_to_target > 0.51:
@@ -433,7 +433,6 @@ func apply_standard(action_instance: ActionInstance) -> void:
 	
 	# TODO show vfx, including rock, arrow, bolt...
 	
-	var vfx_completed: bool = true
 	var vfx_locations: Array[Node3D] = []
 	# apply effects to targets
 	for target_unit: Unit in target_units:
@@ -528,7 +527,7 @@ func apply_standard(action_instance: ActionInstance) -> void:
 
 func apply_status(unit: Unit, status_list: Array[String], status_list_type: StatusListType, status_list_chance: int, will_remove_status: bool) -> void:
 	if status_list_type == StatusListType.ALL:
-		var status_success: bool = randi_range(0, 99) < target_status_chance
+		var status_success: bool = randi_range(0, 99) < status_list_chance
 		if status_success:
 			for status_id: String in status_list:
 				if will_remove_status and unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_id):
@@ -539,7 +538,7 @@ func apply_status(unit: Unit, status_list: Array[String], status_list_type: Stat
 					await unit.add_status(RomReader.status_effects[status_id].duplicate())
 	elif status_list_type == StatusListType.EACH:
 		for status_id: String in status_list:
-			var status_success: bool = randi_range(0, 99) < target_status_chance
+			var status_success: bool = randi_range(0, 99) < status_list_chance
 			if status_success:
 				if will_remove_status and unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_id):
 					unit.remove_status_id(status_id)
@@ -548,7 +547,7 @@ func apply_status(unit: Unit, status_list: Array[String], status_list_type: Stat
 					unit.show_popup_text(RomReader.status_effects[status_id].status_effect_name)
 					await unit.add_status(RomReader.status_effects[status_id].duplicate())
 	elif status_list_type == StatusListType.RANDOM:
-		var status_success: bool = randi_range(0, 99) < target_status_chance
+		var status_success: bool = randi_range(0, 99) < status_list_chance
 		if status_success:
 			if will_remove_status:
 				var removable_status_list: Array[String] = status_list.filter(func(status_id: String) -> bool: return unit.current_status_ids.has(status_id))
@@ -603,7 +602,7 @@ func get_action_types() -> Array[ActionType]:
 	return action_types
 
 
-func set_data_from_formula_id(new_formula_id: int, x: int = 0, y: int = 0) -> void:
+func set_data_from_formula_id(new_formula_id: int) -> void:
 	formula_id = new_formula_id
 	# ignores_statuses.append_array(["protect", "shell"]) # protect and shell
 	ignore_passives = [
