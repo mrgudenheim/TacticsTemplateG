@@ -76,5 +76,5 @@ In the scenario editor, unit can be drag and dropped with the mouse.
 ...
 
 # Building From Source
-This project is built with Godot 4.5.1
+This project is built with Godot 4.6.1
 https://godotengine.org/
