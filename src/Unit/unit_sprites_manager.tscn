@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://cw8mvbkue4ibk"]
+[gd_scene format=3 uid="uid://cw8mvbkue4ibk"]
 
 [ext_resource type="Script" uid="uid://cd7gejdmtbx5v" path="res://src/Unit/unit_sprites_manager.gd" id="1_brshp"]
 
-[node name="UnitSpritesManager" type="Node3D" node_paths=PackedStringArray("sprite_primary", "sprite_weapon", "sprite_effect", "sprite_text", "sprite_item", "sprite_background")]
+[node name="UnitSpritesManager" type="Node3D" unique_id=197575275 node_paths=PackedStringArray("sprite_primary", "sprite_weapon", "sprite_effect", "sprite_text", "sprite_item", "sprite_background")]
 script = ExtResource("1_brshp")
 sprite_primary = NodePath("UnitSprite3D")
 sprite_weapon = NodePath("WepSprite3D")
@@ -11,7 +11,7 @@ sprite_text = NodePath("TextSprite3D")
 sprite_item = NodePath("ItemSprite3D")
 sprite_background = NodePath("BackgroundSprite3D")
 
-[node name="UnitSprite3D" type="Sprite3D" parent="."]
+[node name="UnitSprite3D" type="Sprite3D" parent="." unique_id=453113232]
 physics_interpolation_mode = 2
 transform = Transform3D(1, 0, 0, 0, 1, -2.98023e-08, 0, -2.98023e-08, 1, 0, -0.714, 0)
 offset = Vector2(0, 20)
@@ -21,7 +21,7 @@ texture_filter = 0
 hframes = 16
 vframes = 16
 
-[node name="WepSprite3D" type="Sprite3D" parent="."]
+[node name="WepSprite3D" type="Sprite3D" parent="." unique_id=878870733]
 physics_interpolation_mode = 2
 transform = Transform3D(1, 0, 0, 0, 1, -2.98023e-08, 0, -2.98023e-08, 1, 0, -0.714, 0)
 offset = Vector2(0, 20)
@@ -31,7 +31,7 @@ texture_filter = 0
 hframes = 16
 vframes = 32
 
-[node name="EffSprite3D" type="Sprite3D" parent="."]
+[node name="EffSprite3D" type="Sprite3D" parent="." unique_id=112098802]
 physics_interpolation_mode = 2
 transform = Transform3D(1, 0, 0, 0, 1, -2.98023e-08, 0, -2.98023e-08, 1, 0, -0.714, 0)
 offset = Vector2(0, 20)
@@ -41,13 +41,13 @@ texture_filter = 0
 hframes = 16
 vframes = 16
 
-[node name="TextSprite3D" type="Sprite3D" parent="."]
+[node name="TextSprite3D" type="Sprite3D" parent="." unique_id=1807546863]
 offset = Vector2(0, 20)
 pixel_size = 0.0357
 billboard = 1
 alpha_cut = 1
 
-[node name="ItemSprite3D" type="Sprite3D" parent="."]
+[node name="ItemSprite3D" type="Sprite3D" parent="." unique_id=486871257]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.714, 0.001)
 pixel_size = 0.0357
 billboard = 1
@@ -56,6 +56,6 @@ texture_filter = 0
 hframes = 16
 vframes = 16
 
-[node name="BackgroundSprite3D" type="Sprite3D" parent="."]
+[node name="BackgroundSprite3D" type="Sprite3D" parent="." unique_id=744801170]
 billboard = 1
 texture_filter = 0

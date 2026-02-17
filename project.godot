@@ -13,7 +13,7 @@ config_version=5
 config/name="TacticsTemplateG"
 run/main_scene="uid://card26cltbba1"
 config/use_custom_user_dir=true
-config/features=PackedStringArray("4.5", "GL Compatibility")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 run/max_fps=240
 config/icon="uid://b05fn7pqo1rrn"
 

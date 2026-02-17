@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://h7281h60pnbl"]
+[gd_scene format=3 uid="uid://h7281h60pnbl"]
 
 [ext_resource type="Script" uid="uid://dam17uf3w1qj4" path="res://src/battle/editor/team_setup.gd" id="1_v60ut"]
 [ext_resource type="PackedScene" uid="uid://b2bfuf828p6i6" path="res://src/battle/editor/unit_editor.tscn" id="1_vj6nb"]
 
-[node name="TeamSetup" type="MarginContainer" node_paths=PackedStringArray("unit_list", "num_units_spinbox")]
+[node name="TeamSetup" type="MarginContainer" unique_id=1375504290 node_paths=PackedStringArray("unit_list", "num_units_spinbox")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -14,29 +14,29 @@ unit_list = NodePath("VBoxContainer/UnitListScrollArea/UnitList")
 num_units_spinbox = NodePath("VBoxContainer/HBoxContainer/NumUnitsSpinBox")
 unit_editor_scene = ExtResource("1_vj6nb")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=70030324]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=65362214]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=2037681805]
 layout_mode = 2
 text = "Team 1: "
 
-[node name="NumUnits" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="NumUnits" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=310491840]
 layout_mode = 2
 text = "Units:"
 
-[node name="NumUnitsSpinBox" type="SpinBox" parent="VBoxContainer/HBoxContainer"]
+[node name="NumUnitsSpinBox" type="SpinBox" parent="VBoxContainer/HBoxContainer" unique_id=423747805]
 layout_mode = 2
 rounded = true
 select_all_on_focus = true
 
-[node name="UnitListScrollArea" type="ScrollContainer" parent="VBoxContainer"]
+[node name="UnitListScrollArea" type="ScrollContainer" parent="VBoxContainer" unique_id=1996456383]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="UnitList" type="VBoxContainer" parent="VBoxContainer/UnitListScrollArea"]
+[node name="UnitList" type="VBoxContainer" parent="VBoxContainer/UnitListScrollArea" unique_id=1981318330]
 layout_mode = 2
 size_flags_horizontal = 3

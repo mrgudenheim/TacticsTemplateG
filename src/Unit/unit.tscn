@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://dkudrb304m7t1"]
+[gd_scene format=3 uid="uid://dkudrb304m7t1"]
 
 [ext_resource type="Script" uid="uid://b1ogscpjrty2b" path="res://src/Unit/unit.gd" id="1_lcmw7"]
 [ext_resource type="Script" uid="uid://cmjcg2ou16liv" path="res://src/Unit/unit_animation_manager.gd" id="3_l3ow2"]
@@ -36,7 +36,7 @@ fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 metadata/_snap_enabled = true
 
-[node name="Unit" type="Node3D" node_paths=PackedStringArray("char_body", "animation_manager", "popup_texts", "stat_bars_position", "stat_bars_container", "unit_battle_details_ui", "icon", "icon2", "debug_menu", "tile_highlights")]
+[node name="Unit" type="Node3D" unique_id=668783031 node_paths=PackedStringArray("char_body", "animation_manager", "popup_texts", "stat_bars_position", "stat_bars_container", "unit_battle_details_ui", "icon", "icon2", "debug_menu", "tile_highlights")]
 script = ExtResource("1_lcmw7")
 char_body = NodePath("CharacterBody3D")
 animation_manager = NodePath("CharacterBody3D/UnitAnimationManager")
@@ -51,7 +51,7 @@ tile_highlights = NodePath("TileHighlights")
 move_action = ExtResource("3_wg4to")
 wait_action = ExtResource("3_rw50f")
 
-[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
+[node name="CharacterBody3D" type="CharacterBody3D" parent="." unique_id=761181480]
 transform = Transform3D(0.707107, 0, 0.707107, 0, 0.999999, 0, -0.707107, 0, 0.707107, 0, 0, 0)
 collision_layer = 2
 axis_lock_angular_x = true
@@ -59,36 +59,36 @@ axis_lock_angular_y = true
 axis_lock_angular_z = true
 floor_max_angle = 1.0472
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D" unique_id=290534293]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.375, 0)
 shape = SubResource("CapsuleShape3D_omsuf")
 
-[node name="UnitReferenceSphere" type="MeshInstance3D" parent="CharacterBody3D/CollisionShape3D"]
+[node name="UnitReferenceSphere" type="MeshInstance3D" parent="CharacterBody3D/CollisionShape3D" unique_id=202868429]
 transform = Transform3D(1, 0, 0, 0, 1, 2.98024e-08, 0, -2.98024e-08, 1, 0, 0, 0)
 visible = false
 mesh = SubResource("CapsuleMesh_46deq")
 
-[node name="ShadowSpringArm3D" type="SpringArm3D" parent="CharacterBody3D"]
+[node name="ShadowSpringArm3D" type="SpringArm3D" parent="CharacterBody3D" unique_id=1528181681]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 spring_length = 15.0
 
-[node name="DropShadowSprite3D" type="Sprite3D" parent="CharacterBody3D/ShadowSpringArm3D"]
+[node name="DropShadowSprite3D" type="Sprite3D" parent="CharacterBody3D/ShadowSpringArm3D" unique_id=395470040]
 transform = Transform3D(0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 0, 1, 0, 0, 0)
 pixel_size = 0.0357
 texture_filter = 0
 render_priority = 1
 texture = SubResource("GradientTexture2D_6vwfi")
 
-[node name="UnitAnimationManager" type="Node3D" parent="CharacterBody3D" node_paths=PackedStringArray("unit_data", "unit_sprites_manager")]
+[node name="UnitAnimationManager" type="Node3D" parent="CharacterBody3D" unique_id=1134309126 node_paths=PackedStringArray("unit_data", "unit_sprites_manager")]
 transform = Transform3D(1, 0, 0, 0, 0.894934, 0.446198, 0, -0.446198, 0.894934, 0, 0.643, 0)
 script = ExtResource("3_l3ow2")
 unit_data = NodePath("../..")
 unit_sprites_manager = NodePath("UnitSpritesManager")
 weapon_sheathe_check2_delay = 0
 
-[node name="UnitSpritesManager" parent="CharacterBody3D/UnitAnimationManager" instance=ExtResource("4_h8uk5")]
+[node name="UnitSpritesManager" parent="CharacterBody3D/UnitAnimationManager" unique_id=1494597518 instance=ExtResource("4_h8uk5")]
 
-[node name="UnitDebugMenu" type="Control" parent="CharacterBody3D" node_paths=PackedStringArray("unit", "unit_char_body", "animation_manager", "sprite_options", "anim_id_spin", "weapon_options", "item_options", "other_type_options", "ability_id_spin", "ability_name_line")]
+[node name="UnitDebugMenu" type="Control" parent="CharacterBody3D" unique_id=283646517 node_paths=PackedStringArray("unit", "unit_char_body", "animation_manager", "sprite_options", "anim_id_spin", "weapon_options", "item_options", "other_type_options", "ability_id_spin", "ability_name_line")]
 visible = false
 layout_mode = 3
 anchors_preset = 0
@@ -106,70 +106,70 @@ other_type_options = NodePath("PanelContainer/MarginContainer/VBoxContainer/Grid
 ability_id_spin = NodePath("PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/AbilityIdSpinBox")
 ability_name_line = NodePath("PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/AbilityName")
 
-[node name="PanelContainer" type="PanelContainer" parent="CharacterBody3D/UnitDebugMenu"]
+[node name="PanelContainer" type="PanelContainer" parent="CharacterBody3D/UnitDebugMenu" unique_id=982832818]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="MarginContainer" type="MarginContainer" parent="CharacterBody3D/UnitDebugMenu/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="CharacterBody3D/UnitDebugMenu/PanelContainer" unique_id=406631473]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer" unique_id=2055961790]
 layout_mode = 2
 
-[node name="GridContainer" type="GridContainer" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="GridContainer" type="GridContainer" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer" unique_id=698645999]
 layout_mode = 2
 columns = 2
 
-[node name="Sprite" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="Sprite" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer" unique_id=1801386355]
 layout_mode = 2
 text = "Sprite: "
 horizontal_alignment = 2
 
-[node name="SprOptionButton" type="OptionButton" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="SprOptionButton" type="OptionButton" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer" unique_id=2123289749]
 layout_mode = 2
 
-[node name="AnimationPtrId" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="AnimationPtrId" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer" unique_id=875615556]
 layout_mode = 2
 text = "Animation Ptr: "
 horizontal_alignment = 2
 
-[node name="AnimPtrIdSpinBox" type="SpinBox" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="AnimPtrIdSpinBox" type="SpinBox" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer" unique_id=1124165619]
 layout_mode = 2
 max_value = 256.0
 rounded = true
 select_all_on_focus = true
 
-[node name="Weapon" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="Weapon" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer" unique_id=1146834293]
 layout_mode = 2
 text = "Weapon: "
 horizontal_alignment = 2
 
-[node name="WeaponOptionButton" type="OptionButton" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="WeaponOptionButton" type="OptionButton" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer" unique_id=398795551]
 layout_mode = 2
 
-[node name="Item" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="Item" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer" unique_id=107671909]
 layout_mode = 2
 text = "Item: "
 horizontal_alignment = 2
 
-[node name="ItemOptionButton" type="OptionButton" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="ItemOptionButton" type="OptionButton" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer" unique_id=1933678128]
 layout_mode = 2
 
-[node name="Other Type" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="Other Type" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer" unique_id=986312883]
 layout_mode = 2
 text = "Other: "
 horizontal_alignment = 2
 
-[node name="OtherTypeOptionButton" type="OptionButton" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="OtherTypeOptionButton" type="OptionButton" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer" unique_id=1418814248]
 layout_mode = 2
 
-[node name="AnimationFps" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="AnimationFps" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer" unique_id=1956322847]
 layout_mode = 2
 text = "Animation FPS: "
 horizontal_alignment = 2
 
-[node name="AnimationFpsSpinBox" type="SpinBox" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="AnimationFpsSpinBox" type="SpinBox" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer" unique_id=1995917067]
 layout_mode = 2
 min_value = 0.1
 step = 0.1
@@ -177,26 +177,26 @@ value = 59.0
 allow_greater = true
 select_all_on_focus = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer" unique_id=400703088]
 layout_mode = 2
 
-[node name="AbilityId" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="AbilityId" type="Label" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=790241817]
 layout_mode = 2
 text = "Ability:"
 horizontal_alignment = 2
 
-[node name="AbilityIdSpinBox" type="SpinBox" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="AbilityIdSpinBox" type="SpinBox" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1290573558]
 layout_mode = 2
 max_value = 453.0
 rounded = true
 select_all_on_focus = true
 
-[node name="AbilityName" type="LineEdit" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="AbilityName" type="LineEdit" parent="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1371754428]
 layout_mode = 2
 size_flags_horizontal = 3
 editable = false
 
-[node name="Control" type="Control" parent="CharacterBody3D" node_paths=PackedStringArray("unit", "unit_char_body")]
+[node name="Control" type="Control" parent="CharacterBody3D" unique_id=1721185491 node_paths=PackedStringArray("unit", "unit_char_body")]
 layout_mode = 3
 anchors_preset = 8
 anchor_left = 0.5
@@ -210,7 +210,7 @@ script = ExtResource("7_wg4to")
 unit = NodePath("../..")
 unit_char_body = NodePath("..")
 
-[node name="ActionPopups" type="VBoxContainer" parent="CharacterBody3D/Control"]
+[node name="ActionPopups" type="VBoxContainer" parent="CharacterBody3D/Control" unique_id=1950925296]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -227,7 +227,7 @@ alignment = 2
 script = ExtResource("8_a44xk")
 popup_text = ExtResource("8_rp3cl")
 
-[node name="Control2" type="Control" parent="CharacterBody3D" node_paths=PackedStringArray("unit", "unit_char_body")]
+[node name="Control2" type="Control" parent="CharacterBody3D" unique_id=1666291264 node_paths=PackedStringArray("unit", "unit_char_body")]
 visible = false
 layout_mode = 3
 anchors_preset = 0
@@ -239,7 +239,7 @@ unit = NodePath("../..")
 unit_char_body = NodePath("..")
 offset = Vector2(0.25, 0.9)
 
-[node name="StatusBubble" type="TextureRect" parent="CharacterBody3D/Control2"]
+[node name="StatusBubble" type="TextureRect" parent="CharacterBody3D/Control2" unique_id=1188470040]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -249,7 +249,7 @@ offset_bottom = -40.0
 grow_vertical = 0
 script = ExtResource("9_0prau")
 
-[node name="StatusIcon" type="Sprite3D" parent="CharacterBody3D"]
+[node name="StatusIcon" type="Sprite3D" parent="CharacterBody3D" unique_id=1430136188]
 transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0.25, 1.05, 0)
 pixel_size = 0.0357
 billboard = 1
@@ -258,7 +258,7 @@ render_priority = 1
 region_enabled = true
 region_rect = Rect2(0, 0, 1, 1)
 
-[node name="StatBars" type="Control" parent="CharacterBody3D" node_paths=PackedStringArray("unit", "unit_char_body")]
+[node name="StatBars" type="Control" parent="CharacterBody3D" unique_id=2030790559 node_paths=PackedStringArray("unit", "unit_char_body")]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("7_wg4to")
@@ -266,7 +266,7 @@ unit = NodePath("../..")
 unit_char_body = NodePath("..")
 metadata/_custom_type_script = "uid://baavg15lka8r7"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CharacterBody3D/StatBars"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CharacterBody3D/StatBars" unique_id=1697421478]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -279,7 +279,7 @@ offset_right = 50.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="UnitDetailsPosition" type="Control" parent="CharacterBody3D" node_paths=PackedStringArray("unit", "unit_char_body")]
+[node name="UnitDetailsPosition" type="Control" parent="CharacterBody3D" unique_id=556636158 node_paths=PackedStringArray("unit", "unit_char_body")]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("7_wg4to")
@@ -288,14 +288,14 @@ unit_char_body = NodePath("..")
 offset = Vector2(0.75, 0.5)
 metadata/_custom_type_script = "uid://baavg15lka8r7"
 
-[node name="UnitDetailsPanel" parent="CharacterBody3D/UnitDetailsPosition" instance=ExtResource("12_gngdm")]
+[node name="UnitDetailsPanel" parent="CharacterBody3D/UnitDetailsPosition" unique_id=1172530904 instance=ExtResource("12_gngdm")]
 visible = false
 layout_mode = 1
 offset_top = -252.0
 offset_right = 602.0
 offset_bottom = 252.0
 
-[node name="TileHighlights" type="Node3D" parent="."]
+[node name="TileHighlights" type="Node3D" parent="." unique_id=2068408663]
 
 [connection signal="input_event" from="CharacterBody3D" to="." method="_on_character_body_3d_input_event"]
 [connection signal="value_changed" from="CharacterBody3D/UnitDebugMenu/PanelContainer/MarginContainer/VBoxContainer/GridContainer/AnimationFpsSpinBox" to="CharacterBody3D/UnitAnimationManager" method="set_animation_fps"]

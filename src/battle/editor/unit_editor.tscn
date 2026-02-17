@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://b2bfuf828p6i6"]
+[gd_scene format=3 uid="uid://b2bfuf828p6i6"]
 
 [ext_resource type="Script" uid="uid://6pc8u8p185nd" path="res://src/battle/editor/unit_editor.gd" id="1_fwwrv"]
 [ext_resource type="PackedScene" uid="uid://d2jb1kiyb35fa" path="res://src/Unit/stat_bar.tscn" id="2_3o4pl"]
@@ -13,7 +13,7 @@ font_size = 18
 outline_size = 6
 outline_color = Color(0, 0, 0, 1)
 
-[node name="UnitSetupPanel" type="PanelContainer" node_paths=PackedStringArray("sprite_rect", "sprite_button", "unit_name_line_edit", "gender_option_button", "job_button", "level_spinbox", "team_option_button", "controller_option_button", "palette_option_button", "zodiac_option_button", "hp_bar", "mp_bar", "ct_bar", "pa_label", "ma_label", "brave_label", "faith_label", "move_label", "jump_label", "speed_label", "evade_grid", "equipment_grid", "ability_grid", "passive_effect_container", "innate_ability_container", "status_affinity_container", "weak_elements_label", "resist_elements_label", "immune_elements_label", "absorb_elements_label", "strengthen_elements_label")]
+[node name="UnitSetupPanel" type="PanelContainer" unique_id=1630241016 node_paths=PackedStringArray("sprite_rect", "sprite_button", "unit_name_line_edit", "gender_option_button", "job_button", "level_spinbox", "team_option_button", "controller_option_button", "palette_option_button", "zodiac_option_button", "hp_bar", "mp_bar", "ct_bar", "pa_label", "ma_label", "brave_label", "faith_label", "move_label", "jump_label", "speed_label", "evade_grid", "equipment_grid", "ability_grid", "passive_effect_container", "innate_ability_container", "status_affinity_container", "weak_elements_label", "resist_elements_label", "immune_elements_label", "absorb_elements_label", "strengthen_elements_label")]
 offset_right = 1184.0
 offset_bottom = 232.0
 script = ExtResource("1_fwwrv")
@@ -50,36 +50,36 @@ absorb_elements_label = NodePath("MarginContainer/HBoxContainer/ElementAffinityP
 strengthen_elements_label = NodePath("MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities/Strengthen")
 unit_scene = ExtResource("2_k0plo")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1573942583]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=1804554041]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=1159122782]
 layout_mode = 2
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer" unique_id=1392732387]
 layout_mode = 2
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=344378668]
 layout_mode = 2
 
-[node name="SpriteTextureButton" type="TextureButton" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer2"]
+[node name="SpriteTextureButton" type="TextureButton" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=32344903]
 texture_filter = 1
 layout_mode = 2
 size_flags_vertical = 3
 texture_normal = SubResource("AtlasTexture_ryng8")
 stretch_mode = 5
 
-[node name="Sprite" type="TextureRect" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer2"]
+[node name="Sprite" type="TextureRect" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=761347384]
 visible = false
 custom_minimum_size = Vector2(40, 60)
 layout_mode = 2
 size_flags_vertical = 3
 expand_mode = 3
 
-[node name="Team" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/Sprite"]
+[node name="Team" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/Sprite" unique_id=60478091]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -90,14 +90,14 @@ grow_vertical = 0
 text = "Sprite"
 label_settings = SubResource("LabelSettings_v0g1v")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer2"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=1650854264]
 layout_mode = 2
 
-[node name="PaletteLabel" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/HBoxContainer"]
+[node name="PaletteLabel" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/HBoxContainer" unique_id=1936308181]
 layout_mode = 2
 text = "Palette:"
 
-[node name="Palette" type="OptionButton" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/HBoxContainer"]
+[node name="Palette" type="OptionButton" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/HBoxContainer" unique_id=110546463]
 layout_mode = 2
 selected = 0
 item_count = 2
@@ -106,39 +106,39 @@ popup/item_0/id = 0
 popup/item_1/text = "1"
 popup/item_1/id = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=577182934]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=1239886801]
 layout_mode = 2
 
-[node name="UnitName" type="LineEdit" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer"]
+[node name="UnitName" type="LineEdit" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer" unique_id=131164913]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "UnitName"
 select_all_on_focus = true
 
-[node name="Job" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer"]
+[node name="Job" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer" unique_id=603153636]
 visible = false
 layout_mode = 2
 size_flags_stretch_ratio = 0.25
 text = "Job"
 horizontal_alignment = 1
 
-[node name="Level" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer"]
+[node name="Level" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer" unique_id=1921145981]
 layout_mode = 2
 text = "Lvl:"
 horizontal_alignment = 2
 
-[node name="LevelSpinBox" type="SpinBox" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer"]
+[node name="LevelSpinBox" type="SpinBox" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer" unique_id=1675992718]
 layout_mode = 2
 min_value = 1.0
 value = 1.0
 rounded = true
 select_all_on_focus = true
 
-[node name="Gender" type="OptionButton" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer"]
+[node name="Gender" type="OptionButton" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer" unique_id=1416194680]
 layout_mode = 2
 selected = 0
 item_count = 3
@@ -149,7 +149,7 @@ popup/item_1/id = 1
 popup/item_2/text = "Monster"
 popup/item_2/id = 2
 
-[node name="ZodiacOptionButton" type="OptionButton" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer"]
+[node name="ZodiacOptionButton" type="OptionButton" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer" unique_id=1972412624]
 layout_mode = 2
 size_flags_horizontal = 3
 selected = 0
@@ -163,20 +163,20 @@ popup/item_2/id = 2
 popup/item_3/text = "Capricorn"
 popup/item_3/id = 3
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=964358843]
 layout_mode = 2
 
-[node name="JobSelect" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer2"]
+[node name="JobSelect" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=953187571]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Select Job"
 
-[node name="TeamLabel" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer2"]
+[node name="TeamLabel" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=1113123576]
 layout_mode = 2
 text = "Team:"
 
-[node name="TeamOptionButton" type="OptionButton" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer2"]
+[node name="TeamOptionButton" type="OptionButton" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=284959695]
 layout_mode = 2
 selected = 0
 item_count = 2
@@ -185,11 +185,11 @@ popup/item_0/id = 0
 popup/item_1/text = "2"
 popup/item_1/id = 1
 
-[node name="ControllerLabel" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer2"]
+[node name="ControllerLabel" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=1061989982]
 layout_mode = 2
 text = "Controller:"
 
-[node name="ControllerOptionButton" type="OptionButton" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer2"]
+[node name="ControllerOptionButton" type="OptionButton" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=1743943882]
 layout_mode = 2
 selected = 1
 item_count = 2
@@ -198,460 +198,460 @@ popup/item_0/id = 0
 popup/item_1/text = "Player 1"
 popup/item_1/id = 1
 
-[node name="StatPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer"]
+[node name="StatPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=1924515794]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel" unique_id=69179674]
 layout_mode = 2
 
-[node name="StatGrid" type="GridContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer"]
+[node name="StatGrid" type="GridContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer" unique_id=1896182430]
 layout_mode = 2
 columns = 4
 
-[node name="StatBar" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" instance=ExtResource("2_3o4pl")]
+[node name="StatBar" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" unique_id=204065326 instance=ExtResource("2_3o4pl")]
 custom_minimum_size = Vector2(175, 15)
 layout_mode = 2
 show_name = true
 show_value = true
 
-[node name="PA" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid"]
+[node name="PA" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" unique_id=607982033]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "PA: 99"
 horizontal_alignment = 1
 
-[node name="Brave" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid"]
+[node name="Brave" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" unique_id=762251063]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Brave: 99"
 horizontal_alignment = 1
 
-[node name="Move" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid"]
+[node name="Move" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" unique_id=1423012863]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Move: 99"
 horizontal_alignment = 1
 
-[node name="StatBar2" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" instance=ExtResource("2_3o4pl")]
+[node name="StatBar2" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" unique_id=1647944922 instance=ExtResource("2_3o4pl")]
 custom_minimum_size = Vector2(175, 15)
 layout_mode = 2
 show_name = true
 show_value = true
 
-[node name="MA" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid"]
+[node name="MA" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" unique_id=1637088855]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "MA: 99"
 horizontal_alignment = 1
 
-[node name="Faith" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid"]
+[node name="Faith" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" unique_id=1914789546]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Faith: 99"
 horizontal_alignment = 1
 
-[node name="Jump" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid"]
+[node name="Jump" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" unique_id=882815283]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Jump: 99"
 horizontal_alignment = 1
 
-[node name="StatBar3" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" instance=ExtResource("2_3o4pl")]
+[node name="StatBar3" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" unique_id=78883912 instance=ExtResource("2_3o4pl")]
 custom_minimum_size = Vector2(175, 15)
 layout_mode = 2
 visual_max = 100.0
 show_name = true
 show_value = true
 
-[node name="Control" type="Control" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid"]
+[node name="Control" type="Control" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" unique_id=1973017345]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Control2" type="Control" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid"]
+[node name="Control2" type="Control" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" unique_id=2058844383]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Speed" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid"]
+[node name="Speed" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VBoxContainer/StatPanel/MarginContainer/StatGrid" unique_id=402317880]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Speed: 99"
 horizontal_alignment = 1
 
-[node name="EvadePanel" type="PanelContainer" parent="MarginContainer/HBoxContainer/VBoxContainer"]
+[node name="EvadePanel" type="PanelContainer" parent="MarginContainer/HBoxContainer/VBoxContainer" unique_id=2111514856]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel" unique_id=1251341234]
 layout_mode = 2
 
-[node name="EvadeGrid" type="GridContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer"]
+[node name="EvadeGrid" type="GridContainer" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer" unique_id=855093313]
 layout_mode = 2
 columns = 9
 
-[node name="Label3" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="Label3" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=1764727152]
 layout_mode = 2
 text = "Evade"
 
-[node name="Direction1" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="Direction1" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=637621534]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Front"
 horizontal_alignment = 1
 
-[node name="Direction2" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="Direction2" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=473218753]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Side"
 horizontal_alignment = 1
 
-[node name="Direction3" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="Direction3" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=788332895]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Back"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="Spacer" type="Control" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=1606571074]
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
 
-[node name="Source1" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="Source1" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=1846992966]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Job"
 horizontal_alignment = 1
 
-[node name="Source2" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="Source2" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=1618632438]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Shield"
 horizontal_alignment = 1
 
-[node name="Source3" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="Source3" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=1162649536]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Accessory"
 horizontal_alignment = 1
 
-[node name="Source4" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="Source4" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=42956339]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Weapon"
 horizontal_alignment = 1
 
-[node name="Type1" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="Type1" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=566194554]
 layout_mode = 2
 text = "Physical"
 
-[node name="value" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=2087909573]
 layout_mode = 2
 text = "99%"
 horizontal_alignment = 1
 
-[node name="value2" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value2" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=1661466984]
 layout_mode = 2
 text = "99%"
 horizontal_alignment = 1
 
-[node name="value3" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value3" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=1824132109]
 layout_mode = 2
 text = "99%"
 horizontal_alignment = 1
 
-[node name="Control2" type="Control" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="Control2" type="Control" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=847875484]
 layout_mode = 2
 
-[node name="value4" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
-layout_mode = 2
-text = "99%"
-horizontal_alignment = 1
-
-[node name="value5" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value4" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=601209473]
 layout_mode = 2
 text = "99%"
 horizontal_alignment = 1
 
-[node name="value6" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value5" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=32651442]
 layout_mode = 2
 text = "99%"
 horizontal_alignment = 1
 
-[node name="value7" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value6" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=662876186]
 layout_mode = 2
 text = "99%"
 horizontal_alignment = 1
 
-[node name="Type2" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value7" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=845182720]
+layout_mode = 2
+text = "99%"
+horizontal_alignment = 1
+
+[node name="Type2" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=760548067]
 layout_mode = 2
 text = "Magic"
 
-[node name="value8" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value8" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=819917178]
 layout_mode = 2
 text = "99%"
 horizontal_alignment = 1
 
-[node name="value9" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value9" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=442485621]
 layout_mode = 2
 text = "99%"
 horizontal_alignment = 1
 
-[node name="value10" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value10" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=1098536485]
 layout_mode = 2
 text = "99%"
 horizontal_alignment = 1
 
-[node name="Control3" type="Control" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="Control3" type="Control" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=1090810679]
 layout_mode = 2
 
-[node name="value11" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
-layout_mode = 2
-text = "99%"
-horizontal_alignment = 1
-
-[node name="value12" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value11" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=255132115]
 layout_mode = 2
 text = "99%"
 horizontal_alignment = 1
 
-[node name="value13" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value12" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=1444290431]
 layout_mode = 2
 text = "99%"
 horizontal_alignment = 1
 
-[node name="value14" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid"]
+[node name="value13" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=377562169]
 layout_mode = 2
 text = "99%"
 horizontal_alignment = 1
 
-[node name="EquipmentPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
+[node name="value14" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainer/EvadePanel/MarginContainer/EvadeGrid" unique_id=122030687]
+layout_mode = 2
+text = "99%"
+horizontal_alignment = 1
+
+[node name="EquipmentPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer" unique_id=1826545161]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/EquipmentPanel"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/EquipmentPanel" unique_id=1656710628]
 layout_mode = 2
 
-[node name="EquipmentSlots" type="VBoxContainer" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer"]
+[node name="EquipmentSlots" type="VBoxContainer" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer" unique_id=1980985955]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots"]
+[node name="Title" type="Label" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots" unique_id=1241674400]
 layout_mode = 2
 text = "Equipment"
 horizontal_alignment = 1
 
-[node name="EquipmentGrid" type="GridContainer" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots"]
+[node name="EquipmentGrid" type="GridContainer" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots" unique_id=90437446]
 layout_mode = 2
 columns = 2
 
-[node name="Slot" type="Label" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid"]
+[node name="Slot" type="Label" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid" unique_id=178953216]
 layout_mode = 2
 text = "Slot:"
 
-[node name="Item" type="Button" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid"]
+[node name="Item" type="Button" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid" unique_id=325318887]
 layout_mode = 2
 text = "Select Item"
 
-[node name="Slot2" type="Label" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid"]
+[node name="Slot2" type="Label" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid" unique_id=1186564219]
 layout_mode = 2
 text = "Slot:"
 
-[node name="Item2" type="Button" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid"]
+[node name="Item2" type="Button" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid" unique_id=66409319]
 layout_mode = 2
 text = "Select Item"
 
-[node name="Slot3" type="Label" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid"]
+[node name="Slot3" type="Label" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid" unique_id=1808874545]
 layout_mode = 2
 text = "Slot:"
 
-[node name="Item3" type="Button" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid"]
+[node name="Item3" type="Button" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid" unique_id=2011177401]
 layout_mode = 2
 text = "Select Item"
 
-[node name="Slot4" type="Label" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid"]
+[node name="Slot4" type="Label" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid" unique_id=1083392775]
 layout_mode = 2
 text = "Slot:"
 
-[node name="Item4" type="Button" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid"]
+[node name="Item4" type="Button" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid" unique_id=25528494]
 layout_mode = 2
 text = "Select Item"
 
-[node name="Slot5" type="Label" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid"]
+[node name="Slot5" type="Label" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid" unique_id=924755149]
 layout_mode = 2
 text = "Slot:"
 
-[node name="Item5" type="Button" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid"]
+[node name="Item5" type="Button" parent="MarginContainer/HBoxContainer/EquipmentPanel/MarginContainer/EquipmentSlots/EquipmentGrid" unique_id=1353350810]
 layout_mode = 2
 text = "Select Item"
 
-[node name="AbilityPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
+[node name="AbilityPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer" unique_id=609253752]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/AbilityPanel"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/AbilityPanel" unique_id=204760929]
 layout_mode = 2
 
-[node name="AbilitySlots" type="VBoxContainer" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer"]
+[node name="AbilitySlots" type="VBoxContainer" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer" unique_id=1876086558]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots"]
+[node name="Title" type="Label" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots" unique_id=1256104715]
 layout_mode = 2
 text = "Abilities"
 horizontal_alignment = 1
 
-[node name="AbilityGrid" type="GridContainer" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots"]
+[node name="AbilityGrid" type="GridContainer" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots" unique_id=1526529151]
 layout_mode = 2
 columns = 2
 
-[node name="Slot" type="Label" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid"]
+[node name="Slot" type="Label" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid" unique_id=319712251]
 layout_mode = 2
 text = "Slot:"
 
-[node name="Ability" type="Button" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid"]
+[node name="Ability" type="Button" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid" unique_id=551703006]
 layout_mode = 2
 text = "Select Ability"
 
-[node name="Slot2" type="Label" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid"]
+[node name="Slot2" type="Label" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid" unique_id=321536142]
 layout_mode = 2
 text = "Slot:"
 
-[node name="Ability2" type="Button" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid"]
+[node name="Ability2" type="Button" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid" unique_id=1762823160]
 layout_mode = 2
 text = "Select Ability"
 
-[node name="Slot3" type="Label" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid"]
+[node name="Slot3" type="Label" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid" unique_id=138704252]
 layout_mode = 2
 text = "Slot:"
 
-[node name="Ability3" type="Button" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid"]
+[node name="Ability3" type="Button" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid" unique_id=2036703458]
 layout_mode = 2
 text = "Select Ability"
 
-[node name="Slot4" type="Label" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid"]
+[node name="Slot4" type="Label" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid" unique_id=569126114]
 layout_mode = 2
 text = "Slot:"
 
-[node name="Ability4" type="Button" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid"]
+[node name="Ability4" type="Button" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid" unique_id=16378873]
 layout_mode = 2
 text = "Select Ability"
 
-[node name="Slot5" type="Label" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid"]
+[node name="Slot5" type="Label" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid" unique_id=871574195]
 layout_mode = 2
 text = "Slot:"
 
-[node name="Ability5" type="Button" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid"]
+[node name="Ability5" type="Button" parent="MarginContainer/HBoxContainer/AbilityPanel/MarginContainer/AbilitySlots/AbilityGrid" unique_id=1310179328]
 layout_mode = 2
 text = "Select Ability"
 
-[node name="InnateAbilityPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
+[node name="InnateAbilityPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer" unique_id=182016700]
 visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/InnateAbilityPanel"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/InnateAbilityPanel" unique_id=1127363381]
 layout_mode = 2
 
-[node name="InnateAbilities" type="VBoxContainer" parent="MarginContainer/HBoxContainer/InnateAbilityPanel/MarginContainer"]
+[node name="InnateAbilities" type="VBoxContainer" parent="MarginContainer/HBoxContainer/InnateAbilityPanel/MarginContainer" unique_id=1598413232]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="MarginContainer/HBoxContainer/InnateAbilityPanel/MarginContainer/InnateAbilities"]
+[node name="Title" type="Label" parent="MarginContainer/HBoxContainer/InnateAbilityPanel/MarginContainer/InnateAbilities" unique_id=869367920]
 layout_mode = 2
 text = "Innate Abilities"
 horizontal_alignment = 1
 
-[node name="InnateAbilityGrid" type="GridContainer" parent="MarginContainer/HBoxContainer/InnateAbilityPanel/MarginContainer/InnateAbilities"]
+[node name="InnateAbilityGrid" type="GridContainer" parent="MarginContainer/HBoxContainer/InnateAbilityPanel/MarginContainer/InnateAbilities" unique_id=2087469056]
 layout_mode = 2
 
-[node name="Ability" type="Label" parent="MarginContainer/HBoxContainer/InnateAbilityPanel/MarginContainer/InnateAbilities/InnateAbilityGrid"]
-layout_mode = 2
-text = "Ability"
-
-[node name="Ability2" type="Label" parent="MarginContainer/HBoxContainer/InnateAbilityPanel/MarginContainer/InnateAbilities/InnateAbilityGrid"]
+[node name="Ability" type="Label" parent="MarginContainer/HBoxContainer/InnateAbilityPanel/MarginContainer/InnateAbilities/InnateAbilityGrid" unique_id=1403574266]
 layout_mode = 2
 text = "Ability"
 
-[node name="Ability3" type="Label" parent="MarginContainer/HBoxContainer/InnateAbilityPanel/MarginContainer/InnateAbilities/InnateAbilityGrid"]
+[node name="Ability2" type="Label" parent="MarginContainer/HBoxContainer/InnateAbilityPanel/MarginContainer/InnateAbilities/InnateAbilityGrid" unique_id=843135241]
 layout_mode = 2
 text = "Ability"
 
-[node name="StatusAffinityPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
+[node name="Ability3" type="Label" parent="MarginContainer/HBoxContainer/InnateAbilityPanel/MarginContainer/InnateAbilities/InnateAbilityGrid" unique_id=1141820313]
+layout_mode = 2
+text = "Ability"
+
+[node name="StatusAffinityPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer" unique_id=715580974]
 visible = false
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/StatusAffinityPanel"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/StatusAffinityPanel" unique_id=2070877582]
 layout_mode = 2
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/HBoxContainer/StatusAffinityPanel/MarginContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/HBoxContainer/StatusAffinityPanel/MarginContainer" unique_id=425239108]
 custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
 
-[node name="StatusAffinityList" type="VBoxContainer" parent="MarginContainer/HBoxContainer/StatusAffinityPanel/MarginContainer/ScrollContainer"]
+[node name="StatusAffinityList" type="VBoxContainer" parent="MarginContainer/HBoxContainer/StatusAffinityPanel/MarginContainer/ScrollContainer" unique_id=2080514594]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Title" type="Label" parent="MarginContainer/HBoxContainer/StatusAffinityPanel/MarginContainer/ScrollContainer/StatusAffinityList"]
+[node name="Title" type="Label" parent="MarginContainer/HBoxContainer/StatusAffinityPanel/MarginContainer/ScrollContainer/StatusAffinityList" unique_id=1187373256]
 layout_mode = 2
 text = "Status Affinity"
 horizontal_alignment = 1
 
-[node name="Label3" type="Label" parent="MarginContainer/HBoxContainer/StatusAffinityPanel/MarginContainer/ScrollContainer/StatusAffinityList"]
+[node name="Label3" type="Label" parent="MarginContainer/HBoxContainer/StatusAffinityPanel/MarginContainer/ScrollContainer/StatusAffinityList" unique_id=450682654]
 layout_mode = 2
 text = "Always Status"
 
-[node name="Label4" type="Label" parent="MarginContainer/HBoxContainer/StatusAffinityPanel/MarginContainer/ScrollContainer/StatusAffinityList"]
+[node name="Label4" type="Label" parent="MarginContainer/HBoxContainer/StatusAffinityPanel/MarginContainer/ScrollContainer/StatusAffinityList" unique_id=1739985069]
 layout_mode = 2
 text = "Start Status"
 
-[node name="Label5" type="Label" parent="MarginContainer/HBoxContainer/StatusAffinityPanel/MarginContainer/ScrollContainer/StatusAffinityList"]
+[node name="Label5" type="Label" parent="MarginContainer/HBoxContainer/StatusAffinityPanel/MarginContainer/ScrollContainer/StatusAffinityList" unique_id=1425035627]
 layout_mode = 2
 text = "Immune Status"
 
-[node name="ElementAffinityPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
+[node name="ElementAffinityPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer" unique_id=1492478982]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/ElementAffinityPanel"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/ElementAffinityPanel" unique_id=471152262]
 layout_mode = 2
 
-[node name="ElementAffinities" type="VBoxContainer" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer"]
+[node name="ElementAffinities" type="VBoxContainer" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer" unique_id=241793256]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities"]
+[node name="Title" type="Label" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities" unique_id=1212304625]
 layout_mode = 2
 text = "Element Affinities"
 horizontal_alignment = 1
 
-[node name="Weak" type="Label" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities"]
+[node name="Weak" type="Label" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities" unique_id=1603515915]
 layout_mode = 2
 text = "Weak: Fire, Lightning"
 autowrap_mode = 3
 
-[node name="Resist" type="Label" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities"]
+[node name="Resist" type="Label" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities" unique_id=319875232]
 layout_mode = 2
 text = "Resist: Ice"
 autowrap_mode = 3
 
-[node name="Immune" type="Label" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities"]
+[node name="Immune" type="Label" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities" unique_id=1986000933]
 layout_mode = 2
 text = "Immune: Earth"
 autowrap_mode = 3
 
-[node name="Absorb" type="Label" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities"]
+[node name="Absorb" type="Label" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities" unique_id=478900335]
 layout_mode = 2
 text = "Absorb: Wind"
 autowrap_mode = 3
 
-[node name="Strengthen" type="Label" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities"]
+[node name="Strengthen" type="Label" parent="MarginContainer/HBoxContainer/ElementAffinityPanel/MarginContainer/ElementAffinities" unique_id=1571460424]
 layout_mode = 2
 text = "Strengthen: Holy, Dark"
 autowrap_mode = 3
 
-[node name="PassiveEffectsPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
+[node name="PassiveEffectsPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer" unique_id=1704730012]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/PassiveEffectsPanel"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/PassiveEffectsPanel" unique_id=1789553874]
 layout_mode = 2
 
-[node name="PassiveEffects" type="VBoxContainer" parent="MarginContainer/HBoxContainer/PassiveEffectsPanel/MarginContainer"]
+[node name="PassiveEffects" type="VBoxContainer" parent="MarginContainer/HBoxContainer/PassiveEffectsPanel/MarginContainer" unique_id=804964984]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="MarginContainer/HBoxContainer/PassiveEffectsPanel/MarginContainer/PassiveEffects"]
+[node name="Title" type="Label" parent="MarginContainer/HBoxContainer/PassiveEffectsPanel/MarginContainer/PassiveEffects" unique_id=1305204343]
 layout_mode = 2
 text = "Passive Effects"
 horizontal_alignment = 1

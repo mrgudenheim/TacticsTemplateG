@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dgp4s8ucc0j6n"]
+[gd_scene format=3 uid="uid://dgp4s8ucc0j6n"]
 
 [ext_resource type="Script" uid="uid://bnyoqmlgtnvkt" path="res://src/fftae/fftae.gd" id="2_2hqs7"]
 [ext_resource type="PackedScene" uid="uid://t3xjefep2ne1" path="res://src/fftae/row_animation.tscn" id="3_n0tn6"]
@@ -17,7 +17,7 @@ font_size = 14
 [sub_resource type="LabelSettings" id="LabelSettings_bugng"]
 font_size = 14
 
-[node name="FFTae" type="Control" node_paths=PackedStringArray("ui_manager", "preview_manager", "load_rom_dialog", "load_file_dialog", "save_xml_button", "save_xml_dialog", "save_seq_button", "save_seq_dialog", "save_frame_grid_button", "save_frame_grid_dialog", "save_gif_button", "save_gif_dialog", "animation_list_container", "opcode_list_container", "frame_list_container")]
+[node name="FFTae" type="Control" unique_id=1192285252 node_paths=PackedStringArray("ui_manager", "preview_manager", "load_rom_dialog", "load_file_dialog", "save_xml_button", "save_xml_dialog", "save_seq_button", "save_seq_dialog", "save_frame_grid_button", "save_frame_grid_dialog", "save_gif_button", "save_gif_dialog", "animation_list_container", "opcode_list_container", "frame_list_container")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -43,13 +43,13 @@ opcode_list_container = NodePath("HBoxContainer/AnimationEditor/MarginContainer/
 frame_list_container = NodePath("HBoxContainer/TabContainer/Frames/VBoxContainer/FrameListScroll/FrameList")
 frame_list_row_tscn = ExtResource("4_omu1g")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=146624078]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="PatchPanel" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("seq_options", "animations_pointers_text", "animations_bytes_text", "shp_options", "sprite_options", "palette_spinbox", "animation_scroll_container", "patch_name_edit", "author_name_edit", "patch_description_edit", "animation_id_spinbox", "animation_name_options", "row_spinbox", "pointer_index_spinbox", "create_animation", "delete_animation", "create_opcode", "delete_opcode", "create_pointer", "delete_pointer")]
+[node name="PatchPanel" type="PanelContainer" parent="HBoxContainer" unique_id=899954990 node_paths=PackedStringArray("seq_options", "animations_pointers_text", "animations_bytes_text", "shp_options", "sprite_options", "palette_spinbox", "animation_scroll_container", "patch_name_edit", "author_name_edit", "patch_description_edit", "animation_id_spinbox", "animation_name_options", "row_spinbox", "pointer_index_spinbox", "create_animation", "delete_animation", "create_opcode", "delete_opcode", "create_pointer", "delete_pointer")]
 layout_mode = 2
 script = ExtResource("5_1m40y")
 seq_options = NodePath("../SettingsPanel/MarginContainer/VBoxContainer/Settings/SeqFileOptions")
@@ -73,18 +73,18 @@ delete_opcode = NodePath("../AnimationEditor/MarginContainer/VBoxContainer/Funct
 create_pointer = NodePath("../TabContainer/Animations/VBoxContainer/AddPointer")
 delete_pointer = NodePath("../TabContainer/Animations/VBoxContainer/Functions/DeletePointer")
 
-[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PatchPanel"]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PatchPanel" unique_id=649471742]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PatchPanel/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PatchPanel/MarginContainer" unique_id=1313108590]
 layout_mode = 2
 
-[node name="LoadRom" type="Button" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer"]
+[node name="LoadRom" type="Button" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=655259432]
 layout_mode = 2
 text = "Load ROM
 "
 
-[node name="LoadRomDialog" type="FileDialog" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/LoadRom"]
+[node name="LoadRomDialog" type="FileDialog" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/LoadRom" unique_id=802165749]
 auto_translate_mode = 1
 title = "Open a File"
 initial_position = 1
@@ -95,13 +95,13 @@ access = 2
 filters = PackedStringArray("*.bin")
 use_native_dialog = true
 
-[node name="LoadSEQ" type="Button" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer"]
+[node name="LoadSEQ" type="Button" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=216115807]
 visible = false
 layout_mode = 2
 text = "Load SEQ
 "
 
-[node name="LoadFileDialog" type="FileDialog" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/LoadSEQ"]
+[node name="LoadFileDialog" type="FileDialog" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/LoadSEQ" unique_id=1347427833]
 title = "Open a File"
 initial_position = 1
 size = Vector2i(500, 400)
@@ -111,47 +111,47 @@ access = 2
 filters = PackedStringArray("*.seq")
 use_native_dialog = true
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer"]
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=2134896393]
 layout_mode = 2
 columns = 2
 
-[node name="PatchNameLabel" type="Label" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/GridContainer"]
+[node name="PatchNameLabel" type="Label" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=1482131578]
 layout_mode = 2
 text = "Patch Name: "
 horizontal_alignment = 2
 
-[node name="PatchNameLineEdit" type="LineEdit" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/GridContainer"]
+[node name="PatchNameLineEdit" type="LineEdit" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=624325331]
 layout_mode = 2
 placeholder_text = "default_patch_name"
 
-[node name="AuthorLabel" type="Label" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/GridContainer"]
+[node name="AuthorLabel" type="Label" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=1793730206]
 layout_mode = 2
 text = "Author: "
 horizontal_alignment = 2
 
-[node name="AuthorLineEdit" type="LineEdit" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/GridContainer"]
+[node name="AuthorLineEdit" type="LineEdit" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=271874450]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Default Author Name"
 
-[node name="DescriptionLabel" type="Label" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer"]
+[node name="DescriptionLabel" type="Label" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=1946953774]
 layout_mode = 2
 text = "Patch Description: "
 horizontal_alignment = 1
 
-[node name="DescriptionTextEdit" type="TextEdit" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer"]
+[node name="DescriptionTextEdit" type="TextEdit" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=13307989]
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_vertical = 3
 placeholder_text = "Patch description goes here..."
 wrap_mode = 1
 
-[node name="PreviewLabel" type="Label" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer"]
+[node name="PreviewLabel" type="Label" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=1452845743]
 layout_mode = 2
 text = "Preview:"
 
-[node name="PreviewContainer" type="PanelContainer" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" node_paths=PackedStringArray("ui_manager", "preview_viewport2", "preview_rect", "weapon_options", "item_options", "other_type_options", "submerged_depth_options", "face_right_check", "is_playing_check", "is_back_facing_check", "animation_slider", "opcode_text")]
+[node name="PreviewContainer" type="PanelContainer" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=969526739 node_paths=PackedStringArray("ui_manager", "preview_viewport2", "preview_rect", "weapon_options", "item_options", "other_type_options", "submerged_depth_options", "face_right_check", "is_playing_check", "is_back_facing_check", "animation_slider", "opcode_text")]
 layout_mode = 2
 script = ExtResource("6_4j3la")
 ui_manager = NodePath("../../..")
@@ -168,7 +168,7 @@ is_back_facing_check = NodePath("../../../../SettingsPanel/MarginContainer/VBoxC
 animation_slider = NodePath("../SliderContainer/HSlider")
 opcode_text = NodePath("../Opcode")
 
-[node name="PreviewTextureRect" type="TextureRect" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/PreviewContainer" node_paths=PackedStringArray("camera")]
+[node name="PreviewTextureRect" type="TextureRect" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/PreviewContainer" unique_id=2033970574 node_paths=PackedStringArray("camera")]
 texture_filter = 1
 custom_minimum_size = Vector2(200, 200)
 layout_mode = 2
@@ -177,28 +177,28 @@ stretch_mode = 5
 script = ExtResource("8_fg5ho")
 camera = NodePath("../PreviewSubViewport/PreviewCamera3D")
 
-[node name="PreviewSubViewport" type="SubViewport" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/PreviewContainer"]
+[node name="PreviewSubViewport" type="SubViewport" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/PreviewContainer" unique_id=1263200952]
 transparent_bg = true
 size = Vector2i(128, 128)
 
-[node name="PreviewCamera3D" type="Camera3D" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/PreviewContainer/PreviewSubViewport"]
+[node name="PreviewCamera3D" type="Camera3D" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/PreviewContainer/PreviewSubViewport" unique_id=134027193]
 transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 2.5, 0, 2.5)
 projection = 1
 size = 2.5
 
-[node name="SliderContainer" type="HBoxContainer" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer"]
+[node name="SliderContainer" type="HBoxContainer" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=1066482769]
 layout_mode = 2
 
-[node name="PlayLabel" type="Label" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SliderContainer"]
+[node name="PlayLabel" type="Label" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SliderContainer" unique_id=1425968746]
 layout_mode = 2
 text = "Play?"
 
-[node name="PlayCheckBox" type="CheckBox" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SliderContainer"]
+[node name="PlayCheckBox" type="CheckBox" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SliderContainer" unique_id=1358088200]
 custom_minimum_size = Vector2(24, 0)
 layout_mode = 2
 disabled = true
 
-[node name="HSlider" type="HSlider" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SliderContainer"]
+[node name="HSlider" type="HSlider" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SliderContainer" unique_id=60744684]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
@@ -206,18 +206,18 @@ rounded = true
 editable = false
 ticks_on_borders = true
 
-[node name="Opcode" type="LineEdit" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer"]
+[node name="Opcode" type="LineEdit" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=1405524604]
 layout_mode = 2
 placeholder_text = "Opcode"
 editable = false
 
-[node name="SaveGif" type="Button" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer"]
+[node name="SaveGif" type="Button" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=44162392]
 layout_mode = 2
 disabled = true
 toggle_mode = true
 text = "Save Animation GIF"
 
-[node name="SaveGifDialog" type="FileDialog" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SaveGif"]
+[node name="SaveGifDialog" type="FileDialog" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SaveGif" unique_id=1169546285]
 auto_translate_mode = 1
 initial_position = 1
 size = Vector2i(500, 400)
@@ -225,12 +225,12 @@ access = 2
 filters = PackedStringArray("*.gif")
 use_native_dialog = true
 
-[node name="SaveFrameGrid" type="Button" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer"]
+[node name="SaveFrameGrid" type="Button" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=1628866151]
 layout_mode = 2
 disabled = true
 text = "Save Frame Grid PNG"
 
-[node name="SaveFrameGridDialog" type="FileDialog" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SaveFrameGrid"]
+[node name="SaveFrameGridDialog" type="FileDialog" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SaveFrameGrid" unique_id=696962833]
 auto_translate_mode = 1
 initial_position = 1
 size = Vector2i(500, 400)
@@ -238,27 +238,27 @@ access = 2
 filters = PackedStringArray("*.png")
 use_native_dialog = true
 
-[node name="SaveAsXml" type="Button" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer"]
+[node name="SaveAsXml" type="Button" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=1962647120]
 layout_mode = 2
 disabled = true
 text = "Save XML Patch
 "
 
-[node name="SaveXmlDialog" type="FileDialog" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SaveAsXml"]
+[node name="SaveXmlDialog" type="FileDialog" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SaveAsXml" unique_id=1349811482]
 initial_position = 1
 size = Vector2i(500, 400)
 access = 2
 filters = PackedStringArray("*.xml")
 use_native_dialog = true
 
-[node name="SaveAsSEQ" type="Button" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer"]
+[node name="SaveAsSEQ" type="Button" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer" unique_id=1574986315]
 visible = false
 layout_mode = 2
 disabled = true
 text = "Save as SEQ
 "
 
-[node name="SaveSeqDialog" type="FileDialog" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SaveAsSEQ"]
+[node name="SaveSeqDialog" type="FileDialog" parent="HBoxContainer/PatchPanel/MarginContainer/VBoxContainer/SaveAsSEQ" unique_id=996039254]
 auto_translate_mode = 1
 initial_position = 1
 size = Vector2i(500, 400)
@@ -266,101 +266,101 @@ access = 2
 filters = PackedStringArray("*.seq")
 use_native_dialog = true
 
-[node name="SettingsPanel" type="PanelContainer" parent="HBoxContainer"]
+[node name="SettingsPanel" type="PanelContainer" parent="HBoxContainer" unique_id=187809489]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanel"]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanel" unique_id=1889601515]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/SettingsPanel/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/SettingsPanel/MarginContainer" unique_id=1608975483]
 layout_mode = 2
 
-[node name="SettingsLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+[node name="SettingsLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer" unique_id=715170772]
 layout_mode = 2
 text = "Settings"
 horizontal_alignment = 1
 
-[node name="Settings" type="GridContainer" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+[node name="Settings" type="GridContainer" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer" unique_id=1904630209]
 layout_mode = 2
 columns = 2
 
-[node name="SeqFile" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="SeqFile" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=48213303]
 layout_mode = 2
 text = "SEQ: "
 horizontal_alignment = 2
 
-[node name="SeqFileOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="SeqFileOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=834184090]
 layout_mode = 2
 fit_to_longest_item = false
 
-[node name="EmptyAnimationPointers" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="EmptyAnimationPointers" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=2110540846]
 layout_mode = 2
 text = "Pointers: "
 horizontal_alignment = 2
 
-[node name="NumEmptyAnimationPointers" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="NumEmptyAnimationPointers" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=473229540]
 layout_mode = 2
 text = "0/256"
 label_settings = SubResource("LabelSettings_8s6nw")
 
-[node name="EmptySeqBytes" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="EmptySeqBytes" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=1689617556]
 layout_mode = 2
 text = "Bytes: "
 horizontal_alignment = 2
 
-[node name="NumEmptySeqBytes" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="NumEmptySeqBytes" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=444194096]
 layout_mode = 2
 text = "2048/2048"
 label_settings = SubResource("LabelSettings_bugng")
 
-[node name="ShpFile" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="ShpFile" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=1413355891]
 layout_mode = 2
 text = "SHP: "
 horizontal_alignment = 2
 
-[node name="ShpFileOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="ShpFileOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=654020117]
 layout_mode = 2
 fit_to_longest_item = false
 
-[node name="EmptyFramePointers" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="EmptyFramePointers" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=101855614]
 visible = false
 layout_mode = 2
 text = "Pointers: "
 horizontal_alignment = 2
 
-[node name="NumEmptyFramePoitners" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="NumEmptyFramePoitners" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=226243428]
 visible = false
 layout_mode = 2
 text = "0/256"
 label_settings = SubResource("LabelSettings_8s6nw")
 
-[node name="EmptyShpBytes" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="EmptyShpBytes" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=1362885594]
 visible = false
 layout_mode = 2
 text = "Bytes: "
 horizontal_alignment = 2
 
-[node name="NumEmptyShpBytes" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="NumEmptyShpBytes" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=84212982]
 visible = false
 layout_mode = 2
 text = "2048/2048"
 label_settings = SubResource("LabelSettings_bugng")
 
-[node name="Sprite" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="Sprite" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=1794169191]
 layout_mode = 2
 text = "Sprite:"
 horizontal_alignment = 2
 
-[node name="SpriteOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="SpriteOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=700627125]
 layout_mode = 2
 fit_to_longest_item = false
 
-[node name="PaletteLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="PaletteLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=1424690419]
 layout_mode = 2
 text = "Palette"
 horizontal_alignment = 2
 
-[node name="PaletteSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="PaletteSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=1609985139]
 layout_mode = 2
 max_value = 7.0
 rounded = true
@@ -368,32 +368,32 @@ allow_greater = true
 editable = false
 select_all_on_focus = true
 
-[node name="WeaponLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="WeaponLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=280298286]
 layout_mode = 2
 text = "Weapon:"
 horizontal_alignment = 2
 
-[node name="WeaponOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="WeaponOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=75398185]
 layout_mode = 2
 disabled = true
 fit_to_longest_item = false
 
-[node name="ItemLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="ItemLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=276550786]
 layout_mode = 2
 text = "Item:"
 horizontal_alignment = 2
 
-[node name="ItemOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="ItemOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=215423476]
 layout_mode = 2
 disabled = true
 fit_to_longest_item = false
 
-[node name="OtherTypeLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="OtherTypeLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=1429092586]
 layout_mode = 2
 text = "Other Type:"
 horizontal_alignment = 2
 
-[node name="OtherTypeOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="OtherTypeOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=1012006314]
 layout_mode = 2
 disabled = true
 selected = 0
@@ -405,12 +405,12 @@ popup/item_1/id = 1
 popup/item_2/text = "Crystal"
 popup/item_2/id = 2
 
-[node name="SubmergedLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="SubmergedLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=449283827]
 layout_mode = 2
 text = "Submerged:"
 horizontal_alignment = 2
 
-[node name="SubmergedOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="SubmergedOptions" type="OptionButton" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=692351070]
 layout_mode = 2
 disabled = true
 selected = 0
@@ -423,292 +423,292 @@ popup/item_1/id = 1
 popup/item_2/text = "2"
 popup/item_2/id = 2
 
-[node name="FaceRightLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="FaceRightLabel" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=858360327]
 layout_mode = 2
 text = "Face Right:"
 horizontal_alignment = 2
 
-[node name="FaceRightCheckBox" type="CheckBox" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings"]
+[node name="FaceRightCheckBox" type="CheckBox" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/Settings" unique_id=2021850105]
 layout_mode = 2
 size_flags_horizontal = 0
 disabled = true
 
-[node name="Animation Rewrite" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+[node name="Animation Rewrite" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer" unique_id=1910636446]
 layout_mode = 2
 text = "----- Animation Rewrite ASM -----"
 horizontal_alignment = 1
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer" unique_id=1751485547]
 layout_mode = 2
 columns = 2
 
-[node name="UseAnimationRewrite" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/GridContainer"]
+[node name="UseAnimationRewrite" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=318274335]
 layout_mode = 2
 text = "Rewrite Opcodes: "
 horizontal_alignment = 2
 
-[node name="AnimationRewriteCheck" type="CheckBox" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/GridContainer"]
+[node name="AnimationRewriteCheck" type="CheckBox" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=949297083]
 layout_mode = 2
 tooltip_text = "WARNING: Uses new opcode definitions from the Animation Rewrite ASM."
 
-[node name="FaceBack" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/GridContainer"]
+[node name="FaceBack" type="Label" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=2103037658]
 layout_mode = 2
 text = "Face Back: "
 horizontal_alignment = 2
 
-[node name="FaceBackCheck" type="CheckBox" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/GridContainer"]
+[node name="FaceBackCheck" type="CheckBox" parent="HBoxContainer/SettingsPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=1587915807]
 layout_mode = 2
 
-[node name="TabContainer" type="TabContainer" parent="HBoxContainer"]
+[node name="TabContainer" type="TabContainer" parent="HBoxContainer" unique_id=1286548988]
 layout_mode = 2
 current_tab = 0
 
-[node name="Animations" type="MarginContainer" parent="HBoxContainer/TabContainer"]
+[node name="Animations" type="MarginContainer" parent="HBoxContainer/TabContainer" unique_id=1905351923]
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/TabContainer/Animations"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/TabContainer/Animations" unique_id=1879457347]
 layout_mode = 2
 
-[node name="AddPointer" type="Button" parent="HBoxContainer/TabContainer/Animations/VBoxContainer"]
+[node name="AddPointer" type="Button" parent="HBoxContainer/TabContainer/Animations/VBoxContainer" unique_id=1780322750]
 layout_mode = 2
 disabled = true
 text = "Add Pointer"
 
-[node name="Functions" type="HBoxContainer" parent="HBoxContainer/TabContainer/Animations/VBoxContainer"]
+[node name="Functions" type="HBoxContainer" parent="HBoxContainer/TabContainer/Animations/VBoxContainer" unique_id=143079844]
 layout_mode = 2
 
-[node name="DeletePointer" type="Button" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Functions"]
+[node name="DeletePointer" type="Button" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Functions" unique_id=504241063]
 layout_mode = 2
 disabled = true
 text = "Delete Pointer"
 
-[node name="PointerSpinBox" type="SpinBox" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Functions"]
+[node name="PointerSpinBox" type="SpinBox" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Functions" unique_id=1006545002]
 layout_mode = 2
 editable = false
 select_all_on_focus = true
 
-[node name="Headers" type="HBoxContainer" parent="HBoxContainer/TabContainer/Animations/VBoxContainer"]
+[node name="Headers" type="HBoxContainer" parent="HBoxContainer/TabContainer/Animations/VBoxContainer" unique_id=2017869992]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="Pointer ID" type="Label" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers"]
+[node name="Pointer ID" type="Label" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers" unique_id=244287221]
 custom_minimum_size = Vector2(85, 0)
 layout_mode = 2
 text = "Pointer ID"
 horizontal_alignment = 1
 
-[node name="VSeparator" type="VSeparator" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers"]
+[node name="VSeparator" type="VSeparator" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers" unique_id=19948995]
 layout_mode = 2
 
-[node name="Anim ID" type="Label" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers"]
+[node name="Anim ID" type="Label" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers" unique_id=288316904]
 custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
 text = "Anim ID"
 horizontal_alignment = 1
 
-[node name="VSeparator2" type="VSeparator" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers"]
+[node name="VSeparator2" type="VSeparator" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers" unique_id=732359527]
 layout_mode = 2
 
-[node name="Desription" type="Label" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers"]
+[node name="Desription" type="Label" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers" unique_id=1473897689]
 custom_minimum_size = Vector2(130, 0)
 layout_mode = 2
 text = "Description"
 horizontal_alignment = 1
 
-[node name="VSeparator3" type="VSeparator" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers"]
+[node name="VSeparator3" type="VSeparator" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers" unique_id=1687862306]
 layout_mode = 2
 
-[node name="Opcodes" type="Label" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers"]
+[node name="Opcodes" type="Label" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/Headers" unique_id=1899289055]
 custom_minimum_size = Vector2(205, 0)
 layout_mode = 2
 text = "Opcodes"
 horizontal_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="HBoxContainer/TabContainer/Animations/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="HBoxContainer/TabContainer/Animations/VBoxContainer" unique_id=76145112]
 visible = false
 layout_mode = 2
 
-[node name="AnimationListScroll" type="ScrollContainer" parent="HBoxContainer/TabContainer/Animations/VBoxContainer"]
+[node name="AnimationListScroll" type="ScrollContainer" parent="HBoxContainer/TabContainer/Animations/VBoxContainer" unique_id=1641014585]
 layout_mode = 2
 size_flags_vertical = 3
 follow_focus = true
 horizontal_scroll_mode = 0
 
-[node name="AnimationList" type="VBoxContainer" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/AnimationListScroll"]
+[node name="AnimationList" type="VBoxContainer" parent="HBoxContainer/TabContainer/Animations/VBoxContainer/AnimationListScroll" unique_id=2077050979]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 
-[node name="Frames" type="MarginContainer" parent="HBoxContainer/TabContainer"]
+[node name="Frames" type="MarginContainer" parent="HBoxContainer/TabContainer" unique_id=1028425019]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/TabContainer/Frames"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/TabContainer/Frames" unique_id=1147270138]
 layout_mode = 2
 
-[node name="Headers" type="HBoxContainer" parent="HBoxContainer/TabContainer/Frames/VBoxContainer"]
+[node name="Headers" type="HBoxContainer" parent="HBoxContainer/TabContainer/Frames/VBoxContainer" unique_id=767794784]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="Frame ID" type="Label" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers"]
+[node name="Frame ID" type="Label" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers" unique_id=809985555]
 custom_minimum_size = Vector2(85, 0)
 layout_mode = 2
 text = "Frame  ID"
 horizontal_alignment = 1
 
-[node name="VSeparator" type="VSeparator" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers"]
+[node name="VSeparator" type="VSeparator" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers" unique_id=991097081]
 layout_mode = 2
 
-[node name="Rotation" type="Label" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers"]
+[node name="Rotation" type="Label" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers" unique_id=37356217]
 custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
 text = "Rotation (deg)"
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="VSeparator2" type="VSeparator" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers"]
+[node name="VSeparator2" type="VSeparator" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers" unique_id=1006633305]
 layout_mode = 2
 
-[node name="Subframes" type="Label" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers"]
+[node name="Subframes" type="Label" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers" unique_id=549486104]
 custom_minimum_size = Vector2(265, 0)
 layout_mode = 2
 text = "Subframes
 x, y, u, v, rect, flip_x, flip_y"
 horizontal_alignment = 1
 
-[node name="VSeparator3" type="VSeparator" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers"]
+[node name="VSeparator3" type="VSeparator" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers" unique_id=736820762]
 layout_mode = 2
 
-[node name="Preview" type="Label" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers"]
+[node name="Preview" type="Label" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/Headers" unique_id=2086430036]
 custom_minimum_size = Vector2(130, 0)
 layout_mode = 2
 text = "Preview"
 horizontal_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="HBoxContainer/TabContainer/Frames/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="HBoxContainer/TabContainer/Frames/VBoxContainer" unique_id=595649116]
 visible = false
 layout_mode = 2
 
-[node name="FrameListScroll" type="ScrollContainer" parent="HBoxContainer/TabContainer/Frames/VBoxContainer"]
+[node name="FrameListScroll" type="ScrollContainer" parent="HBoxContainer/TabContainer/Frames/VBoxContainer" unique_id=652647418]
 layout_mode = 2
 size_flags_vertical = 3
 follow_focus = true
 horizontal_scroll_mode = 0
 
-[node name="FrameList" type="VBoxContainer" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/FrameListScroll"]
+[node name="FrameList" type="VBoxContainer" parent="HBoxContainer/TabContainer/Frames/VBoxContainer/FrameListScroll" unique_id=1284008960]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 
-[node name="AnimationEditor" type="PanelContainer" parent="HBoxContainer"]
+[node name="AnimationEditor" type="PanelContainer" parent="HBoxContainer" unique_id=866412475]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/AnimationEditor"]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/AnimationEditor" unique_id=859091355]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/AnimationEditor/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/AnimationEditor/MarginContainer" unique_id=777528060]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer" unique_id=540131574]
 layout_mode = 2
 
-[node name="NewAnimation" type="Button" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="NewAnimation" type="Button" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1095497753]
 layout_mode = 2
 disabled = true
 text = "Add New Animation"
 
-[node name="DeleteAnimation" type="Button" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="DeleteAnimation" type="Button" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1739742908]
 layout_mode = 2
 disabled = true
 text = "Delete Current Animation"
 
-[node name="Options" type="GridContainer" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer"]
+[node name="Options" type="GridContainer" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer" unique_id=1956261557]
 layout_mode = 2
 columns = 2
 
-[node name="IdLabel" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Options"]
+[node name="IdLabel" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Options" unique_id=1209461743]
 layout_mode = 2
 text = "Anim ID"
 horizontal_alignment = 1
 
-[node name="AnimOptLabel" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Options"]
+[node name="AnimOptLabel" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Options" unique_id=789965410]
 layout_mode = 2
 text = "Description
 "
 horizontal_alignment = 1
 
-[node name="IdSpinBox" type="SpinBox" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Options"]
+[node name="IdSpinBox" type="SpinBox" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Options" unique_id=1026654360]
 layout_mode = 2
 alignment = 2
 editable = false
 select_all_on_focus = true
 
-[node name="AnimationOptionButton" type="OptionButton" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Options"]
+[node name="AnimationOptionButton" type="OptionButton" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Options" unique_id=17151111]
 layout_mode = 2
 size_flags_horizontal = 3
 disabled = true
 fit_to_longest_item = false
 
-[node name="Functions" type="HBoxContainer" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer"]
+[node name="Functions" type="HBoxContainer" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer" unique_id=1604113198]
 layout_mode = 2
 
-[node name="Row" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Functions"]
+[node name="Row" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Functions" unique_id=854125525]
 layout_mode = 2
 text = "Row: "
 
-[node name="RowSpinBox" type="SpinBox" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Functions"]
+[node name="RowSpinBox" type="SpinBox" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Functions" unique_id=982347163]
 layout_mode = 2
 editable = false
 select_all_on_focus = true
 
-[node name="InsertOpcode" type="Button" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Functions"]
+[node name="InsertOpcode" type="Button" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Functions" unique_id=882867263]
 layout_mode = 2
 disabled = true
 text = "Insert Opcode"
 
-[node name="DeleteOpcode" type="Button" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Functions"]
+[node name="DeleteOpcode" type="Button" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/Functions" unique_id=633951183]
 layout_mode = 2
 disabled = true
 text = "Delete Opcode"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer" unique_id=1274629799]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="Opcodes" type="GridContainer" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/ScrollContainer"]
+[node name="Opcodes" type="GridContainer" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/ScrollContainer" unique_id=1674741846]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 columns = 5
 
-[node name="#" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/ScrollContainer/Opcodes"]
+[node name="#" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/ScrollContainer/Opcodes" unique_id=2095689113]
 custom_minimum_size = Vector2(25, 0)
 layout_mode = 2
 text = "Row"
 horizontal_alignment = 1
 
-[node name="Opcode" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/ScrollContainer/Opcodes"]
+[node name="Opcode" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/ScrollContainer/Opcodes" unique_id=269741823]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 text = "Opcode"
 horizontal_alignment = 1
 
-[node name="Param1" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/ScrollContainer/Opcodes"]
+[node name="Param1" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/ScrollContainer/Opcodes" unique_id=1235347481]
 custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
 text = "Param1"
 horizontal_alignment = 1
 
-[node name="Param2" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/ScrollContainer/Opcodes"]
+[node name="Param2" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/ScrollContainer/Opcodes" unique_id=707522751]
 custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
 text = "Param2"
 horizontal_alignment = 1
 
-[node name="Param3" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/ScrollContainer/Opcodes"]
+[node name="Param3" type="Label" parent="HBoxContainer/AnimationEditor/MarginContainer/VBoxContainer/ScrollContainer/Opcodes" unique_id=1643080071]
 custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
 text = "Param3"

@@ -1,11 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://dxvm0fphohpx4"]
+[gd_scene format=3 uid="uid://dxvm0fphohpx4"]
 
 [ext_resource type="Script" uid="uid://cvq3uro8bjpsk" path="res://src/utilities/ui/vector3i_edit.gd" id="1_akxsu"]
 
-[node name="Vector3iEdit" type="HBoxContainer"]
+[node name="Vector3iEdit" type="HBoxContainer" unique_id=705601014]
 script = ExtResource("1_akxsu")
 
-[node name="xSpinBox" type="SpinBox" parent="."]
+[node name="xSpinBox" type="SpinBox" parent="." unique_id=1674666011]
 layout_mode = 2
 size_flags_vertical = 4
 rounded = true
@@ -14,7 +14,7 @@ allow_lesser = true
 alignment = 2
 select_all_on_focus = true
 
-[node name="ySpinBox" type="SpinBox" parent="."]
+[node name="ySpinBox" type="SpinBox" parent="." unique_id=297977836]
 layout_mode = 2
 size_flags_vertical = 4
 rounded = true
@@ -23,7 +23,7 @@ allow_lesser = true
 alignment = 2
 select_all_on_focus = true
 
-[node name="zSpinBox" type="SpinBox" parent="."]
+[node name="zSpinBox" type="SpinBox" parent="." unique_id=281411299]
 layout_mode = 2
 size_flags_vertical = 4
 rounded = true

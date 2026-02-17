@@ -1,11 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://dfhvsm7ynvj76"]
+[gd_scene format=3 uid="uid://dfhvsm7ynvj76"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_wg4to"]
 font_size = 22
 outline_size = 6
 outline_color = Color(0, 0, 0, 1)
 
-[node name="PopupText" type="Label"]
+[node name="PopupText" type="Label" unique_id=897409257]
 text = "Test2"
 label_settings = SubResource("LabelSettings_wg4to")
 horizontal_alignment = 1

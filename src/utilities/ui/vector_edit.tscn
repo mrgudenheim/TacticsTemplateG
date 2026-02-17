@@ -1,14 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://4b53llrdeigy"]
+[gd_scene format=3 uid="uid://4b53llrdeigy"]
 
 [ext_resource type="Script" uid="uid://br4mouluysyjs" path="res://src/utilities/ui/vector_edit.gd" id="1_e4lnk"]
 
-[node name="VectorEdit" type="HBoxContainer" node_paths=PackedStringArray("x_spinbox", "y_spinbox", "z_spinbox")]
+[node name="VectorEdit" type="HBoxContainer" unique_id=1055779330 node_paths=PackedStringArray("x_spinbox", "y_spinbox", "z_spinbox")]
 script = ExtResource("1_e4lnk")
 x_spinbox = NodePath("xSpinBox")
 y_spinbox = NodePath("ySpinBox")
 z_spinbox = NodePath("zSpinBox")
 
-[node name="xSpinBox" type="SpinBox" parent="."]
+[node name="xSpinBox" type="SpinBox" parent="." unique_id=1142801170]
 layout_mode = 2
 size_flags_vertical = 4
 allow_greater = true
@@ -16,7 +16,7 @@ allow_lesser = true
 alignment = 2
 select_all_on_focus = true
 
-[node name="ySpinBox" type="SpinBox" parent="."]
+[node name="ySpinBox" type="SpinBox" parent="." unique_id=680245749]
 layout_mode = 2
 size_flags_vertical = 4
 allow_greater = true
@@ -24,7 +24,7 @@ allow_lesser = true
 alignment = 2
 select_all_on_focus = true
 
-[node name="zSpinBox" type="SpinBox" parent="."]
+[node name="zSpinBox" type="SpinBox" parent="." unique_id=1920683027]
 layout_mode = 2
 size_flags_vertical = 4
 allow_greater = true

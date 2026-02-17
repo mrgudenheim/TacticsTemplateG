@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://dyajlcyhtfdbr"]
+[gd_scene format=3 uid="uid://dyajlcyhtfdbr"]
 
 [ext_resource type="Script" uid="uid://85yekig5g046" path="res://src/battle/editor/map_chunk_settings_ui.gd" id="1_mm4sl"]
 [ext_resource type="PackedScene" uid="uid://dxvm0fphohpx4" path="res://src/utilities/ui/vector3i_edit.tscn" id="1_sf625"]
 
-[node name="MapChunkSettings" type="Control" node_paths=PackedStringArray("chunk_name_dropdown", "position_edit_container", "mirror_bools_container", "delete_button", "position_edit", "mirror_checkboxes")]
+[node name="MapChunkSettings" type="Control" unique_id=898890729 node_paths=PackedStringArray("chunk_name_dropdown", "position_edit_container", "mirror_bools_container", "delete_button", "position_edit", "mirror_checkboxes")]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_mm4sl")
@@ -14,7 +14,7 @@ delete_button = NodePath("DeleteButton")
 position_edit = NodePath("PanelContainer/PositionVector3iEdit")
 mirror_checkboxes = [NodePath("PanelContainer2/Mirror/xCheckBox"), NodePath("PanelContainer2/Mirror/yCheckBox"), NodePath("PanelContainer2/Mirror/zCheckBox")]
 
-[node name="MapDropdown" type="OptionButton" parent="."]
+[node name="MapDropdown" type="OptionButton" parent="." unique_id=1707884252]
 layout_mode = 0
 offset_top = 28.0
 offset_right = 32.0
@@ -22,39 +22,39 @@ offset_bottom = 48.0
 size_flags_horizontal = 0
 size_flags_vertical = 4
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1279610938]
 layout_mode = 0
 offset_left = 36.0
 offset_top = 24.0
 offset_right = 202.0
 offset_bottom = 52.0
 
-[node name="PositionVector3iEdit" parent="PanelContainer" instance=ExtResource("1_sf625")]
+[node name="PositionVector3iEdit" parent="PanelContainer" unique_id=672744780 instance=ExtResource("1_sf625")]
 layout_mode = 2
 
-[node name="PanelContainer2" type="PanelContainer" parent="."]
+[node name="PanelContainer2" type="PanelContainer" parent="." unique_id=1793516974]
 layout_mode = 0
 offset_left = 206.0
 offset_top = 24.0
 offset_right = 323.0
 offset_bottom = 52.0
 
-[node name="Mirror" type="HBoxContainer" parent="PanelContainer2"]
+[node name="Mirror" type="HBoxContainer" parent="PanelContainer2" unique_id=842847763]
 layout_mode = 2
 
-[node name="xCheckBox" type="CheckBox" parent="PanelContainer2/Mirror"]
+[node name="xCheckBox" type="CheckBox" parent="PanelContainer2/Mirror" unique_id=1130236601]
 layout_mode = 2
 text = "x"
 
-[node name="yCheckBox" type="CheckBox" parent="PanelContainer2/Mirror"]
+[node name="yCheckBox" type="CheckBox" parent="PanelContainer2/Mirror" unique_id=1381532906]
 layout_mode = 2
 text = "y"
 
-[node name="zCheckBox" type="CheckBox" parent="PanelContainer2/Mirror"]
+[node name="zCheckBox" type="CheckBox" parent="PanelContainer2/Mirror" unique_id=949348587]
 layout_mode = 2
 text = "z"
 
-[node name="DeleteButton" type="Button" parent="."]
+[node name="DeleteButton" type="Button" parent="." unique_id=2046197177]
 layout_mode = 0
 offset_left = 327.0
 offset_top = 24.0

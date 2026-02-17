@@ -1,17 +1,8 @@
-[gd_resource type="Resource" script_class="ItemData" load_steps=6 format=3 uid="uid://k82phe25gaet"]
+[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://k82phe25gaet"]
 
-[ext_resource type="Script" uid="uid://dlaul7n568vti" path="res://src/content_scripts/actions/action.gd" id="1_5alu4"]
 [ext_resource type="Script" uid="uid://bhswehxfrpmc6" path="res://src/content_scripts/evade_data.gd" id="1_x6yjh"]
 [ext_resource type="Script" uid="uid://cf5w02iml4cqu" path="res://src/content_scripts/item_data.gd" id="2_5alu4"]
-[ext_resource type="Script" uid="uid://cpa42ca48we8h" path="res://src/content_scripts/actions/action_effect.gd" id="4_sx00x"]
-
-[sub_resource type="Resource" id="Resource_5alu4"]
-script = ExtResource("1_5alu4")
-action_name = "Action Name 01"
-cant_follow_target = false
-metadata/_custom_type_script = "uid://dlaul7n568vti"
 
 [resource]
 script = ExtResource("2_5alu4")
-weapon_attack_action = SubResource("Resource_5alu4")
 metadata/_custom_type_script = "uid://cf5w02iml4cqu"

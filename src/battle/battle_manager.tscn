@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://card26cltbba1"]
+[gd_scene format=3 uid="uid://card26cltbba1"]
 
 [ext_resource type="Script" uid="uid://cd31vmh881wm5" path="res://src/battle/battle_manager.gd" id="1_hnd0w"]
 [ext_resource type="Material" uid="uid://u6jhtav4x31l" path="res://src/content_scripts/Map/tile_highlight_red.material" id="4_f2r6p"]
@@ -51,7 +51,7 @@ material = SubResource("StandardMaterial3D_p2e2h")
 [sub_resource type="BoxMesh" id="BoxMesh_cqdh8"]
 material = SubResource("StandardMaterial3D_tjj5r")
 
-[node name="BattleManager" type="Node3D" node_paths=PackedStringArray("texture_viewer", "reference_quad", "load_rom_button", "orthographic_check", "camera_controller", "background_gradient", "maps", "battle_view", "action_menu", "action_button_list", "units_container", "controller", "battle_end_panel", "post_battle_messages", "start_new_battle_button", "game_state_container", "game_state_label", "icon_counter", "scenario_editor")]
+[node name="BattleManager" type="Node3D" unique_id=1724416264 node_paths=PackedStringArray("texture_viewer", "reference_quad", "load_rom_button", "orthographic_check", "camera_controller", "background_gradient", "maps", "battle_view", "action_menu", "action_button_list", "units_container", "controller", "battle_end_panel", "post_battle_messages", "start_new_battle_button", "game_state_container", "game_state_label", "icon_counter", "scenario_editor")]
 script = ExtResource("1_hnd0w")
 texture_viewer = NodePath("SpriteViewer")
 reference_quad = NodePath("ReferenceQuad")
@@ -80,13 +80,13 @@ game_state_label = NodePath("GameState/GameState")
 icon_counter = NodePath("IconGridContainer")
 scenario_editor = NodePath("ScenarioEditor")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=931800301]
 environment = SubResource("Environment_njvnp")
 
-[node name="BackgroundCanvasLayer" type="CanvasLayer" parent="."]
+[node name="BackgroundCanvasLayer" type="CanvasLayer" parent="." unique_id=214302282]
 layer = -3
 
-[node name="TextureRect" type="TextureRect" parent="BackgroundCanvasLayer"]
+[node name="TextureRect" type="TextureRect" parent="BackgroundCanvasLayer" unique_id=820736276]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -94,7 +94,7 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("GradientTexture2D_1dnhu")
 
-[node name="LoadRom" parent="." instance=ExtResource("9_pbg35")]
+[node name="LoadRom" parent="." unique_id=801972973 instance=ExtResource("9_pbg35")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -107,27 +107,27 @@ offset_bottom = 14.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CharacterController" type="Node3D" parent="."]
+[node name="CharacterController" type="Node3D" parent="." unique_id=853182301]
 script = ExtResource("10_d5yoq")
 
-[node name="SpriteViewer" type="Sprite3D" parent="."]
+[node name="SpriteViewer" type="Sprite3D" parent="." unique_id=2066917235]
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 5, 0)
 visible = false
 pixel_size = 0.05
 billboard = 1
 texture_filter = 0
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=668646346]
 transform = Transform3D(1, 0, 0, 0, 0.553391, -0.832921, 0, 0.832921, 0.553391, 0, 3.51982, 2.72607)
 
-[node name="ReferenceQuad" type="MeshInstance3D" parent="."]
+[node name="ReferenceQuad" type="MeshInstance3D" parent="." unique_id=2085637259]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
 visible = false
 mesh = SubResource("QuadMesh_foefj")
 
-[node name="PathContainer" type="Node3D" parent="."]
+[node name="PathContainer" type="Node3D" parent="." unique_id=1527857166]
 
-[node name="CPUParticles3D" type="CPUParticles3D" parent="."]
+[node name="CPUParticles3D" type="CPUParticles3D" parent="." unique_id=1726698127]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 5, 0, -5)
 visible = false
 amount = 1
@@ -136,59 +136,59 @@ mesh = SubResource("QuadMesh_tjj5r")
 emission_shape = 4
 emission_points = PackedVector3Array(0, 0, -10)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="CPUParticles3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CPUParticles3D" unique_id=2085780190]
 visible = false
 mesh = SubResource("BoxMesh_cqdh8")
 
-[node name="EastLabel3D" type="Label3D" parent="."]
+[node name="EastLabel3D" type="Label3D" parent="." unique_id=764822122]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, 0)
 visible = false
 pixel_size = 0.05
 billboard = 1
 text = "East (1, 0, 0)"
 
-[node name="WestLabel3D" type="Label3D" parent="."]
+[node name="WestLabel3D" type="Label3D" parent="." unique_id=1275156168]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 0)
 visible = false
 pixel_size = 0.05
 billboard = 1
 text = "West (-1, 0, 0)"
 
-[node name="SouthLabel3D" type="Label3D" parent="."]
+[node name="SouthLabel3D" type="Label3D" parent="." unique_id=119274720]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -20)
 visible = false
 pixel_size = 0.05
 billboard = 1
 text = "South (0, 0, -1)"
 
-[node name="NorthLabel3D" type="Label3D" parent="."]
+[node name="NorthLabel3D" type="Label3D" parent="." unique_id=1947024591]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 20)
 visible = false
 pixel_size = 0.05
 billboard = 1
 text = "North (0, 0, 1)"
 
-[node name="IconGridContainer" type="GridContainer" parent="."]
+[node name="IconGridContainer" type="GridContainer" parent="." unique_id=1779577295]
 layout_direction = 3
 offset_right = 40.0
 offset_bottom = 40.0
 columns = 5
 
-[node name="ActionMenu" type="PanelContainer" parent="."]
+[node name="ActionMenu" type="PanelContainer" parent="." unique_id=818999789]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 grow_vertical = 0
 
-[node name="ActionButtonsList" type="VBoxContainer" parent="ActionMenu"]
+[node name="ActionButtonsList" type="VBoxContainer" parent="ActionMenu" unique_id=657770307]
 layout_mode = 2
 
-[node name="ActionButton" type="Button" parent="ActionMenu/ActionButtonsList"]
+[node name="ActionButton" type="Button" parent="ActionMenu/ActionButtonsList" unique_id=1967070411]
 layout_mode = 2
 script = ExtResource("16_l2dig")
 metadata/_custom_type_script = "uid://cectjl7guvpqa"
 
-[node name="BattleEnd" type="PanelContainer" parent="."]
+[node name="BattleEnd" type="PanelContainer" parent="." unique_id=1436038232]
 visible = false
 anchors_preset = 8
 anchor_left = 0.5
@@ -202,17 +202,17 @@ offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="BattleEnd"]
+[node name="VBoxContainer" type="VBoxContainer" parent="BattleEnd" unique_id=1973066166]
 layout_mode = 2
 
-[node name="Messages" type="VBoxContainer" parent="BattleEnd/VBoxContainer"]
+[node name="Messages" type="VBoxContainer" parent="BattleEnd/VBoxContainer" unique_id=1297380922]
 layout_mode = 2
 
-[node name="StartNewBattle" type="Button" parent="BattleEnd/VBoxContainer"]
+[node name="StartNewBattle" type="Button" parent="BattleEnd/VBoxContainer" unique_id=555210304]
 layout_mode = 2
 text = "Start New Battle"
 
-[node name="GameState" type="PanelContainer" parent="."]
+[node name="GameState" type="PanelContainer" parent="." unique_id=642871799]
 visible = false
 anchors_preset = 5
 anchor_left = 0.5
@@ -222,12 +222,12 @@ offset_right = 45.0
 offset_bottom = 40.0
 grow_horizontal = 2
 
-[node name="GameState" type="Label" parent="GameState"]
+[node name="GameState" type="Label" parent="GameState" unique_id=558228285]
 layout_mode = 2
 text = "Game State"
 horizontal_alignment = 1
 
-[node name="ScenarioEditor" type="Control" parent="." node_paths=PackedStringArray("battle_manager", "start_button", "load_scenario_button", "export_scenario_button", "import_scenario_button", "import_file_dialog", "new_scenario_button", "background_gradient_color_pickers", "battle_subviewport", "battle_setup_container", "job_select_control", "item_select_control", "ability_select_control", "unit_editor", "add_map_chunk_button", "map_chunk_settings_container", "show_map_tiles_check")]
+[node name="ScenarioEditor" type="Control" parent="." unique_id=535534392 node_paths=PackedStringArray("battle_manager", "start_button", "load_scenario_button", "export_scenario_button", "import_scenario_button", "import_file_dialog", "new_scenario_button", "background_gradient_color_pickers", "battle_subviewport", "battle_setup_container", "job_select_control", "item_select_control", "ability_select_control", "unit_editor", "add_map_chunk_button", "map_chunk_settings_container", "show_map_tiles_check")]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -255,7 +255,7 @@ add_map_chunk_button = NodePath("BattleSetupTabContainer/Map/FloatingUi/HBoxCont
 map_chunk_settings_container = NodePath("BattleSetupTabContainer/Map/FloatingUi/MapChunkSettings")
 show_map_tiles_check = NodePath("BattleSetupTabContainer/Map/FloatingUi/HBoxContainer/ShowMapTiles")
 
-[node name="BattleSetupTabContainer" type="TabContainer" parent="ScenarioEditor"]
+[node name="BattleSetupTabContainer" type="TabContainer" parent="ScenarioEditor" unique_id=728997520]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -266,103 +266,103 @@ grow_vertical = 2
 size_flags_horizontal = 3
 current_tab = 0
 
-[node name="Map" type="MarginContainer" parent="ScenarioEditor/BattleSetupTabContainer"]
+[node name="Map" type="MarginContainer" parent="ScenarioEditor/BattleSetupTabContainer" unique_id=1143399220]
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map"]
+[node name="VBoxContainer" type="VBoxContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map" unique_id=1750396135]
 layout_mode = 2
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer"]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer" unique_id=1055106019]
 layout_mode = 2
 size_flags_vertical = 3
 stretch = true
 
-[node name="SubViewport" type="SubViewport" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer"]
+[node name="SubViewport" type="SubViewport" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer" unique_id=1358451554]
 transparent_bg = true
 handle_input_locally = false
 physics_object_picking = true
-size = Vector2i(1516, 710)
+size = Vector2i(2, 2)
 render_target_update_mode = 0
 
-[node name="BattleView" type="Node3D" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport"]
+[node name="BattleView" type="Node3D" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport" unique_id=1739086315]
 
-[node name="CameraController" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport/BattleView" instance=ExtResource("12_l2dig")]
+[node name="CameraController" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport/BattleView" unique_id=1467603110 instance=ExtResource("12_l2dig")]
 physics_interpolation_mode = 2
 transform = Transform3D(0.707107, -0.315509, 0.632814, 0, 0.894934, 0.446198, -0.707107, -0.315509, 0.632814, 0, 0, 0)
 
-[node name="Maps" type="Node3D" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport/BattleView"]
+[node name="Maps" type="Node3D" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport/BattleView" unique_id=1380327606]
 
-[node name="Units" type="Node3D" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport/BattleView"]
+[node name="Units" type="Node3D" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport/BattleView" unique_id=666417944]
 
-[node name="FoldableContainer" type="FoldableContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer"]
+[node name="FoldableContainer" type="FoldableContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer" unique_id=900303519]
 layout_mode = 2
 folded = true
 title = "Unit Editor"
 
-[node name="UnitSetupPanel" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/FoldableContainer" instance=ExtResource("15_qgxlc")]
+[node name="UnitSetupPanel" parent="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/FoldableContainer" unique_id=1550329473 instance=ExtResource("15_qgxlc")]
 visible = false
 layout_mode = 2
 
-[node name="FloatingUi" type="VBoxContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map"]
+[node name="FloatingUi" type="VBoxContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map" unique_id=1261639888]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 
-[node name="Gradient" type="HBoxContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi"]
+[node name="Gradient" type="HBoxContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi" unique_id=1045092598]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/Gradient"]
+[node name="Label" type="Label" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/Gradient" unique_id=241068620]
 layout_mode = 2
 text = "Background Gradient: "
 
-[node name="BottomColorPickerButton" type="ColorPickerButton" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/Gradient"]
+[node name="BottomColorPickerButton" type="ColorPickerButton" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/Gradient" unique_id=222165005]
 custom_minimum_size = Vector2(20, 0)
 layout_mode = 2
 color = Color(0, 0, 0.09411765, 1)
 
-[node name="TopColorPickerButton" type="ColorPickerButton" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/Gradient"]
+[node name="TopColorPickerButton" type="ColorPickerButton" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/Gradient" unique_id=534066196]
 custom_minimum_size = Vector2(20, 0)
 layout_mode = 2
 color = Color(0.627451, 0.9098039, 0.9372549, 1)
 
-[node name="HBoxContainer" type="HBoxContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi"]
+[node name="HBoxContainer" type="HBoxContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi" unique_id=209519552]
 layout_mode = 2
 
-[node name="ShowMapTiles" type="CheckBox" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/HBoxContainer"]
+[node name="ShowMapTiles" type="CheckBox" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/HBoxContainer" unique_id=828597401]
 layout_mode = 2
 text = "Show Map Tiles"
 
-[node name="AddMapChunkButton" type="Button" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/HBoxContainer"]
+[node name="AddMapChunkButton" type="Button" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/HBoxContainer" unique_id=488544131]
 layout_mode = 2
 text = "Add Map Chunk"
 
-[node name="MapSize" type="Label" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi"]
+[node name="MapSize" type="Label" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi" unique_id=1430793367]
 visible = false
 layout_mode = 2
 text = "Map Size: X x Y"
 
-[node name="MapChunkSettings" type="GridContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi"]
+[node name="MapChunkSettings" type="GridContainer" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi" unique_id=1942712239]
 layout_mode = 2
 columns = 4
 
-[node name="Spacer" type="Control" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/MapChunkSettings"]
+[node name="Spacer" type="Control" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/MapChunkSettings" unique_id=1715864977]
 layout_mode = 2
 
-[node name="PositionLabel" type="Label" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/MapChunkSettings"]
+[node name="PositionLabel" type="Label" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/MapChunkSettings" unique_id=830737953]
 layout_mode = 2
 text = "Position"
 horizontal_alignment = 1
 
-[node name="MirrorLabel" type="Label" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/MapChunkSettings"]
+[node name="MirrorLabel" type="Label" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/MapChunkSettings" unique_id=1164210917]
 layout_mode = 2
 text = "Mirror"
 horizontal_alignment = 1
 
-[node name="Spacer2" type="Control" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/MapChunkSettings"]
+[node name="Spacer2" type="Control" parent="ScenarioEditor/BattleSetupTabContainer/Map/FloatingUi/MapChunkSettings" unique_id=83287887]
 layout_mode = 2
 
-[node name="JobSelectContainer" type="HBoxContainer" parent="ScenarioEditor" node_paths=PackedStringArray("job_select_button_container")]
+[node name="JobSelectContainer" type="HBoxContainer" parent="ScenarioEditor" unique_id=1714022995 node_paths=PackedStringArray("job_select_button_container")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -374,20 +374,20 @@ script = ExtResource("16_bp08t")
 job_select_button_container = NodePath("JobSelectScrollArea/JobSelectList")
 job_select_button_scene = ExtResource("14_f2r6p")
 
-[node name="Spacer" type="Control" parent="ScenarioEditor/JobSelectContainer"]
+[node name="Spacer" type="Control" parent="ScenarioEditor/JobSelectContainer" unique_id=143486491]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="JobSelectScrollArea" type="ScrollContainer" parent="ScenarioEditor/JobSelectContainer"]
+[node name="JobSelectScrollArea" type="ScrollContainer" parent="ScenarioEditor/JobSelectContainer" unique_id=46666350]
 layout_mode = 2
 horizontal_scroll_mode = 0
 
-[node name="JobSelectList" type="GridContainer" parent="ScenarioEditor/JobSelectContainer/JobSelectScrollArea"]
+[node name="JobSelectList" type="GridContainer" parent="ScenarioEditor/JobSelectContainer/JobSelectScrollArea" unique_id=191877590]
 layout_mode = 2
 size_flags_horizontal = 3
 columns = 2
 
-[node name="ItemSelectContainer" type="HBoxContainer" parent="ScenarioEditor" node_paths=PackedStringArray("item_select_button_container")]
+[node name="ItemSelectContainer" type="HBoxContainer" parent="ScenarioEditor" unique_id=258370141 node_paths=PackedStringArray("item_select_button_container")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -399,20 +399,20 @@ script = ExtResource("17_bp08t")
 item_select_button_container = NodePath("ItemSelectScrollArea/ItemSelectList")
 item_select_button_scene = ExtResource("18_d5yoq")
 
-[node name="Spacer" type="Control" parent="ScenarioEditor/ItemSelectContainer"]
+[node name="Spacer" type="Control" parent="ScenarioEditor/ItemSelectContainer" unique_id=145008621]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ItemSelectScrollArea" type="ScrollContainer" parent="ScenarioEditor/ItemSelectContainer"]
+[node name="ItemSelectScrollArea" type="ScrollContainer" parent="ScenarioEditor/ItemSelectContainer" unique_id=1692646385]
 layout_mode = 2
 horizontal_scroll_mode = 0
 
-[node name="ItemSelectList" type="GridContainer" parent="ScenarioEditor/ItemSelectContainer/ItemSelectScrollArea"]
+[node name="ItemSelectList" type="GridContainer" parent="ScenarioEditor/ItemSelectContainer/ItemSelectScrollArea" unique_id=870026063]
 layout_mode = 2
 size_flags_horizontal = 3
 columns = 3
 
-[node name="AbilitySelectContainer" type="HBoxContainer" parent="ScenarioEditor" node_paths=PackedStringArray("ability_select_button_container")]
+[node name="AbilitySelectContainer" type="HBoxContainer" parent="ScenarioEditor" unique_id=2138028931 node_paths=PackedStringArray("ability_select_button_container")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -424,20 +424,20 @@ script = ExtResource("18_pbg35")
 ability_select_button_container = NodePath("AbilitySelectScrollArea/AbilitySelectList")
 ability_select_button_scene = ExtResource("20_ok2a6")
 
-[node name="Spacer" type="Control" parent="ScenarioEditor/AbilitySelectContainer"]
+[node name="Spacer" type="Control" parent="ScenarioEditor/AbilitySelectContainer" unique_id=1819833387]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="AbilitySelectScrollArea" type="ScrollContainer" parent="ScenarioEditor/AbilitySelectContainer"]
+[node name="AbilitySelectScrollArea" type="ScrollContainer" parent="ScenarioEditor/AbilitySelectContainer" unique_id=875466022]
 layout_mode = 2
 horizontal_scroll_mode = 0
 
-[node name="AbilitySelectList" type="GridContainer" parent="ScenarioEditor/AbilitySelectContainer/AbilitySelectScrollArea"]
+[node name="AbilitySelectList" type="GridContainer" parent="ScenarioEditor/AbilitySelectContainer/AbilitySelectScrollArea" unique_id=1356332529]
 layout_mode = 2
 size_flags_horizontal = 3
 columns = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="ScenarioEditor"]
+[node name="MarginContainer" type="MarginContainer" parent="ScenarioEditor" unique_id=1566037213]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -446,18 +446,18 @@ offset_left = -589.0
 offset_bottom = 48.0
 grow_horizontal = 0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="ScenarioEditor/MarginContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="ScenarioEditor/MarginContainer" unique_id=254501853]
 layout_mode = 2
 
-[node name="ExportScenario" type="Button" parent="ScenarioEditor/MarginContainer/HBoxContainer"]
+[node name="ExportScenario" type="Button" parent="ScenarioEditor/MarginContainer/HBoxContainer" unique_id=1408401229]
 layout_mode = 2
 text = "Export Scenario"
 
-[node name="ImportScenario" type="Button" parent="ScenarioEditor/MarginContainer/HBoxContainer"]
+[node name="ImportScenario" type="Button" parent="ScenarioEditor/MarginContainer/HBoxContainer" unique_id=2028730762]
 layout_mode = 2
 text = "Import Scenario"
 
-[node name="ImportFileDialog" type="FileDialog" parent="ScenarioEditor/MarginContainer/HBoxContainer/ImportScenario"]
+[node name="ImportFileDialog" type="FileDialog" parent="ScenarioEditor/MarginContainer/HBoxContainer/ImportScenario" unique_id=1709963743]
 oversampling_override = 1.0
 title = "Open a File"
 initial_position = 2
@@ -469,7 +469,7 @@ access = 2
 filters = PackedStringArray("*.scenario.json")
 use_native_dialog = true
 
-[node name="LoadScenario" type="OptionButton" parent="ScenarioEditor/MarginContainer/HBoxContainer"]
+[node name="LoadScenario" type="OptionButton" parent="ScenarioEditor/MarginContainer/HBoxContainer" unique_id=1776173876]
 layout_mode = 2
 selected = 0
 item_count = 1
@@ -477,29 +477,29 @@ popup/item_0/text = "Load Scenario"
 popup/item_0/id = 0
 popup/item_0/separator = true
 
-[node name="NewScenario" type="Button" parent="ScenarioEditor/MarginContainer/HBoxContainer"]
+[node name="NewScenario" type="Button" parent="ScenarioEditor/MarginContainer/HBoxContainer" unique_id=1076059299]
 layout_mode = 2
 text = "New Scenario"
 
-[node name="StartBattle" type="Button" parent="ScenarioEditor/MarginContainer/HBoxContainer"]
+[node name="StartBattle" type="Button" parent="ScenarioEditor/MarginContainer/HBoxContainer" unique_id=976049207]
 layout_mode = 2
 text = "Start Battle!"
 
-[node name="OptionsPanelContainer" type="PanelContainer" parent="."]
+[node name="OptionsPanelContainer" type="PanelContainer" parent="." unique_id=1236366788]
 offset_right = 218.0
 offset_bottom = 68.0
 
-[node name="MarginContainer" type="MarginContainer" parent="OptionsPanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="OptionsPanelContainer" unique_id=1754633861]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="OptionsPanelContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="OptionsPanelContainer/MarginContainer" unique_id=913747402]
 layout_mode = 2
 
-[node name="MenuReminder" type="Label" parent="OptionsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="MenuReminder" type="Label" parent="OptionsPanelContainer/MarginContainer/VBoxContainer" unique_id=1106892062]
 layout_mode = 2
 text = "Press ESCAPE to toggle editor"
 
-[node name="OrthographicCheckBox" type="CheckBox" parent="OptionsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="OrthographicCheckBox" type="CheckBox" parent="OptionsPanelContainer/MarginContainer/VBoxContainer" unique_id=1205553809]
 layout_mode = 2
 button_pressed = true
 text = "Orthographic"

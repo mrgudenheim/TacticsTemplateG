@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="RangeTargeting" load_steps=2 format=3 uid="uid://bu2sto41olfil"]
+[gd_resource type="Resource" script_class="RangeTargeting" format=3 uid="uid://bu2sto41olfil"]
 
 [ext_resource type="Script" uid="uid://ba2wklkq5kl0i" path="res://src/content_scripts/actions/targeting_range.gd" id="1_xkrdh"]
 

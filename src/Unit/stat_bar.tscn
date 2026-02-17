@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://d2jb1kiyb35fa"]
+[gd_scene format=3 uid="uid://d2jb1kiyb35fa"]
 
 [ext_resource type="Script" uid="uid://dw16eiy4pm2tp" path="res://src/Unit/stat_bar.gd" id="1_e7q7o"]
 
@@ -29,7 +29,7 @@ font_size = 18
 outline_size = 6
 outline_color = Color(0, 0, 0, 1)
 
-[node name="StatBar" type="TextureProgressBar" node_paths=PackedStringArray("name_label", "value_label")]
+[node name="StatBar" type="TextureProgressBar" unique_id=591093240 node_paths=PackedStringArray("name_label", "value_label")]
 custom_minimum_size = Vector2(100, 15)
 value = 50.0
 allow_greater = true
@@ -40,7 +40,7 @@ script = ExtResource("1_e7q7o")
 name_label = NodePath("StatName")
 value_label = NodePath("StatValue")
 
-[node name="StatName" type="Label" parent="."]
+[node name="StatName" type="Label" parent="." unique_id=1331352309]
 visible = false
 layout_mode = 1
 anchors_preset = -1
@@ -54,7 +54,7 @@ label_settings = SubResource("LabelSettings_a44xk")
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="StatValue" type="Label" parent="."]
+[node name="StatValue" type="Label" parent="." unique_id=517442183]
 visible = false
 layout_mode = 1
 anchors_preset = -1

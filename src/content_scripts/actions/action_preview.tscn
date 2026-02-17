@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://c8f4elqq81b37"]
+[gd_scene format=3 uid="uid://c8f4elqq81b37"]
 
 [ext_resource type="Script" uid="uid://bwbencebp0rew" path="res://src/content_scripts/actions/action_preview.gd" id="1_qexfa"]
 
-[node name="ActionPreview" type="Control" node_paths=PackedStringArray("label")]
+[node name="ActionPreview" type="Control" unique_id=426137715 node_paths=PackedStringArray("label")]
 layout_mode = 3
 anchors_preset = 7
 anchor_left = 0.5
@@ -14,7 +14,7 @@ grow_vertical = 0
 script = ExtResource("1_qexfa")
 label = NodePath("PanelContainer/MarginContainer/Label")
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=429389415]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -27,14 +27,14 @@ offset_right = 21.5
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=278495710]
 layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer"]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer" unique_id=1297164822]
 layout_mode = 2
 text = "Test"
 vertical_alignment = 2

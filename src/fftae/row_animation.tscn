@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://t3xjefep2ne1"]
+[gd_scene format=3 uid="uid://t3xjefep2ne1"]
 
 [ext_resource type="ButtonGroup" uid="uid://d3gvtnjq7tpqo" path="res://src/fftae/button_group_animations.tres" id="1_7wbbd"]
 [ext_resource type="Script" uid="uid://1hfkujadr060" path="res://src/fftae/row_animation.gd" id="1_bnb56"]
 
-[node name="RowMarginContainer" type="MarginContainer" node_paths=PackedStringArray("pointer_label", "anim_id_spinbox", "description_label", "opcodes_label", "button")]
+[node name="RowMarginContainer" type="MarginContainer" unique_id=112192614 node_paths=PackedStringArray("pointer_label", "anim_id_spinbox", "description_label", "opcodes_label", "button")]
 clip_contents = true
 offset_right = 547.0
 offset_bottom = 59.0
@@ -18,27 +18,27 @@ description_label = NodePath("Row/MarginContainer2/Description")
 opcodes_label = NodePath("Row/MarginContainer3/Opcodes")
 button = NodePath("RowButton")
 
-[node name="RowButton" type="Button" parent="."]
+[node name="RowButton" type="Button" parent="." unique_id=215625347]
 layout_mode = 2
 toggle_mode = true
 button_group = ExtResource("1_7wbbd")
 
-[node name="Row" type="HBoxContainer" parent="."]
+[node name="Row" type="HBoxContainer" parent="." unique_id=259731549]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 0
 
-[node name="PointerId" type="Label" parent="Row"]
+[node name="PointerId" type="Label" parent="Row" unique_id=846656547]
 custom_minimum_size = Vector2(85, 0)
 layout_mode = 2
 text = "0 (0x00)"
 horizontal_alignment = 1
 
-[node name="VSeparator" type="VSeparator" parent="Row"]
+[node name="VSeparator" type="VSeparator" parent="Row" unique_id=323126315]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="Row"]
+[node name="MarginContainer" type="MarginContainer" parent="Row" unique_id=1770452057]
 custom_minimum_size = Vector2(70, 0)
 layout_mode = 2
 mouse_filter = 2
@@ -47,7 +47,7 @@ theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
 
-[node name="AnimId" type="SpinBox" parent="Row/MarginContainer"]
+[node name="AnimId" type="SpinBox" parent="Row/MarginContainer" unique_id=1593094894]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -57,27 +57,27 @@ rounded = true
 alignment = 2
 select_all_on_focus = true
 
-[node name="VSeparator2" type="VSeparator" parent="Row"]
+[node name="VSeparator2" type="VSeparator" parent="Row" unique_id=2117266571]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="MarginContainer2" type="MarginContainer" parent="Row"]
+[node name="MarginContainer2" type="MarginContainer" parent="Row" unique_id=1752243443]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_right = 5
 
-[node name="Description" type="Label" parent="Row/MarginContainer2"]
+[node name="Description" type="Label" parent="Row/MarginContainer2" unique_id=1434736665]
 custom_minimum_size = Vector2(115, 0)
 layout_mode = 2
 text = "Walk Front"
 autowrap_mode = 3
 
-[node name="VSeparator3" type="VSeparator" parent="Row"]
+[node name="VSeparator3" type="VSeparator" parent="Row" unique_id=303038484]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="MarginContainer3" type="MarginContainer" parent="Row"]
+[node name="MarginContainer3" type="MarginContainer" parent="Row" unique_id=369243590]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 5
@@ -85,7 +85,7 @@ theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="Opcodes" type="Label" parent="Row/MarginContainer3"]
+[node name="Opcodes" type="Label" parent="Row/MarginContainer3" unique_id=169140067]
 layout_mode = 2
 text = "LoadFrameAndWait(01,04)
 LoadFrameAndWait(02,04)"

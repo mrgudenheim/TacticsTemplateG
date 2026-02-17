@@ -1,81 +1,81 @@
-[gd_scene load_steps=3 format=3 uid="uid://ckvy5kybckxkh"]
+[gd_scene format=3 uid="uid://ckvy5kybckxkh"]
 
 [ext_resource type="Script" uid="uid://can2dyv3jj67w" path="res://src/battle/editor/ability_select_button.gd" id="1_awuk6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d26o3"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
 
-[node name="AbilitySelectButton" type="PanelContainer" node_paths=PackedStringArray("button", "display_name", "sprite_rect", "descrption")]
+[node name="AbilitySelectButton" type="PanelContainer" unique_id=1133927501 node_paths=PackedStringArray("button", "display_name", "sprite_rect", "descrption")]
 script = ExtResource("1_awuk6")
 button = NodePath("Button")
 display_name = NodePath("MarginContainer/VBoxContainer/Name")
 sprite_rect = NodePath("MarginContainer/Control/PanelContainer/Sprite")
 descrption = NodePath("MarginContainer/VBoxContainer/Description")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=368254690]
 layout_mode = 2
 
-[node name="Control" type="Control" parent="MarginContainer"]
+[node name="Control" type="Control" parent="MarginContainer" unique_id=1063571596]
 layout_mode = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/Control"]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/Control" unique_id=345250661]
 layout_mode = 1
 offset_right = 40.0
 offset_bottom = 20.0
 
-[node name="ColorRect" type="ColorRect" parent="MarginContainer/Control/PanelContainer"]
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/Control/PanelContainer" unique_id=740749757]
 layout_mode = 2
 color = Color(0.7724798, 0.5703566, 0.2862759, 1)
 
-[node name="Sprite" type="TextureRect" parent="MarginContainer/Control/PanelContainer"]
+[node name="Sprite" type="TextureRect" parent="MarginContainer/Control/PanelContainer" unique_id=1085097760]
 visible = false
 layout_mode = 2
 expand_mode = 2
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="MarginContainer/Control/PanelContainer"]
+[node name="Label" type="Label" parent="MarginContainer/Control/PanelContainer" unique_id=1733745177]
 layout_mode = 2
 text = "Sprite"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=2006470171]
 layout_mode = 2
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1748278312]
 layout_mode = 2
 
-[node name="Name" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="Name" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1672730921]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "AbilityName"
 horizontal_alignment = 1
 
-[node name="Description" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="Description" type="Label" parent="MarginContainer/VBoxContainer" unique_id=135671816]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 text = "AbilityDescription"
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1940217616]
 visible = false
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=14262366]
 layout_mode = 2
 
-[node name="SpriteAndStats" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
+[node name="SpriteAndStats" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=576410118]
 layout_mode = 2
 
-[node name="PassiveEffectsPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/SpriteAndStats"]
+[node name="PassiveEffectsPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/SpriteAndStats" unique_id=1986271088]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/SpriteAndStats/PassiveEffectsPanel"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/SpriteAndStats/PassiveEffectsPanel" unique_id=1472395086]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/SpriteAndStats/PassiveEffectsPanel/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/SpriteAndStats/PassiveEffectsPanel/MarginContainer" unique_id=991385156]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="."]
+[node name="Button" type="Button" parent="." unique_id=1631028207]
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_d26o3")

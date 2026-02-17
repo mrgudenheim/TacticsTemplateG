@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://buljw4afjva1d"]
+[gd_scene format=3 uid="uid://buljw4afjva1d"]
 
 [ext_resource type="Script" uid="uid://2xnqb0s2njm6" path="res://src/content_scripts/Map/map_chunk_nodes.gd" id="1_64g4l"]
 [ext_resource type="Shader" uid="uid://cq4x76xn7qnvi" path="res://src/content_scripts/Map/map_shader.gdshader" id="2_rol37"]
@@ -6,15 +6,15 @@
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_vqavv"]
 backface_collision = true
 
-[node name="MapChunk" type="StaticBody3D" node_paths=PackedStringArray("mesh_instance", "collision_shape")]
+[node name="MapChunk" type="StaticBody3D" unique_id=790882441 node_paths=PackedStringArray("mesh_instance", "collision_shape")]
 script = ExtResource("1_64g4l")
 mesh_instance = NodePath("MeshInstance3D")
 collision_shape = NodePath("CollisionShape3D")
 map_shader = ExtResource("2_rol37")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=136573296]
 shape = SubResource("ConcavePolygonShape3D_vqavv")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1364264082]
 transform = Transform3D(1, -6.6815e-22, 0, -6.6815e-22, 1, 0, 0, 0, 1, 0, 0, 0)
 skeleton = NodePath("../../..")
