@@ -26,10 +26,8 @@ var action_instance: ActionInstance
 # 	-Nullified (element)
 # 	-Guarded
 # -Item Lost--Potions/Break/Steal/Draw Out
-# -HP Damage Halfword
-# -HP Healing Halfword
-# -MP Damage Halfword
-# -MP Healing Halfword
+# -HP Damage/Healing
+# -MP Damage/MP Healing
 # -Gil Stolen/Lost
 # -Reaction ID
 # -Special Effect
@@ -41,12 +39,12 @@ var action_instance: ActionInstance
 # 	-Malboro (moldball virus)
 # 	-Golem
 # 	-Knockback?
-# -SP Change Byte
-# -CT Change Byte
-# -PA Change Byte
-# -MA Change Byte
-# -Br Change Byte
-# -Fa Change Byte
+# -SP Change
+# -CT Change
+# -PA Change
+# -MA Change
+# -Br Change
+# -Fa Change
 # -Status Change?
 # -Equipment Destroyed Slot
 # 	-Remove Helmet
