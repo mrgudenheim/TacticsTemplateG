@@ -3,12 +3,11 @@ extends Node3D
 
 signal map_input_event(action_instance: ActionInstance, camera: Camera3D, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) # TODO should action_instance be removed from signal?
 signal unit_created(new_unit: Unit)
+signal delayed_action_completed
 
 const SCALE: float = 1.0 / MapData.TILE_SIDE_LENGTH
 const SCALED_UNITS_PER_HEIGHT: float = SCALE * MapData.UNITS_PER_HEIGHT
 
-# debug vars
-@export var use_test_teams: bool = false
 @export var texture_viewer: Sprite3D # for debugging
 @export var reference_quad: MeshInstance3D # for debugging
 @export var highlights_container: Node3D
@@ -135,10 +134,7 @@ func on_rom_loaded() -> void:
 
 	scenario_editor.populate_option_lists()
 	scenario_editor.visible = true
-	if use_test_teams:
-		scenario_editor.init_scenario(RomReader.scenarios["test0"])
-	else:
-		scenario_editor.init_scenario()
+	scenario_editor.init_scenario()
 
 
 func load_scenario(new_scenario: Scenario) -> void:
@@ -322,8 +318,8 @@ func start_battle() -> void:
 	#teams.append(team2)
 	#team2.team_name = "Team 2 (Computer)"
 	#
-	##if use_test_teams:
-		##add_test_teams_to_map()
+	#if use_test_teams:
+		#add_test_teams_to_map()
 	##else: # use random teams
 		##var generic_job_ids: Array[int] = []
 		##generic_job_ids.assign(range(0x4a, 0x5a)) # generics
@@ -725,9 +721,9 @@ func update_units_pathfinding() -> void:
 func process_battle() -> void:
 	while battle_is_running:
 		await process_clock_tick()
-		
+
 		# TODO check end conditions, switching map, etc.
-	
+
 	for team: Team in teams:
 		if team.state == Team.State.WON:
 			battle_end_panel.visible = true
@@ -745,7 +741,7 @@ func process_battle() -> void:
 # TODO implement action timeline
 func process_clock_tick() -> void:
 	game_state_label.text = "processing new clock tick"
-	
+
 	# increment status ticks
 	for unit: Unit in units:
 		var statuses_to_remove: Array[StatusEffect] = []
@@ -763,6 +759,7 @@ func process_clock_tick() -> void:
 						camera_controller.follow_node = unit.char_body
 						game_state_label.text = unit.job_nickname + "-" + unit.unit_nickname + " processing " + status.status_effect_name + " ending"
 						await status_action_instance.use()
+						if not battle_is_running: return
 						# await status_action_instance.action_completed
 						if check_end_conditions():
 							safe_to_load_map = true
@@ -773,28 +770,39 @@ func process_clock_tick() -> void:
 						camera_controller.follow_node = unit.char_body
 						game_state_label.text = unit.job_nickname + "-" + unit.unit_nickname + " processing delayed " + status.delayed_action.action.display_name
 						await status.delayed_action.use()
+						if not battle_is_running: return
 						#await status.delayed_action.action_completed
+						delayed_action_completed.emit()
+						if not battle_is_running: return
 						if check_end_conditions():
 							safe_to_load_map = true
 							return
 			safe_to_load_map = true
 			await get_tree().process_frame
+			if not battle_is_running: return
 		for status: StatusEffect in statuses_to_remove:
+			if not is_instance_valid(unit): break
 			unit.remove_status(status)
-	
+
+	if not battle_is_running: return
+
 	for unit: Unit in units: # increment each units ct by speed
 		if not unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.freezes_ct): # check status that prevent ct gain (stop, sleep, etc.)
 			var ct_gain: int = unit.speed
 			for status: StatusEffect in unit.current_statuses:
 				ct_gain = status.passive_effect.ct_gain_modifier.apply(ct_gain)
-			unit.stats[Unit.StatType.CT].add_value(ct_gain) 
-	
+			unit.stats[Unit.StatType.CT].add_value(ct_gain)
+
+	if not battle_is_running: return
+
 	# execute unit turns, ties decided by unit index in units[]
 	# TODO keep looping until all units ct_current < 100
 	for unit: Unit in units:
+		if not battle_is_running: return
 		if unit.ct_current >= 100:
 			safe_to_load_map = false
 			await start_units_turn(unit)
+			if not battle_is_running: return
 			#if unit.is_defeated: # check status that counts as KO, aka prevents turn (dead, petrify, etc.)
 				#unit.end_turn()
 			if not unit.is_defeated:
@@ -802,6 +810,7 @@ func process_clock_tick() -> void:
 					safe_to_load_map = true
 				while not unit.is_ending_turn:
 					await get_tree().process_frame
+					if not battle_is_running: return
 					if unit == null: # prevent error when loading map
 						return
 				if check_end_conditions():
@@ -809,6 +818,7 @@ func process_clock_tick() -> void:
 					return
 			safe_to_load_map = true
 			await get_tree().process_frame
+			if not battle_is_running: return
 	
 	# TODO increment status ticks, delayed action ticks, and unit ticks in the same step, then order resolution?
 

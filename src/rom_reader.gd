@@ -53,6 +53,41 @@ var triggered_actions: Dictionary[String, TriggeredAction] = {} # [unique_name, 
 var passive_effects: Dictionary[String, PassiveEffect] = {} # [unique_name, TriggeredAction]
 var abilities: Dictionary[String, Ability] = {} # [unique_name, Ability]
 var scenarios: Dictionary[String, Scenario] = {} # [unique_name, Scenario]
+var scenario_paths: Dictionary[String, String] = {} # [unique_name, file_path] for lazy-loaded scenarios
+
+
+func get_scenario(scenario_name: String) -> Scenario:
+	if scenarios.has(scenario_name):
+		return scenarios[scenario_name]
+	if scenario_paths.has(scenario_name):
+		var file: FileAccess = FileAccess.open(scenario_paths[scenario_name], FileAccess.READ)
+		var new_scenario: Scenario = Scenario.create_from_json(file.get_as_text())
+		file.close()
+		scenarios[scenario_name] = new_scenario
+		return new_scenario
+	push_error("Scenario not found: " + scenario_name)
+	return null
+
+
+func get_all_scenario_names() -> PackedStringArray:
+	var names: PackedStringArray = []
+	for key: String in scenarios.keys():
+		names.append(key)
+	for key: String in scenario_paths.keys():
+		if not scenarios.has(key):
+			names.append(key)
+	return names
+
+
+func has_scenario(scenario_name: String) -> bool:
+	return scenarios.has(scenario_name) or scenario_paths.has(scenario_name)
+
+var rom_load_times: Array[Dictionary] = [] # [{name: String, time_ms: int}]
+
+func _profile_section(section_name: String, start_ms: int) -> int:
+	var elapsed: int = Time.get_ticks_msec() - start_ms
+	rom_load_times.append({"name": section_name, "time_ms": elapsed})
+	return Time.get_ticks_msec()
 
 var battle_bin_data: BattleBinData = BattleBinData.new() # BATTLE.BIN tables
 var scus_data: ScusData = ScusData.new() # SCUS.942.41 tables
@@ -80,6 +115,27 @@ class SpritesheetRegionData:
 
 #func _init() -> void:
 	#pass
+
+
+const ROM_PATH_CONFIG: String = "user://rom_path.cfg"
+
+
+func _ready() -> void:
+	var auto_load_path: String = _get_saved_rom_path()
+	if not auto_load_path.is_empty() and FileAccess.file_exists(auto_load_path):
+		call_deferred("on_load_rom_dialog_file_selected", auto_load_path)
+
+
+func _get_saved_rom_path() -> String:
+	if not FileAccess.file_exists(ROM_PATH_CONFIG):
+		return ""
+	var file: FileAccess = FileAccess.open(ROM_PATH_CONFIG, FileAccess.READ)
+	return file.get_line().strip_edges()
+
+
+func _save_rom_path(path: String) -> void:
+	var file: FileAccess = FileAccess.open(ROM_PATH_CONFIG, FileAccess.WRITE)
+	file.store_line(path)
 
 
 func on_load_rom_dialog_file_selected(path: String) -> void:
@@ -111,29 +167,46 @@ func clear_data() -> void:
 	passive_effects.clear()
 	abilities.clear()
 	scenarios.clear()
+	scenario_paths.clear()
 
 
 func process_rom() -> void:
 	clear_data()
-	
-	var start_time: int = Time.get_ticks_msec()
-	
+	rom_load_times.clear()
+	var section_start: int = Time.get_ticks_msec()
+	var total_start: int = section_start
+
 	RomReader.spr_id_file_idxs.resize(NUM_SPRITESHEETS)
-	
+
 	# http://wiki.osdev.org/ISO_9660#Directories
 	process_file_records(DIRECTORY_DATA_SECTORS_ROOT)
-	
-	push_warning("Time to process ROM (ms): " + str(Time.get_ticks_msec() - start_time))
-	
+	section_start = _profile_section("process_file_records", section_start)
+
 	process_frame_bin()
-	
+	section_start = _profile_section("process_frame_bin", section_start)
+
 	fft_text.init_text()
+	section_start = _profile_section("fft_text.init_text", section_start)
+
 	scus_data.init_from_scus()
+	section_start = _profile_section("scus_data.init_from_scus", section_start)
+
 	battle_bin_data.init_from_battle_bin()
-	wldcore_data.init_from_wldcore()
-	attack_out_data.init_from_attack_out()
-	
+	section_start = _profile_section("battle_bin_data.init_from_battle_bin", section_start)
+
+	var fft_scenarios_pre_extracted: bool = Array(DirAccess.open("res://src/_content/scenarios").get_files()).any(func(f: String) -> bool: return f.begins_with("map_") and f.ends_with(".scenario.json"))
+
+	if not fft_scenarios_pre_extracted:
+		wldcore_data.init_from_wldcore()
+		section_start = _profile_section("wldcore_data.init_from_wldcore", section_start)
+
+		attack_out_data.init_from_attack_out()
+		section_start = _profile_section("attack_out_data.init_from_attack_out", section_start)
+	else:
+		section_start = _profile_section("SKIPPED wldcore+attack_out (pre-extracted)", section_start)
+
 	cache_associated_files()
+	section_start = _profile_section("cache_associated_files", section_start)
 
 	for map_idx: int in maps_array.size():
 		var map_data: MapData = maps_array[map_idx]
@@ -143,50 +216,59 @@ func process_rom() -> void:
 			map_data.unique_name += " " + map_data.display_name
 		map_data.unique_name = map_data.unique_name.to_snake_case()
 		maps[map_data.unique_name] = map_data
-	
+	section_start = _profile_section("map_naming", section_start)
+
 	for ability_id: int in NUM_ABILITIES:
 		var new_fft_ability: FftAbilityData = FftAbilityData.new(ability_id)
 		fft_abilities.append(new_fft_ability)
 		var new_ability: Ability = new_fft_ability.create_ability()
 		new_ability.add_to_global_list()
-	
+
 	for fft_ability: FftAbilityData in fft_abilities:
 		if fft_ability.ability_type == FftAbilityData.AbilityType.NORMAL:
 			fft_ability.set_action()
+	section_start = _profile_section("abilities (512 + set_action)", section_start)
 
 	# must be after fft_abilities to set secondary actions
 	items_array.resize(NUM_ITEMS)
 	for id: int in NUM_ITEMS:
 		items_array[id] = ItemData.new(id)
-	
+	section_start = _profile_section("items (254)", section_start)
+
 	scus_data.init_statuses()
+	section_start = _profile_section("scus_data.init_statuses", section_start)
 
-	add_entds("ENTD1.ENT")
-	add_entds("ENTD2.ENT")
-	add_entds("ENTD3.ENT")
-	add_entds("ENTD4.ENT")
+	if not fft_scenarios_pre_extracted:
+		add_entds("ENTD1.ENT")
+		add_entds("ENTD2.ENT")
+		add_entds("ENTD3.ENT")
+		add_entds("ENTD4.ENT")
+		section_start = _profile_section("add_entds (4 files)", section_start)
 
-	var wldcore_scenarios: Array[Scenario] = wldcore_data.get_all_scenarios()
-	for new_scenario: Scenario in wldcore_scenarios:
-		var number: int = 1
-		var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
-		while scenarios.keys().has(new_unique_name):
-			number += 1
-			new_unique_name = new_scenario.unique_name + ("_%02d" % number)
-		new_scenario.unique_name = new_unique_name
+		var wldcore_scenarios: Array[Scenario] = wldcore_data.get_all_scenarios()
+		for new_scenario: Scenario in wldcore_scenarios:
+			var number: int = 1
+			var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
+			while scenarios.keys().has(new_unique_name):
+				number += 1
+				new_unique_name = new_scenario.unique_name + ("_%02d" % number)
+			new_scenario.unique_name = new_unique_name
 
-		RomReader.scenarios[new_scenario.unique_name] = new_scenario
+			RomReader.scenarios[new_scenario.unique_name] = new_scenario
 
-	var attack_out_scenarios: Array[Scenario] = attack_out_data.get_unique_scenarios()
-	for new_scenario: Scenario in attack_out_scenarios:
-		var number: int = 1
-		var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
-		while scenarios.keys().has(new_unique_name):
-			number += 1
-			new_unique_name = new_scenario.unique_name + ("_%02d" % number)
-		new_scenario.unique_name = new_unique_name
+		var attack_out_scenarios: Array[Scenario] = attack_out_data.get_unique_scenarios()
+		for new_scenario: Scenario in attack_out_scenarios:
+			var number: int = 1
+			var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
+			while scenarios.keys().has(new_unique_name):
+				number += 1
+				new_unique_name = new_scenario.unique_name + ("_%02d" % number)
+			new_scenario.unique_name = new_unique_name
 
-		RomReader.scenarios[new_scenario.unique_name] = new_scenario
+			RomReader.scenarios[new_scenario.unique_name] = new_scenario
+		section_start = _profile_section("scenario_extraction", section_start)
+	else:
+		section_start = _profile_section("SKIPPED entds+scenarios (pre-extracted)", section_start)
 
 	# for status_: int in status_effects.size():
 		# status_effects[idx].ai_score_formula.values[0] = battle_bin_data.ai_status_priorities[idx] / 128.0
@@ -215,7 +297,17 @@ func process_rom() -> void:
 	# json_file.close()
 	
 	import_custom_data()
+	section_start = _profile_section("import_custom_data (~200 JSON files)", section_start)
+
 	connect_data_references()
+	section_start = _profile_section("connect_data_references", section_start)
+
+	var total_ms: int = Time.get_ticks_msec() - total_start
+	print("=== ROM Load Profile ===")
+	for entry: Dictionary in rom_load_times:
+		var pct: float = (entry.time_ms / float(total_ms)) * 100.0
+		print("  %6d ms (%5.1f%%) — %s" % [entry.time_ms, pct, entry.name])
+	print("  %6d ms (TOTAL)" % total_ms)
 
 	# var new_scenario: Scenario = Scenario.new()
 	# new_scenario.unique_name = "test1"
@@ -612,40 +704,41 @@ func import_custom_data() -> void:
 					#push_warning("Found file: " + file_name)
 					if file_name.ends_with(".json"):
 						var file_path: String = dir_path + file_name
-						var file: FileAccess = FileAccess.open(file_path, FileAccess.READ)
-						var file_text: String = file.get_as_text()
-
 						var data_type: String = file_name.split(".")[-2]
 
-						match data_type:
-							"action":
-								var new_content: Action = Action.create_from_json(file_text)
-								if not actions.keys().has(new_content.unique_name):
-									new_content.add_to_global_list()
-							"ability":
-								var new_content: Ability = Ability.create_from_json(file_text)
-								if not abilities.keys().has(new_content.unique_name):
-									new_content.add_to_global_list()
-							"triggered_action":
-								var new_content: TriggeredAction = TriggeredAction.create_from_json(file_text)
-								if not triggered_actions.keys().has(new_content.unique_name):
-									new_content.add_to_global_list()
-							"passive_effect":
-								var new_content: PassiveEffect = PassiveEffect.create_from_json(file_text)
-								if not passive_effects.keys().has(new_content.unique_name):
-									new_content.add_to_global_list()
-							"status_effect":
-								var new_content: StatusEffect = StatusEffect.create_from_json(file_text)
-								if not status_effects.keys().has(new_content.unique_name):
-									new_content.add_to_global_list()
-							"item":
-								var new_content: ItemData = ItemData.create_from_json(file_text)
-								if not items.keys().has(new_content.unique_name): # TODO allow overwriting content
-									new_content.add_to_global_list()
-							"scenario":
-								var new_content: Scenario = Scenario.create_from_json(file_text)
-								if not scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
-									new_content.add_to_global_list()
+						if data_type == "scenario":
+							var unique_name: String = file_name.trim_suffix(".scenario.json")
+							if not has_scenario(unique_name):
+								scenario_paths[unique_name] = file_path
+						else:
+							var file: FileAccess = FileAccess.open(file_path, FileAccess.READ)
+							var file_text: String = file.get_as_text()
+
+							match data_type:
+								"action":
+									var new_content: Action = Action.create_from_json(file_text)
+									if not actions.keys().has(new_content.unique_name):
+										new_content.add_to_global_list()
+								"ability":
+									var new_content: Ability = Ability.create_from_json(file_text)
+									if not abilities.keys().has(new_content.unique_name):
+										new_content.add_to_global_list()
+								"triggered_action":
+									var new_content: TriggeredAction = TriggeredAction.create_from_json(file_text)
+									if not triggered_actions.keys().has(new_content.unique_name):
+										new_content.add_to_global_list()
+								"passive_effect":
+									var new_content: PassiveEffect = PassiveEffect.create_from_json(file_text)
+									if not passive_effects.keys().has(new_content.unique_name):
+										new_content.add_to_global_list()
+								"status_effect":
+									var new_content: StatusEffect = StatusEffect.create_from_json(file_text)
+									if not status_effects.keys().has(new_content.unique_name):
+										new_content.add_to_global_list()
+								"item":
+									var new_content: ItemData = ItemData.create_from_json(file_text)
+									if not items.keys().has(new_content.unique_name): # TODO allow overwriting content
+										new_content.add_to_global_list()
 				file_name = dir.get_next()
 			dir.list_dir_end()
 		else:

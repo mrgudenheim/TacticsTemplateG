@@ -1,0 +1,87 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" uid="uid://odqiqyvvgy0u" path="res://src/battle/extract_fft_scenarios.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://26tg32417lfm" path="res://src/load_rom.tscn" id="2_load_rom"]
+
+[node name="ExtractFftScenarios" type="Control" node_paths=PackedStringArray("load_rom_button", "rom_path_label", "auto_load_checkbox", "clear_path_button", "extract_button", "status_label", "close_button")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+load_rom_button = NodePath("MarginContainer/VBoxContainer/RomRow/LoadRom")
+rom_path_label = NodePath("MarginContainer/VBoxContainer/RomRow/RomPathLabel")
+auto_load_checkbox = NodePath("MarginContainer/VBoxContainer/AutoLoadCheckBox")
+clear_path_button = NodePath("MarginContainer/VBoxContainer/ClearPathButton")
+extract_button = NodePath("MarginContainer/VBoxContainer/ExtractButton")
+status_label = NodePath("MarginContainer/VBoxContainer/StatusLabel")
+close_button = NodePath("MarginContainer/VBoxContainer/CloseButton")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "FFT Setup Tool"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="RomRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LoadRom" parent="MarginContainer/VBoxContainer/RomRow" instance=ExtResource("2_load_rom")]
+layout_mode = 2
+
+[node name="RomPathLabel" type="Label" parent="MarginContainer/VBoxContainer/RomRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "No ROM path saved"
+text_overrun_behavior = 3
+
+[node name="AutoLoadCheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Auto-load ROM on startup"
+
+[node name="ClearPathButton" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Clear Saved Path"
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ExtractButton" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+disabled = true
+text = "Extract Scenarios"
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "ROM not loaded"
+
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CloseButton" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Close"
