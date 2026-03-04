@@ -438,7 +438,7 @@ func apply_standard(action_instance: ActionInstance) -> void:
 	for target_unit: Unit in target_units:
 		if vfx_data != null:
 			#vfx_data.vfx_completed.connect(func(): vfx_completed = true, CONNECT_ONE_SHOT)
-			vfx_locations.append(show_vfx(action_instance, target_unit.tile_position.get_world_position()))
+			vfx_locations.append(show_vfx(action_instance, target_unit.char_body.global_position))
 		var evade_direction: EvadeData.Directions = get_evade_direction(action_instance.user, target_unit)
 		var total_hit_chance: int = get_total_hit_chance(action_instance.user, target_unit, evade_direction)
 		var hit_success: bool = randi_range(0, 99) < total_hit_chance
@@ -499,29 +499,37 @@ func apply_standard(action_instance: ActionInstance) -> void:
 	# wait for applying effect animation
 	action_instance.user.global_battle_manager.game_state_label.text = "Waiting for " + display_name + " vfx" 
 	if vfx_data != null and target_units.size() > 0:
-		while vfx_locations.any(func(vfx_location: Node3D) -> bool: return vfx_location != null): # wait until vfx is completed
+		while vfx_locations.any(func(vfx_location: Variant) -> bool: return is_instance_valid(vfx_location)): # wait until vfx is completed
 			await action_instance.user.get_tree().process_frame
 	else:
 		await action_instance.user.get_tree().create_timer(0.5).timeout # TODO show based on vfx timing data? (attacks use vfx 0xFFFF?)
 	for target_unit: Unit in target_units:
-		target_unit.return_to_idle_from_hit()
+		if is_instance_valid(target_unit):
+			target_unit.return_to_idle_from_hit()
 	vfx_locations.clear()
-	
+
+	if not is_instance_valid(action_instance.user):
+		return
+
 	# pay costs
 	action_instance.user.mp -= action_instance.action.mp_cost
 
 	# wait for triggered actions
 	if action_instance.allow_triggering_actions:
 		for target: Unit in target_units:
-			for connection: Dictionary in target.targeted_post_action.get_connections():
-				await connection["callable"].call(target, action_instance)
+			if is_instance_valid(target):
+				for connection: Dictionary in target.targeted_post_action.get_connections():
+					await connection["callable"].call(target, action_instance)
 
 	action_instance.clear() # clear all highlighting and target data
-	
+
+	if not is_instance_valid(action_instance.user):
+		return
+
 	if ends_turn:
 		action_instance.user.is_ending_turn = true
 		#action_instance.user.end_turn()
-	
+
 	action_instance.action_completed.emit(action_instance.battle_manager)
 
 
@@ -565,19 +573,19 @@ func apply_status(unit: Unit, status_list: Array[String], status_list_type: Stat
 
 func show_vfx(action_instance: ActionInstance, position: Vector3) -> Node3D:
 	if not is_instance_valid(vfx_data):
+		print("[Action.show_vfx] vfx_data is not valid, skipping")
 		return
-	
-	var new_vfx_location: Node3D = Node3D.new()
-	new_vfx_location.position = position
-	#new_vfx_location.position.y += 2 # TODO set position dependent on ability vfx data
-	new_vfx_location.name = "VfxLocation"
-	action_instance.user.get_parent().add_child(new_vfx_location)
-	
-	if not vfx_data.is_initialized:
-		vfx_data.init_from_file()
-	
-	vfx_data.display_vfx(new_vfx_location)
-	return new_vfx_location
+
+	var parent_node: Node = action_instance.user.get_parent()
+
+	var instance := VfxEffectInstance.new()
+	instance.name = "VfxEffectInstance"
+	instance.position = position
+	parent_node.add_child(instance)
+
+	var origin_pos: Vector3 = action_instance.user.char_body.global_position
+	instance.initialize(vfx_data, position, origin_pos)
+	return instance
 
 
 # TODO set action type directly for each action? maybe as part of action processing per target to check values after formula processing and passive effect modifications
