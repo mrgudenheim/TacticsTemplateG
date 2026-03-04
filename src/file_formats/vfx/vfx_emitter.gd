@@ -1,9 +1,15 @@
 class_name VfxEmitter
 extends RefCounted
 
+## Unit conversion constants (FFT raw → Godot units)
+## These match godot-learning/tools/transform_for_godot.py
+const POSITION_DIVISOR: float = 28.0           ## FFT world units → Godot tile units
+const VELOCITY_DIVISOR: float = 14336.0        ## raw → Godot units/frame
+const ACCEL_DIVISOR: float = 114688.0          ## raw → Godot units/frame² (4096 * 28)
+const ANGLE_TO_RADIANS: float = TAU / 4096.0   ## 0-4096 → radians
+
 var vfx_data: VisualEffectData
 var anim_index: int
-var animation: VisualEffectData.VfxAnimation
 var motion_type_flag: int
 var align_to_velocity: bool = false
 var target_anchor_mode: int = 0
@@ -55,10 +61,10 @@ var end_angle: Vector3 = Vector3.ZERO
 var start_angle_spread: Vector3 = Vector3.ZERO
 var end_angle_spread: Vector3 = Vector3.ZERO
 
-var intertia_min_start: int = 0
-var intertia_max_start: int = 0
-var intertia_min_end: int = 0
-var intertia_max_end: int = 0
+var inertia_min_start: int = 0
+var inertia_max_start: int = 0
+var inertia_min_end: int = 0
+var inertia_max_end: int = 0
 
 var weight_min_start: int = 0
 var weight_max_start: int = 0
@@ -102,14 +108,54 @@ var homing_strength_max_end: int = 0
 var child_emitter_idx_on_death: int = 0
 var child_emitter_idx_on_interval: int = 0
 
+## Converted fields (Godot units, matching godot-learning's EffectEmitter)
+## Positions: / 28.0 with Y-flip
+var conv_position_start: Vector3 = Vector3.ZERO
+var conv_position_end: Vector3 = Vector3.ZERO
+var conv_spread_start: Vector3 = Vector3.ZERO
+var conv_spread_end: Vector3 = Vector3.ZERO
+## Angles: * TAU / 4096.0 (radians)
+var conv_angle_start: Vector3 = Vector3.ZERO
+var conv_angle_end: Vector3 = Vector3.ZERO
+var conv_angle_spread_start: Vector3 = Vector3.ZERO
+var conv_angle_spread_end: Vector3 = Vector3.ZERO
+## Inertia/weight: cast to float (no unit conversion, used directly in physics formula)
+var conv_inertia_min_start: float = 0.0
+var conv_inertia_max_start: float = 0.0
+var conv_inertia_min_end: float = 0.0
+var conv_inertia_max_end: float = 0.0
+var conv_weight_min_start: float = 0.0
+var conv_weight_max_start: float = 0.0
+var conv_weight_min_end: float = 0.0
+var conv_weight_max_end: float = 0.0
+## Radial velocity: / 14336.0 (signed)
+var conv_radial_velocity_min_start: float = 0.0
+var conv_radial_velocity_max_start: float = 0.0
+var conv_radial_velocity_min_end: float = 0.0
+var conv_radial_velocity_max_end: float = 0.0
+## Acceleration: / 114688.0 with Y-flip (signed)
+var conv_acceleration_min_start: Vector3 = Vector3.ZERO
+var conv_acceleration_max_start: Vector3 = Vector3.ZERO
+var conv_acceleration_min_end: Vector3 = Vector3.ZERO
+var conv_acceleration_max_end: Vector3 = Vector3.ZERO
+## Drag: / 114688.0 with Y-flip (signed)
+var conv_drag_min_start: Vector3 = Vector3.ZERO
+var conv_drag_max_start: Vector3 = Vector3.ZERO
+var conv_drag_min_end: Vector3 = Vector3.ZERO
+var conv_drag_max_end: Vector3 = Vector3.ZERO
+## Target offset: / 28.0 with Y-flip (signed)
+var conv_target_offset_start: Vector3 = Vector3.ZERO
+var conv_target_offset_end: Vector3 = Vector3.ZERO
+## Homing strength: / 114688.0 (signed)
+var conv_homing_strength_min_start: float = 0.0
+var conv_homing_strength_max_start: float = 0.0
+var conv_homing_strength_min_end: float = 0.0
+var conv_homing_strength_max_end: float = 0.0
+
 # var color_masking_motion_flags: int # byte 06
 # var byte_07: int
 # var start_position: Vector3i
 # var end_position: Vector3i
-
-# start time and lifetime controlled by timers in VisualEffectData.spawn_emitters
-# var start_time: int = 0
-# var emitter_lifetime: int = 0 # frames
 
 func _init(emitter_bytes: PackedByteArray = [], new_vfx_data: VisualEffectData = null):
 	if emitter_bytes.size() == 0:
@@ -120,7 +166,7 @@ func _init(emitter_bytes: PackedByteArray = [], new_vfx_data: VisualEffectData =
 	anim_index = emitter_bytes.decode_u8(1)
 	
 	motion_type_flag = emitter_bytes.decode_u8(2)
-	align_to_velocity = motion_type_flag & 1 == 1
+	align_to_velocity = motion_type_flag & 0x02 != 0
 	target_anchor_mode = motion_type_flag >> 5
 	
 	animation_target_flag = emitter_bytes.decode_u8(3) 
@@ -179,10 +225,10 @@ func _init(emitter_bytes: PackedByteArray = [], new_vfx_data: VisualEffectData =
 	start_angle_spread = Vector3(emitter_bytes.decode_u16(0x38), emitter_bytes.decode_u16(0x3a), emitter_bytes.decode_u16(0x3c))
 	end_angle_spread = Vector3(emitter_bytes.decode_u16(0x3e), emitter_bytes.decode_u16(0x40), emitter_bytes.decode_u16(0x42))
 
-	intertia_min_start = emitter_bytes.decode_u16(0x44)
-	intertia_max_start = emitter_bytes.decode_u16(0x46)
-	intertia_min_end = emitter_bytes.decode_u16(0x48)
-	intertia_max_end = emitter_bytes.decode_u16(0x4a)
+	inertia_min_start = emitter_bytes.decode_u16(0x44)
+	inertia_max_start = emitter_bytes.decode_u16(0x46)
+	inertia_min_end = emitter_bytes.decode_u16(0x48)
+	inertia_max_end = emitter_bytes.decode_u16(0x4a)
 	
 	# bytes 0x4c - 0x52 not used
 
@@ -206,10 +252,10 @@ func _init(emitter_bytes: PackedByteArray = [], new_vfx_data: VisualEffectData =
 	drag_min_end = Vector3(emitter_bytes.decode_u16(0x88), emitter_bytes.decode_u16(0x8c), emitter_bytes.decode_u16(0x90))
 	drag_max_end = Vector3(emitter_bytes.decode_u16(0x8a), emitter_bytes.decode_u16(0x8e), emitter_bytes.decode_u16(0x92))
 
-	particle_lifetime_min_start = emitter_bytes.decode_u16(0x94)
-	particle_lifetime_max_start = emitter_bytes.decode_u16(0x96)
-	particle_lifetime_min_end = emitter_bytes.decode_u16(0x98)
-	particle_lifetime_max_end = emitter_bytes.decode_u16(0x9a)
+	particle_lifetime_min_start = emitter_bytes.decode_s16(0x94)
+	particle_lifetime_max_start = emitter_bytes.decode_s16(0x96)
+	particle_lifetime_min_end = emitter_bytes.decode_s16(0x98)
+	particle_lifetime_max_end = emitter_bytes.decode_s16(0x9a)
 
 	target_offset_start = Vector3(emitter_bytes.decode_u16(0x9c), emitter_bytes.decode_u16(0x9e), emitter_bytes.decode_u16(0xa0))
 	target_offset_end = Vector3(emitter_bytes.decode_u16(0xa2), emitter_bytes.decode_u16(0xa4), emitter_bytes.decode_u16(0xa6))
@@ -232,16 +278,96 @@ func _init(emitter_bytes: PackedByteArray = [], new_vfx_data: VisualEffectData =
 
 	# bytes 0xc2, 0xc3 not used
 
+	_compute_converted_fields(emitter_bytes)
 
-# TODO implement emitters spawning particles
-func spawn_particles(emitter_node: Node3D) -> void:
-	var particle: VfxParticle = VfxParticle.new(vfx_data, self)
-	particle.name = emitter_node.name + " Particle, Animation_" + str(anim_index)
-	# handle initial anim_location position as screen_space movement instead of world space
-	
-	if emitter_node == null:
-		return
-	emitter_node.add_child(particle)
-	particle.play_animation() # particles needs to be added to tree before playing animation because they need to get the viewport to set their position
-	particle.reparent(emitter_node.get_parent())
+
+func _compute_converted_fields(emitter_bytes: PackedByteArray) -> void:
+	## Position: already Y-flipped in raw parse, divide by 28
+	conv_position_start = start_position / POSITION_DIVISOR
+	conv_position_end = end_position / POSITION_DIVISOR
+
+	## Spread: / 28 with Y-flip (raw was NOT Y-flipped)
+	conv_spread_start = Vector3(
+		start_position_spread.x / POSITION_DIVISOR,
+		-start_position_spread.y / POSITION_DIVISOR,
+		start_position_spread.z / POSITION_DIVISOR)
+	conv_spread_end = Vector3(
+		end_position_spread.x / POSITION_DIVISOR,
+		-end_position_spread.y / POSITION_DIVISOR,
+		end_position_spread.z / POSITION_DIVISOR)
+
+	## Angles: * TAU / 4096
+	conv_angle_start = start_angle * ANGLE_TO_RADIANS
+	conv_angle_end = end_angle * ANGLE_TO_RADIANS
+	conv_angle_spread_start = start_angle_spread * ANGLE_TO_RADIANS
+	conv_angle_spread_end = end_angle_spread * ANGLE_TO_RADIANS
+
+	## Inertia/weight: re-decode as signed, keep raw value (no unit conversion)
+	conv_inertia_min_start = float(emitter_bytes.decode_s16(0x44))
+	conv_inertia_max_start = float(emitter_bytes.decode_s16(0x46))
+	conv_inertia_min_end = float(emitter_bytes.decode_s16(0x48))
+	conv_inertia_max_end = float(emitter_bytes.decode_s16(0x4a))
+
+	conv_weight_min_start = float(emitter_bytes.decode_s16(0x54))
+	conv_weight_max_start = float(emitter_bytes.decode_s16(0x56))
+	conv_weight_min_end = float(emitter_bytes.decode_s16(0x58))
+	conv_weight_max_end = float(emitter_bytes.decode_s16(0x5a))
+
+	## Radial velocity: re-decode as signed / 14336
+	conv_radial_velocity_min_start = emitter_bytes.decode_s16(0x5c) / VELOCITY_DIVISOR
+	conv_radial_velocity_max_start = emitter_bytes.decode_s16(0x5e) / VELOCITY_DIVISOR
+	conv_radial_velocity_min_end = emitter_bytes.decode_s16(0x60) / VELOCITY_DIVISOR
+	conv_radial_velocity_max_end = emitter_bytes.decode_s16(0x62) / VELOCITY_DIVISOR
+
+	## Acceleration: re-decode as signed / 114688 with Y-flip
+	conv_acceleration_min_start = Vector3(
+		emitter_bytes.decode_s16(0x64) / ACCEL_DIVISOR,
+		-emitter_bytes.decode_s16(0x68) / ACCEL_DIVISOR,
+		emitter_bytes.decode_s16(0x6c) / ACCEL_DIVISOR)
+	conv_acceleration_max_start = Vector3(
+		emitter_bytes.decode_s16(0x66) / ACCEL_DIVISOR,
+		-emitter_bytes.decode_s16(0x6a) / ACCEL_DIVISOR,
+		emitter_bytes.decode_s16(0x6e) / ACCEL_DIVISOR)
+	conv_acceleration_min_end = Vector3(
+		emitter_bytes.decode_s16(0x70) / ACCEL_DIVISOR,
+		-emitter_bytes.decode_s16(0x74) / ACCEL_DIVISOR,
+		emitter_bytes.decode_s16(0x78) / ACCEL_DIVISOR)
+	conv_acceleration_max_end = Vector3(
+		emitter_bytes.decode_s16(0x72) / ACCEL_DIVISOR,
+		-emitter_bytes.decode_s16(0x76) / ACCEL_DIVISOR,
+		emitter_bytes.decode_s16(0x7a) / ACCEL_DIVISOR)
+
+	## Drag: re-decode as signed / 114688 with Y-flip
+	conv_drag_min_start = Vector3(
+		emitter_bytes.decode_s16(0x7c) / ACCEL_DIVISOR,
+		-emitter_bytes.decode_s16(0x80) / ACCEL_DIVISOR,
+		emitter_bytes.decode_s16(0x84) / ACCEL_DIVISOR)
+	conv_drag_max_start = Vector3(
+		emitter_bytes.decode_s16(0x7e) / ACCEL_DIVISOR,
+		-emitter_bytes.decode_s16(0x82) / ACCEL_DIVISOR,
+		emitter_bytes.decode_s16(0x86) / ACCEL_DIVISOR)
+	conv_drag_min_end = Vector3(
+		emitter_bytes.decode_s16(0x88) / ACCEL_DIVISOR,
+		-emitter_bytes.decode_s16(0x8c) / ACCEL_DIVISOR,
+		emitter_bytes.decode_s16(0x90) / ACCEL_DIVISOR)
+	conv_drag_max_end = Vector3(
+		emitter_bytes.decode_s16(0x8a) / ACCEL_DIVISOR,
+		-emitter_bytes.decode_s16(0x8e) / ACCEL_DIVISOR,
+		emitter_bytes.decode_s16(0x92) / ACCEL_DIVISOR)
+
+	## Target offset: re-decode as signed / 28 with Y-flip
+	conv_target_offset_start = Vector3(
+		emitter_bytes.decode_s16(0x9c) / POSITION_DIVISOR,
+		-emitter_bytes.decode_s16(0x9e) / POSITION_DIVISOR,
+		emitter_bytes.decode_s16(0xa0) / POSITION_DIVISOR)
+	conv_target_offset_end = Vector3(
+		emitter_bytes.decode_s16(0xa2) / POSITION_DIVISOR,
+		-emitter_bytes.decode_s16(0xa4) / POSITION_DIVISOR,
+		emitter_bytes.decode_s16(0xa6) / POSITION_DIVISOR)
+
+	## Homing strength: re-decode as signed / 114688
+	conv_homing_strength_min_start = emitter_bytes.decode_s16(0xb8) / ACCEL_DIVISOR
+	conv_homing_strength_max_start = emitter_bytes.decode_s16(0xba) / ACCEL_DIVISOR
+	conv_homing_strength_min_end = emitter_bytes.decode_s16(0xbc) / ACCEL_DIVISOR
+	conv_homing_strength_max_end = emitter_bytes.decode_s16(0xbe) / ACCEL_DIVISOR
 	
