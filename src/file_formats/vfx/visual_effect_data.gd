@@ -4,8 +4,6 @@ class_name VisualEffectData
 # https://ffhacktics.com/wiki/Effect_Files
 # https://ffhacktics.com/wiki/Effect_Data
 
-signal vfx_completed
-
 var is_initialized: bool = false
 var file_name: String = "effect file name"
 var vfx_id: int = 0
@@ -46,9 +44,6 @@ class VfxFrame:
 	var top_right_xy: Vector2i = Vector2i.ZERO
 	var bottom_left_xy: Vector2i = Vector2i.ZERO
 	var bottom_right_xy: Vector2i = Vector2i.ZERO
-	var quad_width: float = 0
-	var quad_height: float = 0
-	var quad_rotation_deg: float = 0
 	var quad_vertices: PackedVector3Array = []
 	var quad_uvs_pixels: PackedVector2Array = []
 	var quad_uvs: PackedVector2Array = []
@@ -83,14 +78,15 @@ class EmitterTimeline:
 
 	func _init(new_bytes: PackedByteArray):
 		bytes = new_bytes
-		action_flags = bytes.slice(75, 125)
-		num_keyframes = bytes.decode_u16(126)
+		# Layout: 25×u16 times (0x00), 25×u8 emitter_ids (0x31), 25×u16 action_flags (0x4A), u16 num_kf (0x7E)
+		action_flags = bytes.slice(0x4A, 0x4A + 50)
+		num_keyframes = bytes.decode_s16(0x7E)
 
 		for idx in 25:
 			var time: int = bytes.decode_u16(idx * 2)
 			times.append(time)
 
-			var emitter_id: int = bytes.decode_u8(50 + idx)
+			var emitter_id: int = bytes.decode_u8(0x31 + idx)
 			emitter_ids.append(emitter_id)
 
 			var action_flag: int = action_flags.decode_u16(idx * 2)
@@ -128,6 +124,11 @@ class EmitterKeyframe:
 var script_bytes: PackedByteArray = []
 var emitter_control_bytes: PackedByteArray = []
 var emitters: Array[VfxEmitter] = []
+
+## Particle header fields (from 0x14-byte header at start of EMITTER_DATA section)
+var gravity_raw: Vector3i = Vector3i.ZERO  ## raw s32 values
+var gravity: Vector3 = Vector3.ZERO        ## converted: / ACCEL_DIVISOR with Y-flip
+var inertia_threshold: int = 0             ## raw s32, used directly in physics formula
 var timer_data_header_bytes: PackedByteArray = []
 var timer_data_bytes: PackedByteArray = []
 var phase1_duration: int = -1
@@ -150,8 +151,6 @@ enum camera_focus {SINGLE, SEQUENTIAL, MULTI}
 var sound_effects
 var partical_effects
 
-var animation_speed: float = 59.0
-
 enum VfxSections {
 	FRAMES = 0,
 	ANIMATION = 1,
@@ -164,6 +163,12 @@ enum VfxSections {
 	SOUND_EFFECTS = 8,
 	TEXTURE = 9,
 	}
+
+
+func get_curve(index: int) -> VfxCurve:
+	if index < 0 or index >= curves.size():
+		return null
+	return VfxCurve.new(curves[index], index)
 
 
 func _init(new_file_name: String = "") -> void:
@@ -297,10 +302,6 @@ func init_from_file() -> void:
 			new_frame.quad_uvs_pixels.append(Vector2(top_left_u, (top_left_v + new_frame.uv_height))) # bottom left
 			new_frame.quad_uvs_pixels.append(Vector2((top_left_u + new_frame.uv_width), (top_left_v + new_frame.uv_height))) # bottom right
 			
-			new_frame.quad_width = new_frame.top_left_xy.distance_to(new_frame.top_right_xy)
-			new_frame.quad_height = new_frame.top_left_xy.distance_to(new_frame.bottom_left_xy)
-			new_frame.quad_rotation_deg = rad_to_deg(Vector2(new_frame.top_right_xy - new_frame.top_left_xy).angle())
-			
 			for vertex_idx: int in vertices_xy.size():
 				new_frame.quad_vertices.append(Vector3(vertices_xy[vertex_idx].x, -vertices_xy[vertex_idx].y, 0) * MapData.SCALE)
 			
@@ -325,19 +326,47 @@ func init_from_file() -> void:
 		var anim_bytes: PackedByteArray = data_bytes.slice(anim_start_offset, anim_end)
 		var animation: VfxAnimation = VfxAnimation.new()
 		
-		var screen_offset_x: int = anim_bytes.decode_s16(1)
-		var screen_offset_y: int = anim_bytes.decode_s16(3)
-		animation.screen_offset = Vector2i(screen_offset_x, screen_offset_y)
-		
-		# TODO Figure out byte_02, does special function 0x82 ever show up in the middle of an animation?
-		var byte_index: int = 5
-		while byte_index + 3 < anim_bytes.size():
-			var anim_frame_data: VfxAnimationFrame = VfxAnimationFrame.new()
-			anim_frame_data.frameset_id = anim_bytes.decode_u8(byte_index)
-			anim_frame_data.duration = anim_bytes.decode_s8(byte_index + 1) # TODO Signed for 0x83 movement, but should it be unsigned for frame duration?
-			anim_frame_data.byte_02 = anim_bytes.decode_u8(byte_index + 2) 
-			animation.animation_frames.append(anim_frame_data)
-			byte_index += 3
+		# Variable-length opcode parsing
+		var byte_index: int = 0
+		while byte_index < anim_bytes.size():
+			var opcode: int = anim_bytes.decode_u8(byte_index)
+			if opcode <= 0x7F:
+				# FRAME: 3 bytes (frameset_id, duration, depth_mode)
+				if byte_index + 3 > anim_bytes.size():
+					break
+				var anim_frame_data := VfxAnimationFrame.new()
+				anim_frame_data.frameset_id = opcode
+				anim_frame_data.duration = anim_bytes.decode_s8(byte_index + 1)
+				anim_frame_data.byte_02 = anim_bytes.decode_u8(byte_index + 2)
+				animation.animation_frames.append(anim_frame_data)
+				byte_index += 3
+			elif opcode == 0x81:
+				# LOOP: 1 byte — store as marker, stop parsing
+				var anim_frame_data := VfxAnimationFrame.new()
+				anim_frame_data.frameset_id = 0x81
+				animation.animation_frames.append(anim_frame_data)
+				break
+			elif opcode == 0x82:
+				# SET_OFFSET: 5 bytes (opcode, s16 x, s16 y)
+				if byte_index + 5 > anim_bytes.size():
+					break
+				animation.screen_offset = Vector2i(
+					anim_bytes.decode_s16(byte_index + 1),
+					anim_bytes.decode_s16(byte_index + 3))
+				byte_index += 5
+			elif opcode == 0x83:
+				# ADD_OFFSET: 3 bytes (opcode, s8 dx, s8 dy)
+				if byte_index + 3 > anim_bytes.size():
+					break
+				var anim_frame_data := VfxAnimationFrame.new()
+				anim_frame_data.frameset_id = 0x83
+				anim_frame_data.duration = anim_bytes.decode_s8(byte_index + 1)
+				anim_frame_data.byte_02 = anim_bytes.decode_u8(byte_index + 2)
+				animation.animation_frames.append(anim_frame_data)
+				byte_index += 3
+			else:
+				# Unknown opcode, skip 1 byte
+				byte_index += 1
 		
 		animations[anim_id] = animation
 	
@@ -349,12 +378,22 @@ func init_from_file() -> void:
 	
 	# TODO extract relevant data from effect script;
 	
-	### TODO emitter control data
+	### emitter control data
 	section_num = VfxSections.EMITTER_DATA
 	section_start = section_offsets[section_num]
 	emitter_control_bytes = vfx_bytes.slice(section_start, section_offsets[section_num + 1])
-	
+
+	# Particle header (0x14 bytes): constant, emitter_count, gravity (3x s32), inertia_threshold (s32)
 	var num_emitters: int = emitter_control_bytes.decode_u16(2)
+	gravity_raw = Vector3i(
+		emitter_control_bytes.decode_s32(0x04),
+		emitter_control_bytes.decode_s32(0x08),
+		emitter_control_bytes.decode_s32(0x0C))
+	gravity = Vector3(
+		gravity_raw.x / VfxEmitter.ACCEL_DIVISOR,
+		-gravity_raw.y / VfxEmitter.ACCEL_DIVISOR,
+		gravity_raw.z / VfxEmitter.ACCEL_DIVISOR)
+	inertia_threshold = emitter_control_bytes.decode_s32(0x10)
 	emitters.resize(num_emitters)
 	
 	for emitter_id: int in num_emitters:
@@ -373,20 +412,6 @@ func init_from_file() -> void:
 		# emitter.start_position = Vector3i(emitter_data_bytes.decode_s16(0x14), -emitter_data_bytes.decode_s16(0x16), emitter_data_bytes.decode_s16(0x18))
 		# emitter.end_position = Vector3i(emitter_data_bytes.decode_s16(0x1a), -emitter_data_bytes.decode_s16(0x1c), emitter_data_bytes.decode_s16(0x1e))
 		
-		emitter.animation = VfxAnimation.new()
-		if emitter.anim_index >= animations.size():
-			push_warning(file_name + ": animation index " + str(emitter.anim_index) + " out of bounds, skipping") # only shows up in unused emitters?
-		else:
-			emitter.animation.screen_offset = animations[emitter.anim_index].screen_offset
-			emitter.animation.animation_frames = animations[emitter.anim_index].animation_frames.duplicate_deep()
-
-		var frameset_group_id_offset: int = 0
-		for idx: int in emitter.frameset_group_index:
-			frameset_group_id_offset += frameset_groups_num_framesets[idx]
-
-		for animation_frame: VfxAnimationFrame in emitter.animation.animation_frames:
-			animation_frame.frameset_id += frameset_group_id_offset
-
 		emitters[emitter_id] = emitter
 	
 	# Curves
@@ -423,18 +448,18 @@ func init_from_file() -> void:
 	section_start = section_offsets[section_num]
 	timer_data_header_bytes = vfx_bytes.slice(section_start, section_offsets[section_num + 1])
 	
-	phase1_duration = timer_data_header_bytes.decode_u16(4)
+	# Phase timing read below from TIMELINES section header (not EFFECT_FLAGS)
 	child_spawn_delay = timer_data_header_bytes.decode_u16(6)
-	phase2_offset = timer_data_header_bytes.decode_u16(0x0a)
 
 	### TODO timeline data
 	section_num = VfxSections.TIMELINES
 	section_start = section_offsets[section_num]
 	timer_data_bytes = vfx_bytes.slice(section_start, section_offsets[section_num + 1])
 	
-	var effect_start_time: int = timer_data_bytes.decode_u16(4)
+	# Phase timing from TIMELINES section header (matches godot-learning)
+	phase1_duration = timer_data_bytes.decode_u16(4)
 	var target_switching_delay: int = timer_data_bytes.decode_u16(6)
-	var effect_max_duration_per_target: int = timer_data_bytes.decode_u16(10)
+	phase2_offset = timer_data_bytes.decode_u16(10)
 	
 	# TODO 5 emitter timing sections, 0x80 long each
 	for emitter_timing_section_id: int in 5:
@@ -593,118 +618,3 @@ func get_frame_mesh(composite_frame_idx: int, frame_idx: int = 0) -> ArrayMesh:
 	mesh.surface_set_material(0, mesh_material)
 	
 	return mesh
-
-
-func display_vfx(location: Node3D) -> void:
-	#if vfx_id == 163: # TODO handle vfx other than stasis sword
-		#display_stasis_sword_vfx(location)
-		#return
-	
-	var children: Array[Node] = location.get_children()
-	for child: Node in children:
-		child.queue_free()
-	
-	#var frame_meshes: Array[ArrayMesh] = []
-	#for frameset_idx: int in range(0, num_framesets):
-		#frame_meshes.append(vfx_data.get_frame_mesh(frameset_idx))
-
-	for timeline: EmitterTimeline in phase1_emitter_timelines:
-		spawn_emitters(location, timeline)
-
-	for timeline: EmitterTimeline in child_emitter_timelines:
-		spawn_emitters(location, timeline, phase1_duration)
-
-	# TODO show vfx animations on emitters, get correct position of vfx
-	# for emitter_idx: int in emitters.size():
-	# 	var emitter := emitters[emitter_idx]
-	# 	var emitter_location: Node3D = Node3D.new()
-	# 	emitter_location.position = emitter.start_position * MapData.SCALE
-	# 	location.add_child(emitter_location)
-		
-	# 	# TODO fix emitter timing; why do they need x3 to be reasonable?
-	# 	emitter_location.get_tree().create_timer(emitter.start_time * 3.0 / animation_speed).timeout.connect(func(): display_vfx_animation(emitter, emitter_location))
-	
-	while location.get_child_count() > 0:
-		await Engine.get_main_loop().process_frame
-	
-	location.queue_free()
-	vfx_completed.emit()
-
-
-func spawn_emitters(location: Node3D, timeline: EmitterTimeline, time_offset: int = 0):
-	for emitter_keyframe_idx: int in timeline.num_keyframes:
-		var keyframe: EmitterKeyframe = timeline.keyframes[emitter_keyframe_idx]
-		if keyframe.emitter_id <= 0: # no emitter
-			continue
-		
-		var emitter: VfxEmitter = emitters[keyframe.emitter_id - 1]
-		var emitter_location: Node3D = Node3D.new()
-		emitter_location.position = emitter.start_position * MapData.SCALE
-		emitter_location.name = "Emitter " + str(keyframe.emitter_id - 1)
-		location.add_child(emitter_location)
-		
-		# TODO fix emitter timing; why do they need x3 to be reasonable?
-		# emitter_location.get_tree().create_timer((keyframe.time + time_offset) * 3.0 / animation_speed).timeout.connect(func(): display_vfx_animation(emitter, emitter_location))
-		emitter_location.get_tree().create_timer((keyframe.time + time_offset) * 3.0 / animation_speed).timeout.connect(func(): emitter.spawn_particles(emitter_location))
-
-		# destroy emitter and next keyframe time
-		emitter_location.get_tree().create_timer((timeline.keyframes[emitter_keyframe_idx + 1].time + time_offset) * 3.0 / animation_speed).timeout.connect(func(): emitter_location.queue_free())
-
-
-func display_vfx_animation(emitter_data: VfxEmitter, emitter_node: Node3D) -> void:
-	if emitter_data.anim_index >= animations.size(): # TODO fix steal exp vfx?
-		push_error(file_name + " trying to access animation " + str(emitter_data.anim_index) + ", but there are only " + str(animations.size()) + " animations")
-		emitter_node.queue_free()
-		return
-	
-	# var vfx_animation := animations[emitter_data.anim_index]
-	var vfx_animation: VfxAnimation = emitter_data.animation
-	var particle: Node3D = Node3D.new()
-	particle.name = "Particle, Animation_" + str(emitter_data.anim_index)
-	# handle initial anim_location position as screen_space movement instead of world space
-	var camera_right: Vector3 = emitter_node.get_viewport().get_camera_3d().basis * Vector3.RIGHT
-	var screen_space_x: Vector3 = (vfx_animation.screen_offset.x * camera_right)
-	var screen_space_y: Vector3 = Vector3(0, -vfx_animation.screen_offset.y, 0)
-	particle.position = (screen_space_x + screen_space_y) * MapData.SCALE 
-	
-	if emitter_node == null:
-		return
-	emitter_node.add_child(particle)
-	
-	for anim_frame_idx: int in vfx_animation.animation_frames.size():
-		var vfx_anim_frame := vfx_animation.animation_frames[anim_frame_idx]
-		
-		if vfx_anim_frame.frameset_id == 0x83: # move anim_location, handle anim_location 0x83 movement as screen_space movement instead of world space
-			var screen_space_offset_x: Vector3 = (vfx_anim_frame.duration * camera_right)
-			var screen_space_offset_y: Vector3 = Vector3(0, -vfx_anim_frame.byte_02, 0)
-			particle.position += (screen_space_offset_x + screen_space_offset_y) * MapData.SCALE # byte01 is actually the X movement in function 0x83, not the duration
-			continue
-		elif vfx_anim_frame.frameset_id >= framesets.size():
-			push_warning(file_name + " frameset_id: " + str(vfx_anim_frame.frameset_id)) # TODO fix special frame_id codes, >= 0x80 (128)
-			continue
-		
-		# get composite frame
-		for frame_idx: int in framesets[vfx_anim_frame.frameset_id].frameset.size():
-			var vfx_frame_mesh: MeshInstance3D = MeshInstance3D.new()
-			vfx_frame_mesh.name = "frame"
-			#mesh_instance.mesh = frame_meshes[frame_mesh_idx]
-			vfx_frame_mesh.mesh = get_frame_mesh(vfx_anim_frame.frameset_id, frame_idx)
-			#vfx_frame_mesh.scale.y = -1
-			particle.add_child(vfx_frame_mesh)
-		
-		if vfx_anim_frame.duration == 0: # TODO handle vfx animation with duration 00 corretly
-			await particle.get_tree().create_timer(10 / animation_speed).timeout
-		else:
-			if vfx_anim_frame.duration < 0:
-				vfx_anim_frame.duration += 256 # convert signed byte to unsigned 
-			await particle.get_tree().create_timer(vfx_anim_frame.duration / animation_speed).timeout
-		
-		if particle == null:
-			break
-		
-		# clear composite frame
-		var children := particle.get_children()
-		for child: Node in children:
-			child.queue_free()
-	
-	# emitter_node.queue_free()
