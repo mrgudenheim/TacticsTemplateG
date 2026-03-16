@@ -8,6 +8,9 @@ const PSX_ANGLE_TO_RAD: float = TAU / 4096.0
 const PSX_FIXED_POINT_ONE: float = 4096.0  ## PSX fixed-point 1.0 — used as acceleration scale & inertia base
 
 const NO_CHILD_EMITTER: int = -1
+const TIMELINE_EMITTER_DURATION: int = 10000  ## Long duration for timeline-driven emitters
+const CHANNEL_SORT_SPACING: float = 1000.0  ## Sort key spacing between channels
+const TICKS_PER_TILE: float = 5.0  ## Projectile flight duration per tile of distance
 
 enum AnchorMode { WORLD = 0, CURSOR = 1, ORIGIN = 2, TARGET = 3, PARENT = 4 }
 enum SpreadMode { SPHERE = 0, BOX = 1 }

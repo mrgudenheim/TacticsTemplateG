@@ -93,6 +93,7 @@ var battle_bin_data: BattleBinData = BattleBinData.new() # BATTLE.BIN tables
 var scus_data: ScusData = ScusData.new() # SCUS.942.41 tables
 var wldcore_data: WldcoreData = WldcoreData.new() # WLDCORE.BIN tables
 var attack_out_data: AttackOutData = AttackOutData.new() # ATTACK.OUT tables
+var trap_effect_data: TrapEffectData = TrapEffectData.new() # TRAP particle effects from BATTLE.BIN
 
 # Images
 # https://github.com/Glain/FFTPatcher/blob/master/ShishiSpriteEditor/PSXImages.xml#L148
@@ -207,6 +208,9 @@ func process_rom() -> void:
 
 	cache_associated_files()
 	section_start = _profile_section("cache_associated_files", section_start)
+
+	trap_effect_data.init_from_rom()
+	section_start = _profile_section("trap_effect_data.init_from_rom", section_start)
 
 	for map_idx: int in maps_array.size():
 		var map_data: MapData = maps_array[map_idx]
@@ -525,7 +529,7 @@ func cache_associated_files() -> void:
 	eff_spr.seq_name = "EFF1.SEQ"
 	sprs.append(eff_spr)
 	
-	# TODO get trap effects - not useful for this tool at this time
+	# TRAP effects parsed in process_rom() via trap_effect_data.init_from_rom()
 	
 	# crop wep spr
 	var wep_spr_start: int = 0

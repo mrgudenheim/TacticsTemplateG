@@ -189,7 +189,7 @@ func _get_or_create_emitter(emitter_index: int, channel_idx: int = 0) -> VfxActi
 	# Timeline emitters use duration_frames=10000 (matching godot-learning).
 	# The spawn_counter passed to spawn_particles_for_timeline() drives curve
 	# sampling via frame index, not via normalized time t.
-	emitter.initialize(emitter_config, emitter_index, vfx_data, 10000)
+	emitter.initialize(emitter_config, emitter_index, vfx_data, VfxConstants.TIMELINE_EMITTER_DURATION)
 	emitter.channel_index = channel_idx
 	_apply_anchors(emitter)
 	active_emitters.append(emitter)
@@ -345,7 +345,7 @@ func _controller_is_done(controller: VfxTimelineController) -> bool:
 		if state.finished:
 			continue
 		# Check current and all future keyframes for any non-zero emitter_id
-		for kf_idx in range(state.current_keyframe, state.timeline.num_keyframes + 1):
+		for kf_idx in range(state.current_keyframe, mini(state.timeline.num_keyframes + 1, state.timeline.keyframes.size())):
 			if state.timeline.keyframes[kf_idx].emitter_id != 0:
 				return false
 	return true

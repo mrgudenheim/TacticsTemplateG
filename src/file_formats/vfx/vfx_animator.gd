@@ -88,7 +88,7 @@ func tick(particle: VfxParticleData) -> void:
 	if frames.is_empty():
 		return
 
-	particle.anim_frame = particle.anim_time
+	particle.anim_frame = clampi(particle.anim_time, 0, frames.size() - 1)
 
 	var frame_data: Dictionary = frames[particle.anim_frame]
 	particle.anim_offset = frame_data.get("offset", Vector2.ZERO)
@@ -106,32 +106,6 @@ func tick(particle: VfxParticleData) -> void:
 
 	if particle.anim_time >= frames.size():
 		particle.anim_time = 0
-
-
-func get_current_frameset(particle: VfxParticleData) -> int:
-	var emitter_idx: int = particle.emitter_index
-	if emitter_idx < 0 or emitter_idx >= baked_animations.size():
-		return 0
-
-	var frames: Array[Dictionary] = baked_animations[emitter_idx]
-	if frames.is_empty():
-		return 0
-
-	var frame_idx: int = clampi(particle.anim_frame, 0, frames.size() - 1)
-	return frames[frame_idx].get("frameset", 0)
-
-
-func get_current_depth_mode(particle: VfxParticleData) -> int:
-	var emitter_idx: int = particle.emitter_index
-	if emitter_idx < 0 or emitter_idx >= baked_animations.size():
-		return 0
-
-	var frames: Array[Dictionary] = baked_animations[emitter_idx]
-	if frames.is_empty():
-		return 0
-
-	var frame_idx: int = clampi(particle.anim_frame, 0, frames.size() - 1)
-	return frames[frame_idx].get("depth_mode", 0)
 
 
 func get_animation_duration(emitter_index: int) -> int:

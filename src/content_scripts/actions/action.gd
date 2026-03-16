@@ -114,6 +114,8 @@ var separate_status: bool = false
 @export var vfx_id: int = 0
 var vfx_data: VisualEffectData
 
+var trap_hit_handler_id: int = 0 # 0 = no TRAP, >0 = handler ID from charging_vfx_ids
+
 class SecondaryAction:
 	var action_idx: int
 	var action_unique_name: String
@@ -443,6 +445,8 @@ func apply_standard(action_instance: ActionInstance) -> void:
 		var total_hit_chance: int = get_total_hit_chance(action_instance.user, target_unit, evade_direction)
 		var hit_success: bool = randi_range(0, 99) < total_hit_chance
 		if hit_success:
+			show_trap_hit(action_instance, target_unit)
+
 			for effect: ActionEffect in target_effects:
 				var effect_value: int = roundi(effect.base_power_formula.get_result(action_instance.user, target_unit, element))
 				if not passive_power_modifier_applies_to_hit_chance:
@@ -586,6 +590,29 @@ func show_vfx(action_instance: ActionInstance, position: Vector3) -> Node3D:
 	var origin_pos: Vector3 = action_instance.user.char_body.global_position
 	instance.initialize(vfx_data, position, origin_pos)
 	return instance
+
+
+func show_trap_hit(action_instance: ActionInstance, target_unit: Unit) -> void:
+	if trap_hit_handler_id <= 0:
+		return
+	var bm: BattleManager = action_instance.user.global_battle_manager
+	if bm == null or bm.trap_instance == null:
+		return
+	var target_pos: Vector3 = target_unit.char_body.global_position
+	bm.trap_instance.global_position = target_pos
+	var dir: Vector3 = (target_pos - action_instance.user.char_body.global_position).normalized()
+	var trap_el: int = TrapEffectData.element_type_to_trap_id(element)
+	var flash_unit: Unit = target_unit if trap_hit_handler_id in TrapEffectData.FLASH_HANDLER_IDS else null
+	bm.trap_instance.play(trap_hit_handler_id, trap_el, dir, flash_unit)
+
+
+func show_projectile(action_instance: ActionInstance, target_unit: Unit, variant: ProjectileEffectInstance.Variant) -> void:
+	var bm: BattleManager = action_instance.user.global_battle_manager
+	if bm == null or bm.projectile_instance == null:
+		return
+	var origin: Vector3 = action_instance.user.char_body.global_position
+	var target: Vector3 = target_unit.char_body.global_position
+	bm.projectile_instance.play(origin, target, variant)
 
 
 # TODO set action type directly for each action? maybe as part of action processing per target to check values after formula processing and passive effect modifications
@@ -1965,6 +1992,7 @@ func set_data_from_formula_id(new_formula_id: int) -> void:
 static func get_modified_action(action_to_modify: Action, user: Unit) -> Action:
 	var modified_action: Action = action_to_modify.duplicate()
 	modified_action.vfx_data = action_to_modify.vfx_data
+	modified_action.trap_hit_handler_id = action_to_modify.trap_hit_handler_id
 	var all_passive_effects: Array[PassiveEffect] = user.get_all_passive_effects(action_to_modify.ignore_passives)
 
 	for passive_effect: PassiveEffect in all_passive_effects:

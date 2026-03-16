@@ -48,6 +48,47 @@ class VfxFrame:
 	var quad_uvs_pixels: PackedVector2Array = []
 	var quad_uvs: PackedVector2Array = []
 
+	func parse_vram_bytes(frame_bytes: PackedByteArray) -> void:
+		vram_bytes = frame_bytes.slice(0, 4)
+		palette_id = vram_bytes[0] & 0x0f
+		semi_transparency_mode = (vram_bytes[0] & 0x60) >> 5
+		image_color_depth = 4 + ((vram_bytes[0] & 0x80) >> 5)
+		semi_transparency_on = (vram_bytes[1] & 0x02) == 0x02
+		frame_width_signed = (vram_bytes[1] & 0x10) == 0x10
+		frame_height_signed = (vram_bytes[1] & 0x20) == 0x20
+		texture_page = vram_bytes.decode_u16(2)
+
+	func parse_geometry_bytes(frame_bytes: PackedByteArray, v_offset: int = 0) -> void:
+		var u: int = frame_bytes.decode_u8(4)
+		var v: int = frame_bytes.decode_u8(5) - v_offset
+		top_left_uv = Vector2i(u, v)
+
+		if frame_width_signed:
+			uv_width = frame_bytes.decode_s8(6)
+		else:
+			uv_width = frame_bytes.decode_u8(6)
+		if frame_height_signed:
+			uv_height = frame_bytes.decode_s8(7)
+		else:
+			uv_height = frame_bytes.decode_u8(7)
+
+		top_left_xy = Vector2i(frame_bytes.decode_s16(8), frame_bytes.decode_s16(0xa))
+		top_right_xy = Vector2i(frame_bytes.decode_s16(0xc), frame_bytes.decode_s16(0xe))
+		bottom_left_xy = Vector2i(frame_bytes.decode_s16(0x10), frame_bytes.decode_s16(0x12))
+		bottom_right_xy = Vector2i(frame_bytes.decode_s16(0x14), frame_bytes.decode_s16(0x16))
+
+		quad_uvs_pixels = PackedVector2Array([
+			Vector2(u, v),
+			Vector2(u + uv_width, v),
+			Vector2(u, v + uv_height),
+			Vector2(u + uv_width, v + uv_height)])
+
+		var vertices_xy: PackedVector2Array = [
+			Vector2(top_left_xy), Vector2(top_right_xy),
+			Vector2(bottom_left_xy), Vector2(bottom_right_xy)]
+		for vert: Vector2 in vertices_xy:
+			quad_vertices.append(Vector3(vert.x, -vert.y, 0) * MapData.SCALE)
+
 class VfxAnimation:
 	var animation_frames: Array[VfxAnimationFrame]
 	var screen_offset: Vector2i
@@ -164,6 +205,8 @@ enum VfxSections {
 	TEXTURE = 9,
 	}
 
+const ANIM_OPCODE_LOOP: int = 0x81
+
 
 func get_curve(index: int) -> VfxCurve:
 	if index < 0 or index >= curves.size():
@@ -256,54 +299,8 @@ func init_from_file() -> void:
 				break
 			
 			var new_frame: VfxFrame = VfxFrame.new()
-			new_frame.vram_bytes = frame_bytes.slice(0, 4)
-			new_frame.palette_id = new_frame.vram_bytes[0] & 0x0f
-			new_frame.semi_transparency_mode = (new_frame.vram_bytes[0] & 0x60) >> 5
-			new_frame.image_color_depth = 4 + ((new_frame.vram_bytes[0] & 0x80) >> 5)
-			new_frame.semi_transparency_on = (new_frame.vram_bytes[1] & 0x02) == 0x02
-			new_frame.frame_width_signed = (new_frame.vram_bytes[1] & 0x10) == 0x10
-			new_frame.frame_height_signed = (new_frame.vram_bytes[1] & 0x20) == 0x20
-			new_frame.texture_page = new_frame.vram_bytes.decode_u16(2)
-			
-			var top_left_u: int = frame_bytes.decode_u8(4)
-			var top_left_v: int = frame_bytes.decode_u8(5)
-			new_frame.top_left_uv = Vector2i(top_left_u, top_left_v)
-			
-			if new_frame.frame_width_signed:
-				new_frame.uv_width = frame_bytes.decode_s8(6)
-			else:
-				new_frame.uv_width = frame_bytes.decode_u8(6)
-			if new_frame.frame_height_signed:
-				new_frame.uv_height = frame_bytes.decode_s8(7)
-			else:
-				new_frame.uv_height = frame_bytes.decode_u8(7)
-			#new_frame.uv_width = frame_bytes.decode_s8(6)
-			#new_frame.uv_height = frame_bytes.decode_s8(7)
-			var top_left_x: int = frame_bytes.decode_s16(8)
-			var top_left_y: int = frame_bytes.decode_s16(0xa)
-			new_frame.top_left_xy = Vector2i(top_left_x, top_left_y)
-			var top_right_x: int = frame_bytes.decode_s16(0xc)
-			var top_right_y: int = frame_bytes.decode_s16(0xe)
-			new_frame.top_right_xy = Vector2i(top_right_x, top_right_y)
-			var bottom_left_x: int = frame_bytes.decode_s16(0x10)
-			var bottom_left_y: int = frame_bytes.decode_s16(0x12)
-			new_frame.bottom_left_xy = Vector2i(bottom_left_x, bottom_left_y)
-			var bottom_right_x: int = frame_bytes.decode_s16(0x14)
-			var bottom_right_y: int = frame_bytes.decode_s16(0x16)
-			new_frame.bottom_right_xy = Vector2i(bottom_right_x, bottom_right_y)
-			var vertices_xy: PackedVector2Array = []
-			vertices_xy.append(new_frame.top_left_xy)
-			vertices_xy.append(new_frame.top_right_xy)
-			vertices_xy.append(new_frame.bottom_left_xy)
-			vertices_xy.append(new_frame.bottom_right_xy)
-			
-			new_frame.quad_uvs_pixels.append(Vector2(top_left_u, top_left_v)) # top left
-			new_frame.quad_uvs_pixels.append(Vector2((top_left_u + new_frame.uv_width), top_left_v)) # top right
-			new_frame.quad_uvs_pixels.append(Vector2(top_left_u, (top_left_v + new_frame.uv_height))) # bottom left
-			new_frame.quad_uvs_pixels.append(Vector2((top_left_u + new_frame.uv_width), (top_left_v + new_frame.uv_height))) # bottom right
-			
-			for vertex_idx: int in vertices_xy.size():
-				new_frame.quad_vertices.append(Vector3(vertices_xy[vertex_idx].x, -vertices_xy[vertex_idx].y, 0) * MapData.SCALE)
+			new_frame.parse_vram_bytes(frame_bytes)
+			new_frame.parse_geometry_bytes(frame_bytes)
 			
 			frame_set.frameset[frame_id] = new_frame
 		
@@ -340,10 +337,10 @@ func init_from_file() -> void:
 				anim_frame_data.byte_02 = anim_bytes.decode_u8(byte_index + 2)
 				animation.animation_frames.append(anim_frame_data)
 				byte_index += 3
-			elif opcode == 0x81:
+			elif opcode == ANIM_OPCODE_LOOP:
 				# LOOP: 1 byte — store as marker, stop parsing
 				var anim_frame_data := VfxAnimationFrame.new()
-				anim_frame_data.frameset_id = 0x81
+				anim_frame_data.frameset_id = ANIM_OPCODE_LOOP
 				animation.animation_frames.append(anim_frame_data)
 				break
 			elif opcode == 0x82:

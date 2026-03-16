@@ -332,7 +332,12 @@ func _init(idx: int = 0) -> void:
 			"don't_act",
 		]
 		weapon_attack_action.status_prevents_use_any.append_array(default_statuses_prevents_weapon_attacks)
-		
+
+		if weapon_is_arc or weapon_is_direct:
+			weapon_attack_action.trap_hit_handler_id = TrapEffectData.HANDLER_HIT_RANGED
+		else:
+			weapon_attack_action.trap_hit_handler_id = TrapEffectData.HANDLER_HIT_MELEE
+
 		#weapon_attack_action.animation_executing_id = RomReader.battle_bin_data.weapon_animation_ids[item_type].y * 2
 		
 		

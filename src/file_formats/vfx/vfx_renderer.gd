@@ -40,8 +40,10 @@ var _sort_particle_idx: PackedInt32Array = []
 var _sort_frame_idx: PackedInt32Array = []
 var _sort_frameset_idx: PackedInt32Array = []
 var _sort_opaque: Array[bool] = []
+var _sort_indices: Array[int] = []
 var _sort_capacity: int = 0
 var _sort_count: int = 0
+var _sort_comparator: Callable
 
 # Cached per-emitter align_to_velocity flags
 var _emitter_align_flags: Array[bool] = []
@@ -54,12 +56,12 @@ func initialize(vfx_data: VisualEffectData, initial_pool_size: int = 4096) -> vo
 	_shared_quad.size = Vector2(1.0, 1.0)
 
 	# Load shaders
-	_opaque_shader = load("res://src/file_formats/vfx/shaders/effect_particle_opaque.gdshader")
+	_opaque_shader = preload("res://src/file_formats/vfx/shaders/effect_particle_opaque.gdshader")
 	_blend_shaders = [
-		load("res://src/file_formats/vfx/shaders/effect_particle_mode0.gdshader"),
-		load("res://src/file_formats/vfx/shaders/effect_particle_mode1.gdshader"),
-		load("res://src/file_formats/vfx/shaders/effect_particle_mode2.gdshader"),
-		load("res://src/file_formats/vfx/shaders/effect_particle_mode3.gdshader"),
+		preload("res://src/file_formats/vfx/shaders/effect_particle_mode0.gdshader"),
+		preload("res://src/file_formats/vfx/shaders/effect_particle_mode1.gdshader"),
+		preload("res://src/file_formats/vfx/shaders/effect_particle_mode2.gdshader"),
+		preload("res://src/file_formats/vfx/shaders/effect_particle_mode3.gdshader"),
 	]
 
 	if vfx_data.texture:
@@ -78,6 +80,8 @@ func initialize(vfx_data: VisualEffectData, initial_pool_size: int = 4096) -> vo
 	_sort_frame_idx.resize(_sort_capacity)
 	_sort_frameset_idx.resize(_sort_capacity)
 	_sort_opaque.resize(_sort_capacity)
+	_sort_indices.resize(_sort_capacity)
+	_sort_comparator = func(a: int, b: int) -> bool: return _sort_keys[a] < _sort_keys[b]
 
 	# Cache align_to_velocity flags
 	_emitter_align_flags.clear()
@@ -177,7 +181,7 @@ func render(particles: Array[VfxParticleData], vfx_data: VisualEffectData) -> vo
 		for fi in range(frameset.frameset.size()):
 			var frame_z_offset: float = -fi * Z_EPSILON
 			var total_z_offset: float = frame_z_offset + depth_z_offset
-			var base_sort_key: float = p.channel_index * 1000.0 + (-total_z_offset)
+			var base_sort_key: float = p.channel_index * VfxConstants.CHANNEL_SORT_SPACING + (-total_z_offset)
 
 			# Ensure sort buffers have room
 			var needed_cap: int = _sort_count + 2
@@ -209,13 +213,15 @@ func render(particles: Array[VfxParticleData], vfx_data: VisualEffectData) -> vo
 			_sort_count += 1
 
 	# Step 5: Sort by key to determine draw order
-	var indices: Array = range(_sort_count)
-	indices.sort_custom(func(a, b): return _sort_keys[a] < _sort_keys[b])
+	_sort_indices.resize(_sort_count)
+	for i in range(_sort_count):
+		_sort_indices[i] = i
+	_sort_indices.sort_custom(_sort_comparator)
 
 	# Step 6: Render using stable mesh assignment
 	# Sort determines draw ORDER (render_priority), but each entry uses its particle's own mesh slot
 	for draw_order in range(_sort_count):
-		var idx: int = indices[draw_order]
+		var idx: int = _sort_indices[draw_order]
 		var uid: int = _sort_uid[idx]
 		var local_idx: int = _sort_local_idx[idx]
 		var p: VfxParticleData = particles[_sort_particle_idx[idx]]
@@ -363,3 +369,4 @@ func _ensure_sort_capacity(needed: int) -> void:
 	_sort_frame_idx.resize(_sort_capacity)
 	_sort_frameset_idx.resize(_sort_capacity)
 	_sort_opaque.resize(_sort_capacity)
+	_sort_indices.resize(_sort_capacity)
