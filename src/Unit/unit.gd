@@ -1311,8 +1311,8 @@ func set_primary_weapon(new_weapon_unique_name: String) -> void:
 	primary_weapon = RomReader.items[new_weapon_unique_name]
 	#animation_manager.weapon_id = new_weapon_id
 	#var weapon_palette_id = RomReader.battle_bin_data.weapon_graphic_palettes_1[primary_weapon.id]
-	animation_manager.unit_sprites_manager.sprite_weapon.texture = animation_manager.wep_spr.create_frame_grid_texture(
-		primary_weapon.wep_frame_palette, 0, 0, primary_weapon.wep_frame_v_offset, 0, animation_manager.wep_shp.file_name)
+	animation_manager.unit_sprites_manager.set_weapon_texture(animation_manager.wep_spr.create_frame_grid_texture(
+		primary_weapon.wep_frame_palette, 0, 0, primary_weapon.wep_frame_v_offset, 0, animation_manager.wep_shp.file_name))
 	
 	attack_action = primary_weapon.weapon_attack_action
 	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
@@ -1562,6 +1562,10 @@ func modulate_sprite_color(new_modulate_color: Color) -> void:
 	animation_manager.unit_sprites_manager.sprite_primary.modulate = new_modulate_color
 
 
+func set_sprite_tint(tint: Vector3) -> void:
+	animation_manager.unit_sprites_manager.set_tint(tint)
+
+
 func set_submerged_depth(new_depth: int) -> void:
 	if new_depth == submerged_depth:
 		return
@@ -1575,7 +1579,7 @@ func update_spritesheet_grid_texture() -> void:
 	var palette_idx_final: int = sprite_palette_id_override
 	if sprite_palette_id_override < 0:
 		palette_idx_final = sprite_palette_id
-	animation_manager.unit_sprites_manager.sprite_primary.texture = new_spr.create_frame_grid_texture(palette_idx_final, 0, animation_manager.other_type_index, 0, submerged_depth)
+	animation_manager.unit_sprites_manager.set_primary_texture(new_spr.create_frame_grid_texture(palette_idx_final, 0, animation_manager.other_type_index, 0, submerged_depth))
 
 
 func on_sprite_idx_selected(index: int) -> void:

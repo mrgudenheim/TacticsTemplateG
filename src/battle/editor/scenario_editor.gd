@@ -78,7 +78,7 @@ func _ready() -> void:
 
 
 func load_scenario(dropdown_idx: int) -> void:
-	var scenario_to_load: Scenario = RomReader.scenarios[load_scenario_button.get_item_text(dropdown_idx)].duplicate_deep(Resource.DEEP_DUPLICATE_ALL)
+	var scenario_to_load: Scenario = RomReader.get_scenario(load_scenario_button.get_item_text(dropdown_idx)).duplicate_deep(Resource.DEEP_DUPLICATE_ALL)
 	scenario_to_load.unique_name = scenario_to_load.unique_name + "_new"
 	# update mirror_scale for duplicated map chunks
 	for map_chunk: Scenario.MapChunk in scenario_to_load.map_chunks:
@@ -108,7 +108,7 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 	
 	load_scenario_button.clear()
 	load_scenario_button.add_separator("Load Scenario")
-	for scenario_unique_name: String in RomReader.scenarios.keys():
+	for scenario_unique_name: String in RomReader.get_all_scenario_names():
 		load_scenario_button.add_item(scenario_unique_name)
 	load_scenario_button.select(0)
 	
@@ -144,7 +144,7 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 			number = int(new_scenario_num) + 1
 			
 		scenario.unique_name = "new_scenario_%02d" % number
-		while RomReader.scenarios.keys().has(scenario.unique_name):
+		while RomReader.has_scenario(scenario.unique_name):
 			number += 1
 			scenario.unique_name = "new_scenario_%02d" % number
 		init_random_scenario()
@@ -301,6 +301,8 @@ func update_map(new_map_chunk_settings: MapChunkSettingsUi) -> void:
 
 
 func update_unit_positions(units: Array[Unit]) -> void:
+	if battle_manager.total_map_tiles.is_empty():
+		return
 	for unit: Unit in units:
 		if battle_manager.total_map_tiles.keys().has(unit.tile_position.location):
 			unit.tile_position = battle_manager.total_map_tiles[unit.tile_position.location][0]

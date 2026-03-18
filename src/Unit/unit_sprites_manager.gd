@@ -2,6 +2,7 @@ class_name UnitSpritesManager
 extends Node3D
 
 const LAYERING_OFFSET: float = 0.001
+const UNIT_SPRITE_SHADER = preload("res://src/Unit/shaders/unit_sprite.gdshader")
 
 @export var sprite_primary: Sprite3D
 @export var sprite_weapon: Sprite3D
@@ -11,6 +12,34 @@ const LAYERING_OFFSET: float = 0.001
 @export var sprite_item: Sprite3D
 var item_initial_pos: Vector3 = Vector3(0, -0.714, 0)
 @export var sprite_background: Sprite3D
+
+var _primary_material: ShaderMaterial
+var _weapon_material: ShaderMaterial
+
+
+func _ready() -> void:
+	_primary_material = ShaderMaterial.new()
+	_primary_material.shader = UNIT_SPRITE_SHADER
+	sprite_primary.material_override = _primary_material
+
+	_weapon_material = ShaderMaterial.new()
+	_weapon_material.shader = UNIT_SPRITE_SHADER
+	sprite_weapon.material_override = _weapon_material
+
+
+func set_primary_texture(tex: Texture2D) -> void:
+	sprite_primary.texture = tex
+	_primary_material.set_shader_parameter("sprite_texture", tex)
+
+
+func set_weapon_texture(tex: Texture2D) -> void:
+	sprite_weapon.texture = tex
+	_weapon_material.set_shader_parameter("sprite_texture", tex)
+
+
+func set_tint(tint: Vector3) -> void:
+	_primary_material.set_shader_parameter("unit_tint", tint)
+	_weapon_material.set_shader_parameter("unit_tint", tint)
 
 
 

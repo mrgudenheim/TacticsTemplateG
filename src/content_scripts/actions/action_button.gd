@@ -43,7 +43,7 @@ func set_active_action() -> void:
 	
 	if not action_instance.action.auto_target:
 		if not action_instance.potential_targets_are_set:
-			action_instance.update_potential_targets()
+			await action_instance.update_potential_targets()
 		action_instance.start_targeting()
 	else:
 		if action_instance.user.active_action != null:
