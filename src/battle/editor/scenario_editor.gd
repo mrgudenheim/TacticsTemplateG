@@ -302,6 +302,7 @@ func update_map(new_map_chunk_settings: MapChunkSettingsUi) -> void:
 
 func update_unit_positions(units: Array[Unit]) -> void:
 	if battle_manager.total_map_tiles.is_empty():
+		push_warning("[ScenarioEditor] No map tiles loaded — cannot position units")
 		return
 	for unit: Unit in units:
 		if battle_manager.total_map_tiles.keys().has(unit.tile_position.location):

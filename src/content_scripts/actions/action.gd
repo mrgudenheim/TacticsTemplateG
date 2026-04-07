@@ -440,7 +440,7 @@ func apply_standard(action_instance: ActionInstance) -> void:
 	for target_unit: Unit in target_units:
 		if vfx_data != null:
 			#vfx_data.vfx_completed.connect(func(): vfx_completed = true, CONNECT_ONE_SHOT)
-			vfx_locations.append(show_vfx(action_instance, target_unit.char_body.global_position))
+			vfx_locations.append(show_vfx(action_instance, target_unit.tile_position.get_world_position()))
 		var evade_direction: EvadeData.Directions = get_evade_direction(action_instance.user, target_unit)
 		var total_hit_chance: int = get_total_hit_chance(action_instance.user, target_unit, evade_direction)
 		var hit_success: bool = randi_range(0, 99) < total_hit_chance
@@ -503,7 +503,7 @@ func apply_standard(action_instance: ActionInstance) -> void:
 	# wait for applying effect animation
 	action_instance.user.global_battle_manager.game_state_label.text = "Waiting for " + display_name + " vfx" 
 	if vfx_data != null and target_units.size() > 0:
-		while vfx_locations.any(func(vfx_location: Variant) -> bool: return is_instance_valid(vfx_location)): # wait until vfx is completed
+		while vfx_locations.any(func(vfx_location: Node3D) -> bool: return is_instance_valid(vfx_location)): # wait until vfx is completed
 			await action_instance.user.get_tree().process_frame
 	else:
 		await action_instance.user.get_tree().create_timer(0.5).timeout # TODO show based on vfx timing data? (attacks use vfx 0xFFFF?)
@@ -577,7 +577,7 @@ func apply_status(unit: Unit, status_list: Array[String], status_list_type: Stat
 
 func show_vfx(action_instance: ActionInstance, position: Vector3) -> Node3D:
 	if not is_instance_valid(vfx_data):
-		print("[Action.show_vfx] vfx_data is not valid, skipping")
+		push_warning("[Action.show_vfx] vfx_data is not valid, skipping")
 		return
 
 	var parent_node: Node = action_instance.user.get_parent()
@@ -587,7 +587,7 @@ func show_vfx(action_instance: ActionInstance, position: Vector3) -> Node3D:
 	instance.position = position
 	parent_node.add_child(instance)
 
-	var origin_pos: Vector3 = action_instance.user.char_body.global_position
+	var origin_pos: Vector3 = action_instance.user.tile_position.get_world_position()
 	instance.initialize(vfx_data, position, origin_pos)
 	return instance
 
@@ -595,24 +595,25 @@ func show_vfx(action_instance: ActionInstance, position: Vector3) -> Node3D:
 func show_trap_hit(action_instance: ActionInstance, target_unit: Unit) -> void:
 	if trap_hit_handler_id <= 0:
 		return
-	var bm: BattleManager = action_instance.user.global_battle_manager
-	if bm == null or bm.trap_instance == null:
+	var battle_manager: BattleManager = action_instance.user.global_battle_manager
+	if battle_manager == null or battle_manager.trap_instance == null:
 		return
 	var target_pos: Vector3 = target_unit.char_body.global_position
-	bm.trap_instance.global_position = target_pos
+	battle_manager.trap_instance.global_position = target_pos
 	var dir: Vector3 = (target_pos - action_instance.user.char_body.global_position).normalized()
-	var trap_el: int = TrapEffectData.element_type_to_trap_id(element)
+	var trap_element: int = TrapEffectData.element_type_to_trap_id(element)
 	var flash_unit: Unit = target_unit if trap_hit_handler_id in TrapEffectData.FLASH_HANDLER_IDS else null
-	bm.trap_instance.play(trap_hit_handler_id, trap_el, dir, flash_unit)
+	battle_manager.trap_instance.play(trap_hit_handler_id, trap_element, dir, flash_unit)
 
 
-func show_projectile(action_instance: ActionInstance, target_unit: Unit, variant: ProjectileEffectInstance.Variant) -> void:
-	var bm: BattleManager = action_instance.user.global_battle_manager
-	if bm == null or bm.projectile_instance == null:
+func show_projectile(action_instance: ActionInstance, target_unit: Unit, variant: ProjectileEffectInstance.ProjectileType) -> void:
+	var battle_manager: BattleManager = action_instance.user.global_battle_manager
+	if battle_manager == null or battle_manager.projectile_instance == null:
+		push_warning("[Action.show_projectile] battle_manager or projectile_instance is null")
 		return
 	var origin: Vector3 = action_instance.user.char_body.global_position
 	var target: Vector3 = target_unit.char_body.global_position
-	bm.projectile_instance.play(origin, target, variant)
+	battle_manager.projectile_instance.play(origin, target, variant)
 
 
 # TODO set action type directly for each action? maybe as part of action processing per target to check values after formula processing and passive effect modifications

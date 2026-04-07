@@ -79,10 +79,11 @@ func get_all_scenario_names() -> PackedStringArray:
 	return names
 
 
+var rom_load_times: Array[Dictionary] = [] # [{name: String, time_ms: int}]
+
+
 func has_scenario(scenario_name: String) -> bool:
 	return scenarios.has(scenario_name) or scenario_paths.has(scenario_name)
-
-var rom_load_times: Array[Dictionary] = [] # [{name: String, time_ms: int}]
 
 func _profile_section(section_name: String, start_ms: int) -> int:
 	var elapsed: int = Time.get_ticks_msec() - start_ms
@@ -114,11 +115,10 @@ class SpritesheetRegionData:
 	var animation_ids: PackedInt32Array = []
 	var animation_descriptions: PackedStringArray = []
 
+const ROM_PATH_CONFIG: String = "user://rom_path.cfg"
+
 #func _init() -> void:
 	#pass
-
-
-const ROM_PATH_CONFIG: String = "user://rom_path.cfg"
 
 
 func _ready() -> void:
@@ -195,7 +195,8 @@ func process_rom() -> void:
 	battle_bin_data.init_from_battle_bin()
 	section_start = _profile_section("battle_bin_data.init_from_battle_bin", section_start)
 
-	var fft_scenarios_pre_extracted: bool = Array(DirAccess.open("res://src/_content/scenarios").get_files()).any(func(f: String) -> bool: return f.begins_with("map_") and f.ends_with(".scenario.json"))
+	var scenario_dir: DirAccess = DirAccess.open(Scenario.SAVE_DIRECTORY_PATH)
+	var fft_scenarios_pre_extracted: bool = scenario_dir != null and Array(scenario_dir.get_files()).any(func(f: String) -> bool: return f.ends_with(".scenario.json"))
 
 	if not fft_scenarios_pre_extracted:
 		wldcore_data.init_from_wldcore()
@@ -695,6 +696,19 @@ func import_custom_data() -> void:
 		"abilities",
 		"scenarios",
 	]
+
+	# Also scan user:// for pre-extracted scenarios
+	var user_scenario_dir: DirAccess = DirAccess.open(Scenario.SAVE_DIRECTORY_PATH)
+	if user_scenario_dir:
+		user_scenario_dir.list_dir_begin()
+		var scenario_file: String = user_scenario_dir.get_next()
+		while scenario_file != "":
+			if scenario_file.ends_with(".scenario.json"):
+				var unique_name: String = scenario_file.trim_suffix(".scenario.json")
+				if not has_scenario(unique_name):
+					scenario_paths[unique_name] = Scenario.SAVE_DIRECTORY_PATH + scenario_file
+			scenario_file = user_scenario_dir.get_next()
+		user_scenario_dir.list_dir_end()
 
 	for content_folder: String in folder_names:
 		var dir_path: String = "res://src/_content/" + content_folder + "/"

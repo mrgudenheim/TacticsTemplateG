@@ -107,19 +107,18 @@ func render(particles: Array[VfxParticleData], vfx_data: VisualEffectData) -> vo
 		var entries: Array = _particle_meshes[uid]
 		var slot: int = 0
 
-		for fi in range(frameset.frameset.size()):
+		var num_frames: int = frameset.frameset.size()
+		for fi in range(num_frames):
 			var vfx_frame: VisualEffectData.VfxFrame = frameset.frameset[fi]
 
-			# Opaque pass
 			var opaque_entry: Dictionary = entries[slot]
-			opaque_entry.mat.render_priority = 0
+			opaque_entry.mat.render_priority = fi
 			_render_frame(opaque_entry.mesh, opaque_entry.mat, p, vfx_frame, true, frame_camera, align, p.current_depth_mode)
 			slot += 1
 
-			# Semi-transparent pass
 			var semi_entry: Dictionary = entries[slot]
 			if vfx_frame.semi_transparency_on:
-				semi_entry.mat.render_priority = 1
+				semi_entry.mat.render_priority = num_frames + fi
 				_render_frame(semi_entry.mesh, semi_entry.mat, p, vfx_frame, false, frame_camera, align, p.current_depth_mode)
 			else:
 				semi_entry.mesh.visible = false

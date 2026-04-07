@@ -8,7 +8,7 @@ extends Node3D
 
 signal completed
 
-enum Variant { ARROW, STONE, SPECIAL }
+enum ProjectileType { ARROW, STONE, SPECIAL }
 enum Trajectory { LINEAR, PARABOLIC }
 
 enum _State { IDLE, FLYING, DONE }
@@ -33,7 +33,7 @@ const SPECIAL_SCALE: float = 0.1
 var loop: bool = false
 
 var _state: _State = _State.IDLE
-var _variant: Variant = Variant.STONE
+var _projectile_type: ProjectileType = ProjectileType.STONE
 var _trajectory: Trajectory = Trajectory.LINEAR
 var _origin: Vector3
 var _target: Vector3
@@ -81,7 +81,7 @@ func initialize() -> void:
 		_meshes[variant_id] = _build_mesh(verts, faces)
 
 
-func play(origin: Vector3, target: Vector3, variant: Variant, trajectory: Trajectory = Trajectory.LINEAR, arc_height: float = 2.0) -> void:
+func play(origin: Vector3, target: Vector3, variant: ProjectileType, trajectory: Trajectory = Trajectory.LINEAR, arc_height: float = 2.0) -> void:
 	stop()
 
 	_origin = origin
@@ -92,13 +92,13 @@ func play(origin: Vector3, target: Vector3, variant: Variant, trajectory: Trajec
 	_total_distance = _delta.length()
 
 	if trajectory == Trajectory.PARABOLIC:
-		variant = Variant.ARROW # Handler 1 is arrow-only
+		variant = ProjectileType.ARROW # Handler 1 is arrow-only
 		# XZ-only distance (handler 1 ignores Y in distance calc)
 		var xz_delta: Vector3 = Vector3(_delta.x, 0.0, _delta.z)
 		_xz_distance = xz_delta.length()
 		_xz_direction = xz_delta.normalized() if _xz_distance > 0.001 else Vector3.FORWARD
 
-	_variant = variant
+	_projectile_type = variant
 
 	var effective_distance: float = _xz_distance if trajectory == Trajectory.PARABOLIC else _total_distance
 	if effective_distance < 0.001:
@@ -163,7 +163,7 @@ func _process_tick() -> void:
 		_mesh_instance.visible = false
 		_state = _State.DONE
 		if loop:
-			play(_origin, _target, _variant, _trajectory, _arc_height)
+			play(_origin, _target, _projectile_type, _trajectory, _arc_height)
 		else:
 			completed.emit()
 		return
@@ -188,11 +188,11 @@ func _process_tick() -> void:
 		_current_position = _origin.lerp(_target, t)
 
 	# Update rotation per variant
-	match _variant:
-		Variant.STONE:
+	match _projectile_type:
+		ProjectileType.STONE:
 			_tumble_y += STONE_TUMBLE_Y_RATE
 			_tumble_x += STONE_TUMBLE_X_RATE
-		Variant.SPECIAL:
+		ProjectileType.SPECIAL:
 			_spin_x -= SPECIAL_SPIN_RATE
 
 
@@ -211,7 +211,7 @@ func _evaluate_parabolic_arc(t: float) -> float:
 
 
 # PSX bow arc constants
-const PSX_PER_GODOT: float = 28.0
+const PSX_PER_GODOT: float = MapData.TILE_SIDE_LENGTH
 const PSX_ARC_K: float = 4096.0
 const PSX_ARC_R: float = 336.0
 const PSX_HEIGHT_UNIT: float = 12.0  # 1h = 12 PSX world units
@@ -244,24 +244,24 @@ static func compute_psx_bow_arc(godot_xz_dist: float, godot_delta_y: float) -> f
 
 func _update_transform() -> void:
 	var model_scale: float = STONE_SCALE
-	match _variant:
-		Variant.ARROW:
+	match _projectile_type:
+		ProjectileType.ARROW:
 			model_scale = ARROW_SCALE
-		Variant.STONE:
+		ProjectileType.STONE:
 			model_scale = STONE_SCALE
-		Variant.SPECIAL:
+		ProjectileType.SPECIAL:
 			model_scale = SPECIAL_SCALE
 
 	# Build rotation: orientation along trajectory + variant-specific tumble
 	var tumble_basis: Basis = Basis.IDENTITY
-	match _variant:
-		Variant.ARROW:
+	match _projectile_type:
+		ProjectileType.ARROW:
 			# PSX arrow tip is at -Y; rotate +90° around X to point tip along -Z
 			# Then looking_at in _compute_orientation makes -Z face the velocity
 			tumble_basis = Basis(Vector3.RIGHT, PI / 2.0)
-		Variant.STONE:
+		ProjectileType.STONE:
 			tumble_basis = Basis.from_euler(Vector3(_tumble_x, _tumble_y, 0.0))
-		Variant.SPECIAL:
+		ProjectileType.SPECIAL:
 			tumble_basis = Basis.from_euler(Vector3(_spin_x, 0.0, 0.0))
 
 	var model_basis: Basis = _orientation * tumble_basis

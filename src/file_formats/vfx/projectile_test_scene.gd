@@ -143,9 +143,9 @@ func _setup_projectile_instance() -> void:
 
 func _populate_ui() -> void:
 	variant_option.clear()
-	variant_option.add_item("Arrow", ProjectileEffectInstance.Variant.ARROW)
-	variant_option.add_item("Stone", ProjectileEffectInstance.Variant.STONE)
-	variant_option.add_item("Special", ProjectileEffectInstance.Variant.SPECIAL)
+	variant_option.add_item("Arrow", ProjectileEffectInstance.ProjectileType.ARROW)
+	variant_option.add_item("Stone", ProjectileEffectInstance.ProjectileType.STONE)
+	variant_option.add_item("Special", ProjectileEffectInstance.ProjectileType.SPECIAL)
 	variant_option.select(1) # Default to Stone
 
 	trajectory_option.clear()
@@ -219,7 +219,7 @@ func _on_play_pressed() -> void:
 	if _projectile_instance == null or attacker_unit == null or target_unit == null:
 		return
 
-	var variant: ProjectileEffectInstance.Variant = variant_option.get_selected_id() as ProjectileEffectInstance.Variant
+	var variant: ProjectileEffectInstance.ProjectileType = variant_option.get_selected_id() as ProjectileEffectInstance.ProjectileType
 	var trajectory: ProjectileEffectInstance.Trajectory = trajectory_option.get_selected_id() as ProjectileEffectInstance.Trajectory
 	var origin_pos: Vector3 = attacker_unit.char_body.global_position
 	var target_pos: Vector3 = target_unit.char_body.global_position

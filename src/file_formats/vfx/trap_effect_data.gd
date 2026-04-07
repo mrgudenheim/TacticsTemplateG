@@ -145,17 +145,19 @@ const HANDLER_PALETTE_OVERRIDES: Dictionary = {
 # Handlers that trigger white flash on the target unit sprite
 const FLASH_HANDLER_IDS: PackedInt32Array = [HANDLER_HIT_MELEE]
 
+const ELEMENT_TO_TRAP_ID: Dictionary = {
+	Action.ElementTypes.FIRE: 1,
+	Action.ElementTypes.LIGHTNING: 2,
+	Action.ElementTypes.ICE: 3,
+	Action.ElementTypes.WIND: 4,
+	Action.ElementTypes.EARTH: 5,
+	Action.ElementTypes.WATER: 6,
+	Action.ElementTypes.HOLY: 7,
+	Action.ElementTypes.DARK: 8,
+}
+
 static func element_type_to_trap_id(el: Action.ElementTypes) -> int:
-	match el:
-		Action.ElementTypes.FIRE: return 1
-		Action.ElementTypes.LIGHTNING: return 2
-		Action.ElementTypes.ICE: return 3
-		Action.ElementTypes.WIND: return 4
-		Action.ElementTypes.EARTH: return 5
-		Action.ElementTypes.WATER: return 6
-		Action.ElementTypes.HOLY: return 7
-		Action.ElementTypes.DARK: return 8
-		_: return 0
+	return ELEMENT_TO_TRAP_ID.get(el, 0)
 
 
 static func get_element_color(p_element_id: int) -> Color:

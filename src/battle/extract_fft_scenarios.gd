@@ -1,6 +1,6 @@
 extends Control
 
-const SAVE_DIR: String = "res://src/_content/scenarios/"
+const SAVE_DIR: String = Scenario.SAVE_DIRECTORY_PATH
 
 @export var load_rom_button: LoadRomButton
 @export var rom_path_label: Label
@@ -77,6 +77,8 @@ func _on_clear_path_pressed() -> void:
 func _on_extract_pressed() -> void:
 	extract_button.disabled = true
 	status_label.text = "Extracting scenarios..."
+
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
 
 	var count: int = 0
 	for scenario_name: String in RomReader.scenarios.keys():

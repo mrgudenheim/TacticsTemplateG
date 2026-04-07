@@ -7,6 +7,3 @@
 addons/script-ide/
 addons/Todo_Manager/
 overrides/MAP
-
-# Pre-extracted FFT scenarios (optional, regenerate with extract_fft_scenarios.tscn)
-src/_content/scenarios/map_*.scenario.json
