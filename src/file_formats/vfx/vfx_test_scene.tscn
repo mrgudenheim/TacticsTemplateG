@@ -31,7 +31,7 @@ height = 0.16
 shading_mode = 0
 albedo_color = Color(1.0, 0.3, 0.2, 1)
 
-[node name="VfxTestScene" type="Node3D" node_paths=PackedStringArray("camera_controller", "maps_container", "vfx_container", "origin_marker", "target_marker", "effect_spinbox", "effect_name_label", "play_button", "loop_checkbox", "speed_slider", "speed_label", "show_markers_checkbox", "show_map_checkbox", "show_background_checkbox", "emitter_list_container", "anchor_list_container", "world_environment", "background_canvas", "directional_light")]
+[node name="VfxTestScene" type="Node3D" node_paths=PackedStringArray("camera_controller", "maps_container", "vfx_container", "origin_marker", "target_marker", "effect_spinbox", "effect_name_label", "play_button", "loop_checkbox", "speed_slider", "speed_label", "depth_scale_slider", "depth_scale_label", "show_markers_checkbox", "show_map_checkbox", "show_background_checkbox", "emitter_list_container", "anchor_list_container", "world_environment", "background_canvas", "directional_light")]
 script = ExtResource("1_script")
 camera_controller = NodePath("CameraController")
 maps_container = NodePath("Maps")
@@ -44,6 +44,8 @@ play_button = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/Pla
 loop_checkbox = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/LoopCheckBox")
 speed_slider = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/SpeedRow/HSlider")
 speed_label = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/SpeedLabel")
+depth_scale_slider = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/DepthScaleRow/HSlider")
+depth_scale_label = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/DepthScaleLabel")
 show_markers_checkbox = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/ShowMarkersCheckBox")
 show_map_checkbox = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/ShowMapCheckBox")
 show_background_checkbox = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/ShowBackgroundCheckBox")
@@ -151,6 +153,25 @@ value = 1.0
 [node name="SpeedLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "1.0x"
+
+[node name="DepthScaleRow" type="HBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/DepthScaleRow"]
+layout_mode = 2
+text = "Depth Scale:"
+
+[node name="HSlider" type="HSlider" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/DepthScaleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.1
+max_value = 10.0
+step = 0.1
+value = 1.0
+
+[node name="DepthScaleLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "1.0"
 
 [node name="ShowMarkersCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2

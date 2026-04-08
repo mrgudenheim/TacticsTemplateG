@@ -28,6 +28,21 @@ enum SpreadMode { SPHERE = 0, BOX = 1 }
 enum AnimOpcode { LOOP = 0x81, SET_OFFSET = 0x82, ADD_OFFSET = 0x83 }
 const MAX_FRAMESET_ID: int = 0x7F  ## frameset_id <= this is a frame; above is an opcode
 
+## Depth bias: shifts depth sampling point toward camera by N world units.
+## All use the same formula: compute depth from (position + camera_dir * bias).
+##
+## PSX OT: 383 buckets (0=near, 382=far). Base depth = GTE_SZ >> 2.
+## Relative modes offset from base depth, fixed modes use absolute bucket positions.
+## DEPTH_BIAS_SCALE converts PSX OT bucket offsets to world units (empirically tuned).
+const DEPTH_BIAS_SCALE: float = 0.375        ## World units per OT bucket (tuned to match PSX sorting)
+const DEPTH_BIAS_PULL_8: float = 8.0 * DEPTH_BIAS_SCALE    ## 3.0 world units (PSX: base - 8 buckets)
+const DEPTH_BIAS_PULL_16: float = 16.0 * DEPTH_BIAS_SCALE  ## 6.0 world units (PSX: base - 16 buckets)
+const DEPTH_BIAS_FIXED_FRONT: float = 100.0  ## Large forward shift — always near camera (PSX: bucket 8)
+const DEPTH_BIAS_FIXED_BACK: float = -100.0  ## Large backward shift — always far (PSX: bucket 382)
+const DEPTH_BIAS_FIXED_16: float = 80.0      ## Near front but behind FIXED_FRONT (PSX: bucket 16)
+const DEPTH_BIAS_UNIT: float = 0.1           ## Unit sprite: slightly in front of its tile
+const DEPTH_BIAS_SHADOW: float = 0.1         ## Shadow: slightly in front of its tile
+
 enum DepthMode {
 	STANDARD = 0,        ## Z >> 2 (no bias)
 	PULL_FORWARD_8 = 1,  ## Z >> 2 - 8 (pulled forward ~1 tile)

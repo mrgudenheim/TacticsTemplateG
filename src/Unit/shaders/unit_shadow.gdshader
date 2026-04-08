@@ -1,8 +1,7 @@
 shader_type spatial;
-render_mode unshaded, cull_disabled, depth_draw_opaque;
+render_mode blend_mul, unshaded, cull_disabled, depth_draw_opaque;
 
-uniform sampler2D sprite_texture : source_color, filter_nearest;
-uniform vec3 unit_tint = vec3(0.0, 0.0, 0.0);
+uniform sampler2D shadow_texture : filter_nearest;
 uniform float depth_bias = 0.1;
 
 varying float biased_depth;
@@ -16,11 +15,10 @@ void vertex() {
 }
 
 void fragment() {
-	vec4 tex = texture(sprite_texture, UV);
-	vec4 col = tex * COLOR;
-	if (col.a < 0.5) {
+	vec4 col = texture(shadow_texture, UV);
+	if (col.a < 0.01) {
 		discard;
 	}
-	ALBEDO = clamp(col.rgb + unit_tint, vec3(0.0), vec3(1.0));
+	ALBEDO = vec3(1.0 - col.a);
 	DEPTH = biased_depth;
 }

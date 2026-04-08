@@ -17,6 +17,8 @@ extends Node3D
 @export var loop_checkbox: CheckBox
 @export var speed_slider: HSlider
 @export var speed_label: Label
+@export var depth_scale_slider: HSlider
+@export var depth_scale_label: Label
 @export var show_markers_checkbox: CheckBox
 @export var show_map_checkbox: CheckBox
 @export var show_background_checkbox: CheckBox
@@ -89,6 +91,7 @@ func _ready() -> void:
 	effect_spinbox.get_line_edit().gui_input.connect(_on_spinbox_gui_input)
 	play_button.pressed.connect(_on_play_pressed)
 	speed_slider.value_changed.connect(_on_speed_changed)
+	depth_scale_slider.value_changed.connect(_on_depth_scale_changed)
 	show_markers_checkbox.toggled.connect(_on_show_markers_toggled)
 	show_map_checkbox.toggled.connect(_on_show_map_toggled)
 	show_background_checkbox.toggled.connect(_on_show_background_toggled)
@@ -160,6 +163,7 @@ func _create_effect_instance() -> bool:
 	vfx_container.add_child(current_instance)
 	current_instance.initialize(vfx_data, target_world_pos, origin_world_pos, true)
 	current_instance.tree_exiting.connect(_on_effect_instance_finished)
+	current_instance.renderer.depth_scale = depth_scale_slider.value
 	if debug_depth:
 		current_instance.renderer.debug_depth_enabled = true
 
@@ -470,6 +474,12 @@ func _on_play_pressed() -> void:
 func _on_speed_changed(value: float) -> void:
 	Engine.time_scale = value
 	speed_label.text = "%.1fx" % value
+
+
+func _on_depth_scale_changed(value: float) -> void:
+	depth_scale_label.text = "%.1f" % value
+	if current_instance and is_instance_valid(current_instance) and current_instance.renderer:
+		current_instance.renderer.depth_scale = value
 
 
 func _on_spinbox_gui_input(event: InputEvent) -> void:

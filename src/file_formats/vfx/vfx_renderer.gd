@@ -22,6 +22,7 @@ var _emitter_align_flags: Array[bool] = []
 
 # Debug: visualize depth values as heat map colors
 var debug_depth_enabled: bool = false
+var depth_scale: float = 1.0
 
 
 func initialize(vfx_data: VisualEffectData) -> void:
@@ -136,6 +137,11 @@ func _create_mesh_entry() -> Dictionary:
 	if _vfx_data and _vfx_data.texture:
 		mat.set_shader_parameter("effect_texture", _vfx_data.texture)
 		mat.set_shader_parameter("texture_size", _texture_size)
+	mat.set_shader_parameter("bias_pull_8", VfxConstants.DEPTH_BIAS_PULL_8)
+	mat.set_shader_parameter("bias_pull_16", VfxConstants.DEPTH_BIAS_PULL_16)
+	mat.set_shader_parameter("bias_fixed_front", VfxConstants.DEPTH_BIAS_FIXED_FRONT)
+	mat.set_shader_parameter("bias_fixed_back", VfxConstants.DEPTH_BIAS_FIXED_BACK)
+	mat.set_shader_parameter("bias_fixed_16", VfxConstants.DEPTH_BIAS_FIXED_16)
 	mesh_instance.material_override = mat
 
 	add_child(mesh_instance)
@@ -206,6 +212,7 @@ func _render_frame(mesh: MeshInstance3D, mat: ShaderMaterial, p: VfxParticleData
 	mat.set_shader_parameter("uv_rect_data", uv_rect_data)
 	mat.set_shader_parameter("color_modulate", p.color_modulate)
 	mat.set_shader_parameter("depth_mode", depth_mode)
+	mat.set_shader_parameter("depth_scale", depth_scale)
 	if debug_depth_enabled:
 		mat.set_shader_parameter("debug_depth", true)
 

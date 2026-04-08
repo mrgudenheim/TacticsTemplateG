@@ -1,7 +1,7 @@
 // https://docs.godotengine.org/en/stable/tutorials/shaders/shader_reference/shading_language.html
 
 shader_type spatial;
-render_mode unshaded, depth_prepass_alpha;
+render_mode unshaded, depth_draw_opaque;
 
 // palette anim vars
 uniform sampler2D albedo_texture_color_indicies : source_color, filter_nearest;
@@ -46,9 +46,10 @@ void fragment() {
 	// palette animation/swap
 	if (COLOR.rgb != vec3(0.0, 0.0, 0.0)) {
 		vec4 new_color = palettes_colors[int(round(texture(albedo_texture_color_indicies, new_uv).r * 255.0))];
-		//new_color = texture(albedo_texture_color_indicies, UV);
+		if (new_color.a < 0.5) {
+			discard;
+		}
 		ALBEDO.rgb = new_color.rgb;
-		ALPHA = new_color.a;
 	}
 	else {
 		ALBEDO.rgb = COLOR.rgb;
@@ -62,7 +63,6 @@ void fragment() {
 		else
 			dc = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), (d_inv - 0.5) * 2.0);
 		ALBEDO = dc;
-		ALPHA = 1.0;
 	}
 	DEPTH = face_center_depth;
 }
