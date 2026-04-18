@@ -1,0 +1,223 @@
+[gd_scene format=3 uid="uid://c7vfxtest001"]
+
+[ext_resource type="Script" path="res://src/file_formats/vfx/vfx_test_scene.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://7tn6b6eup5na" path="res://src/camera_controller.tscn" id="2_camera"]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 3
+background_canvas_max_layer = -3
+
+[sub_resource type="Gradient" id="Gradient_1"]
+colors = PackedColorArray(0.1332, 0.14724, 0.18, 1, 0.39, 0.695, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_1"]
+gradient = SubResource("Gradient_1")
+fill_from = Vector2(0.5, 1)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="SphereMesh" id="SphereMesh_origin"]
+radius = 0.08
+height = 0.16
+
+[sub_resource type="StandardMaterial3D" id="Material_origin"]
+shading_mode = 0
+albedo_color = Color(0.2, 0.6, 1.0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_target"]
+radius = 0.08
+height = 0.16
+
+[sub_resource type="StandardMaterial3D" id="Material_target"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.3, 0.2, 1)
+
+[node name="VfxTestScene" type="Node3D" node_paths=PackedStringArray("camera_controller", "maps_container", "vfx_container", "origin_marker", "target_marker", "effect_spinbox", "effect_name_label", "play_button", "loop_checkbox", "speed_slider", "speed_label", "depth_scale_slider", "depth_scale_label", "show_markers_checkbox", "show_map_checkbox", "show_background_checkbox", "emitter_list_container", "anchor_list_container", "world_environment", "background_canvas", "directional_light")]
+script = ExtResource("1_script")
+camera_controller = NodePath("CameraController")
+maps_container = NodePath("Maps")
+vfx_container = NodePath("VfxContainer")
+origin_marker = NodePath("OriginMarker")
+target_marker = NodePath("TargetMarker")
+effect_spinbox = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/EffectRow/SpinBox")
+effect_name_label = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/EffectNameLabel")
+play_button = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/PlayButton")
+loop_checkbox = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/LoopCheckBox")
+speed_slider = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/SpeedRow/HSlider")
+speed_label = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/SpeedLabel")
+depth_scale_slider = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/DepthScaleRow/HSlider")
+depth_scale_label = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/DepthScaleLabel")
+show_markers_checkbox = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/ShowMarkersCheckBox")
+show_map_checkbox = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/ShowMapCheckBox")
+show_background_checkbox = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/ShowBackgroundCheckBox")
+emitter_list_container = NodePath("DebugUI/PanelContainer/MarginContainer/VBoxContainer/EmitterList")
+anchor_list_container = NodePath("DebugUI/AnchorPanel/AnchorMargin/AnchorVBox/AnchorList")
+world_environment = NodePath("WorldEnvironment")
+background_canvas = NodePath("BackgroundCanvasLayer")
+directional_light = NodePath("DirectionalLight3D")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.553391, -0.832921, 0, 0.832921, 0.553391, 0, 3.51982, 2.72607)
+
+[node name="BackgroundCanvasLayer" type="CanvasLayer" parent="."]
+layer = -3
+
+[node name="TextureRect" type="TextureRect" parent="BackgroundCanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_1")
+
+[node name="CameraController" parent="." instance=ExtResource("2_camera")]
+transform = Transform3D(0.707107, -0.315509, 0.632814, 0, 0.894934, 0.446198, -0.707107, -0.315509, 0.632814, 0, 0, 0)
+
+[node name="Maps" type="Node3D" parent="."]
+
+[node name="VfxContainer" type="Node3D" parent="."]
+
+[node name="OriginMarker" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_origin")
+material_override = SubResource("Material_origin")
+
+[node name="TargetMarker" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_target")
+material_override = SubResource("Material_target")
+
+[node name="DebugUI" type="CanvasLayer" parent="."]
+
+[node name="PanelContainer" type="PanelContainer" parent="DebugUI"]
+offset_right = 280.0
+offset_bottom = 400.0
+
+[node name="MarginContainer" type="MarginContainer" parent="DebugUI/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="DebugUI/PanelContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "VFX Debug"
+
+[node name="EffectRow" type="HBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/EffectRow"]
+layout_mode = 2
+text = "Effect:"
+
+[node name="SpinBox" type="SpinBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/EffectRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 510.0
+value = 10.0
+
+[node name="EffectNameLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = ""
+add_theme_font_size_override/font_size = 11
+modulate = Color(0.7, 0.7, 0.7, 1)
+
+[node name="PlayButton" type="Button" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Play"
+
+[node name="LoopCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Loop"
+
+[node name="SpeedRow" type="HBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/SpeedRow"]
+layout_mode = 2
+text = "Speed:"
+
+[node name="HSlider" type="HSlider" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/SpeedRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.1
+max_value = 10.0
+step = 0.1
+value = 1.0
+
+[node name="SpeedLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "1.0x"
+
+[node name="DepthScaleRow" type="HBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/DepthScaleRow"]
+layout_mode = 2
+text = "Depth Scale:"
+
+[node name="HSlider" type="HSlider" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/DepthScaleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.1
+max_value = 10.0
+step = 0.1
+value = 1.0
+
+[node name="DepthScaleLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "1.0"
+
+[node name="ShowMarkersCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Show Markers"
+
+[node name="ShowMapCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Show Map"
+
+[node name="ShowBackgroundCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Background"
+
+[node name="HSeparator" type="HSeparator" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="EmittersLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Emitters"
+
+[node name="EmitterList" type="VBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="AnchorPanel" type="PanelContainer" parent="DebugUI"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -320.0
+offset_bottom = 400.0
+grow_horizontal = 0
+
+[node name="AnchorMargin" type="MarginContainer" parent="DebugUI/AnchorPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="AnchorVBox" type="VBoxContainer" parent="DebugUI/AnchorPanel/AnchorMargin"]
+layout_mode = 2
+
+[node name="AnchorsLabel" type="Label" parent="DebugUI/AnchorPanel/AnchorMargin/AnchorVBox"]
+layout_mode = 2
+text = "Anchors"
+
+[node name="AnchorList" type="VBoxContainer" parent="DebugUI/AnchorPanel/AnchorMargin/AnchorVBox"]
+layout_mode = 2

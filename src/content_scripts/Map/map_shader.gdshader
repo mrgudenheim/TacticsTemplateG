@@ -1,7 +1,7 @@
 // https://docs.godotengine.org/en/stable/tutorials/shaders/shader_reference/shading_language.html
 
 shader_type spatial;
-render_mode unshaded, depth_prepass_alpha;
+render_mode unshaded, depth_draw_opaque;
 
 // palette anim vars
 uniform sampler2D albedo_texture_color_indicies : source_color, filter_nearest;
@@ -14,6 +14,15 @@ uniform vec2[32] frame_pos;
 uniform float[32] frame_idx;
 
 const int NUM_PALETTES = 16;
+
+uniform bool debug_depth = false;
+
+varying float face_center_depth;
+
+void vertex() {
+	vec4 centroid_clip = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(CUSTOM0.xyz, 1.0);
+	face_center_depth = centroid_clip.z / centroid_clip.w;
+}
 
 void fragment() {
 	// uv animation
@@ -37,11 +46,23 @@ void fragment() {
 	// palette animation/swap
 	if (COLOR.rgb != vec3(0.0, 0.0, 0.0)) {
 		vec4 new_color = palettes_colors[int(round(texture(albedo_texture_color_indicies, new_uv).r * 255.0))];
-		//new_color = texture(albedo_texture_color_indicies, UV);
+		if (new_color.a < 0.5) {
+			discard;
+		}
 		ALBEDO.rgb = new_color.rgb;
-		ALPHA = new_color.a;
 	}
 	else {
 		ALBEDO.rgb = COLOR.rgb;
 	}
+	if (debug_depth) {
+		// Reversed-Z: 1.0=near(blue), 0.0=far(red)
+		vec3 dc;
+		float d_inv = 1.0 - face_center_depth;
+		if (d_inv < 0.5)
+			dc = mix(vec3(0.0, 0.0, 1.0), vec3(0.0, 1.0, 0.0), d_inv * 2.0);
+		else
+			dc = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), (d_inv - 0.5) * 2.0);
+		ALBEDO = dc;
+	}
+	DEPTH = face_center_depth;
 }

@@ -116,22 +116,17 @@ func get_map_chunk_nodes(map_chunk_unique_name: String) -> MapChunkNodes:
 	# else:
 
 	var mesh_aabb: AABB = map_chunk_data.mesh.get_aabb()
-	# modify mesh based on mirroring and so bottom left corner is at (0, 0, 0)
-	# TODO handle rotation
 	if map_chunk.mirror_scale != Vector3i.ONE or mesh_aabb.position != Vector3.ZERO:
 		var surface_arrays: Array = map_chunk_data.mesh.surface_get_arrays(0)
 		var original_mesh_center: Vector3 = mesh_aabb.get_center()
+		var mirror_vec := Vector3(map_chunk.mirror_scale)
 		for vertex_idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size():
 			var vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx]
-			vertex = vertex - original_mesh_center # shift center to be at (0, 0, 0) to make moving after mirroring easy
-			vertex = vertex * Vector3(map_chunk.mirror_scale) # apply mirroring
-			vertex = vertex + (mesh_aabb.size / 2.0) # shift so mesh_aabb start will be at (0, 0, 0)
-			
+			vertex = (vertex - original_mesh_center) * mirror_vec + (mesh_aabb.size / 2.0)
 			surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx] = vertex
-		
-		# var new_array_index: Array = []
-		# new_array_index.resize(surface_arrays[Mesh.ARRAY_VERTEX].size())
-		# if mirrored along an odd number of axis polygons will render with the wrong facing
+
+		var custom0_flags: int = MapData.mirror_custom0(surface_arrays, original_mesh_center, mirror_vec, mesh_aabb.size / 2.0)
+
 		var sum_scale: int = map_chunk.mirror_scale.x + map_chunk.mirror_scale.y + map_chunk.mirror_scale.z
 		if sum_scale == 1 or sum_scale == -3:
 			for idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size() / 3:
@@ -144,10 +139,8 @@ func get_map_chunk_nodes(map_chunk_unique_name: String) -> MapChunkNodes:
 				surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx] = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2]
 				surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2] = temp_uv
 
-				# TODO fix ordering of normals for mirrored mesh?
-		
 		var modified_mesh: ArrayMesh = ArrayMesh.new()
-		modified_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays)
+		modified_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays, [], {}, custom0_flags)
 		new_map_instance.mesh_instance.mesh = modified_mesh
 	else:
 		new_map_instance.mesh_instance.mesh = map_chunk_data.mesh

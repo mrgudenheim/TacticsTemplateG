@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://src/shaders/psx_depth_overlay.gdshader" id="1"]
+
+[resource]
+shader = ExtResource("1")
+shader_parameter/overlay_color = Color(1, 1, 1, 1)
+shader_parameter/overlay_opacity = 0.4
+shader_parameter/depth_mode = 7

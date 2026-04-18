@@ -114,6 +114,8 @@ var separate_status: bool = false
 @export var vfx_id: int = 0
 var vfx_data: VisualEffectData
 
+var trap_hit_handler_id: int = 0 # 0 = no TRAP, >0 = handler ID from charging_vfx_ids
+
 class SecondaryAction:
 	var action_idx: int
 	var action_unique_name: String
@@ -443,6 +445,8 @@ func apply_standard(action_instance: ActionInstance) -> void:
 		var total_hit_chance: int = get_total_hit_chance(action_instance.user, target_unit, evade_direction)
 		var hit_success: bool = randi_range(0, 99) < total_hit_chance
 		if hit_success:
+			show_trap_hit(action_instance, target_unit)
+
 			for effect: ActionEffect in target_effects:
 				var effect_value: int = roundi(effect.base_power_formula.get_result(action_instance.user, target_unit, element))
 				if not passive_power_modifier_applies_to_hit_chance:
@@ -499,29 +503,37 @@ func apply_standard(action_instance: ActionInstance) -> void:
 	# wait for applying effect animation
 	action_instance.user.global_battle_manager.game_state_label.text = "Waiting for " + display_name + " vfx" 
 	if vfx_data != null and target_units.size() > 0:
-		while vfx_locations.any(func(vfx_location: Node3D) -> bool: return vfx_location != null): # wait until vfx is completed
+		while vfx_locations.any(func(vfx_location: Node3D) -> bool: return is_instance_valid(vfx_location)): # wait until vfx is completed
 			await action_instance.user.get_tree().process_frame
 	else:
 		await action_instance.user.get_tree().create_timer(0.5).timeout # TODO show based on vfx timing data? (attacks use vfx 0xFFFF?)
 	for target_unit: Unit in target_units:
-		target_unit.return_to_idle_from_hit()
+		if is_instance_valid(target_unit):
+			target_unit.return_to_idle_from_hit()
 	vfx_locations.clear()
-	
+
+	if not is_instance_valid(action_instance.user):
+		return
+
 	# pay costs
 	action_instance.user.mp -= action_instance.action.mp_cost
 
 	# wait for triggered actions
 	if action_instance.allow_triggering_actions:
 		for target: Unit in target_units:
-			for connection: Dictionary in target.targeted_post_action.get_connections():
-				await connection["callable"].call(target, action_instance)
+			if is_instance_valid(target):
+				for connection: Dictionary in target.targeted_post_action.get_connections():
+					await connection["callable"].call(target, action_instance)
 
 	action_instance.clear() # clear all highlighting and target data
-	
+
+	if not is_instance_valid(action_instance.user):
+		return
+
 	if ends_turn:
 		action_instance.user.is_ending_turn = true
 		#action_instance.user.end_turn()
-	
+
 	action_instance.action_completed.emit(action_instance.battle_manager)
 
 
@@ -565,19 +577,43 @@ func apply_status(unit: Unit, status_list: Array[String], status_list_type: Stat
 
 func show_vfx(action_instance: ActionInstance, position: Vector3) -> Node3D:
 	if not is_instance_valid(vfx_data):
+		push_warning("[Action.show_vfx] vfx_data is not valid, skipping")
 		return
-	
-	var new_vfx_location: Node3D = Node3D.new()
-	new_vfx_location.position = position
-	#new_vfx_location.position.y += 2 # TODO set position dependent on ability vfx data
-	new_vfx_location.name = "VfxLocation"
-	action_instance.user.get_parent().add_child(new_vfx_location)
-	
-	if not vfx_data.is_initialized:
-		vfx_data.init_from_file()
-	
-	vfx_data.display_vfx(new_vfx_location)
-	return new_vfx_location
+
+	var parent_node: Node = action_instance.user.get_parent()
+
+	var instance := VfxEffectInstance.new()
+	instance.name = "VfxEffectInstance"
+	instance.position = position
+	parent_node.add_child(instance)
+
+	var origin_pos: Vector3 = action_instance.user.tile_position.get_world_position()
+	instance.initialize(vfx_data, position, origin_pos)
+	return instance
+
+
+func show_trap_hit(action_instance: ActionInstance, target_unit: Unit) -> void:
+	if trap_hit_handler_id <= 0:
+		return
+	var battle_manager: BattleManager = action_instance.user.global_battle_manager
+	if battle_manager == null or battle_manager.trap_instance == null:
+		return
+	var target_pos: Vector3 = target_unit.char_body.global_position
+	battle_manager.trap_instance.global_position = target_pos
+	var dir: Vector3 = (target_pos - action_instance.user.char_body.global_position).normalized()
+	var trap_element: int = TrapEffectData.element_type_to_trap_id(element)
+	var flash_unit: Unit = target_unit if trap_hit_handler_id in TrapEffectData.FLASH_HANDLER_IDS else null
+	battle_manager.trap_instance.play(trap_hit_handler_id, trap_element, dir, flash_unit)
+
+
+func show_projectile(action_instance: ActionInstance, target_unit: Unit, variant: ProjectileEffectInstance.ProjectileType) -> void:
+	var battle_manager: BattleManager = action_instance.user.global_battle_manager
+	if battle_manager == null or battle_manager.projectile_instance == null:
+		push_warning("[Action.show_projectile] battle_manager or projectile_instance is null")
+		return
+	var origin: Vector3 = action_instance.user.char_body.global_position
+	var target: Vector3 = target_unit.char_body.global_position
+	battle_manager.projectile_instance.play(origin, target, variant)
 
 
 # TODO set action type directly for each action? maybe as part of action processing per target to check values after formula processing and passive effect modifications
@@ -1957,6 +1993,7 @@ func set_data_from_formula_id(new_formula_id: int) -> void:
 static func get_modified_action(action_to_modify: Action, user: Unit) -> Action:
 	var modified_action: Action = action_to_modify.duplicate()
 	modified_action.vfx_data = action_to_modify.vfx_data
+	modified_action.trap_hit_handler_id = action_to_modify.trap_hit_handler_id
 	var all_passive_effects: Array[PassiveEffect] = user.get_all_passive_effects(action_to_modify.ignore_passives)
 
 	for passive_effect: PassiveEffect in all_passive_effects:
