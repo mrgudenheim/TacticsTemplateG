@@ -157,6 +157,8 @@ func play_animation(fft_animation: FftAnimation, draw_target: Sprite3D, isLoopin
 				fft_animation.primary_anim.frame_timings[next_frame] = delay_value
 			
 			while fft_animation.get_time() < fft_animation.primary_anim.frame_timings[next_frame]:
+				if not is_inside_tree():
+					return
 				await get_tree().process_frame
 				
 			fft_animation.frame_count += delay_frames

@@ -375,7 +375,7 @@ func populate_frame_list(frame_list_parent: VBoxContainer, shp_local: Shp) -> vo
 
 func draw_assembled_frame(frame_index: int) -> void:
 	var assembled_image: Image = shp.get_assembled_frame(frame_index, spr.spritesheet, ui_manager.animation_id_spinbox.value, preview_manager.other_type_options.selected, preview_manager.unit.primary_weapon.wep_frame_v_offset, preview_manager.submerged_depth_options.selected)
-	preview_manager.unit.animation_manager.unit_sprites_manager.sprite_primary.texture = ImageTexture.create_from_image(assembled_image)
+	preview_manager.unit.animation_manager.unit_sprites_manager.set_primary_texture(ImageTexture.create_from_image(assembled_image))
 	var image_rotation: float = shp.get_frame(frame_index, preview_manager.submerged_depth_options.selected).y_rotation
 	(preview_manager.unit.animation_manager.unit_sprites_manager.sprite_primary.get_parent() as Node2D).rotation_degrees = image_rotation
 

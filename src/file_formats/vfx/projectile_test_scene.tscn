@@ -1,0 +1,251 @@
+[gd_scene format=3 uid="uid://cprojtest001"]
+
+[ext_resource type="Script" path="res://src/file_formats/vfx/projectile_test_scene.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://7tn6b6eup5na" path="res://src/camera_controller.tscn" id="2_camera"]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 3
+background_canvas_max_layer = -3
+
+[sub_resource type="Gradient" id="Gradient_1"]
+colors = PackedColorArray(0.1332, 0.14724, 0.18, 1, 0.39, 0.695, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_1"]
+gradient = SubResource("Gradient_1")
+fill_from = Vector2(0.5, 1)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="SphereMesh" id="SphereMesh_target"]
+radius = 0.08
+height = 0.16
+
+[sub_resource type="StandardMaterial3D" id="Material_target"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.3, 0.2, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_origin"]
+radius = 0.08
+height = 0.16
+
+[sub_resource type="StandardMaterial3D" id="Material_origin"]
+shading_mode = 0
+albedo_color = Color(0.2, 0.5, 1.0, 1)
+
+[node name="ProjectileTestScene" type="Node3D" node_paths=PackedStringArray("camera_controller", "maps_container", "target_marker", "origin_marker", "units_container", "effect_container", "variant_option", "trajectory_option", "arc_height_slider", "arc_height_label", "play_button", "loop_checkbox", "speed_slider", "speed_label", "direction_slider", "direction_label", "distance_slider", "distance_label", "height_offset_slider", "height_offset_label", "info_label")]
+script = ExtResource("1_script")
+camera_controller = NodePath("CameraController")
+maps_container = NodePath("Maps")
+target_marker = NodePath("TargetMarker")
+origin_marker = NodePath("OriginMarker")
+units_container = NodePath("UnitsContainer")
+effect_container = NodePath("EffectContainer")
+variant_option = NodePath("DebugUI/LeftPanel/Margin/VBox/VariantRow/VariantOption")
+trajectory_option = NodePath("DebugUI/LeftPanel/Margin/VBox/TrajectoryRow/TrajectoryOption")
+arc_height_slider = NodePath("DebugUI/LeftPanel/Margin/VBox/ArcHeightRow/ArcHeightSlider")
+arc_height_label = NodePath("DebugUI/LeftPanel/Margin/VBox/ArcHeightLabel")
+play_button = NodePath("DebugUI/LeftPanel/Margin/VBox/PlayButton")
+loop_checkbox = NodePath("DebugUI/LeftPanel/Margin/VBox/LoopCheckBox")
+speed_slider = NodePath("DebugUI/LeftPanel/Margin/VBox/SpeedRow/SpeedSlider")
+speed_label = NodePath("DebugUI/LeftPanel/Margin/VBox/SpeedLabel")
+direction_slider = NodePath("DebugUI/LeftPanel/Margin/VBox/DirectionRow/DirectionSlider")
+direction_label = NodePath("DebugUI/LeftPanel/Margin/VBox/DirectionLabel")
+distance_slider = NodePath("DebugUI/LeftPanel/Margin/VBox/DistanceRow/DistanceSlider")
+distance_label = NodePath("DebugUI/LeftPanel/Margin/VBox/DistanceLabel")
+height_offset_slider = NodePath("DebugUI/LeftPanel/Margin/VBox/HeightOffsetRow/HeightOffsetSlider")
+height_offset_label = NodePath("DebugUI/LeftPanel/Margin/VBox/HeightOffsetLabel")
+info_label = NodePath("DebugUI/LeftPanel/Margin/VBox/InfoScroll/InfoLabel")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.553391, -0.832921, 0, 0.832921, 0.553391, 0, 3.51982, 2.72607)
+
+[node name="BackgroundCanvasLayer" type="CanvasLayer" parent="."]
+layer = -3
+
+[node name="TextureRect" type="TextureRect" parent="BackgroundCanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_1")
+
+[node name="CameraController" parent="." instance=ExtResource("2_camera")]
+transform = Transform3D(0.707107, -0.315509, 0.632814, 0, 0.894934, 0.446198, -0.707107, -0.315509, 0.632814, 0, 0, 0)
+
+[node name="Maps" type="Node3D" parent="."]
+
+[node name="TargetMarker" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_target")
+material_override = SubResource("Material_target")
+
+[node name="OriginMarker" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_origin")
+material_override = SubResource("Material_origin")
+
+[node name="UnitsContainer" type="Node3D" parent="."]
+
+[node name="EffectContainer" type="Node3D" parent="."]
+
+[node name="DebugUI" type="CanvasLayer" parent="."]
+
+[node name="LeftPanel" type="PanelContainer" parent="DebugUI"]
+offset_right = 280.0
+offset_bottom = 600.0
+
+[node name="Margin" type="MarginContainer" parent="DebugUI/LeftPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="DebugUI/LeftPanel/Margin"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+text = "Projectile Debug"
+
+[node name="VariantRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="VariantLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/VariantRow"]
+layout_mode = 2
+text = "Variant:"
+
+[node name="VariantOption" type="OptionButton" parent="DebugUI/LeftPanel/Margin/VBox/VariantRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TrajectoryRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="TrajectoryLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/TrajectoryRow"]
+layout_mode = 2
+text = "Trajectory:"
+
+[node name="TrajectoryOption" type="OptionButton" parent="DebugUI/LeftPanel/Margin/VBox/TrajectoryRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ArcHeightRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="ArcHeightRowLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/ArcHeightRow"]
+layout_mode = 2
+text = "Arc Height:"
+
+[node name="ArcHeightSlider" type="HSlider" parent="DebugUI/LeftPanel/Margin/VBox/ArcHeightRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.5
+max_value = 5.0
+step = 0.25
+value = 2.0
+
+[node name="ArcHeightLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+text = "2.00"
+
+[node name="PlayButton" type="Button" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+text = "Play"
+
+[node name="LoopCheckBox" type="CheckBox" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+button_pressed = true
+text = "Loop"
+
+[node name="SpeedRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="SpeedRowLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/SpeedRow"]
+layout_mode = 2
+text = "Speed:"
+
+[node name="SpeedSlider" type="HSlider" parent="DebugUI/LeftPanel/Margin/VBox/SpeedRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.1
+max_value = 10.0
+step = 0.1
+value = 1.0
+
+[node name="SpeedLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+text = "1.0x"
+
+[node name="DirectionRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="DirectionRowLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/DirectionRow"]
+layout_mode = 2
+text = "Direction:"
+
+[node name="DirectionSlider" type="HSlider" parent="DebugUI/LeftPanel/Margin/VBox/DirectionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 360.0
+step = 15.0
+value = 0.0
+
+[node name="DirectionLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+text = "0 deg"
+
+[node name="DistanceRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="DistanceRowLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/DistanceRow"]
+layout_mode = 2
+text = "Distance:"
+
+[node name="DistanceSlider" type="HSlider" parent="DebugUI/LeftPanel/Margin/VBox/DistanceRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 8.0
+step = 0.5
+value = 5.0
+
+[node name="DistanceLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+text = "5.0 tiles"
+
+[node name="HeightOffsetRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="HeightOffsetRowLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/HeightOffsetRow"]
+layout_mode = 2
+text = "Height Offset:"
+
+[node name="HeightOffsetSlider" type="HSlider" parent="DebugUI/LeftPanel/Margin/VBox/HeightOffsetRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = -3.0
+max_value = 3.0
+step = 0.25
+value = 0.0
+
+[node name="HeightOffsetLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+text = "0.00"
+
+[node name="HSeparator" type="HSeparator" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="InfoScroll" type="ScrollContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="InfoLabel" type="RichTextLabel" parent="DebugUI/LeftPanel/Margin/VBox/InfoScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+scroll_active = false

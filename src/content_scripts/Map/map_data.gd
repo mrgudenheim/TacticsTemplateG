@@ -13,6 +13,25 @@ var description: String = "description"
 
 var is_initialized: bool = false
 
+
+## Mirror CUSTOM0 centroid data in surface arrays.
+## Returns the CUSTOM0 format flags to pass to add_surface_from_arrays().
+static func mirror_custom0(surface_arrays: Array, center: Vector3, mirror_scale: Vector3, half_size: Vector3) -> int:
+	if surface_arrays.size() <= Mesh.ARRAY_CUSTOM0 or surface_arrays[Mesh.ARRAY_CUSTOM0] == null:
+		return 0
+	var floats: PackedFloat32Array = surface_arrays[Mesh.ARRAY_CUSTOM0]
+	for vi in range(floats.size() / 3):
+		var base: int = vi * 3
+		var c := Vector3(floats[base], floats[base + 1], floats[base + 2])
+		c = (c - center) * mirror_scale + half_size
+		floats[base] = c.x
+		floats[base + 1] = c.y
+		floats[base + 2] = c.z
+	surface_arrays[Mesh.ARRAY_CUSTOM0] = floats
+	# Godot needs explicit format flags for CUSTOM0 in add_surface_from_arrays()
+	# RGB_FLOAT = 6, CUSTOM0 format shift = 13
+	return (6 << 13)
+
 var file_name: String = "default map file name"
 var primary_mesh_data_record: MapFileRecord
 var primary_texture_record: MapFileRecord
@@ -237,23 +256,36 @@ func clear_map_data() -> void:
 func _create_mesh() -> void:
 	st.clear()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	
+	st.set_custom_format(0, SurfaceTool.CUSTOM_RGB_FLOAT)
+
 	# add textured tris
 	for i: int in num_text_tris:
+		var v0: Vector3 = text_tri_vertices[i * 3] * SCALE
+		var v1: Vector3 = text_tri_vertices[i * 3 + 1] * SCALE
+		var v2: Vector3 = text_tri_vertices[i * 3 + 2] * SCALE
+		var centroid: Vector3 = (v0 + v1 + v2) / 3.0
+		var centroid_color := Color(centroid.x, centroid.y, centroid.z, 0.0)
 		for vertex_index: int in 3:
 			var index: int = (i*3) + vertex_index
 			st.set_normal(text_tri_normals[index] * SCALE)
 			st.set_uv(tris_uvs[index])
 			st.set_color(Color.WHITE)
+			st.set_custom(0, centroid_color)
 			st.add_vertex(text_tri_vertices[index] * SCALE)
-	
+
 	# add black tris
 	for i: int in num_black_tris:
+		var v0: Vector3 = black_tri_vertices[i * 3] * SCALE
+		var v1: Vector3 = black_tri_vertices[i * 3 + 1] * SCALE
+		var v2: Vector3 = black_tri_vertices[i * 3 + 2] * SCALE
+		var centroid: Vector3 = (v0 + v1 + v2) / 3.0
+		var centroid_color := Color(centroid.x, centroid.y, centroid.z, 0.0)
 		for vertex_index: int in 3:
 			var index: int = (i*3) + vertex_index
 			st.set_color(Color.BLACK)
+			st.set_custom(0, centroid_color)
 			st.add_vertex(black_tri_vertices[index] * SCALE)
-	
+
 	# add textured quads
 	for i: int in num_text_quads:
 		var quad_start: int = i * 4
@@ -261,39 +293,41 @@ func _create_mesh() -> void:
 		var quad_vertices: PackedVector3Array = text_quad_vertices.slice(quad_start, quad_end)
 		var quad_normals: PackedVector3Array = text_quad_normals.slice(quad_start, quad_end)
 		var quad_uvs: PackedVector2Array = quads_uvs.slice(quad_start, quad_end)
-		var quad_colors: PackedColorArray
-		quad_colors.resize(4)
-		quad_colors.fill(Color.WHITE)
-		
+		var centroid: Vector3 = (quad_vertices[0] + quad_vertices[1] + quad_vertices[2] + quad_vertices[3]) * SCALE / 4.0
+		var centroid_color := Color(centroid.x, centroid.y, centroid.z, 0.0)
+
 		for vert_index: int in [0, 1, 2]:
 			st.set_normal(quad_normals[vert_index] * SCALE) # TODO why is there error on MAP105 "terminate"
 			st.set_uv(quad_uvs[vert_index])
 			st.set_color(Color.WHITE)
+			st.set_custom(0, centroid_color)
 			st.add_vertex(quad_vertices[vert_index] * SCALE)
-		
+
 		for vert_index: int in [3, 2, 1]:
 			st.set_normal(quad_normals[vert_index] * SCALE)
 			st.set_uv(quad_uvs[vert_index])
 			st.set_color(Color.WHITE)
+			st.set_custom(0, centroid_color)
 			st.add_vertex(quad_vertices[vert_index] * SCALE)
-	
+
 	# add black quads
 	for i: int in num_black_quads:
 		var quad_start: int = i * 4
 		var quad_end: int = (i + 1) * 4
 		var quad_vertices: PackedVector3Array = black_quad_vertices.slice(quad_start, quad_end)
-		var quad_colors: PackedColorArray
-		quad_colors.resize(4)
-		quad_colors.fill(Color.BLACK)
-		
+		var centroid: Vector3 = (quad_vertices[0] + quad_vertices[1] + quad_vertices[2] + quad_vertices[3]) * SCALE / 4.0
+		var centroid_color := Color(centroid.x, centroid.y, centroid.z, 0.0)
+
 		for vert_index: int in [0, 1, 2]:
 			st.set_color(Color.BLACK)
+			st.set_custom(0, centroid_color)
 			st.add_vertex(quad_vertices[vert_index] * SCALE)
-		
+
 		for vert_index: int in [3, 2, 1]:
 			st.set_color(Color.BLACK)
+			st.set_custom(0, centroid_color)
 			st.add_vertex(quad_vertices[vert_index] * SCALE)
-	
+
 	mesh = st.commit()
 
 

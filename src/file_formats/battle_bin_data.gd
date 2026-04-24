@@ -46,9 +46,17 @@ var ability_vfx_header_offsets: PackedInt32Array = []
 var ability_vfx_ids_start: int = 0x14f3f0 # 2 bytes each - uint16
 var ability_vfx_ids: PackedInt32Array = [] 
 
+# Projectile model offsets in BATTLE.BIN
+const PROJECTILE_MODEL_OFFSETS: Dictionary = {
+	0: 0x14F9DC,  # Arrow
+	1: 0x14FD00,  # Stone
+	2: 0x1503B8,  # Special (shuriken)
+}
+var projectile_models: Dictionary = {}  # Variant int -> {"vertices": Array[Vector3], "faces": Array}
+
 # https://ffhacktics.com/wiki/Secondary_effects_by_Charge_Animation
 var charging_vfx_ids_start: int = 0x1b84ac - 0x67000 # 1 byte each?, 0x13 total
-var charging_vfx_ids: PackedInt32Array = [] # TODO get this data
+var charging_vfx_ids: PackedInt32Array = []
 
 var status_image_rects_start: int = 0x14cf68 - 0x67000 # 4 bytes each, 49 entries, mostly text + sword and rod icon
 var status_image_rects: Array[Rect2i] = []
@@ -153,7 +161,14 @@ func init_from_battle_bin() -> void:
 		ability_animation_charging_set_ids[ability_id] = ability_animation_id_bytes.decode_u8(ability_id * entry_size)
 		ability_animation_executing_ids[ability_id] = ability_animation_id_bytes.decode_u8((ability_id * entry_size) + 1)
 		ability_animation_text_ids[ability_id] = ability_animation_id_bytes.decode_u8((ability_id * entry_size) + 2)
-	
+
+	# charging vfx ids (maps charge animation set to TRAP handler index)
+	var num_charge_entries: int = 0x13
+	charging_vfx_ids.resize(num_charge_entries)
+	var charge_data: PackedByteArray = battle_bytes.slice(charging_vfx_ids_start, charging_vfx_ids_start + num_charge_entries)
+	for idx: int in num_charge_entries:
+		charging_vfx_ids[idx] = charge_data.decode_u8(idx)
+
 	# ability vfx header offsets
 	entry_size = 3
 	num_entries = ItemData.ItemType.CLOTH + 1
@@ -276,6 +291,9 @@ func init_from_battle_bin() -> void:
 		status_counter_locations[idx] = Vector2i(x, y)
 		status_counter_rects[idx] = Rect2i(Vector2i(x, y + 32), Vector2i(14, 12)) # y + 32 because image is 288 pixels tall (288-256 = 32)
 	
+	# Projectile models
+	_parse_projectile_models(battle_bytes)
+
 	# TODO all the other battle.bin data
 	
 
@@ -295,3 +313,68 @@ func _load_battle_bin_sprite_data() -> void:
 			spritesheet_file_name = RomReader.lba_to_file_name[spritesheet_lba]
 		RomReader.spr_file_name_to_id[spritesheet_file_name] = sprite_id
 		RomReader.spr_id_file_idxs[sprite_id] = RomReader.file_records[spritesheet_file_name].type_index
+
+
+func _parse_projectile_models(battle_bytes: PackedByteArray) -> void:
+	for variant_id: int in PROJECTILE_MODEL_OFFSETS:
+		var offset: int = PROJECTILE_MODEL_OFFSETS[variant_id]
+		projectile_models[variant_id] = _parse_projectile_model(battle_bytes, offset)
+
+
+func _parse_projectile_model(data: PackedByteArray, offset: int) -> Dictionary:
+	# Header: vertex_offset at byte 12 (relative), vertex_count at byte 16
+	var vertex_offset_rel: int = data.decode_u32(offset + 12)
+	var vertex_count: int = data.decode_u32(offset + 16)
+	var vertex_offset_abs: int = offset + 12 + vertex_offset_rel
+
+	# Parse vertices (8 bytes each: s16 x, s16 y, s16 z, s16 flags)
+	var vertices: Array[Vector3] = []
+	for i in range(vertex_count):
+		var v_off: int = vertex_offset_abs + (i * 8)
+		vertices.append(Vector3(data.decode_s16(v_off), data.decode_s16(v_off + 2), data.decode_s16(v_off + 4)))
+
+	# Parse faces (variable size, start after 40-byte header)
+	var faces: Array = []
+	var face_offset: int = offset + 40
+	while face_offset < vertex_offset_abs - 8:
+		var face_type: int = data[face_offset]
+		var num_verts: int
+		var color_start: int
+		var index_start: int
+		var face_size: int
+		var type_str: String
+
+		if face_type == 0x08:  # Quad (28 bytes)
+			num_verts = 4
+			color_start = face_offset + 4
+			index_start = face_offset + 20
+			face_size = 28
+			type_str = "q"
+		elif face_type == 0x06:  # Triangle (24 bytes)
+			num_verts = 3
+			color_start = face_offset + 4
+			index_start = face_offset + 16
+			face_size = 24
+			type_str = "t"
+		elif face_type == 0x09:  # Triangle + normals (36 bytes)
+			num_verts = 3
+			color_start = face_offset + 16  # After 4-byte header + 12-byte normals
+			index_start = face_offset + 28
+			face_size = 36
+			type_str = "t"
+		else:
+			break
+
+		var colors: Array = []
+		for c in range(num_verts):
+			var co: int = color_start + (c * 4)
+			colors.append([data[co], data[co + 1], data[co + 2]])
+
+		var indices: Array = []
+		for idx in range(num_verts):
+			indices.append(data.decode_u16(index_start + (idx * 2)))
+
+		faces.append([indices, colors, type_str])
+		face_offset += face_size
+
+	return {"vertices": vertices, "faces": faces}

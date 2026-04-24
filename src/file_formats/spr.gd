@@ -95,35 +95,29 @@ func set_palette_data(palette_bytes: PackedByteArray) -> void:
 	for i: int in num_colors:
 		var color: Color = Color.BLACK
 		var color_bits: int = palette_bytes.decode_u16(palette_data_start + (i*2))
-		# var alpha_bit: int = (color_bits & 0b1000_0000_0000_0000) >> 15 # first bit is alpha
-		#color.a8 = 1 - () # first bit is alpha (if bit is zero, color is opaque)
+		var stp_bit: int = (color_bits & 0b1000_0000_0000_0000) >> 15 # bit 15 = STP (semi-transparency processing)
 		var b5: int = (color_bits & 0b0111_1100_0000_0000) >> 10 # then 5 bits each: blue, green, red
 		var g5: int = (color_bits & 0b0000_0011_1110_0000) >> 5
 		var r5: int = color_bits & 0b0000_0000_0001_1111
-		
+
 		# convert 5 bit channels to 8 bit
-		#color.a8 = 255 * color.a8 # first bit is alpha (if bit is zero, color is opaque)
-		color.a8 = 255 # TODO use alpha correctly
-		color.b8 = roundi(255 * (b5 / 31.0)) # then 5 bits each: blue, green, red
+		color.b8 = roundi(255 * (b5 / 31.0))
 		color.g8 = roundi(255 * (g5 / 31.0))
 		color.r8 = roundi(255 * (r5 / 31.0))
-		
-		# psx transparency: https://www.psxdev.net/forum/viewtopic.php?t=953
-		# TODO use Material3D blend mode Add for mode 1 or 3, where brightness builds up from a dark background instead of normal "mix" transparency
-		if color == Color.BLACK:
+
+		# PSX semi-transparency: STP=1 means pixel uses semi-transparent blending
+		# https://www.psxdev.net/forum/viewtopic.php?t=953
+		# Black (RGB all zero) is always transparent regardless of STP bit
+		if color.r8 == 0 and color.g8 == 0 and color.b8 == 0:
 			color.a8 = 0
-		#elif alpha_bit == 1:
-			#color.a8 = roundi(color.v * 255)
-			#color.a8 = 127
-			#color.a8 = 255
-			#if color.v < 0.5:
-				#color.a8 = roundi(color.v * 255)
-			#color.a8 = 127 + roundi(color.v * 255)
-		
-		# if first color in 16 color palette is black, treat it as transparent
-		if (i % 16 == 0
-			and color == Color.BLACK):
-				color.a8 = 0
+		elif stp_bit == 1:
+			color.a8 = 128  # Semi-transparent: rendered by blend shaders
+		else:
+			color.a8 = 255  # Opaque: rendered by opaque shader
+
+		# first color in each 16-color sub-palette is always transparent
+		if i % 16 == 0 and color.r8 == 0 and color.g8 == 0 and color.b8 == 0:
+			color.a8 = 0
 		color_palette[i] = color
 
 

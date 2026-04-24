@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://x1o6jl12c6sh" path="res://src/Unit/unit_debug_menu.gd" id="5_aqiwa"]
 [ext_resource type="Script" uid="uid://baavg15lka8r7" path="res://src/Unit/unit_ui.gd" id="7_wg4to"]
 [ext_resource type="Script" uid="uid://cpd53xavqhs88" path="res://src/Unit/popup_text_container.gd" id="8_a44xk"]
+[ext_resource type="Script" path="res://src/Unit/unit_shadow.gd" id="9_shadow_script"]
 [ext_resource type="PackedScene" uid="uid://dfhvsm7ynvj76" path="res://src/Unit/popup_text.tscn" id="8_rp3cl"]
 [ext_resource type="Script" uid="uid://lnojayxpawho" path="res://src/Unit/unit_icon.gd" id="9_0prau"]
 [ext_resource type="PackedScene" uid="uid://demtoqlp3aicl" path="res://src/Unit/unit_details_panel.tscn" id="12_gngdm"]
@@ -77,6 +78,7 @@ transform = Transform3D(0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 0, 1, 
 pixel_size = 0.0357
 texture_filter = 0
 render_priority = 1
+script = ExtResource("9_shadow_script")
 texture = SubResource("GradientTexture2D_6vwfi")
 
 [node name="UnitAnimationManager" type="Node3D" parent="CharacterBody3D" unique_id=1134309126 node_paths=PackedStringArray("unit_data", "unit_sprites_manager")]

@@ -3,12 +3,11 @@ extends Node3D
 
 signal map_input_event(action_instance: ActionInstance, camera: Camera3D, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) # TODO should action_instance be removed from signal?
 signal unit_created(new_unit: Unit)
+signal delayed_action_completed
 
 const SCALE: float = 1.0 / MapData.TILE_SIDE_LENGTH
 const SCALED_UNITS_PER_HEIGHT: float = SCALE * MapData.UNITS_PER_HEIGHT
 
-# debug vars
-@export var use_test_teams: bool = false
 @export var texture_viewer: Sprite3D # for debugging
 @export var reference_quad: MeshInstance3D # for debugging
 @export var highlights_container: Node3D
@@ -44,6 +43,9 @@ var current_cursor_map_position: Vector3
 @export var active_unit: Unit
 @export var game_state_container: Container
 @export var game_state_label: Label
+
+var trap_instance: TrapEffectInstance
+var projectile_instance: ProjectileEffectInstance
 
 var event_num: int = 0 # TODO handle event timeline
 
@@ -88,7 +90,7 @@ var walled_maps: PackedInt32Array = [
 
 func _ready() -> void:
 	main_camera = camera_controller.camera
-	
+
 	load_rom_button.file_selected.connect(RomReader.on_load_rom_dialog_file_selected)
 	RomReader.rom_loaded.connect(on_rom_loaded)
 	orthographic_check.toggled.connect(camera_controller.on_orthographic_toggled)
@@ -133,12 +135,26 @@ func on_rom_loaded() -> void:
 	push_warning("on rom loaded")
 	load_rom_button.visible = false
 
+	if trap_instance != null:
+		trap_instance.stop()
+		trap_instance.queue_free()
+	trap_instance = TrapEffectInstance.new()
+	trap_instance.name = "TrapEffectInstance"
+	battle_view.add_child(trap_instance)
+	trap_instance.initialize()
+
+	if projectile_instance != null:
+		projectile_instance.stop()
+		projectile_instance.queue_free()
+	projectile_instance = ProjectileEffectInstance.new()
+	projectile_instance.name = "ProjectileEffectInstance"
+	battle_view.add_child(projectile_instance)
+	projectile_instance.initialize()
+
 	scenario_editor.populate_option_lists()
 	scenario_editor.visible = true
-	if use_test_teams:
-		scenario_editor.init_scenario(RomReader.scenarios["test0"])
-	else:
-		scenario_editor.init_scenario()
+	var default_scenario: Scenario = RomReader.scenarios.get("test0")
+	scenario_editor.init_scenario(default_scenario)
 
 
 func load_scenario(new_scenario: Scenario) -> void:
@@ -173,22 +189,17 @@ func load_map_chunk(map_chunk: Scenario.MapChunk) -> void:
 	# else:
 
 	var mesh_aabb: AABB = map_chunk_data.mesh.get_aabb()
-	# modify mesh based on mirroring and so bottom left corner is at (0, 0, 0)
-	# TODO handle rotation
 	if map_chunk.mirror_scale != Vector3i.ONE or mesh_aabb.position != Vector3.ZERO:
 		var surface_arrays: Array = map_chunk_data.mesh.surface_get_arrays(0)
 		var original_mesh_center: Vector3 = mesh_aabb.get_center()
+		var mirror_vec := Vector3(map_chunk.mirror_scale)
 		for vertex_idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size():
 			var vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx]
-			vertex = vertex - original_mesh_center # shift center to be at (0, 0, 0) to make moving after mirroring easy
-			vertex = vertex * Vector3(map_chunk.mirror_scale) # apply mirroring
-			vertex = vertex + (mesh_aabb.size / 2.0) # shift so mesh_aabb start will be at (0, 0, 0)
-			
+			vertex = (vertex - original_mesh_center) * mirror_vec + (mesh_aabb.size / 2.0)
 			surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx] = vertex
-		
-		# var new_array_index: Array = []
-		# new_array_index.resize(surface_arrays[Mesh.ARRAY_VERTEX].size())
-		# if mirrored along an odd number of axis polygons will render with the wrong facing
+
+		var custom0_flags: int = MapData.mirror_custom0(surface_arrays, original_mesh_center, mirror_vec, mesh_aabb.size / 2.0)
+
 		var sum_scale: int = map_chunk.mirror_scale.x + map_chunk.mirror_scale.y + map_chunk.mirror_scale.z
 		if sum_scale == 1 or sum_scale == -3:
 			for idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size() / 3:
@@ -201,10 +212,8 @@ func load_map_chunk(map_chunk: Scenario.MapChunk) -> void:
 				surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx] = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2]
 				surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2] = temp_uv
 
-				# TODO fix ordering of normals for mirrored mesh?
-		
 		var modified_mesh: ArrayMesh = ArrayMesh.new()
-		modified_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays)
+		modified_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays, [], {}, custom0_flags)
 		new_map_instance.mesh_instance.mesh = modified_mesh
 	else:
 		new_map_instance.mesh_instance.mesh = map_chunk_data.mesh
@@ -322,8 +331,8 @@ func start_battle() -> void:
 	#teams.append(team2)
 	#team2.team_name = "Team 2 (Computer)"
 	#
-	##if use_test_teams:
-		##add_test_teams_to_map()
+	#if use_test_teams:
+		#add_test_teams_to_map()
 	##else: # use random teams
 		##var generic_job_ids: Array[int] = []
 		##generic_job_ids.assign(range(0x4a, 0x5a)) # generics
@@ -725,9 +734,9 @@ func update_units_pathfinding() -> void:
 func process_battle() -> void:
 	while battle_is_running:
 		await process_clock_tick()
-		
+
 		# TODO check end conditions, switching map, etc.
-	
+
 	for team: Team in teams:
 		if team.state == Team.State.WON:
 			battle_end_panel.visible = true
@@ -745,7 +754,7 @@ func process_battle() -> void:
 # TODO implement action timeline
 func process_clock_tick() -> void:
 	game_state_label.text = "processing new clock tick"
-	
+
 	# increment status ticks
 	for unit: Unit in units:
 		var statuses_to_remove: Array[StatusEffect] = []
@@ -763,6 +772,7 @@ func process_clock_tick() -> void:
 						camera_controller.follow_node = unit.char_body
 						game_state_label.text = unit.job_nickname + "-" + unit.unit_nickname + " processing " + status.status_effect_name + " ending"
 						await status_action_instance.use()
+						if not battle_is_running: return
 						# await status_action_instance.action_completed
 						if check_end_conditions():
 							safe_to_load_map = true
@@ -773,28 +783,33 @@ func process_clock_tick() -> void:
 						camera_controller.follow_node = unit.char_body
 						game_state_label.text = unit.job_nickname + "-" + unit.unit_nickname + " processing delayed " + status.delayed_action.action.display_name
 						await status.delayed_action.use()
+						if not battle_is_running: return
 						#await status.delayed_action.action_completed
+						delayed_action_completed.emit()
+						if not battle_is_running: return
 						if check_end_conditions():
 							safe_to_load_map = true
 							return
 			safe_to_load_map = true
 			await get_tree().process_frame
+			if not battle_is_running: return
 		for status: StatusEffect in statuses_to_remove:
 			unit.remove_status(status)
-	
+
 	for unit: Unit in units: # increment each units ct by speed
 		if not unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.freezes_ct): # check status that prevent ct gain (stop, sleep, etc.)
 			var ct_gain: int = unit.speed
 			for status: StatusEffect in unit.current_statuses:
 				ct_gain = status.passive_effect.ct_gain_modifier.apply(ct_gain)
-			unit.stats[Unit.StatType.CT].add_value(ct_gain) 
-	
+			unit.stats[Unit.StatType.CT].add_value(ct_gain)
+
 	# execute unit turns, ties decided by unit index in units[]
 	# TODO keep looping until all units ct_current < 100
 	for unit: Unit in units:
 		if unit.ct_current >= 100:
 			safe_to_load_map = false
 			await start_units_turn(unit)
+			if not battle_is_running: return
 			#if unit.is_defeated: # check status that counts as KO, aka prevents turn (dead, petrify, etc.)
 				#unit.end_turn()
 			if not unit.is_defeated:
@@ -802,6 +817,7 @@ func process_clock_tick() -> void:
 					safe_to_load_map = true
 				while not unit.is_ending_turn:
 					await get_tree().process_frame
+					if not battle_is_running: return
 					if unit == null: # prevent error when loading map
 						return
 				if check_end_conditions():
@@ -809,6 +825,7 @@ func process_clock_tick() -> void:
 					return
 			safe_to_load_map = true
 			await get_tree().process_frame
+			if not battle_is_running: return
 	
 	# TODO increment status ticks, delayed action ticks, and unit ticks in the same step, then order resolution?
 

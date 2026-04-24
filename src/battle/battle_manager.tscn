@@ -1,13 +1,14 @@
 [gd_scene format=3 uid="uid://card26cltbba1"]
 
 [ext_resource type="Script" uid="uid://cd31vmh881wm5" path="res://src/battle/battle_manager.gd" id="1_hnd0w"]
-[ext_resource type="Material" uid="uid://u6jhtav4x31l" path="res://src/content_scripts/Map/tile_highlight_red.material" id="4_f2r6p"]
-[ext_resource type="Material" uid="uid://cejj0yxtkspad" path="res://src/content_scripts/Map/tile_highlight_black.material" id="6_l2dig"]
-[ext_resource type="Material" uid="uid://bfoayeqxxbv0f" path="res://src/content_scripts/Map/tile_highlight_yellow.material" id="7_f2r6p"]
-[ext_resource type="Material" uid="uid://bmwuufa37jci2" path="res://src/content_scripts/Map/tile_highlight_white.material" id="8_kb1q2"]
+[ext_resource type="PackedScene" path="res://src/battle/debug_overlay.tscn" id="debug_overlay"]
+[ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_red.tres" id="4_f2r6p"]
+[ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_black.tres" id="6_l2dig"]
+[ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_yellow.tres" id="7_f2r6p"]
+[ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_white.tres" id="8_kb1q2"]
 [ext_resource type="PackedScene" uid="uid://26tg32417lfm" path="res://src/load_rom.tscn" id="9_pbg35"]
 [ext_resource type="Script" uid="uid://cl143w048iago" path="res://src/Unit/character_controller_realtime.gd" id="10_d5yoq"]
-[ext_resource type="Material" uid="uid://emgoiswtrorw" path="res://src/content_scripts/Map/tile_highlight_blue.material" id="11_1os5c"]
+[ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_blue.tres" id="11_1os5c"]
 [ext_resource type="PackedScene" uid="uid://7tn6b6eup5na" path="res://src/camera_controller.tscn" id="12_l2dig"]
 [ext_resource type="PackedScene" uid="uid://djqalqt20isme" path="res://src/battle/editor/job_select_button.tscn" id="14_f2r6p"]
 [ext_resource type="PackedScene" uid="uid://h7281h60pnbl" path="res://src/battle/editor/team_setup.tscn" id="14_kb1q2"]
@@ -503,6 +504,8 @@ text = "Press ESCAPE to toggle editor"
 layout_mode = 2
 button_pressed = true
 text = "Orthographic"
+
+[node name="DebugOverlay" parent="." instance=ExtResource("debug_overlay")]
 
 [connection signal="ability_select_pressed" from="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/FoldableContainer/UnitSetupPanel" to="ScenarioEditor" method="setup_ability_select"]
 [connection signal="item_select_pressed" from="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/FoldableContainer/UnitSetupPanel" to="ScenarioEditor" method="setup_item_select"]
