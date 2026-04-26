@@ -103,6 +103,7 @@ class VfxAnimationFrame:
 	var byte_02: int  ## Depth mode — see VfxConstants.DepthMode
 
 # 128 bytes, 25 keyframes
+# https://ffhacktics.com/wiki/Effect_File_Timeline#Section_5:_Particle_Channel_Structure_(128_Bytes)
 class EmitterTimeline:
 	var bytes: PackedByteArray = []
 	var times: PackedInt32Array = []
@@ -115,8 +116,8 @@ class EmitterTimeline:
 
 	func _init(new_bytes: PackedByteArray):
 		bytes = new_bytes
-		# Layout: 25×u16 times (0x00), 25×u8 emitter_ids (0x32), 25×u16 action_flags (0x4b), u16 num_kf (0x7E)
-		action_flags = bytes.slice(0x4b, 0x4b + 50)
+		# Layout: 25×u16 times (0x00), first emitter_id = 0 then 24×u8 emitter_ids (0x32), 25×u16 action_flags (0x4a), u16 num_kf (0x7E)
+		action_flags = bytes.slice(0x4a, 0x4a + 50)
 		num_keyframes = bytes.decode_s16(0x7E)
 
 		for idx in 25:
@@ -125,7 +126,7 @@ class EmitterTimeline:
 
 			var emitter_id: int = 0
 			if idx > 0:
-				emitter_id = bytes.decode_u8(0x32 + idx - 1)
+				emitter_id = bytes.decode_u8(0x31 + idx)
 				emitter_ids.append(emitter_id)
 
 			var action_flag: int = action_flags.decode_u16(idx * 2)
