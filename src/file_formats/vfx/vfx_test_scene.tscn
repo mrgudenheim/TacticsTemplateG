@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c7vfxtest001"]
 
-[ext_resource type="Script" path="res://src/file_formats/vfx/vfx_test_scene.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cksrme07o2b6u" path="res://src/file_formats/vfx/vfx_test_scene.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://7tn6b6eup5na" path="res://src/camera_controller.tscn" id="2_camera"]
 
 [sub_resource type="Environment" id="Environment_1"]
@@ -15,23 +15,23 @@ gradient = SubResource("Gradient_1")
 fill_from = Vector2(0.5, 1)
 fill_to = Vector2(0.5, 0)
 
-[sub_resource type="SphereMesh" id="SphereMesh_origin"]
-radius = 0.08
-height = 0.16
-
 [sub_resource type="StandardMaterial3D" id="Material_origin"]
 shading_mode = 0
-albedo_color = Color(0.2, 0.6, 1.0, 1)
+albedo_color = Color(0.2, 0.6, 1, 1)
 
-[sub_resource type="SphereMesh" id="SphereMesh_target"]
+[sub_resource type="SphereMesh" id="SphereMesh_origin"]
 radius = 0.08
 height = 0.16
 
 [sub_resource type="StandardMaterial3D" id="Material_target"]
 shading_mode = 0
-albedo_color = Color(1.0, 0.3, 0.2, 1)
+albedo_color = Color(1, 0.3, 0.2, 1)
 
-[node name="VfxTestScene" type="Node3D" node_paths=PackedStringArray("camera_controller", "maps_container", "vfx_container", "origin_marker", "target_marker", "effect_spinbox", "effect_name_label", "play_button", "loop_checkbox", "speed_slider", "speed_label", "depth_scale_slider", "depth_scale_label", "show_markers_checkbox", "show_map_checkbox", "show_background_checkbox", "emitter_list_container", "anchor_list_container", "world_environment", "background_canvas", "directional_light")]
+[sub_resource type="SphereMesh" id="SphereMesh_target"]
+radius = 0.08
+height = 0.16
+
+[node name="VfxTestScene" type="Node3D" unique_id=432170684 node_paths=PackedStringArray("camera_controller", "maps_container", "vfx_container", "origin_marker", "target_marker", "effect_spinbox", "effect_name_label", "play_button", "loop_checkbox", "speed_slider", "speed_label", "depth_scale_slider", "depth_scale_label", "show_markers_checkbox", "show_map_checkbox", "show_background_checkbox", "emitter_list_container", "anchor_list_container", "world_environment", "background_canvas", "directional_light")]
 script = ExtResource("1_script")
 camera_controller = NodePath("CameraController")
 maps_container = NodePath("Maps")
@@ -55,16 +55,16 @@ world_environment = NodePath("WorldEnvironment")
 background_canvas = NodePath("BackgroundCanvasLayer")
 directional_light = NodePath("DirectionalLight3D")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2103814949]
 environment = SubResource("Environment_1")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1815145022]
 transform = Transform3D(1, 0, 0, 0, 0.553391, -0.832921, 0, 0.832921, 0.553391, 0, 3.51982, 2.72607)
 
-[node name="BackgroundCanvasLayer" type="CanvasLayer" parent="."]
+[node name="BackgroundCanvasLayer" type="CanvasLayer" parent="." unique_id=1256854053]
 layer = -3
 
-[node name="TextureRect" type="TextureRect" parent="BackgroundCanvasLayer"]
+[node name="TextureRect" type="TextureRect" parent="BackgroundCanvasLayer" unique_id=152441919]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -72,77 +72,74 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("GradientTexture2D_1")
 
-[node name="CameraController" parent="." instance=ExtResource("2_camera")]
+[node name="CameraController" parent="." unique_id=1585287344 instance=ExtResource("2_camera")]
 transform = Transform3D(0.707107, -0.315509, 0.632814, 0, 0.894934, 0.446198, -0.707107, -0.315509, 0.632814, 0, 0, 0)
 
-[node name="Maps" type="Node3D" parent="."]
+[node name="Maps" type="Node3D" parent="." unique_id=378240056]
 
-[node name="VfxContainer" type="Node3D" parent="."]
+[node name="VfxContainer" type="Node3D" parent="." unique_id=285485976]
 
-[node name="OriginMarker" type="MeshInstance3D" parent="."]
-mesh = SubResource("SphereMesh_origin")
+[node name="OriginMarker" type="MeshInstance3D" parent="." unique_id=1337522827]
 material_override = SubResource("Material_origin")
+mesh = SubResource("SphereMesh_origin")
 
-[node name="TargetMarker" type="MeshInstance3D" parent="."]
-mesh = SubResource("SphereMesh_target")
+[node name="TargetMarker" type="MeshInstance3D" parent="." unique_id=1011811540]
 material_override = SubResource("Material_target")
+mesh = SubResource("SphereMesh_target")
 
-[node name="DebugUI" type="CanvasLayer" parent="."]
+[node name="DebugUI" type="CanvasLayer" parent="." unique_id=1615485015]
 
-[node name="PanelContainer" type="PanelContainer" parent="DebugUI"]
+[node name="PanelContainer" type="PanelContainer" parent="DebugUI" unique_id=1542684479]
 offset_right = 280.0
 offset_bottom = 400.0
 
-[node name="MarginContainer" type="MarginContainer" parent="DebugUI/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="DebugUI/PanelContainer" unique_id=1976837562]
 layout_mode = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="VBoxContainer" type="VBoxContainer" parent="DebugUI/PanelContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="DebugUI/PanelContainer/MarginContainer" unique_id=1426685124]
 layout_mode = 2
 
-[node name="TitleLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="TitleLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=1453957921]
 layout_mode = 2
 text = "VFX Debug"
 
-[node name="EffectRow" type="HBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="EffectRow" type="HBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=1905297736]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/EffectRow"]
+[node name="Label" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/EffectRow" unique_id=780927028]
 layout_mode = 2
 text = "Effect:"
 
-[node name="SpinBox" type="SpinBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/EffectRow"]
+[node name="SpinBox" type="SpinBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/EffectRow" unique_id=2025861819]
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 0.0
 max_value = 510.0
 value = 10.0
 
-[node name="EffectNameLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = ""
-add_theme_font_size_override/font_size = 11
+[node name="EffectNameLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=1416614801]
 modulate = Color(0.7, 0.7, 0.7, 1)
+layout_mode = 2
 
-[node name="PlayButton" type="Button" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="PlayButton" type="Button" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=869722467]
 layout_mode = 2
 text = "Play"
 
-[node name="LoopCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="LoopCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=1179311468]
 layout_mode = 2
 text = "Loop"
 
-[node name="SpeedRow" type="HBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="SpeedRow" type="HBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=1810927466]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/SpeedRow"]
+[node name="Label" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/SpeedRow" unique_id=544568255]
 layout_mode = 2
 text = "Speed:"
 
-[node name="HSlider" type="HSlider" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/SpeedRow"]
+[node name="HSlider" type="HSlider" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/SpeedRow" unique_id=903301354]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 0.1
@@ -150,18 +147,18 @@ max_value = 10.0
 step = 0.1
 value = 1.0
 
-[node name="SpeedLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="SpeedLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=1443473066]
 layout_mode = 2
 text = "1.0x"
 
-[node name="DepthScaleRow" type="HBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="DepthScaleRow" type="HBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=1120238025]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/DepthScaleRow"]
+[node name="Label" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/DepthScaleRow" unique_id=1154801595]
 layout_mode = 2
 text = "Depth Scale:"
 
-[node name="HSlider" type="HSlider" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/DepthScaleRow"]
+[node name="HSlider" type="HSlider" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer/DepthScaleRow" unique_id=817877207]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 0.1
@@ -169,55 +166,56 @@ max_value = 10.0
 step = 0.1
 value = 1.0
 
-[node name="DepthScaleLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="DepthScaleLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=326493926]
 layout_mode = 2
 text = "1.0"
 
-[node name="ShowMarkersCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="ShowMarkersCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=1441484109]
 layout_mode = 2
 button_pressed = true
 text = "Show Markers"
 
-[node name="ShowMapCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="ShowMapCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=1006439992]
 layout_mode = 2
 button_pressed = true
 text = "Show Map"
 
-[node name="ShowBackgroundCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="ShowBackgroundCheckBox" type="CheckBox" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=658566876]
 layout_mode = 2
 button_pressed = true
 text = "Background"
 
-[node name="HSeparator" type="HSeparator" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=302035949]
 layout_mode = 2
 
-[node name="EmittersLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="EmittersLabel" type="Label" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=725678332]
 layout_mode = 2
 text = "Emitters"
 
-[node name="EmitterList" type="VBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="EmitterList" type="VBoxContainer" parent="DebugUI/PanelContainer/MarginContainer/VBoxContainer" unique_id=742632730]
 layout_mode = 2
 
-[node name="AnchorPanel" type="PanelContainer" parent="DebugUI"]
+[node name="AnchorPanel" type="PanelContainer" parent="DebugUI" unique_id=1261793432]
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -320.0
 offset_bottom = 400.0
 grow_horizontal = 0
 
-[node name="AnchorMargin" type="MarginContainer" parent="DebugUI/AnchorPanel"]
+[node name="AnchorMargin" type="MarginContainer" parent="DebugUI/AnchorPanel" unique_id=448855886]
 layout_mode = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="AnchorVBox" type="VBoxContainer" parent="DebugUI/AnchorPanel/AnchorMargin"]
+[node name="AnchorVBox" type="VBoxContainer" parent="DebugUI/AnchorPanel/AnchorMargin" unique_id=1637081065]
 layout_mode = 2
 
-[node name="AnchorsLabel" type="Label" parent="DebugUI/AnchorPanel/AnchorMargin/AnchorVBox"]
+[node name="AnchorsLabel" type="Label" parent="DebugUI/AnchorPanel/AnchorMargin/AnchorVBox" unique_id=1744716072]
 layout_mode = 2
 text = "Anchors"
 
-[node name="AnchorList" type="VBoxContainer" parent="DebugUI/AnchorPanel/AnchorMargin/AnchorVBox"]
+[node name="AnchorList" type="VBoxContainer" parent="DebugUI/AnchorPanel/AnchorMargin/AnchorVBox" unique_id=927052650]
 layout_mode = 2

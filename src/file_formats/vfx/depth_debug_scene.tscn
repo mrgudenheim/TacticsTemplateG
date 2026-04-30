@@ -1,10 +1,10 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://duav7rtpw042x"]
 
-[ext_resource type="Script" path="res://src/file_formats/vfx/depth_debug_scene.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://c057cg0n2i3gd" path="res://src/file_formats/vfx/depth_debug_scene.gd" id="1_script"]
 
-[node name="DepthDebugScene" type="Node3D" node_paths=PackedStringArray("camera")]
+[node name="DepthDebugScene" type="Node3D" unique_id=1055567314 node_paths=PackedStringArray("camera")]
 script = ExtResource("1_script")
 camera = NodePath("Camera3D")
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1951434142]
 transform = Transform3D(0.707107, -0.315509, 0.632814, 0, 0.894934, 0.446198, -0.707107, -0.315509, 0.632814, 2.5, 4, 2.5)

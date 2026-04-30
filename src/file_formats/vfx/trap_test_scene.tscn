@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://ctraptest001"]
 
-[ext_resource type="Script" path="res://src/file_formats/vfx/trap_test_scene.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cw63amfv5jopq" path="res://src/file_formats/vfx/trap_test_scene.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://7tn6b6eup5na" path="res://src/camera_controller.tscn" id="2_camera"]
 
 [sub_resource type="Environment" id="Environment_1"]
@@ -15,23 +15,23 @@ gradient = SubResource("Gradient_1")
 fill_from = Vector2(0.5, 1)
 fill_to = Vector2(0.5, 0)
 
-[sub_resource type="SphereMesh" id="SphereMesh_target"]
-radius = 0.08
-height = 0.16
-
 [sub_resource type="StandardMaterial3D" id="Material_target"]
 shading_mode = 0
-albedo_color = Color(1.0, 0.3, 0.2, 1)
+albedo_color = Color(1, 0.3, 0.2, 1)
 
-[sub_resource type="SphereMesh" id="SphereMesh_attacker"]
+[sub_resource type="SphereMesh" id="SphereMesh_target"]
 radius = 0.08
 height = 0.16
 
 [sub_resource type="StandardMaterial3D" id="Material_attacker"]
 shading_mode = 0
-albedo_color = Color(0.2, 0.5, 1.0, 1)
+albedo_color = Color(0.2, 0.5, 1, 1)
 
-[node name="TrapTestScene" type="Node3D" node_paths=PackedStringArray("camera_controller", "maps_container", "target_marker", "attacker_marker", "units_container", "anim_preview_container", "handler_option", "element_option", "play_button", "loop_checkbox", "speed_slider", "speed_label", "white_flash_button", "direction_slider", "direction_label", "config_label", "texture_preview", "info_label", "element_color_rect")]
+[sub_resource type="SphereMesh" id="SphereMesh_attacker"]
+radius = 0.08
+height = 0.16
+
+[node name="TrapTestScene" type="Node3D" unique_id=76461494 node_paths=PackedStringArray("camera_controller", "maps_container", "target_marker", "attacker_marker", "units_container", "anim_preview_container", "handler_option", "element_option", "play_button", "loop_checkbox", "speed_slider", "speed_label", "white_flash_button", "direction_slider", "direction_label", "config_label", "texture_preview", "info_label", "element_color_rect")]
 script = ExtResource("1_script")
 camera_controller = NodePath("CameraController")
 maps_container = NodePath("Maps")
@@ -53,16 +53,16 @@ texture_preview = NodePath("DebugUI/RightPanel/Margin/VBox/TexturePreview")
 info_label = NodePath("DebugUI/RightPanel/Margin/VBox/InfoScroll/InfoLabel")
 element_color_rect = NodePath("DebugUI/LeftPanel/Margin/VBox/ElementRow/ElementColorRect")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1338414121]
 environment = SubResource("Environment_1")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1445997165]
 transform = Transform3D(1, 0, 0, 0, 0.553391, -0.832921, 0, 0.832921, 0.553391, 0, 3.51982, 2.72607)
 
-[node name="BackgroundCanvasLayer" type="CanvasLayer" parent="."]
+[node name="BackgroundCanvasLayer" type="CanvasLayer" parent="." unique_id=1705099233]
 layer = -3
 
-[node name="TextureRect" type="TextureRect" parent="BackgroundCanvasLayer"]
+[node name="TextureRect" type="TextureRect" parent="BackgroundCanvasLayer" unique_id=1697962238]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -70,87 +70,87 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("GradientTexture2D_1")
 
-[node name="CameraController" parent="." instance=ExtResource("2_camera")]
+[node name="CameraController" parent="." unique_id=1244716017 instance=ExtResource("2_camera")]
 transform = Transform3D(0.707107, -0.315509, 0.632814, 0, 0.894934, 0.446198, -0.707107, -0.315509, 0.632814, 0, 0, 0)
 
-[node name="Maps" type="Node3D" parent="."]
+[node name="Maps" type="Node3D" parent="." unique_id=756104293]
 
-[node name="TargetMarker" type="MeshInstance3D" parent="."]
-mesh = SubResource("SphereMesh_target")
+[node name="TargetMarker" type="MeshInstance3D" parent="." unique_id=1391893996]
 material_override = SubResource("Material_target")
+mesh = SubResource("SphereMesh_target")
 
-[node name="AttackerMarker" type="MeshInstance3D" parent="."]
-mesh = SubResource("SphereMesh_attacker")
+[node name="AttackerMarker" type="MeshInstance3D" parent="." unique_id=1254844138]
 material_override = SubResource("Material_attacker")
+mesh = SubResource("SphereMesh_attacker")
 
-[node name="UnitsContainer" type="Node3D" parent="."]
+[node name="UnitsContainer" type="Node3D" parent="." unique_id=1403470548]
 
-[node name="AnimPreviewContainer" type="Node3D" parent="."]
+[node name="AnimPreviewContainer" type="Node3D" parent="." unique_id=2144079292]
 
-[node name="DebugUI" type="CanvasLayer" parent="."]
+[node name="DebugUI" type="CanvasLayer" parent="." unique_id=1603716867]
 
-[node name="LeftPanel" type="PanelContainer" parent="DebugUI"]
+[node name="LeftPanel" type="PanelContainer" parent="DebugUI" unique_id=1369527027]
 offset_right = 280.0
 offset_bottom = 600.0
 
-[node name="Margin" type="MarginContainer" parent="DebugUI/LeftPanel"]
+[node name="Margin" type="MarginContainer" parent="DebugUI/LeftPanel" unique_id=163824628]
 layout_mode = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="VBox" type="VBoxContainer" parent="DebugUI/LeftPanel/Margin"]
+[node name="VBox" type="VBoxContainer" parent="DebugUI/LeftPanel/Margin" unique_id=399213282]
 layout_mode = 2
 
-[node name="TitleLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox"]
+[node name="TitleLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=589997055]
 layout_mode = 2
 text = "TRAP Debug"
 
-[node name="HandlerRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+[node name="HandlerRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=2071035255]
 layout_mode = 2
 
-[node name="HandlerLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/HandlerRow"]
+[node name="HandlerLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/HandlerRow" unique_id=635623694]
 layout_mode = 2
 text = "Handler:"
 
-[node name="HandlerOption" type="OptionButton" parent="DebugUI/LeftPanel/Margin/VBox/HandlerRow"]
+[node name="HandlerOption" type="OptionButton" parent="DebugUI/LeftPanel/Margin/VBox/HandlerRow" unique_id=1348227112]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ElementRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+[node name="ElementRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=1302535895]
 layout_mode = 2
 
-[node name="ElementLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/ElementRow"]
+[node name="ElementLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/ElementRow" unique_id=1187991970]
 layout_mode = 2
 text = "Element:"
 
-[node name="ElementOption" type="OptionButton" parent="DebugUI/LeftPanel/Margin/VBox/ElementRow"]
+[node name="ElementOption" type="OptionButton" parent="DebugUI/LeftPanel/Margin/VBox/ElementRow" unique_id=1985610071]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ElementColorRect" type="ColorRect" parent="DebugUI/LeftPanel/Margin/VBox/ElementRow"]
+[node name="ElementColorRect" type="ColorRect" parent="DebugUI/LeftPanel/Margin/VBox/ElementRow" unique_id=2112105815]
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 color = Color(0, 0, 0, 1)
 
-[node name="PlayButton" type="Button" parent="DebugUI/LeftPanel/Margin/VBox"]
+[node name="PlayButton" type="Button" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=908191435]
 layout_mode = 2
 text = "Play"
 
-[node name="LoopCheckBox" type="CheckBox" parent="DebugUI/LeftPanel/Margin/VBox"]
+[node name="LoopCheckBox" type="CheckBox" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=1932478896]
 layout_mode = 2
 button_pressed = true
 text = "Loop"
 
-[node name="SpeedRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+[node name="SpeedRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=1792586072]
 layout_mode = 2
 
-[node name="SpeedRowLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/SpeedRow"]
+[node name="SpeedRowLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/SpeedRow" unique_id=1813825029]
 layout_mode = 2
 text = "Speed:"
 
-[node name="SpeedSlider" type="HSlider" parent="DebugUI/LeftPanel/Margin/VBox/SpeedRow"]
+[node name="SpeedSlider" type="HSlider" parent="DebugUI/LeftPanel/Margin/VBox/SpeedRow" unique_id=1831604470]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 0.1
@@ -158,41 +158,39 @@ max_value = 10.0
 step = 0.1
 value = 1.0
 
-[node name="SpeedLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox"]
+[node name="SpeedLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=939759884]
 layout_mode = 2
 text = "1.0x"
 
-[node name="WhiteFlashButton" type="Button" parent="DebugUI/LeftPanel/Margin/VBox"]
+[node name="WhiteFlashButton" type="Button" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=606878189]
 layout_mode = 2
 text = "White Flash"
 
-[node name="DirectionRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+[node name="DirectionRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=1953136773]
 layout_mode = 2
 
-[node name="DirectionRowLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/DirectionRow"]
+[node name="DirectionRowLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/DirectionRow" unique_id=642024295]
 layout_mode = 2
 text = "Direction:"
 
-[node name="DirectionSlider" type="HSlider" parent="DebugUI/LeftPanel/Margin/VBox/DirectionRow"]
+[node name="DirectionSlider" type="HSlider" parent="DebugUI/LeftPanel/Margin/VBox/DirectionRow" unique_id=539740823]
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 0.0
 max_value = 360.0
 step = 15.0
-value = 0.0
 
-[node name="DirectionLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox"]
+[node name="DirectionLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=289357370]
 layout_mode = 2
 text = "0 deg"
 
-[node name="HSeparator" type="HSeparator" parent="DebugUI/LeftPanel/Margin/VBox"]
+[node name="HSeparator" type="HSeparator" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=1857154453]
 layout_mode = 2
 
-[node name="ConfigScroll" type="ScrollContainer" parent="DebugUI/LeftPanel/Margin/VBox"]
+[node name="ConfigScroll" type="ScrollContainer" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=1321034522]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ConfigLabel" type="RichTextLabel" parent="DebugUI/LeftPanel/Margin/VBox/ConfigScroll"]
+[node name="ConfigLabel" type="RichTextLabel" parent="DebugUI/LeftPanel/Margin/VBox/ConfigScroll" unique_id=1425899626]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -200,38 +198,39 @@ bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
-[node name="RightPanel" type="PanelContainer" parent="DebugUI"]
+[node name="RightPanel" type="PanelContainer" parent="DebugUI" unique_id=1292833276]
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -300.0
 offset_bottom = 600.0
 grow_horizontal = 0
 
-[node name="Margin" type="MarginContainer" parent="DebugUI/RightPanel"]
+[node name="Margin" type="MarginContainer" parent="DebugUI/RightPanel" unique_id=1180925481]
 layout_mode = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="VBox" type="VBoxContainer" parent="DebugUI/RightPanel/Margin"]
+[node name="VBox" type="VBoxContainer" parent="DebugUI/RightPanel/Margin" unique_id=1459737923]
 layout_mode = 2
 
-[node name="InfoTitle" type="Label" parent="DebugUI/RightPanel/Margin/VBox"]
+[node name="InfoTitle" type="Label" parent="DebugUI/RightPanel/Margin/VBox" unique_id=1157983899]
 layout_mode = 2
 text = "Info"
 
-[node name="TexturePreview" type="TextureRect" parent="DebugUI/RightPanel/Margin/VBox"]
-layout_mode = 2
+[node name="TexturePreview" type="TextureRect" parent="DebugUI/RightPanel/Margin/VBox" unique_id=1121448748]
 custom_minimum_size = Vector2(256, 144)
-stretch_mode = 2
+layout_mode = 2
 expand_mode = 3
+stretch_mode = 2
 
-[node name="InfoScroll" type="ScrollContainer" parent="DebugUI/RightPanel/Margin/VBox"]
+[node name="InfoScroll" type="ScrollContainer" parent="DebugUI/RightPanel/Margin/VBox" unique_id=1972519165]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="InfoLabel" type="RichTextLabel" parent="DebugUI/RightPanel/Margin/VBox/InfoScroll"]
+[node name="InfoLabel" type="RichTextLabel" parent="DebugUI/RightPanel/Margin/VBox/InfoScroll" unique_id=1610982545]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3

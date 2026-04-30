@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://card26cltbba1"]
 
 [ext_resource type="Script" uid="uid://cd31vmh881wm5" path="res://src/battle/battle_manager.gd" id="1_hnd0w"]
-[ext_resource type="PackedScene" path="res://src/battle/debug_overlay.tscn" id="debug_overlay"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_red.tres" id="4_f2r6p"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_black.tres" id="6_l2dig"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_yellow.tres" id="7_f2r6p"]
@@ -20,6 +19,7 @@
 [ext_resource type="PackedScene" uid="uid://b24ja5gvetaqq" path="res://src/battle/editor/item_select_button.tscn" id="18_d5yoq"]
 [ext_resource type="Script" uid="uid://bsflrccy2sry" path="res://src/battle/editor/ability_select_control.gd" id="18_pbg35"]
 [ext_resource type="PackedScene" uid="uid://ckvy5kybckxkh" path="res://src/battle/editor/ability_select_button.tscn" id="20_ok2a6"]
+[ext_resource type="PackedScene" path="res://src/battle/debug_overlay.tscn" id="debug_overlay"]
 
 [sub_resource type="Environment" id="Environment_njvnp"]
 background_mode = 3
@@ -505,7 +505,7 @@ layout_mode = 2
 button_pressed = true
 text = "Orthographic"
 
-[node name="DebugOverlay" parent="." instance=ExtResource("debug_overlay")]
+[node name="DebugOverlay" parent="." unique_id=895413566 instance=ExtResource("debug_overlay")]
 
 [connection signal="ability_select_pressed" from="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/FoldableContainer/UnitSetupPanel" to="ScenarioEditor" method="setup_ability_select"]
 [connection signal="item_select_pressed" from="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/FoldableContainer/UnitSetupPanel" to="ScenarioEditor" method="setup_item_select"]
