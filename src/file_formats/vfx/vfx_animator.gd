@@ -9,14 +9,16 @@ class BakedFrame:
 	var offset: Vector2
 	var is_terminal: bool
 
+
 	func _init(p_frameset: int, p_depth_mode: int, p_offset: Vector2, p_is_terminal: bool) -> void:
 		frameset = p_frameset
 		depth_mode = p_depth_mode
 		offset = p_offset
 		is_terminal = p_is_terminal
 
+
 var vfx_data: VisualEffectData
-var baked_animations: Array = []  # [emitter_index] → Array[BakedFrame]
+var baked_animations: Array = [] # [emitter_index] → Array[BakedFrame]
 
 
 func initialize(data: VisualEffectData) -> void:
@@ -37,7 +39,7 @@ func _bake_animation_for_emitter(emitter: VfxEmitter) -> Array:
 		frameset_offset += vfx_data.frameset_groups_num_framesets[idx]
 
 	var frames: Array[BakedFrame] = []
-	var current_offset := Vector2(raw_anim.screen_offset)
+	var current_offset: Vector2 = Vector2(raw_anim.screen_offset)
 
 	for anim_frame: VisualEffectData.VfxAnimationFrame in raw_anim.animation_frames:
 		if anim_frame.frameset_id == VfxConstants.AnimOpcode.ADD_OFFSET:
@@ -66,10 +68,15 @@ func _bake_animation_for_emitter(emitter: VfxEmitter) -> Array:
 			var is_terminal: bool = (duration == 0)
 			var display_frames: int = maxi(1, duration >> 1)
 
-			for _i in range(display_frames):
-				frames.append(BakedFrame.new(
-					frameset, depth_mode, current_offset,
-					is_terminal and (_i == display_frames - 1)))
+			for display_frame_index: int in range(display_frames):
+				frames.append(
+					BakedFrame.new(
+						frameset,
+						depth_mode,
+						current_offset,
+						is_terminal and (display_frame_index == display_frames - 1),
+					),
+				)
 
 		# frameset_id >= 0x80 but not 0x81 or 0x83: skip unknown opcodes
 
