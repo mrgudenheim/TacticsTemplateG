@@ -3,20 +3,6 @@ extends RefCounted
 ## Animation driver — bakes VfxAnimation opcodes into frame-by-frame lookup
 ## Reads from VisualEffectData.VfxAnimation (binary-parsed) instead of JSON opcodes
 
-class BakedFrame:
-	var frameset: int
-	var depth_mode: int
-	var offset: Vector2
-	var is_terminal: bool
-
-
-	func _init(p_frameset: int, p_depth_mode: int, p_offset: Vector2, p_is_terminal: bool) -> void:
-		frameset = p_frameset
-		depth_mode = p_depth_mode
-		offset = p_offset
-		is_terminal = p_is_terminal
-
-
 var vfx_data: VisualEffectData
 var baked_animations: Array = [] # [emitter_index] → Array[BakedFrame]
 
@@ -24,6 +10,44 @@ var baked_animations: Array = [] # [emitter_index] → Array[BakedFrame]
 func initialize(data: VisualEffectData) -> void:
 	vfx_data = data
 	_bake_animations()
+
+
+func tick(particle: VfxParticleData) -> void:
+	if particle.animation_held:
+		return
+
+	var emitter_idx: int = particle.emitter_index
+	if emitter_idx < 0 or emitter_idx >= baked_animations.size():
+		return
+
+	var frames: Array[BakedFrame] = baked_animations[emitter_idx]
+	if frames.is_empty():
+		return
+
+	particle.anim_frame = clampi(particle.anim_time, 0, frames.size() - 1)
+
+	var frame: BakedFrame = frames[particle.anim_frame]
+	particle.anim_offset = frame.offset
+	particle.current_frameset = frame.frameset
+	particle.current_depth_mode = frame.depth_mode
+
+	if frame.is_terminal:
+		if particle.lifetime == -1:
+			particle.animation_complete = true
+		else:
+			particle.animation_held = true
+		return
+
+	particle.anim_time += 1
+
+	if particle.anim_time >= frames.size():
+		particle.anim_time = 0
+
+
+func get_animation_duration(emitter_index: int) -> int:
+	if emitter_index < 0 or emitter_index >= baked_animations.size():
+		return 0
+	return baked_animations[emitter_index].size()
 
 
 func _bake_animation_for_emitter(emitter: VfxEmitter) -> Array:
@@ -91,39 +115,15 @@ func _bake_animations() -> void:
 		baked_animations.append(_bake_animation_for_emitter(emitter))
 
 
-func tick(particle: VfxParticleData) -> void:
-	if particle.animation_held:
-		return
-
-	var emitter_idx: int = particle.emitter_index
-	if emitter_idx < 0 or emitter_idx >= baked_animations.size():
-		return
-
-	var frames: Array[BakedFrame] = baked_animations[emitter_idx]
-	if frames.is_empty():
-		return
-
-	particle.anim_frame = clampi(particle.anim_time, 0, frames.size() - 1)
-
-	var frame: BakedFrame = frames[particle.anim_frame]
-	particle.anim_offset = frame.offset
-	particle.current_frameset = frame.frameset
-	particle.current_depth_mode = frame.depth_mode
-
-	if frame.is_terminal:
-		if particle.lifetime == -1:
-			particle.animation_complete = true
-		else:
-			particle.animation_held = true
-		return
-
-	particle.anim_time += 1
-
-	if particle.anim_time >= frames.size():
-		particle.anim_time = 0
+class BakedFrame:
+	var frameset: int
+	var depth_mode: int
+	var offset: Vector2
+	var is_terminal: bool
 
 
-func get_animation_duration(emitter_index: int) -> int:
-	if emitter_index < 0 or emitter_index >= baked_animations.size():
-		return 0
-	return baked_animations[emitter_index].size()
+	func _init(p_frameset: int, p_depth_mode: int, p_offset: Vector2, p_is_terminal: bool) -> void:
+		frameset = p_frameset
+		depth_mode = p_depth_mode
+		offset = p_offset
+		is_terminal = p_is_terminal
