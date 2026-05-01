@@ -489,8 +489,8 @@ func cache_associated_files() -> void:
 		"WEP2.SHP",
 		"EFF1.SHP",
 		"WEP.SPR",
-		]
-	
+	]
+
 	for file_name: String in associated_file_names:
 		var type_index: int = file_records[file_name].type_index
 		match file_name.get_extension():
@@ -602,7 +602,7 @@ func process_frame_bin() -> void:
 	frame_bin.color_palette.resize(frame_bin.num_colors)
 	for i: int in frame_bin.num_colors:
 		var color: Color = Color.BLACK
-		var color_bits: int = palette_bytes.decode_u16(i*2)
+		var color_bits: int = palette_bytes.decode_u16(i * 2)
 		# var alpha_bit: int = (color_bits & 0b1000_0000_0000_0000) >> 15 # first bit is alpha
 		#color.a8 = 1 - () # first bit is alpha (if bit is zero, color is opaque)
 		color.b8 = (color_bits & 0b0111_1100_0000_0000) >> 10 # then 5 bits each: blue, green, red
@@ -664,13 +664,13 @@ func process_frame_bin() -> void:
 	# get_rgba8_image() -> Image:
 	@warning_ignore("integer_division")
 	frame_bin.height = frame_bin.color_indices.size() / frame_bin.width
-	var image:Image = Image.create_empty(frame_bin.width, frame_bin.height, false, Image.FORMAT_RGBA8)
+	var image: Image = Image.create_empty(frame_bin.width, frame_bin.height, false, Image.FORMAT_RGBA8)
 	for x: int in frame_bin.width:
 		for y: int in frame_bin.height:
 			var color: Color = frame_bin.pixel_colors[x + (y * frame_bin.width)]
 			var color8: Color = Color8(color.r8, color.g8, color.b8, color.a8) # use Color8 function to prevent issues with format conversion changing color by 1/255
-			image.set_pixel(x,y, color8) # spr stores pixel data left to right, top to bottm
-	
+			image.set_pixel(x, y, color8) # spr stores pixel data left to right, top to bottm
+
 	frame_bin_texture = ImageTexture.create_from_image(image)
 
 
@@ -791,8 +791,7 @@ func connect_data_references() -> void:
 			ability.passive_effect = passive_effects[ability.passive_effect_name]
 		elif passive_effects.has(ability.passive_effect_name):
 			ability.passive_effect = passive_effects[ability.passive_effect_name]
-		
-		
+
 		for triggered_action_name: String in ability.triggered_actions_names:
 			if triggered_actions.has(triggered_action_name):
 				ability.triggered_actions.append(triggered_actions[triggered_action_name])
@@ -870,9 +869,11 @@ func write_spritesheet_region_data(seq_index: int, shp_index: int) -> void:
 					var subframe_region_size: Vector2i = subframe.rect_size
 					var subframe_region_location: Vector2i = Vector2i(subframe.load_location_x, subframe.load_location_y)
 
-					var region_id: int = regions.find_custom(func(region_data: SpritesheetRegionData) -> bool: 
-						return region_data.region_size == subframe_region_size and region_data.region_location == subframe_region_location)
-					
+					var region_id: int = regions.find_custom(
+						func(region_data: SpritesheetRegionData) -> bool:
+							return region_data.region_size == subframe_region_size and region_data.region_location == subframe_region_location
+					)
+
 					var modified_description: String = seq_description.replace("\n", ", ").replace("-, ", "-<br>").replace(", -", "<br>-")
 					if modified_description.contains("-"):
 						modified_description = "<br>" + modified_description
@@ -914,9 +915,11 @@ func write_spritesheet_region_data(seq_index: int, shp_index: int) -> void:
 						var subframe_region_size: Vector2i = subframe.rect_size
 						var subframe_region_location: Vector2i = Vector2i(subframe.load_location_x, subframe.load_location_y)
 
-						var region_id: int = regions.find_custom(func(region_data: SpritesheetRegionData) -> bool: 
-							return region_data.region_size == subframe_region_size and region_data.region_location == subframe_region_location)
-						
+						var region_id: int = regions.find_custom(
+							func(region_data: SpritesheetRegionData) -> bool:
+								return region_data.region_size == subframe_region_size and region_data.region_location == subframe_region_location
+						)
+
 						var modified_description: String = seq_description.replace("\n", ", ").replace("-, ", "-<br>").replace(", -", "<br>-")
 						if modified_description.contains("-"):
 							modified_description = "<br>" + modified_description
@@ -983,8 +986,8 @@ func write_spritesheet_region_data(seq_index: int, shp_index: int) -> void:
 	
 	var final_output: String = "\n|-\n".join(output_array)
 	final_output += "\n|}"
-	
-	var file_name: String = shp.file_name.to_snake_case().replace(".","_") + "_regions"
+
+	var file_name: String = shp.file_name.to_snake_case().replace(".", "_") + "_regions"
 	DirAccess.make_dir_recursive_absolute("user://wiki_tables")
 	var save_file: FileAccess = FileAccess.open("user://wiki_tables/wiki_table_" + file_name + ".txt", FileAccess.WRITE)
 	save_file.store_string(final_output)
@@ -1001,7 +1004,7 @@ func add_entds(file_name: String) -> void:
 
 
 func generate_passive_effects() -> void:
-	var new_passive_effect: PassiveEffect 
+	var new_passive_effect: PassiveEffect
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "attack_up"
@@ -1037,10 +1040,10 @@ func generate_passive_effects() -> void:
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "concentrate"
 	var evade_modifier_dict: Dictionary[EvadeData.EvadeSource, Modifier] = {
-		EvadeData.EvadeSource.JOB : Modifier.new("0.0", Modifier.ModifierType.SET),
-		EvadeData.EvadeSource.SHIELD : Modifier.new("0.0", Modifier.ModifierType.SET),
-		EvadeData.EvadeSource.ACCESSORY : Modifier.new("0.0", Modifier.ModifierType.SET),
-		EvadeData.EvadeSource.WEAPON : Modifier.new("0.0", Modifier.ModifierType.SET),
+		EvadeData.EvadeSource.JOB: Modifier.new("0.0", Modifier.ModifierType.SET),
+		EvadeData.EvadeSource.SHIELD: Modifier.new("0.0", Modifier.ModifierType.SET),
+		EvadeData.EvadeSource.ACCESSORY: Modifier.new("0.0", Modifier.ModifierType.SET),
+		EvadeData.EvadeSource.WEAPON: Modifier.new("0.0", Modifier.ModifierType.SET),
 	}
 	new_passive_effect.evade_source_modifiers_user = evade_modifier_dict
 	Utilities.save_json(new_passive_effect)
@@ -1102,7 +1105,7 @@ func generate_passive_effects() -> void:
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "move+1"
 	var stat_modifier_dict: Dictionary[Unit.StatType, Modifier] = {
-		Unit.StatType.MOVE : Modifier.new("value + 1", Modifier.ModifierType.ADD),
+		Unit.StatType.MOVE: Modifier.new("value + 1", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
 	Utilities.save_json(new_passive_effect)
@@ -1110,7 +1113,7 @@ func generate_passive_effects() -> void:
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "move+2"
 	stat_modifier_dict = {
-		Unit.StatType.MOVE : Modifier.new("value + 2", Modifier.ModifierType.ADD),
+		Unit.StatType.MOVE: Modifier.new("value + 2", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
 	Utilities.save_json(new_passive_effect)
@@ -1118,7 +1121,7 @@ func generate_passive_effects() -> void:
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "move+3"
 	stat_modifier_dict = {
-		Unit.StatType.MOVE : Modifier.new("value + 3", Modifier.ModifierType.ADD),
+		Unit.StatType.MOVE: Modifier.new("value + 3", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
 	Utilities.save_json(new_passive_effect)
@@ -1126,7 +1129,7 @@ func generate_passive_effects() -> void:
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "jump+1"
 	stat_modifier_dict = {
-		Unit.StatType.JUMP : Modifier.new("value + 1", Modifier.ModifierType.ADD),
+		Unit.StatType.JUMP: Modifier.new("value + 1", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
 	Utilities.save_json(new_passive_effect)
@@ -1134,7 +1137,7 @@ func generate_passive_effects() -> void:
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "jump+2"
 	stat_modifier_dict = {
-		Unit.StatType.JUMP : Modifier.new("value + 2", Modifier.ModifierType.ADD),
+		Unit.StatType.JUMP: Modifier.new("value + 2", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
 	Utilities.save_json(new_passive_effect)
@@ -1142,7 +1145,7 @@ func generate_passive_effects() -> void:
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "jump+3"
 	stat_modifier_dict = {
-		Unit.StatType.JUMP : Modifier.new("value + 3", Modifier.ModifierType.ADD),
+		Unit.StatType.JUMP: Modifier.new("value + 3", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
 	Utilities.save_json(new_passive_effect)
@@ -1155,11 +1158,11 @@ func generate_passive_effects() -> void:
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "ignore_terrain"
 	var terrain_modifier_dict: Dictionary[int, Modifier] = {
-		0x0e : Modifier.new("1", Modifier.ModifierType.SET),
+		0x0e: Modifier.new("1", Modifier.ModifierType.SET),
 		0x0f: Modifier.new("1", Modifier.ModifierType.SET),
-		0x10 : Modifier.new("1", Modifier.ModifierType.SET),
-		0x11 : Modifier.new("1", Modifier.ModifierType.SET),
-		0x2d : Modifier.new("1", Modifier.ModifierType.SET),
+		0x10: Modifier.new("1", Modifier.ModifierType.SET),
+		0x11: Modifier.new("1", Modifier.ModifierType.SET),
+		0x2d: Modifier.new("1", Modifier.ModifierType.SET),
 	}
 	new_passive_effect.terrain_cost_modifiers = terrain_modifier_dict
 	Utilities.save_json(new_passive_effect)
