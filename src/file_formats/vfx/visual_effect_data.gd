@@ -1,5 +1,24 @@
 class_name VisualEffectData
 
+# SINGLE - camera will point at the targeted location
+# SEQUENTIAL - camera will move between each each target
+# MULTI - camera will point at a single location, but make sure all targets are in view
+enum CameraFocus { SINGLE, SEQUENTIAL, MULTI }
+enum VfxSections {
+	FRAMES = 0,
+	ANIMATION = 1,
+	VFX_SCRIPT = 2,
+	EMITTER_DATA = 3,
+	CURVES = 4,
+	TIME_SCALE_CURVE = 5, # optional
+	EFFECT_FLAGS = 6,
+	TIMELINES = 7,
+	SOUND_EFFECTS = 8,
+	TEXTURE = 9,
+}
+
+const ANIM_OPCODE_LOOP: int = VfxConstants.AnimOpcode.LOOP ## Alias for backward compat
+
 # https://ffhacktics.com/wiki/Effect_File_Format
 # https://ffhacktics.com/wiki/Effect_Files
 # https://ffhacktics.com/wiki/Effect_Data
@@ -25,158 +44,6 @@ var time_scale_outer: PackedInt32Array = [] ## 600 per-frame pacing values for p
 var time_scale_for_each: PackedInt32Array = [] ## 600 per-frame pacing values for animate_tick
 var time_scale_pattern1: bool = false ## Enable outer_phases time scaling (during phase1)
 var time_scale_pattern2: bool = false ## Enable for_each time scaling (during animate_tick)
-
-
-class VfxFrameSet:
-	var flags: int = 0
-	var num_frames: int = 0
-	var frameset: Array[VfxFrame] = []
-
-
-class VfxFrame:
-	var vram_bytes: PackedByteArray = []
-	var palette_id: int = 0
-	var semi_transparency_mode: int = 0
-	var image_color_depth: int = 0 # 0 = 4bpp, 1 = 8bpp
-	var semi_transparency_on: bool = true
-	var frame_width_signed: bool = false
-	var frame_height_signed: bool = false
-	var texture_page: int = 0
-
-	var top_left_uv: Vector2i = Vector2i.ZERO
-	var uv_width: int = 0
-	var uv_height: int = 0
-	var top_left_xy: Vector2i = Vector2i.ZERO
-	var top_right_xy: Vector2i = Vector2i.ZERO
-	var bottom_left_xy: Vector2i = Vector2i.ZERO
-	var bottom_right_xy: Vector2i = Vector2i.ZERO
-	var quad_vertices: PackedVector3Array = []
-	var quad_uvs_pixels: PackedVector2Array = []
-	var quad_uvs: PackedVector2Array = []
-
-
-	func parse_vram_bytes(frame_bytes: PackedByteArray) -> void:
-		vram_bytes = frame_bytes.slice(0, 4)
-		palette_id = vram_bytes[0] & 0x0f
-		semi_transparency_mode = (vram_bytes[0] & 0x60) >> 5
-		image_color_depth = 4 + ((vram_bytes[0] & 0x80) >> 5)
-		semi_transparency_on = (vram_bytes[1] & 0x02) == 0x02
-		frame_width_signed = (vram_bytes[1] & 0x10) == 0x10
-		frame_height_signed = (vram_bytes[1] & 0x20) == 0x20
-		texture_page = vram_bytes.decode_u16(2)
-
-
-	func parse_geometry_bytes(frame_bytes: PackedByteArray, v_offset: int = 0) -> void:
-		var u: int = frame_bytes.decode_u8(4)
-		var v: int = frame_bytes.decode_u8(5) - v_offset
-		top_left_uv = Vector2i(u, v)
-
-		if frame_width_signed:
-			uv_width = frame_bytes.decode_s8(6)
-		else:
-			uv_width = frame_bytes.decode_u8(6)
-		if frame_height_signed:
-			uv_height = frame_bytes.decode_s8(7)
-		else:
-			uv_height = frame_bytes.decode_u8(7)
-
-		top_left_xy = Vector2i(frame_bytes.decode_s16(8), frame_bytes.decode_s16(0xa))
-		top_right_xy = Vector2i(frame_bytes.decode_s16(0xc), frame_bytes.decode_s16(0xe))
-		bottom_left_xy = Vector2i(frame_bytes.decode_s16(0x10), frame_bytes.decode_s16(0x12))
-		bottom_right_xy = Vector2i(frame_bytes.decode_s16(0x14), frame_bytes.decode_s16(0x16))
-
-		quad_uvs_pixels = PackedVector2Array(
-			[
-				Vector2(u, v),
-				Vector2(u + uv_width, v),
-				Vector2(u, v + uv_height),
-				Vector2(u + uv_width, v + uv_height),
-			],
-		)
-
-		var vertices_xy: PackedVector2Array = [
-			Vector2(top_left_xy),
-			Vector2(top_right_xy),
-			Vector2(bottom_left_xy),
-			Vector2(bottom_right_xy),
-		]
-		for vert: Vector2 in vertices_xy:
-			quad_vertices.append(Vector3(vert.x, -vert.y, 0) * MapData.SCALE)
-
-
-class VfxAnimation:
-	var animation_frames: Array[VfxAnimationFrame]
-	var screen_offset: Vector2i
-
-
-class VfxAnimationFrame:
-	var frameset_id: int
-	var duration: int
-	var byte_02: int ## Depth mode — see VfxConstants.DepthMode
-
-
-# 128 bytes, 25 keyframes
-# https://ffhacktics.com/wiki/Effect_File_Timeline#Section_5:_Particle_Channel_Structure_(128_Bytes)
-class EmitterTimeline:
-	var bytes: PackedByteArray = []
-	var times: PackedInt32Array = []
-	var emitter_ids: PackedInt32Array = []
-	var action_flags: PackedByteArray = []
-	var num_keyframes: int = 0
-
-	var keyframes: Array[EmitterKeyframe] = []
-	var has_unknown_flags: bool = false
-
-
-	func _init(new_bytes: PackedByteArray) -> void:
-		bytes = new_bytes
-		# Layout: 25×u16 times (0x00), first emitter_id = 0 then 24×u8 emitter_ids (0x32), 25×u16 action_flags (0x4a), u16 num_kf (0x7E)
-		action_flags = bytes.slice(0x4a, 0x4a + 50)
-		num_keyframes = bytes.decode_s16(0x7E)
-
-		for idx: int in 25:
-			var time: int = bytes.decode_u16(idx * 2)
-			times.append(time)
-
-			var emitter_id: int = 0
-			if idx > 0:
-				emitter_id = bytes.decode_u8(0x31 + idx)
-				emitter_ids.append(emitter_id)
-
-			var action_flag: int = action_flags.decode_u16(idx * 2)
-			# if not [0, 0x1000, 0x2000, 0x3000, 0x4000, 0x5000, 0x6000, 0x7000].has(action_flag):
-			# 	has_unknown_flags = true
-			# push_warning(action_flag)
-
-			var new_keyframe: EmitterKeyframe = EmitterKeyframe.new()
-			new_keyframe.time = time
-			new_keyframe.emitter_id = emitter_id
-			new_keyframe.flags = action_flags.slice(idx * 2, (idx + 1) * 2)
-			new_keyframe.display_damage = action_flag & 0x1000 == 0x1000
-			new_keyframe.status_change = action_flag & 0x2000 == 0x2000
-			new_keyframe.target_animation = action_flag & 0x4000 == 0x4000
-			new_keyframe.use_global_target = action_flag & 0x0800 == 0x0800
-			new_keyframe.callback_slot = ((action_flag & 0x0700) >> 8) - 1 # will give -1 if not using callback
-			new_keyframe.animation_param = action_flag & 0x00FF
-
-			new_keyframe.unused_flag_80 = action_flag & 0x8000 == 0x8000
-
-			keyframes.append(new_keyframe)
-
-
-class EmitterKeyframe:
-	var time: int = -1 # frames
-	var emitter_id: int = -1
-	var flags: PackedByteArray = []
-	var display_damage: bool = false
-	var status_change: bool = false
-	var target_animation: bool = false
-	var use_global_target: bool = false
-	var callback_slot: int = -1
-	var animation_param: int = 0
-	var unused_flag_80: bool = false
-
-
 var script_bytes: PackedByteArray = []
 var emitter_control_bytes: PackedByteArray = []
 var emitters: Array[VfxEmitter] = []
@@ -199,36 +66,16 @@ var vfx_spr: Spr
 var texture: Texture2D
 var image_color_depth: int = 0 # 8bpp or 4bpp
 
-# SINGLE - camera will point at the targeted location
-# SEQUENTIAL - camera will move between each each target
-# MULTI - camera will point at a single location, but make sure all targets are in view
-enum CameraFocus {SINGLE, SEQUENTIAL, MULTI} 
 
-enum VfxSections {
-	FRAMES = 0,
-	ANIMATION = 1,
-	VFX_SCRIPT = 2,
-	EMITTER_DATA = 3,
-	CURVES = 4,
-	TIME_SCALE_CURVE = 5, # optional
-	EFFECT_FLAGS = 6,
-	TIMELINES = 7,
-	SOUND_EFFECTS = 8,
-	TEXTURE = 9,
-}
-
-const ANIM_OPCODE_LOOP: int = VfxConstants.AnimOpcode.LOOP ## Alias for backward compat
+func _init(new_file_name: String = "") -> void:
+	file_name = new_file_name
+	vfx_id = new_file_name.trim_suffix(".BIN").trim_prefix("E").to_int()
 
 
 func get_curve(index: int) -> VfxCurve:
 	if index < 0 or index >= curves.size():
 		return null
 	return VfxCurve.new(curves[index], index)
-
-
-func _init(new_file_name: String = "") -> void:
-	file_name = new_file_name
-	vfx_id = new_file_name.trim_suffix(".BIN").trim_prefix("E").to_int()
 
 
 func init_from_file() -> void:
@@ -622,3 +469,153 @@ func get_frame_mesh(composite_frame_idx: int, frame_idx: int = 0) -> ArrayMesh:
 	mesh.surface_set_material(0, mesh_material)
 
 	return mesh
+
+
+class VfxFrameSet:
+	var flags: int = 0
+	var num_frames: int = 0
+	var frameset: Array[VfxFrame] = []
+
+
+class VfxFrame:
+	var vram_bytes: PackedByteArray = []
+	var palette_id: int = 0
+	var semi_transparency_mode: int = 0
+	var image_color_depth: int = 0 # 0 = 4bpp, 1 = 8bpp
+	var semi_transparency_on: bool = true
+	var frame_width_signed: bool = false
+	var frame_height_signed: bool = false
+	var texture_page: int = 0
+
+	var top_left_uv: Vector2i = Vector2i.ZERO
+	var uv_width: int = 0
+	var uv_height: int = 0
+	var top_left_xy: Vector2i = Vector2i.ZERO
+	var top_right_xy: Vector2i = Vector2i.ZERO
+	var bottom_left_xy: Vector2i = Vector2i.ZERO
+	var bottom_right_xy: Vector2i = Vector2i.ZERO
+	var quad_vertices: PackedVector3Array = []
+	var quad_uvs_pixels: PackedVector2Array = []
+	var quad_uvs: PackedVector2Array = []
+
+
+	func parse_vram_bytes(frame_bytes: PackedByteArray) -> void:
+		vram_bytes = frame_bytes.slice(0, 4)
+		palette_id = vram_bytes[0] & 0x0f
+		semi_transparency_mode = (vram_bytes[0] & 0x60) >> 5
+		image_color_depth = 4 + ((vram_bytes[0] & 0x80) >> 5)
+		semi_transparency_on = (vram_bytes[1] & 0x02) == 0x02
+		frame_width_signed = (vram_bytes[1] & 0x10) == 0x10
+		frame_height_signed = (vram_bytes[1] & 0x20) == 0x20
+		texture_page = vram_bytes.decode_u16(2)
+
+
+	func parse_geometry_bytes(frame_bytes: PackedByteArray, v_offset: int = 0) -> void:
+		var u: int = frame_bytes.decode_u8(4)
+		var v: int = frame_bytes.decode_u8(5) - v_offset
+		top_left_uv = Vector2i(u, v)
+
+		if frame_width_signed:
+			uv_width = frame_bytes.decode_s8(6)
+		else:
+			uv_width = frame_bytes.decode_u8(6)
+		if frame_height_signed:
+			uv_height = frame_bytes.decode_s8(7)
+		else:
+			uv_height = frame_bytes.decode_u8(7)
+
+		top_left_xy = Vector2i(frame_bytes.decode_s16(8), frame_bytes.decode_s16(0xa))
+		top_right_xy = Vector2i(frame_bytes.decode_s16(0xc), frame_bytes.decode_s16(0xe))
+		bottom_left_xy = Vector2i(frame_bytes.decode_s16(0x10), frame_bytes.decode_s16(0x12))
+		bottom_right_xy = Vector2i(frame_bytes.decode_s16(0x14), frame_bytes.decode_s16(0x16))
+
+		quad_uvs_pixels = PackedVector2Array(
+			[
+				Vector2(u, v),
+				Vector2(u + uv_width, v),
+				Vector2(u, v + uv_height),
+				Vector2(u + uv_width, v + uv_height),
+			],
+		)
+
+		var vertices_xy: PackedVector2Array = [
+			Vector2(top_left_xy),
+			Vector2(top_right_xy),
+			Vector2(bottom_left_xy),
+			Vector2(bottom_right_xy),
+		]
+		for vert: Vector2 in vertices_xy:
+			quad_vertices.append(Vector3(vert.x, -vert.y, 0) * MapData.SCALE)
+
+
+class VfxAnimation:
+	var animation_frames: Array[VfxAnimationFrame]
+	var screen_offset: Vector2i
+
+
+class VfxAnimationFrame:
+	var frameset_id: int
+	var duration: int
+	var byte_02: int ## Depth mode — see VfxConstants.DepthMode
+
+
+# 128 bytes, 25 keyframes
+# https://ffhacktics.com/wiki/Effect_File_Timeline#Section_5:_Particle_Channel_Structure_(128_Bytes)
+class EmitterTimeline:
+	var bytes: PackedByteArray = []
+	var times: PackedInt32Array = []
+	var emitter_ids: PackedInt32Array = []
+	var action_flags: PackedByteArray = []
+	var num_keyframes: int = 0
+
+	var keyframes: Array[EmitterKeyframe] = []
+	var has_unknown_flags: bool = false
+
+
+	func _init(new_bytes: PackedByteArray) -> void:
+		bytes = new_bytes
+		# Layout: 25×u16 times (0x00), first emitter_id = 0 then 24×u8 emitter_ids (0x32), 25×u16 action_flags (0x4a), u16 num_kf (0x7E)
+		action_flags = bytes.slice(0x4a, 0x4a + 50)
+		num_keyframes = bytes.decode_s16(0x7E)
+
+		for idx: int in 25:
+			var time: int = bytes.decode_u16(idx * 2)
+			times.append(time)
+
+			var emitter_id: int = 0
+			if idx > 0:
+				emitter_id = bytes.decode_u8(0x31 + idx)
+				emitter_ids.append(emitter_id)
+
+			var action_flag: int = action_flags.decode_u16(idx * 2)
+			# if not [0, 0x1000, 0x2000, 0x3000, 0x4000, 0x5000, 0x6000, 0x7000].has(action_flag):
+			# 	has_unknown_flags = true
+			# push_warning(action_flag)
+
+			var new_keyframe: EmitterKeyframe = EmitterKeyframe.new()
+			new_keyframe.time = time
+			new_keyframe.emitter_id = emitter_id
+			new_keyframe.flags = action_flags.slice(idx * 2, (idx + 1) * 2)
+			new_keyframe.display_damage = action_flag & 0x1000 == 0x1000
+			new_keyframe.status_change = action_flag & 0x2000 == 0x2000
+			new_keyframe.target_animation = action_flag & 0x4000 == 0x4000
+			new_keyframe.use_global_target = action_flag & 0x0800 == 0x0800
+			new_keyframe.callback_slot = ((action_flag & 0x0700) >> 8) - 1 # will give -1 if not using callback
+			new_keyframe.animation_param = action_flag & 0x00FF
+
+			new_keyframe.unused_flag_80 = action_flag & 0x8000 == 0x8000
+
+			keyframes.append(new_keyframe)
+
+
+class EmitterKeyframe:
+	var time: int = -1 # frames
+	var emitter_id: int = -1
+	var flags: PackedByteArray = []
+	var display_damage: bool = false
+	var status_change: bool = false
+	var target_animation: bool = false
+	var use_global_target: bool = false
+	var callback_slot: int = -1
+	var animation_param: int = 0
+	var unused_flag_80: bool = false
