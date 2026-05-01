@@ -20,9 +20,9 @@ static func mirror_custom0(surface_arrays: Array, center: Vector3, mirror_scale:
 	if surface_arrays.size() <= Mesh.ARRAY_CUSTOM0 or surface_arrays[Mesh.ARRAY_CUSTOM0] == null:
 		return 0
 	var floats: PackedFloat32Array = surface_arrays[Mesh.ARRAY_CUSTOM0]
-	for vi in range(floats.size() / 3):
+	for vi: int in range(floats.size() / 3):
 		var base: int = vi * 3
-		var c := Vector3(floats[base], floats[base + 1], floats[base + 2])
+		var c: Vector3 = Vector3(floats[base], floats[base + 1], floats[base + 2])
 		c = (c - center) * mirror_scale + half_size
 		floats[base] = c.x
 		floats[base + 1] = c.y
@@ -144,7 +144,8 @@ func create_map(mesh_bytes: PackedByteArray, texture_bytes: PackedByteArray = []
 		push_warning("No lighting data found")
 		pass
 	else:
-		var lighting_data_length: int = 18 + 18 + 3 + 6 # 6 bytes for each directional light color, position, 3 bytes for ambient light color, 6 bytes for gradient colors
+		# 6 bytes for each directional light color, position, 3 bytes for ambient light color, 6 bytes for gradient colors
+		var lighting_data_length: int = 18 + 18 + 3 + 6
 		var lighting_data_end: int = lighting_data_start + lighting_data_length
 		var lighting_data: PackedByteArray = other_bytes.slice(lighting_data_length, lighting_data_end)
 		set_gradient_colors(lighting_data.slice(-6))
@@ -264,7 +265,7 @@ func _create_mesh() -> void:
 		var v1: Vector3 = text_tri_vertices[i * 3 + 1] * SCALE
 		var v2: Vector3 = text_tri_vertices[i * 3 + 2] * SCALE
 		var centroid: Vector3 = (v0 + v1 + v2) / 3.0
-		var centroid_color := Color(centroid.x, centroid.y, centroid.z, 0.0)
+		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, 0.0)
 		for vertex_index: int in 3:
 			var index: int = (i*3) + vertex_index
 			st.set_normal(text_tri_normals[index] * SCALE)
@@ -279,7 +280,7 @@ func _create_mesh() -> void:
 		var v1: Vector3 = black_tri_vertices[i * 3 + 1] * SCALE
 		var v2: Vector3 = black_tri_vertices[i * 3 + 2] * SCALE
 		var centroid: Vector3 = (v0 + v1 + v2) / 3.0
-		var centroid_color := Color(centroid.x, centroid.y, centroid.z, 0.0)
+		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, 0.0)
 		for vertex_index: int in 3:
 			var index: int = (i*3) + vertex_index
 			st.set_color(Color.BLACK)
@@ -294,7 +295,7 @@ func _create_mesh() -> void:
 		var quad_normals: PackedVector3Array = text_quad_normals.slice(quad_start, quad_end)
 		var quad_uvs: PackedVector2Array = quads_uvs.slice(quad_start, quad_end)
 		var centroid: Vector3 = (quad_vertices[0] + quad_vertices[1] + quad_vertices[2] + quad_vertices[3]) * SCALE / 4.0
-		var centroid_color := Color(centroid.x, centroid.y, centroid.z, 0.0)
+		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, 0.0)
 
 		for vert_index: int in [0, 1, 2]:
 			st.set_normal(quad_normals[vert_index] * SCALE) # TODO why is there error on MAP105 "terminate"
@@ -316,7 +317,7 @@ func _create_mesh() -> void:
 		var quad_end: int = (i + 1) * 4
 		var quad_vertices: PackedVector3Array = black_quad_vertices.slice(quad_start, quad_end)
 		var centroid: Vector3 = (quad_vertices[0] + quad_vertices[1] + quad_vertices[2] + quad_vertices[3]) * SCALE / 4.0
-		var centroid_color := Color(centroid.x, centroid.y, centroid.z, 0.0)
+		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, 0.0)
 
 		for vert_index: int in [0, 1, 2]:
 			st.set_color(Color.BLACK)
@@ -641,7 +642,8 @@ func get_texture_rgba8_image_all() -> Image:
 	for x: int in image_width:
 		for y: int in TEXTURE_SIZE.y:
 			var color: Color = pixel_colors[x + (y * image_width)]
-			var color8: Color = Color8(color.r8, color.g8, color.b8, color.a8) # use Color8 function to prevent issues with format conversion changing color by 1/255
+			# use Color8 function to prevent issues with format conversion changing color by 1/255
+			var color8: Color = Color8(color.r8, color.g8, color.b8, color.a8)
 			image.set_pixel(x,y, color8) # spr stores pixel data left to right, top to bottm
 	
 	return image
