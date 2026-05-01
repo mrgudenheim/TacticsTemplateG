@@ -4,7 +4,6 @@ extends RefCounted
 ## Port of godot-learning's ActiveEmitter.gd, adapted to use VfxEmitter conv_* fields
 
 const FRAME_DURATION: float = VfxConstants.TICK_DURATION
-
 const CP := VfxConstants.CurveParam
 
 # References
@@ -96,23 +95,35 @@ func _initialize_particle(particle: VfxParticleData) -> void:
 # === Shared Particle Initialization (used by both normal and child spawn paths) ===
 
 static func initialize_particle_from_config(
-	particle: VfxParticleData,
-	config: VfxEmitter,
-	config_index: int,
-	effect_data: VisualEffectData,
-	base_position: Vector3,
-	target_anchor: Vector3,
-	frame: int,
-	channel_idx: int,
-	facing_angle: float = 0.0
+		particle: VfxParticleData,
+		config: VfxEmitter,
+		config_index: int,
+		effect_data: VisualEffectData,
+		base_position: Vector3,
+		target_anchor: Vector3,
+		frame: int,
+		channel_idx: int,
+		facing_angle: float = 0.0,
 ) -> void:
 	var is_unit_oriented: bool = config.is_velocity_inward and config.align_to_facing
 
 	# --- Position & Spread ---
-	var pos_offset: Vector3 = _interpolate_vec3_static(CP.POSITION,
-		config.conv_position_start, config.conv_position_end, config, effect_data, frame)
-	var spread: Vector3 = _interpolate_vec3_static(CP.PARTICLE_SPREAD,
-		config.conv_spread_start, config.conv_spread_end, config, effect_data, frame)
+	var pos_offset: Vector3 = _interpolate_vec3_static(
+		CP.POSITION,
+		config.conv_position_start,
+		config.conv_position_end,
+		config,
+		effect_data,
+		frame,
+	)
+	var spread: Vector3 = _interpolate_vec3_static(
+		CP.PARTICLE_SPREAD,
+		config.conv_spread_start,
+		config.conv_spread_end,
+		config,
+		effect_data,
+		frame,
+	)
 
 	# OUTWARD_UNIT_ORIENTED: rotate position offset and spread by facing
 	if is_unit_oriented:
@@ -124,19 +135,37 @@ static func initialize_particle_from_config(
 	var final_pos: Vector3 = base_pos + spread_offset
 
 	# --- Velocity ---
-	var radial_vel: float = _interpolate_range_static(CP.RADIAL_VELOCITY,
-		config.conv_radial_velocity_min_start, config.conv_radial_velocity_max_start,
-		config.conv_radial_velocity_min_end, config.conv_radial_velocity_max_end,
-		config, effect_data, frame)
+	var radial_vel: float = _interpolate_range_static(
+		CP.RADIAL_VELOCITY,
+		config.conv_radial_velocity_min_start,
+		config.conv_radial_velocity_max_start,
+		config.conv_radial_velocity_min_end,
+		config.conv_radial_velocity_max_end,
+		config,
+		effect_data,
+		frame,
+	)
 
 	# 4-mode velocity dispatch based on velocity_inward + align_to_facing flags
 	var velocity: Vector3
 	if is_unit_oriented:
 		# OUTWARD_UNIT_ORIENTED: outward (angle-based) + rotated by caster facing
-		var vel_angle: Vector3 = _interpolate_vec3_static(CP.VELOCITY_ANGLE,
-			config.conv_angle_start, config.conv_angle_end, config, effect_data, frame)
-		var vel_spread: Vector3 = _interpolate_vec3_static(CP.VELOCITY_ANGLE_SPREAD,
-			config.conv_angle_spread_start, config.conv_angle_spread_end, config, effect_data, frame)
+		var vel_angle: Vector3 = _interpolate_vec3_static(
+			CP.VELOCITY_ANGLE,
+			config.conv_angle_start,
+			config.conv_angle_end,
+			config,
+			effect_data,
+			frame,
+		)
+		var vel_spread: Vector3 = _interpolate_vec3_static(
+			CP.VELOCITY_ANGLE_SPREAD,
+			config.conv_angle_spread_start,
+			config.conv_angle_spread_end,
+			config,
+			effect_data,
+			frame,
+		)
 		var base_dir: Vector3 = VfxPhysics.angle_to_direction(vel_angle.x, vel_angle.y, vel_angle.z)
 		var final_dir: Vector3 = VfxPhysics.random_cone_direction(base_dir, vel_spread)
 		velocity = _rotate_y(final_dir * radial_vel, facing_angle)
@@ -152,19 +181,39 @@ static func initialize_particle_from_config(
 		velocity = Vector3.ZERO
 	else:
 		# OUTWARD: standard angle-based direction
-		var vel_angle: Vector3 = _interpolate_vec3_static(CP.VELOCITY_ANGLE,
-			config.conv_angle_start, config.conv_angle_end, config, effect_data, frame)
-		var vel_spread: Vector3 = _interpolate_vec3_static(CP.VELOCITY_ANGLE_SPREAD,
-			config.conv_angle_spread_start, config.conv_angle_spread_end, config, effect_data, frame)
+		var vel_angle: Vector3 = _interpolate_vec3_static(
+			CP.VELOCITY_ANGLE,
+			config.conv_angle_start,
+			config.conv_angle_end,
+			config,
+			effect_data,
+			frame,
+		)
+		var vel_spread: Vector3 = _interpolate_vec3_static(
+			CP.VELOCITY_ANGLE_SPREAD,
+			config.conv_angle_spread_start,
+			config.conv_angle_spread_end,
+			config,
+			effect_data,
+			frame,
+		)
 		var base_dir: Vector3 = VfxPhysics.angle_to_direction(vel_angle.x, vel_angle.y, vel_angle.z)
 		var final_dir: Vector3 = VfxPhysics.random_cone_direction(base_dir, vel_spread)
 		velocity = final_dir * radial_vel
 
 	# --- Lifetime ---
-	var lifetime: int = int(_interpolate_range_static(CP.PARTICLE_LIFETIME,
-		float(config.particle_lifetime_min_start), float(config.particle_lifetime_max_start),
-		float(config.particle_lifetime_min_end), float(config.particle_lifetime_max_end),
-		config, effect_data, frame))
+	var lifetime: int = int(
+		_interpolate_range_static(
+			CP.PARTICLE_LIFETIME,
+			float(config.particle_lifetime_min_start),
+			float(config.particle_lifetime_max_start),
+			float(config.particle_lifetime_min_end),
+			float(config.particle_lifetime_max_end),
+			config,
+			effect_data,
+			frame,
+		),
+	)
 	if lifetime >= 0:
 		lifetime = maxi(1, lifetime)
 
@@ -175,43 +224,78 @@ static func initialize_particle_from_config(
 		lifetime,
 		config_index,
 		config.child_emitter_idx_on_death if config.child_death_mode != 0 else VfxConstants.NO_CHILD_EMITTER,
-		config.child_emitter_idx_on_interval if config.child_midlife_mode != 0 else VfxConstants.NO_CHILD_EMITTER
+		config.child_emitter_idx_on_interval if config.child_midlife_mode != 0 else VfxConstants.NO_CHILD_EMITTER,
 	)
 
 	# --- Physics ---
-	particle.inertia = _interpolate_range_static(CP.INERTIA,
-		config.conv_inertia_min_start, config.conv_inertia_max_start,
-		config.conv_inertia_min_end, config.conv_inertia_max_end,
-		config, effect_data, frame)
+	particle.inertia = _interpolate_range_static(
+		CP.INERTIA,
+		config.conv_inertia_min_start,
+		config.conv_inertia_max_start,
+		config.conv_inertia_min_end,
+		config.conv_inertia_max_end,
+		config,
+		effect_data,
+		frame,
+	)
 
-	particle.weight = _interpolate_range_static(CP.WEIGHT,
-		config.conv_weight_min_start, config.conv_weight_max_start,
-		config.conv_weight_min_end, config.conv_weight_max_end,
-		config, effect_data, frame)
+	particle.weight = _interpolate_range_static(
+		CP.WEIGHT,
+		config.conv_weight_min_start,
+		config.conv_weight_max_start,
+		config.conv_weight_min_end,
+		config.conv_weight_max_end,
+		config,
+		effect_data,
+		frame,
+	)
 
 	# Acceleration/drag (already Godot units via conv_*)
-	particle.acceleration = _interpolate_vec3_range_static(CP.ACCELERATION,
-		config.conv_acceleration_min_start, config.conv_acceleration_max_start,
-		config.conv_acceleration_min_end, config.conv_acceleration_max_end,
-		config, effect_data, frame)
+	particle.acceleration = _interpolate_vec3_range_static(
+		CP.ACCELERATION,
+		config.conv_acceleration_min_start,
+		config.conv_acceleration_max_start,
+		config.conv_acceleration_min_end,
+		config.conv_acceleration_max_end,
+		config,
+		effect_data,
+		frame,
+	)
 
-	particle.drag = _interpolate_vec3_range_static(CP.DRAG,
-		config.conv_drag_min_start, config.conv_drag_max_start,
-		config.conv_drag_min_end, config.conv_drag_max_end,
-		config, effect_data, frame)
+	particle.drag = _interpolate_vec3_range_static(
+		CP.DRAG,
+		config.conv_drag_min_start,
+		config.conv_drag_max_start,
+		config.conv_drag_min_end,
+		config.conv_drag_max_end,
+		config,
+		effect_data,
+		frame,
+	)
 
 	# --- Homing ---
-	particle.homing_strength = _interpolate_range_static(CP.HOMING_STRENGTH,
-		config.conv_homing_strength_min_start, config.conv_homing_strength_max_start,
-		config.conv_homing_strength_min_end, config.conv_homing_strength_max_end,
-		config, effect_data, frame)
+	particle.homing_strength = _interpolate_range_static(
+		CP.HOMING_STRENGTH,
+		config.conv_homing_strength_min_start,
+		config.conv_homing_strength_max_start,
+		config.conv_homing_strength_min_end,
+		config.conv_homing_strength_max_end,
+		config,
+		effect_data,
+		frame,
+	)
 
 	particle.homing_curve_index = config.interpolation_curve_indicies.get(CP.HOMING_CURVE, -1)
 
 	if particle.homing_strength > 0:
-		var target_offset: Vector3 = _interpolate_vec3_static(CP.TARGET_OFFSET,
-			config.conv_target_offset_start, config.conv_target_offset_end,
-			config, effect_data, frame)
+		var target_offset: Vector3 = _interpolate_vec3_static(
+			CP.TARGET_OFFSET,
+			config.conv_target_offset_start,
+			config.conv_target_offset_end,
+			config,
+			effect_data,
+			frame,
+		)
 		particle.homing_target = target_anchor + target_offset
 
 	# --- Homing Arrival ---
@@ -250,7 +334,7 @@ static func _random_sphere(spread: Vector3) -> Vector3:
 	return Vector3(
 		r * spread.x * sin(phi) * cos(theta),
 		r * spread.y * cos(phi),
-		r * spread.z * sin(phi) * sin(theta)
+		r * spread.z * sin(phi) * sin(theta),
 	)
 
 
@@ -258,7 +342,7 @@ static func _random_box(spread: Vector3) -> Vector3:
 	return Vector3(
 		randf_range(-spread.x, spread.x),
 		randf_range(-spread.y, spread.y),
-		randf_range(-spread.z, spread.z)
+		randf_range(-spread.z, spread.z),
 	)
 
 
@@ -280,20 +364,40 @@ static func _get_curve_static(param: int, config: VfxEmitter, effect_data: Visua
 	return effect_data.get_curve(idx - 1)
 
 
-static func _interpolate_vec3_static(param: int, start: Vector3, end_val: Vector3,
-	config: VfxEmitter, effect_data: VisualEffectData, frame: int) -> Vector3:
+static func _interpolate_vec3_static(
+		param: int,
+		start: Vector3,
+		end_val: Vector3,
+		config: VfxEmitter,
+		effect_data: VisualEffectData,
+		frame: int,
+) -> Vector3:
 	return VfxPhysics.interpolate_vec3(start, end_val, _get_curve_static(param, config, effect_data), frame)
 
 
-static func _interpolate_range_static(param: int, min_s: float, max_s: float,
-	min_e: float, max_e: float,
-	config: VfxEmitter, effect_data: VisualEffectData, frame: int) -> float:
+static func _interpolate_range_static(
+		param: int,
+		min_s: float,
+		max_s: float,
+		min_e: float,
+		max_e: float,
+		config: VfxEmitter,
+		effect_data: VisualEffectData,
+		frame: int,
+) -> float:
 	return VfxPhysics.interpolate_range(min_s, max_s, min_e, max_e, _get_curve_static(param, config, effect_data), frame)
 
 
-static func _interpolate_vec3_range_static(param: int, min_s: Vector3, max_s: Vector3,
-	min_e: Vector3, max_e: Vector3,
-	config: VfxEmitter, effect_data: VisualEffectData, frame: int) -> Vector3:
+static func _interpolate_vec3_range_static(
+		param: int,
+		min_s: Vector3,
+		max_s: Vector3,
+		min_e: Vector3,
+		max_e: Vector3,
+		config: VfxEmitter,
+		effect_data: VisualEffectData,
+		frame: int,
+) -> Vector3:
 	return VfxPhysics.interpolate_vec3_range(min_s, max_s, min_e, max_e, _get_curve_static(param, config, effect_data), frame)
 
 
@@ -334,14 +438,17 @@ func cleanup_dead_particles() -> Array[Dictionary]:
 				if particle.emitter_index >= 0 and particle.emitter_index < vfx_data.emitters.size():
 					parent_config = vfx_data.emitters[particle.emitter_index]
 				if parent_config and parent_config.child_death_mode != 0:
-					child_spawn_requests.append({
-						"child_index": particle.child_emitter_on_death,
-						"position": particle.position,
-						"age": particle.age,
-						"channel_index": particle.channel_index
-					})
+					child_spawn_requests.append(
+						{
+							"child_index": particle.child_emitter_on_death,
+							"position": particle.position,
+							"age": particle.age,
+							"channel_index": particle.channel_index,
+						},
+					)
 	particles = particles.filter(
-		func(p: VfxParticleData) -> bool: return p.active and not p.is_dead())
+		func(p: VfxParticleData) -> bool: return p.active and not p.is_dead()
+	)
 	return child_spawn_requests
 
 
