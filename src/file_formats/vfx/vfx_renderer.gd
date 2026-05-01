@@ -57,8 +57,8 @@ func render(particles: Array[VfxParticleData], vfx_data: VisualEffectData) -> vo
 	var renderable_uids: Dictionary = {}  # uid → particle index
 	var uid_mesh_need: Dictionary = {}    # uid → mesh count needed
 
-	for pi in range(particles.size()):
-		var p: VfxParticleData = particles[pi]
+	for particle_index: int in range(particles.size()):
+		var p: VfxParticleData = particles[particle_index]
 		if p.age == 0 or not p.active:
 			continue
 
@@ -70,7 +70,7 @@ func render(particles: Array[VfxParticleData], vfx_data: VisualEffectData) -> vo
 		if frameset.frameset.is_empty():
 			continue
 
-		renderable_uids[p.uid] = pi
+		renderable_uids[p.uid] = particle_index
 		uid_mesh_need[p.uid] = frameset.frameset.size() * 2
 
 	var stale_uids: Array[int] = []
@@ -90,13 +90,13 @@ func render(particles: Array[VfxParticleData], vfx_data: VisualEffectData) -> vo
 		var have: int = entries.size()
 
 		if have < needed:
-			for _i in range(needed - have):
+			for i: int in range(needed - have):
 				var entry: Dictionary = _create_mesh_entry()
 				entries.append(entry)
 			_particle_meshes[uid] = entries
 		elif have > needed:
 			# Hide excess (don't free — frameset might grow back)
-			for i in range(needed, have):
+			for i: int in range(needed, have):
 				entries[i].mesh.visible = false
 
 	for uid: int in renderable_uids:
@@ -109,17 +109,17 @@ func render(particles: Array[VfxParticleData], vfx_data: VisualEffectData) -> vo
 		var slot: int = 0
 
 		var num_frames: int = frameset.frameset.size()
-		for fi in range(num_frames):
-			var vfx_frame: VisualEffectData.VfxFrame = frameset.frameset[fi]
+		for frame_index: int in range(num_frames):
+			var vfx_frame: VisualEffectData.VfxFrame = frameset.frameset[frame_index]
 
 			var opaque_entry: Dictionary = entries[slot]
-			opaque_entry.mat.render_priority = fi
+			opaque_entry.mat.render_priority = frame_index
 			_render_frame(opaque_entry.mesh, opaque_entry.mat, p, vfx_frame, true, frame_camera, align, p.current_depth_mode)
 			slot += 1
 
 			var semi_entry: Dictionary = entries[slot]
 			if vfx_frame.semi_transparency_on:
-				semi_entry.mat.render_priority = (2 * num_frames) - fi - 1
+				semi_entry.mat.render_priority = (2 * num_frames) - frame_index - 1
 				_render_frame(semi_entry.mesh, semi_entry.mat, p, vfx_frame, false, frame_camera, align, p.current_depth_mode)
 			else:
 				semi_entry.mesh.visible = false
@@ -127,11 +127,11 @@ func render(particles: Array[VfxParticleData], vfx_data: VisualEffectData) -> vo
 
 
 func _create_mesh_entry() -> Dictionary:
-	var mesh_instance := MeshInstance3D.new()
+	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
 	mesh_instance.mesh = _shared_quad
 	mesh_instance.visible = false
 
-	var mat := ShaderMaterial.new()
+	var mat: ShaderMaterial = ShaderMaterial.new()
 	mat.shader = _opaque_shader
 	mat.render_priority = 0
 	if _vfx_data and _vfx_data.texture:
@@ -185,13 +185,13 @@ func _render_frame(mesh: MeshInstance3D, mat: ShaderMaterial, p: VfxParticleData
 			bl_x = new_bl_x; bl_y = new_bl_y
 			br_x = new_br_x; br_y = new_br_y
 
-	var t := Transform3D.IDENTITY
-	t.origin = p.position
-	mesh.transform = t
+	var mesh_transform: Transform3D = Transform3D.IDENTITY
+	mesh_transform.origin = p.position
+	mesh.transform = mesh_transform
 
 	# Map UVs to texel centers (not edges) for correct filter_nearest sampling.
 	# Prevents seam artifacts where mirrored frames meet (e.g., E485 circle).
-	var uv_rect_data := Vector4(
+	var uv_rect_data: Vector4 = Vector4(
 		(float(vfx_frame.top_left_uv.x) + 0.5) / _texture_size.x,
 		(float(vfx_frame.top_left_uv.y) + 0.5) / _texture_size.y,
 		(float(vfx_frame.uv_width) - signf(vfx_frame.uv_width)) / _texture_size.x,
