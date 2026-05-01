@@ -185,7 +185,7 @@ func process_rom() -> void:
 	section_start = _profile_section("battle_bin_data.init_from_battle_bin", section_start)
 
 	var scenario_dir: DirAccess = DirAccess.open(Scenario.SAVE_DIRECTORY_PATH)
-	var fft_scenarios_pre_extracted: bool = scenario_dir != null and Array(scenario_dir.get_files()).any(func(f: String) -> bool: return f.ends_with(".scenario.json"))
+	var fft_scenarios_pre_extracted: bool = scenario_dir != null and Array(scenario_dir.get_files()).any(func(scenario_file_name: String) -> bool: return scenario_file_name.ends_with(".scenario.json"))
 
 	if not fft_scenarios_pre_extracted:
 		wldcore_data.init_from_wldcore()
