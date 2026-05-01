@@ -3,12 +3,7 @@ extends Node
 
 signal rom_loaded
 
-var is_ready: bool = false
-
-var rom: PackedByteArray = []
-var file_records: Dictionary[String, FileRecord] = {} # {file_name, FileRecord}
-var lba_to_file_name: Dictionary[int, String] = {} # {int, String}
-
+const ROM_PATH_CONFIG: String = "user://rom_path.cfg"
 const DIRECTORY_DATA_SECTORS_ROOT: PackedInt32Array = [22]
 const OFFSET_RECORD_DATA_START: int = 0x60
 
@@ -28,6 +23,12 @@ const NUM_JOBS: int = 0xa0
 const NUM_VFX: int = 511
 const NUM_ITEMS: int = 254 # 256?
 const NUM_WEAPONS: int = 122
+
+var is_ready: bool = false
+
+var rom: PackedByteArray = []
+var file_records: Dictionary[String, FileRecord] = {} # {file_name, FileRecord}
+var lba_to_file_name: Dictionary[int, String] = {} # {int, String}
 
 var sprs: Array[Spr] = []
 var spr_file_name_to_id: Dictionary[String, int] = {}
@@ -55,6 +56,32 @@ var abilities: Dictionary[String, Ability] = {} # [unique_name, Ability]
 var scenarios: Dictionary[String, Scenario] = {} # [unique_name, Scenario]
 var scenario_paths: Dictionary[String, String] = {} # [unique_name, file_path] for lazy-loaded scenarios
 
+var rom_load_times: Array[Dictionary] = [] # [{name: String, time_ms: int}]
+
+var battle_bin_data: BattleBinData = BattleBinData.new() # BATTLE.BIN tables
+var scus_data: ScusData = ScusData.new() # SCUS.942.41 tables
+var wldcore_data: WldcoreData = WldcoreData.new() # WLDCORE.BIN tables
+var attack_out_data: AttackOutData = AttackOutData.new() # ATTACK.OUT tables
+var trap_effect_data: TrapEffectData = TrapEffectData.new() # TRAP particle effects from BATTLE.BIN
+
+# Images
+# https://github.com/Glain/FFTPatcher/blob/master/ShishiSpriteEditor/PSXImages.xml#L148
+var frame_bin: Bmp = Bmp.new()
+var frame_bin_texture: Texture2D
+var item_bin_texture: Texture2D
+
+# Text
+var fft_text: FftText = FftText.new()
+
+#func _init() -> void:
+	#pass
+
+
+func _ready() -> void:
+	var auto_load_path: String = _get_saved_rom_path()
+	if not auto_load_path.is_empty() and FileAccess.file_exists(auto_load_path):
+		call_deferred("on_load_rom_dialog_file_selected", auto_load_path)
+
 
 func get_scenario(scenario_name: String) -> Scenario:
 	if scenarios.has(scenario_name):
@@ -79,52 +106,14 @@ func get_all_scenario_names() -> PackedStringArray:
 	return names
 
 
-var rom_load_times: Array[Dictionary] = [] # [{name: String, time_ms: int}]
-
-
 func has_scenario(scenario_name: String) -> bool:
 	return scenarios.has(scenario_name) or scenario_paths.has(scenario_name)
+
 
 func _profile_section(section_name: String, start_ms: int) -> int:
 	var elapsed: int = Time.get_ticks_msec() - start_ms
 	rom_load_times.append({"name": section_name, "time_ms": elapsed})
 	return Time.get_ticks_msec()
-
-var battle_bin_data: BattleBinData = BattleBinData.new() # BATTLE.BIN tables
-var scus_data: ScusData = ScusData.new() # SCUS.942.41 tables
-var wldcore_data: WldcoreData = WldcoreData.new() # WLDCORE.BIN tables
-var attack_out_data: AttackOutData = AttackOutData.new() # ATTACK.OUT tables
-var trap_effect_data: TrapEffectData = TrapEffectData.new() # TRAP particle effects from BATTLE.BIN
-
-# Images
-# https://github.com/Glain/FFTPatcher/blob/master/ShishiSpriteEditor/PSXImages.xml#L148
-var frame_bin: Bmp = Bmp.new()
-var frame_bin_texture: Texture2D
-var item_bin_texture: Texture2D
-
-# Text
-var fft_text: FftText = FftText.new()
-
-class SpritesheetRegionData:
-	var shp_type: String
-	var region_id: int
-	var region_location: Vector2i
-	var region_size: Vector2i
-	var shp_frame_ids: PackedInt32Array = []
-	var shp_frame_id_labels: PackedStringArray = []
-	var animation_ids: PackedInt32Array = []
-	var animation_descriptions: PackedStringArray = []
-
-const ROM_PATH_CONFIG: String = "user://rom_path.cfg"
-
-#func _init() -> void:
-	#pass
-
-
-func _ready() -> void:
-	var auto_load_path: String = _get_saved_rom_path()
-	if not auto_load_path.is_empty() and FileAccess.file_exists(auto_load_path):
-		call_deferred("on_load_rom_dialog_file_selected", auto_load_path)
 
 
 func _get_saved_rom_path() -> String:
@@ -1308,3 +1297,14 @@ func generate_passive_effects() -> void:
 		ItemData.ItemType.SWORD
 	]
 	Utilities.save_json(new_passive_effect)
+
+
+class SpritesheetRegionData:
+	var shp_type: String
+	var region_id: int
+	var region_location: Vector2i
+	var region_size: Vector2i
+	var shp_frame_ids: PackedInt32Array = []
+	var shp_frame_id_labels: PackedStringArray = []
+	var animation_ids: PackedInt32Array = []
+	var animation_descriptions: PackedStringArray = []
