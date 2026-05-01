@@ -6,7 +6,7 @@ extends RefCounted
 var gravity: Vector3 = Vector3(0.0, -0.036, 0.0)
 var inertia_threshold: float = 512.0
 
-var vfx_data: VisualEffectData  # For curve lookups
+var vfx_data: VisualEffectData # For curve lookups
 
 
 func initialize(effect: VisualEffectData) -> void:
@@ -120,9 +120,12 @@ static func interpolate_vec3(start: Vector3, end_val: Vector3, curve: VfxCurve =
 
 
 static func interpolate_range(
-	min_start: float, max_start: float,
-	min_end: float, max_end: float,
-	curve: VfxCurve = null, frame: int = 0
+		min_start: float,
+		max_start: float,
+		min_end: float,
+		max_end: float,
+		curve: VfxCurve = null,
+		frame: int = 0,
 ) -> float:
 	if curve == null:
 		return randf_range(min_start, max_start)
@@ -134,15 +137,18 @@ static func interpolate_range(
 
 
 static func interpolate_vec3_range(
-	min_start: Vector3, max_start: Vector3,
-	min_end: Vector3, max_end: Vector3,
-	curve: VfxCurve = null, frame: int = 0
+		min_start: Vector3,
+		max_start: Vector3,
+		min_end: Vector3,
+		max_end: Vector3,
+		curve: VfxCurve = null,
+		frame: int = 0,
 ) -> Vector3:
 	if curve == null:
 		return Vector3(
 			randf_range(min_start.x, max_start.x),
 			randf_range(min_start.y, max_start.y),
-			randf_range(min_start.z, max_start.z)
+			randf_range(min_start.z, max_start.z),
 		)
 	var curve_t: float = curve.sample_by_frame(frame)
 
@@ -152,5 +158,5 @@ static func interpolate_vec3_range(
 	return Vector3(
 		randf_range(min_val.x, max_val.x),
 		randf_range(min_val.y, max_val.y),
-		randf_range(min_val.z, max_val.z)
+		randf_range(min_val.z, max_val.z),
 	)
