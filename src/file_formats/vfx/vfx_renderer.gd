@@ -9,7 +9,7 @@ extends Node3D
 var _shared_quad: QuadMesh
 
 var _opaque_shader: Shader
-var _blend_shaders: Array[Shader] = []  # [mode0, mode1, mode2, mode3]
+var _blend_shaders: Array[Shader] = [] # [mode0, mode1, mode2, mode3]
 
 var _texture_size: Vector2 = Vector2(128, 256)
 var _vfx_data: VisualEffectData
@@ -148,9 +148,16 @@ func _create_mesh_entry() -> Dictionary:
 	return {"mesh": mesh_instance, "mat": mat}
 
 
-func _render_frame(mesh: MeshInstance3D, mat: ShaderMaterial, p: VfxParticleData,
-		vfx_frame: VisualEffectData.VfxFrame, is_opaque_pass: bool,
-		frame_camera: Camera3D, align_to_velocity: bool, depth_mode: int) -> void:
+func _render_frame(
+		mesh: MeshInstance3D,
+		mat: ShaderMaterial,
+		p: VfxParticleData,
+		vfx_frame: VisualEffectData.VfxFrame,
+		is_opaque_pass: bool,
+		frame_camera: Camera3D,
+		align_to_velocity: bool,
+		depth_mode: int,
+) -> void:
 	var anim_offset: Vector2 = p.anim_offset
 	var tl_x: float = float(vfx_frame.top_left_xy.x) + anim_offset.x
 	var tl_y: float = float(vfx_frame.top_left_xy.y) + anim_offset.y
@@ -180,10 +187,14 @@ func _render_frame(mesh: MeshInstance3D, mat: ShaderMaterial, p: VfxParticleData
 			var new_br_x: float = br_x * cos_a - br_y * sin_a
 			var new_br_y: float = br_x * sin_a + br_y * cos_a
 
-			tl_x = new_tl_x; tl_y = new_tl_y
-			tr_x = new_tr_x; tr_y = new_tr_y
-			bl_x = new_bl_x; bl_y = new_bl_y
-			br_x = new_br_x; br_y = new_br_y
+			tl_x = new_tl_x
+			tl_y = new_tl_y
+			tr_x = new_tr_x
+			tr_y = new_tr_y
+			bl_x = new_bl_x
+			bl_y = new_bl_y
+			br_x = new_br_x
+			br_y = new_br_y
 
 	var mesh_transform: Transform3D = Transform3D.IDENTITY
 	mesh_transform.origin = p.position
@@ -195,7 +206,7 @@ func _render_frame(mesh: MeshInstance3D, mat: ShaderMaterial, p: VfxParticleData
 		(float(vfx_frame.top_left_uv.x) + 0.5) / _texture_size.x,
 		(float(vfx_frame.top_left_uv.y) + 0.5) / _texture_size.y,
 		(float(vfx_frame.uv_width) - signf(vfx_frame.uv_width)) / _texture_size.x,
-		(float(vfx_frame.uv_height) - signf(vfx_frame.uv_height)) / _texture_size.y
+		(float(vfx_frame.uv_height) - signf(vfx_frame.uv_height)) / _texture_size.y,
 	)
 
 	if is_opaque_pass:
