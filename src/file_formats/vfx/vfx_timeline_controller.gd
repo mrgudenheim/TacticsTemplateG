@@ -11,17 +11,17 @@ extends RefCounted
 ## - Duration = kf[N].time - kf[N-1].time
 ## - emitter_id 0 = skip, N = spawn emitter (N-1)
 
-
 const FLAG_DISPLAY_DAMAGE: int = 0x1000
 const FLAG_STATUS_CHANGE: int = 0x2000
 const FLAG_TARGET_ANIMATION: int = 0x4000
 const FLAG_USE_GLOBAL_TARGET: int = 0x0800
 const FLAG_UNUSED_80: int = 0x8000
 
+
 class ChannelState:
 	var timeline: VisualEffectData.EmitterTimeline
 	var channel_index: int = 0
-	var current_keyframe: int = 1  # Start at 1, skip kf[0]
+	var current_keyframe: int = 1 # Start at 1, skip kf[0]
 	var duration_remaining: int = 0
 	var spawn_counter: int = 0
 	var finished: bool = false
@@ -41,7 +41,7 @@ func initialize(timelines: Array[VisualEffectData.EmitterTimeline]) -> void:
 
 	for ch_idx: int in timelines.size():
 		var timeline: VisualEffectData.EmitterTimeline = timelines[ch_idx]
-		var state := ChannelState.new()
+		var state: ChannelState = ChannelState.new()
 		state.timeline = timeline
 		state.channel_index = ch_idx
 		state.current_keyframe = 1
@@ -101,7 +101,7 @@ func _process_channel(state: ChannelState) -> Variant:
 			"spawn_counter": state.spawn_counter,
 			"channel_index": state.channel_index,
 			"keyframe_duration": kf_duration,
-			"action_flags": raw_action_flag
+			"action_flags": raw_action_flag,
 		}
 		state.spawn_counter += 1
 
