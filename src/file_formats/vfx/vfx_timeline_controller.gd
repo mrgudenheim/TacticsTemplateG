@@ -11,28 +11,18 @@ extends RefCounted
 ## - Duration = kf[N].time - kf[N-1].time
 ## - emitter_id 0 = skip, N = spawn emitter (N-1)
 
+signal emitter_started(emitter_index: int, channel_index: int, frame: int)
+signal emitter_stopped(emitter_index: int, channel_index: int, frame: int)
+signal action_flags_triggered(flags: int, channel_index: int, frame: int)
+
 const FLAG_DISPLAY_DAMAGE: int = 0x1000
 const FLAG_STATUS_CHANGE: int = 0x2000
 const FLAG_TARGET_ANIMATION: int = 0x4000
 const FLAG_USE_GLOBAL_TARGET: int = 0x0800
 const FLAG_UNUSED_80: int = 0x8000
 
-
-class ChannelState:
-	var timeline: VisualEffectData.EmitterTimeline
-	var channel_index: int = 0
-	var current_keyframe: int = 1 # Start at 1, skip kf[0]
-	var duration_remaining: int = 0
-	var spawn_counter: int = 0
-	var finished: bool = false
-
-
 var channel_states: Array = []
 var current_frame: int = 0
-
-signal emitter_started(emitter_index: int, channel_index: int, frame: int)
-signal emitter_stopped(emitter_index: int, channel_index: int, frame: int)
-signal action_flags_triggered(flags: int, channel_index: int, frame: int)
 
 
 func initialize(timelines: Array[VisualEffectData.EmitterTimeline]) -> void:
@@ -181,3 +171,12 @@ func get_active_emitters() -> Array[int]:
 				if emitter_idx not in active_list:
 					active_list.append(emitter_idx)
 	return active_list
+
+
+class ChannelState:
+	var timeline: VisualEffectData.EmitterTimeline
+	var channel_index: int = 0
+	var current_keyframe: int = 1 # Start at 1, skip kf[0]
+	var duration_remaining: int = 0
+	var spawn_counter: int = 0
+	var finished: bool = false
