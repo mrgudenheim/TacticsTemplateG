@@ -21,26 +21,28 @@ var num_curves: int = 0
 var curves_bytes: Array[PackedByteArray] = []
 var curves: Array[PackedFloat64Array] = []
 var time_scale_curve: PackedByteArray = []
-var time_scale_outer: PackedInt32Array = []    ## 600 per-frame pacing values for phase1
+var time_scale_outer: PackedInt32Array = [] ## 600 per-frame pacing values for phase1
 var time_scale_for_each: PackedInt32Array = [] ## 600 per-frame pacing values for animate_tick
-var time_scale_pattern1: bool = false  ## Enable outer_phases time scaling (during phase1)
-var time_scale_pattern2: bool = false  ## Enable for_each time scaling (during animate_tick)
+var time_scale_pattern1: bool = false ## Enable outer_phases time scaling (during phase1)
+var time_scale_pattern2: bool = false ## Enable for_each time scaling (during animate_tick)
+
 
 class VfxFrameSet:
 	var flags: int = 0
 	var num_frames: int = 0
 	var frameset: Array[VfxFrame] = []
 
+
 class VfxFrame:
 	var vram_bytes: PackedByteArray = []
-	var palette_id: int = 0 
+	var palette_id: int = 0
 	var semi_transparency_mode: int = 0
 	var image_color_depth: int = 0 # 0 = 4bpp, 1 = 8bpp
 	var semi_transparency_on: bool = true
 	var frame_width_signed: bool = false
 	var frame_height_signed: bool = false
 	var texture_page: int = 0
-	
+
 	var top_left_uv: Vector2i = Vector2i.ZERO
 	var uv_width: int = 0
 	var uv_height: int = 0
@@ -52,6 +54,7 @@ class VfxFrame:
 	var quad_uvs_pixels: PackedVector2Array = []
 	var quad_uvs: PackedVector2Array = []
 
+
 	func parse_vram_bytes(frame_bytes: PackedByteArray) -> void:
 		vram_bytes = frame_bytes.slice(0, 4)
 		palette_id = vram_bytes[0] & 0x0f
@@ -61,6 +64,7 @@ class VfxFrame:
 		frame_width_signed = (vram_bytes[1] & 0x10) == 0x10
 		frame_height_signed = (vram_bytes[1] & 0x20) == 0x20
 		texture_page = vram_bytes.decode_u16(2)
+
 
 	func parse_geometry_bytes(frame_bytes: PackedByteArray, v_offset: int = 0) -> void:
 		var u: int = frame_bytes.decode_u8(4)
@@ -81,26 +85,35 @@ class VfxFrame:
 		bottom_left_xy = Vector2i(frame_bytes.decode_s16(0x10), frame_bytes.decode_s16(0x12))
 		bottom_right_xy = Vector2i(frame_bytes.decode_s16(0x14), frame_bytes.decode_s16(0x16))
 
-		quad_uvs_pixels = PackedVector2Array([
-			Vector2(u, v),
-			Vector2(u + uv_width, v),
-			Vector2(u, v + uv_height),
-			Vector2(u + uv_width, v + uv_height)])
+		quad_uvs_pixels = PackedVector2Array(
+			[
+				Vector2(u, v),
+				Vector2(u + uv_width, v),
+				Vector2(u, v + uv_height),
+				Vector2(u + uv_width, v + uv_height),
+			],
+		)
 
 		var vertices_xy: PackedVector2Array = [
-			Vector2(top_left_xy), Vector2(top_right_xy),
-			Vector2(bottom_left_xy), Vector2(bottom_right_xy)]
+			Vector2(top_left_xy),
+			Vector2(top_right_xy),
+			Vector2(bottom_left_xy),
+			Vector2(bottom_right_xy),
+		]
 		for vert: Vector2 in vertices_xy:
 			quad_vertices.append(Vector3(vert.x, -vert.y, 0) * MapData.SCALE)
+
 
 class VfxAnimation:
 	var animation_frames: Array[VfxAnimationFrame]
 	var screen_offset: Vector2i
 
+
 class VfxAnimationFrame:
 	var frameset_id: int
 	var duration: int
-	var byte_02: int  ## Depth mode — see VfxConstants.DepthMode
+	var byte_02: int ## Depth mode — see VfxConstants.DepthMode
+
 
 # 128 bytes, 25 keyframes
 # https://ffhacktics.com/wiki/Effect_File_Timeline#Section_5:_Particle_Channel_Structure_(128_Bytes)
@@ -113,6 +126,7 @@ class EmitterTimeline:
 
 	var keyframes: Array[EmitterKeyframe] = []
 	var has_unknown_flags: bool = false
+
 
 	func _init(new_bytes: PackedByteArray):
 		bytes = new_bytes
@@ -132,8 +146,8 @@ class EmitterTimeline:
 			var action_flag: int = action_flags.decode_u16(idx * 2)
 			# if not [0, 0x1000, 0x2000, 0x3000, 0x4000, 0x5000, 0x6000, 0x7000].has(action_flag):
 			# 	has_unknown_flags = true
-				# push_warning(action_flag)
-			
+			# push_warning(action_flag)
+
 			var new_keyframe: EmitterKeyframe = EmitterKeyframe.new()
 			new_keyframe.time = time
 			new_keyframe.emitter_id = emitter_id
@@ -149,6 +163,7 @@ class EmitterTimeline:
 
 			keyframes.append(new_keyframe)
 
+
 class EmitterKeyframe:
 	var time: int = -1 # frames
 	var emitter_id: int = -1
@@ -161,14 +176,15 @@ class EmitterKeyframe:
 	var animation_param: int = 0
 	var unused_flag_80: bool = false
 
+
 var script_bytes: PackedByteArray = []
 var emitter_control_bytes: PackedByteArray = []
 var emitters: Array[VfxEmitter] = []
 
 ## Particle header fields (from 0x14-byte header at start of EMITTER_DATA section)
-var gravity_raw: Vector3i = Vector3i.ZERO  ## raw s32 values
-var gravity: Vector3 = Vector3.ZERO        ## converted: / ACCEL_DIVISOR with Y-flip
-var inertia_threshold: int = 0             ## raw s32, used directly in physics formula
+var gravity_raw: Vector3i = Vector3i.ZERO ## raw s32 values
+var gravity: Vector3 = Vector3.ZERO ## converted: / ACCEL_DIVISOR with Y-flip
+var inertia_threshold: int = 0 ## raw s32, used directly in physics formula
 var timer_data_header_bytes: PackedByteArray = []
 var timer_data_bytes: PackedByteArray = []
 var phase1_duration: int = -1
@@ -202,9 +218,9 @@ enum VfxSections {
 	TIMELINES = 7,
 	SOUND_EFFECTS = 8,
 	TEXTURE = 9,
-	}
+}
 
-const ANIM_OPCODE_LOOP: int = VfxConstants.AnimOpcode.LOOP  ## Alias for backward compat
+const ANIM_OPCODE_LOOP: int = VfxConstants.AnimOpcode.LOOP ## Alias for backward compat
 
 
 func get_curve(index: int) -> VfxCurve:
@@ -224,7 +240,7 @@ func init_from_file() -> void:
 	if vfx_bytes.size() == 0:
 		push_warning(file_name + ": zero bytes in file. Skipping.")
 		return
-	
+
 	#### header data
 	header_start = RomReader.battle_bin_data.ability_vfx_header_offsets[vfx_id]
 	var entry_size = 4
@@ -234,12 +250,12 @@ func init_from_file() -> void:
 	section_offsets.resize(num_entries)
 	for id: int in num_entries:
 		section_offsets[id] = header_bytes.decode_u32(id * entry_size) + header_start
-	
+
 	#### frame data (and image color depth)
 	var section_num = VfxSections.FRAMES
 	var section_start: int = section_offsets[section_num]
 	data_bytes = vfx_bytes.slice(section_start, section_offsets[section_num + 1])
-	
+
 	num_frameset_groups = data_bytes.decode_u32(0)
 	var initial_offset: int = 4
 	for group_idx: int in num_frameset_groups:
@@ -255,13 +271,13 @@ func init_from_file() -> void:
 		if group_idx > 0:
 			frameset_groups_num_framesets[group_idx - 1] = (frameset_group_offsets[group_idx] - frameset_group_offsets[group_idx - 1]) / 2
 			framesets_so_far += frameset_groups_num_framesets[group_idx - 1]
-		
+
 		frameset_groups_num_framesets.append(num_frame_sets - framesets_so_far)
 
 	framesets.resize(num_frame_sets)
 	var frame_set_offsets: PackedInt32Array = []
 	frame_set_offsets.resize(num_frame_sets)
-	
+
 	for id: int in num_frame_sets:
 		var offset: int = data_bytes.decode_u16(initial_offset + (2 * id)) + 4
 		if offset == 4:
@@ -270,21 +286,21 @@ func init_from_file() -> void:
 			framesets.resize(num_frame_sets)
 			continue
 		frame_set_offsets[id] = offset
-	
+
 	# image color depth from first frame in first frame_set
 	if data_bytes.decode_u8(frame_set_offsets[0]) & 0x80 == 0 and data_bytes.decode_u8(0) == 1:
 		image_color_depth = 4
 	else:
 		image_color_depth = 8
-	
+
 	# frame sets
 	for frame_set_id: int in num_frame_sets:
 		var frame_set: VfxFrameSet = VfxFrameSet.new()
-		
+
 		var next_section_start: int = data_bytes.size()
 		if frame_set_id < num_frame_sets - 1:
 			next_section_start = frame_set_offsets[frame_set_id + 1]
-		
+
 		var frame_set_bytes: PackedByteArray = data_bytes.slice(frame_set_offsets[frame_set_id], next_section_start)
 		frame_set.flags = frame_set_bytes.decode_u16(0)
 		var num_frames: int = frame_set_bytes.decode_u16(2)
@@ -298,21 +314,20 @@ func init_from_file() -> void:
 				push_warning(file_name + "frameset " + str(frame_set_id) + " does not have bytes for a frame, clearing frameset")
 				frame_set.frameset.clear()
 				break
-			
+
 			var new_frame: VfxFrame = VfxFrame.new()
 			new_frame.parse_vram_bytes(frame_bytes)
 			new_frame.parse_geometry_bytes(frame_bytes)
 
 			frame_set.frameset[frame_id] = new_frame
-		
+
 		framesets[frame_set_id] = frame_set
-	
-	
+
 	### animation data
 	section_num = VfxSections.ANIMATION
 	section_start = section_offsets[section_num]
 	data_bytes = vfx_bytes.slice(section_start, section_offsets[section_num + 1])
-	
+
 	var num_animations: int = data_bytes.decode_u32(0)
 	animations.resize(num_animations)
 	for anim_id: int in num_animations:
@@ -320,10 +335,10 @@ func init_from_file() -> void:
 		var anim_end: int = data_bytes.size()
 		if anim_id < num_animations - 1:
 			anim_end = data_bytes.decode_u16(4 + ((anim_id + 1) * 2)) + 4
-		
+
 		var anim_bytes: PackedByteArray = data_bytes.slice(anim_start_offset, anim_end)
 		var animation: VfxAnimation = VfxAnimation.new()
-		
+
 		# Variable-length opcode parsing
 		var byte_index: int = 0
 		while byte_index < anim_bytes.size():
@@ -350,7 +365,8 @@ func init_from_file() -> void:
 					break
 				animation.screen_offset = Vector2i(
 					anim_bytes.decode_s16(byte_index + 1),
-					anim_bytes.decode_s16(byte_index + 3))
+					anim_bytes.decode_s16(byte_index + 3),
+				)
 				byte_index += 5
 			elif opcode == VfxConstants.AnimOpcode.ADD_OFFSET:
 				# ADD_OFFSET: 3 bytes (opcode, s8 dx, s8 dy)
@@ -365,17 +381,16 @@ func init_from_file() -> void:
 			else:
 				# Unknown opcode, skip 1 byte
 				byte_index += 1
-		
+
 		animations[anim_id] = animation
-	
-	
+
 	### script data
 	section_num = VfxSections.VFX_SCRIPT
 	section_start = section_offsets[section_num]
 	script_bytes = vfx_bytes.slice(section_start, section_offsets[section_num + 1])
-	
-	# TODO extract relevant data from effect script;
-	
+
+	# TODO extract relevant data from effect script
+
 	### emitter control data
 	section_num = VfxSections.EMITTER_DATA
 	section_start = section_offsets[section_num]
@@ -386,19 +401,21 @@ func init_from_file() -> void:
 	gravity_raw = Vector3i(
 		emitter_control_bytes.decode_s32(0x04),
 		emitter_control_bytes.decode_s32(0x08),
-		emitter_control_bytes.decode_s32(0x0C))
+		emitter_control_bytes.decode_s32(0x0C),
+	)
 	gravity = Vector3(
 		gravity_raw.x / VfxEmitter.ACCEL_DIVISOR,
 		-gravity_raw.y / VfxEmitter.ACCEL_DIVISOR,
-		gravity_raw.z / VfxEmitter.ACCEL_DIVISOR)
+		gravity_raw.z / VfxEmitter.ACCEL_DIVISOR,
+	)
 	inertia_threshold = emitter_control_bytes.decode_s32(0x10)
 	emitters.resize(num_emitters)
-	
+
 	for emitter_id: int in num_emitters:
 		var emitter_data_start: int = 0x14 + (196 * emitter_id)
 		var emitter_data_bytes: PackedByteArray = emitter_control_bytes.slice(emitter_data_start, emitter_data_start + 196)
 		var emitter: VfxEmitter = VfxEmitter.new(emitter_data_bytes, self)
-		
+
 		# emitter.anim_index = emitter_data_bytes.decode_u8(1)
 		# emitter.motion_type_flag = emitter_data_bytes.decode_u8(2)
 		# emitter.animation_target_flag = emitter_data_bytes.decode_u8(3)
@@ -406,12 +423,12 @@ func init_from_file() -> void:
 		# emitter.byte_05 = emitter_data_bytes.decode_u8(5)
 		# emitter.color_masking_motion_flags = emitter_data_bytes.decode_u8(6)
 		# emitter.byte_07 = emitter_data_bytes.decode_u8(7)
-		
+
 		# emitter.start_position = Vector3i(emitter_data_bytes.decode_s16(0x14), -emitter_data_bytes.decode_s16(0x16), emitter_data_bytes.decode_s16(0x18))
 		# emitter.end_position = Vector3i(emitter_data_bytes.decode_s16(0x1a), -emitter_data_bytes.decode_s16(0x1c), emitter_data_bytes.decode_s16(0x1e))
-		
+
 		emitters[emitter_id] = emitter
-	
+
 	# Curves
 	section_num = VfxSections.CURVES
 	section_start = section_offsets[section_num]
@@ -420,7 +437,7 @@ func init_from_file() -> void:
 	var time_scale_raw_ptr: int = header_bytes.decode_u32(VfxSections.TIME_SCALE_CURVE * entry_size)
 	var next_section_start: int
 	if time_scale_raw_ptr == 0:
-		next_section_start = section_offsets[section_num + 2]  # skip to EFFECT_FLAGS
+		next_section_start = section_offsets[section_num + 2] # skip to EFFECT_FLAGS
 	else:
 		next_section_start = section_offsets[section_num + 1]
 	var curve_section_bytes = vfx_bytes.slice(section_start, next_section_start)
@@ -467,12 +484,12 @@ func init_from_file() -> void:
 	section_num = VfxSections.TIMELINES
 	section_start = section_offsets[section_num]
 	timer_data_bytes = vfx_bytes.slice(section_start, section_offsets[section_num + 1])
-	
+
 	# Phase timing from TIMELINES section header (matches godot-learning)
 	phase1_duration = timer_data_bytes.decode_u16(4)
 	var target_switching_delay: int = timer_data_bytes.decode_u16(6)
 	phase2_offset = timer_data_bytes.decode_u16(10)
-	
+
 	# TODO 5 emitter timing sections, 0x80 long each
 	for emitter_timing_section_id: int in 5:
 		var emitter_timing_data_start: int = 0x0c + (emitter_timing_section_id * 0x80)
@@ -494,7 +511,7 @@ func init_from_file() -> void:
 		# 	elif emitter_id > 0:
 		# 		if emitters[emitter_id - 1].start_time == 0 and time < 0x200: # TODO can an emitter be started multiple times? Ex. Cure E001 2nd timing section
 		# 			emitters[emitter_id - 1].start_time = time # TODO figure out special 'times' of 0x257, 0x0258, and 0x0259
-	
+
 	# Parent Phase1 Emitters
 	for emitter_timing_section_id: int in 5:
 		var emitter_timing_data_start: int = 0x82A + (emitter_timing_section_id * 0x80)
@@ -509,12 +526,11 @@ func init_from_file() -> void:
 		var new_timeline: EmitterTimeline = EmitterTimeline.new(timer_data_bytes.slice(emitter_timing_data_start, emitter_timing_data_start + 0x80))
 		phase2_emitter_timelines.append(new_timeline)
 
-
 	#### image and palette data
 	section_num = VfxSections.TEXTURE
 	section_start = section_offsets[section_num]
 	data_bytes = vfx_bytes.slice(section_start)
-	
+
 	var palette_bytes: PackedByteArray = []
 	if image_color_depth == 8:
 		palette_bytes = data_bytes.slice(0, 512)
@@ -522,7 +538,7 @@ func init_from_file() -> void:
 		palette_bytes = data_bytes.slice(512, 1024)
 	else:
 		push_warning(file_name + " image_color_depth not set")
-	
+
 	vfx_spr = Spr.new(file_name)
 	vfx_spr.bits_per_pixel = image_color_depth
 	vfx_spr.pixel_data_start = 1024 + 4
@@ -534,55 +550,57 @@ func init_from_file() -> void:
 	else:
 		vfx_spr.height = image_size_bytes[1] * 2
 		vfx_spr.width = 1024 / image_color_depth
-	
+
 	vfx_spr.has_compressed = false
 	vfx_spr.num_pixels = vfx_spr.width * vfx_spr.height
 	vfx_spr.set_palette_data(palette_bytes)
 	vfx_spr.color_indices = vfx_spr.set_color_indices(data_bytes.slice(1024 + 4))
-	
+
 	# TODO fix transparency - some frames should be opaque, like summons (Odin), some should just be less transparent, like songs and some geomancy (waterfall)
-	
+
 	#vfx_spr.color_palette[vfx_spr.color_indices[0]].a8 = 0 # set background color (ie. color of top left pixel) as transparent
-	
+
 	vfx_spr.set_pixel_colors()
 	vfx_spr.spritesheet = vfx_spr.get_rgba8_image()
-	
+
 	texture = ImageTexture.create_from_image(vfx_spr.spritesheet)
-	
+
 	# set frame uvs based on spr
 	for frameset_idx: int in framesets.size():
 		for frame_idx: int in framesets[frameset_idx].frameset.size():
 			var vfx_frame: VfxFrame = framesets[frameset_idx].frameset[frame_idx]
 			vfx_frame.quad_uvs.resize(vfx_frame.quad_uvs_pixels.size())
 			for vert_idx: int in vfx_frame.quad_uvs_pixels.size():
-				vfx_frame.quad_uvs[vert_idx] = Vector2(vfx_frame.quad_uvs_pixels[vert_idx].x / float(vfx_spr.width), 
-					vfx_frame.quad_uvs_pixels[vert_idx].y / float(vfx_spr.height))
-	
+				vfx_frame.quad_uvs[vert_idx] = Vector2(
+					vfx_frame.quad_uvs_pixels[vert_idx].x / float(vfx_spr.width),
+					vfx_frame.quad_uvs_pixels[vert_idx].y / float(vfx_spr.height),
+				)
+
 	is_initialized = true
 
 
 func get_frame_mesh(composite_frame_idx: int, frame_idx: int = 0) -> ArrayMesh:
 	var vfx_frame: VfxFrame = framesets[composite_frame_idx].frameset[frame_idx]
-	
+
 	# TODO use object pooling and just adjust the vertex positions
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	
+
 	for vert_index: int in [0, 1, 2]:
 		#st.set_normal(quad_normals[vert_index] * SCALE)
 		st.set_uv(vfx_frame.quad_uvs[vert_index])
 		st.set_color(Color.WHITE)
 		st.add_vertex(vfx_frame.quad_vertices[vert_index])
-	
+
 	for vert_index: int in [2, 1, 3]:
 		#st.set_normal(quad_normals[vert_index] * SCALE)
 		st.set_uv(vfx_frame.quad_uvs[vert_index])
 		st.set_color(Color.WHITE)
 		st.add_vertex(vfx_frame.quad_vertices[vert_index])
-	
+
 	st.generate_normals()
 	var mesh: ArrayMesh = st.commit()
-	
+
 	var mesh_material: StandardMaterial3D
 	var albedo_texture: Texture2D = texture
 	mesh_material = StandardMaterial3D.new()
@@ -593,8 +611,7 @@ func get_frame_mesh(composite_frame_idx: int, frame_idx: int = 0) -> ArrayMesh:
 	#mesh_material.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
 	mesh_material.render_priority = 1
 	mesh_material.vertex_color_use_as_albedo = true
-	
-	
+
 	# TODO maybe byte 1, bit 0x02 turns semi-transparency on or off?
 	# Mostly (only?) affects Summon's creature and texture squares, meteor, pitfall, carve model, local quake, small bomb, empty black squares on some others
 	#var semi_transparency_on = ((vfx_frame.vram_bytes[1] & 0x02) >> 1) == 1
@@ -625,8 +642,8 @@ func get_frame_mesh(composite_frame_idx: int, frame_idx: int = 0) -> ArrayMesh:
 	else:
 		mesh_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 		mesh_material.alpha_scissor_threshold = 0.5
-	
+
 	mesh_material.set_texture(BaseMaterial3D.TEXTURE_ALBEDO, albedo_texture)
 	mesh.surface_set_material(0, mesh_material)
-	
+
 	return mesh
