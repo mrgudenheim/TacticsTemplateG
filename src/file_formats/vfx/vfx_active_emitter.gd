@@ -29,14 +29,14 @@ var anchor_cursor: Vector3 = Vector3.ZERO
 var anchor_origin: Vector3 = Vector3.ZERO
 var anchor_target: Vector3 = Vector3.ZERO
 var anchor_parent: Vector3 = Vector3.ZERO
-var caster_facing_angle: float = 0.0  # Radians, Y-axis rotation for OUTWARD_UNIT_ORIENTED
+var caster_facing_angle: float = 0.0 # Radians, Y-axis rotation for OUTWARD_UNIT_ORIENTED
 
 
 func initialize(
-	vfx_emitter: VfxEmitter,
-	idx: int,
-	data: VisualEffectData,
-	duration: int = 120
+		vfx_emitter: VfxEmitter,
+		idx: int,
+		data: VisualEffectData,
+		duration: int = 120,
 ) -> void:
 	emitter = vfx_emitter
 	emitter_index = idx
@@ -88,9 +88,16 @@ func _initialize_particle(particle: VfxParticleData) -> void:
 	var anchor_offset: Vector3 = _get_anchor_offset()
 	var target_anchor: Vector3 = _get_target_anchor()
 	initialize_particle_from_config(
-		particle, emitter, emitter_index, vfx_data,
-		anchor_offset, target_anchor, elapsed_frames, channel_index, caster_facing_angle)
-
+		particle,
+		emitter,
+		emitter_index,
+		vfx_data,
+		anchor_offset,
+		target_anchor,
+		elapsed_frames,
+		channel_index,
+		caster_facing_angle,
+	)
 
 # === Shared Particle Initialization (used by both normal and child spawn paths) ===
 
@@ -310,14 +317,25 @@ static func initialize_particle_from_config(
 # === Anchor Handling ===
 
 func _get_anchor_offset() -> Vector3:
-	return VfxConstants.resolve_anchor(emitter.emitter_anchor_mode,
-		anchor_world, anchor_cursor, anchor_origin, anchor_target, anchor_parent)
+	return VfxConstants.resolve_anchor(
+		emitter.emitter_anchor_mode,
+		anchor_world,
+		anchor_cursor,
+		anchor_origin,
+		anchor_target,
+		anchor_parent,
+	)
 
 
 func _get_target_anchor() -> Vector3:
-	return VfxConstants.resolve_anchor(emitter.target_anchor_mode,
-		anchor_world, anchor_cursor, anchor_origin, anchor_target, anchor_parent)
-
+	return VfxConstants.resolve_anchor(
+		emitter.target_anchor_mode,
+		anchor_world,
+		anchor_cursor,
+		anchor_origin,
+		anchor_target,
+		anchor_parent,
+	)
 
 # === Spread ===
 
@@ -408,7 +426,8 @@ func _get_spawn_interval() -> float:
 	return VfxPhysics.interpolate_simple(
 		float(emitter.spawn_interval_start),
 		float(emitter.spawn_interval_end),
-		curve, elapsed_frames
+		curve,
+		elapsed_frames,
 	)
 
 
@@ -417,7 +436,8 @@ func _get_particle_count() -> int:
 	var count: float = VfxPhysics.interpolate_simple(
 		float(emitter.particle_count_start),
 		float(emitter.particle_count_end),
-		curve, elapsed_frames
+		curve,
+		elapsed_frames,
 	)
 	return maxi(1, int(count))
 
