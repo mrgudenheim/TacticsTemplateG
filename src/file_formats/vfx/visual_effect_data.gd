@@ -202,7 +202,7 @@ var image_color_depth: int = 0 # 8bpp or 4bpp
 # SINGLE - camera will point at the targeted location
 # SEQUENTIAL - camera will move between each each target
 # MULTI - camera will point at a single location, but make sure all targets are in view
-enum camera_focus {SINGLE, SEQUENTIAL, MULTI} 
+enum CameraFocus {SINGLE, SEQUENTIAL, MULTI} 
 
 var sound_effects
 var partical_effects
