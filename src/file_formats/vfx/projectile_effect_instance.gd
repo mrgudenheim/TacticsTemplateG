@@ -11,7 +11,7 @@ signal completed
 enum ProjectileType { ARROW, STONE, SPECIAL }
 enum Trajectory { LINEAR, PARABOLIC }
 
-enum _State { IDLE, FLYING, DONE }
+enum State { IDLE, FLYING, DONE }
 
 const TICK_DURATION: float = VfxConstants.TICK_DURATION
 
@@ -30,9 +30,15 @@ const ARROW_SCALE: float = 0.064
 const STONE_SCALE: float = 0.1
 const SPECIAL_SCALE: float = 0.1
 
+# PSX bow arc constants
+const PSX_PER_GODOT: float = MapData.TILE_SIDE_LENGTH
+const PSX_ARC_K: float = 4096.0
+const PSX_ARC_R: float = 336.0
+const PSX_HEIGHT_UNIT: float = 12.0 # 1h = 12 PSX world units
+
 var loop: bool = false
 
-var _state: _State = _State.IDLE
+var _state: State = State.IDLE
 var _projectile_type: ProjectileType = ProjectileType.STONE
 var _trajectory: Trajectory = Trajectory.LINEAR
 var _origin: Vector3
@@ -59,7 +65,22 @@ var _tick_timer: float = 0.0
 # Rendering — baked ArrayMesh per variant, transformed via MeshInstance3D
 var _mesh_instance: MeshInstance3D
 var _material: StandardMaterial3D
-var _meshes: Dictionary = {} # Variant -> ArrayMesh (cached)
+var _meshes: Dictionary = { } # Variant -> ArrayMesh (cached)
+
+
+func _process(delta: float) -> void:
+	if _state != State.FLYING:
+		return
+
+	_tick_timer += delta
+	while _tick_timer >= TICK_DURATION:
+		_tick_timer -= TICK_DURATION
+		_process_tick()
+		if _state != State.FLYING:
+			break
+
+	if _state == State.FLYING:
+		_update_transform()
 
 
 func initialize() -> void:
@@ -81,7 +102,13 @@ func initialize() -> void:
 		_meshes[variant_id] = _build_mesh(verts, faces)
 
 
-func play(origin: Vector3, target: Vector3, variant: ProjectileType, trajectory: Trajectory = Trajectory.LINEAR, arc_height: float = 2.0) -> void:
+func play(
+		origin: Vector3,
+		target: Vector3,
+		variant: ProjectileType,
+		trajectory: Trajectory = Trajectory.LINEAR,
+		arc_height: float = 2.0,
+) -> void:
 	stop()
 
 	_origin = origin
@@ -102,7 +129,7 @@ func play(origin: Vector3, target: Vector3, variant: ProjectileType, trajectory:
 
 	var effective_distance: float = _xz_distance if trajectory == Trajectory.PARABOLIC else _total_distance
 	if effective_distance < 0.001:
-		_state = _State.DONE
+		_state = State.DONE
 		completed.emit()
 		return
 
@@ -122,11 +149,11 @@ func play(origin: Vector3, target: Vector3, variant: ProjectileType, trajectory:
 	_mesh_instance.visible = true
 
 	_tick_timer = 0.0
-	_state = _State.FLYING
+	_state = State.FLYING
 
 
 func stop() -> void:
-	_state = _State.IDLE
+	_state = State.IDLE
 	_xz_distance = 0.0
 	_tumble_y = 0.0
 	_tumble_x = 0.0
@@ -136,22 +163,7 @@ func stop() -> void:
 
 
 func is_playing() -> bool:
-	return _state == _State.FLYING
-
-
-func _process(delta: float) -> void:
-	if _state != _State.FLYING:
-		return
-
-	_tick_timer += delta
-	while _tick_timer >= TICK_DURATION:
-		_tick_timer -= TICK_DURATION
-		_process_tick()
-		if _state != _State.FLYING:
-			break
-
-	if _state == _State.FLYING:
-		_update_transform()
+	return _state == State.FLYING
 
 
 func _process_tick() -> void:
@@ -161,7 +173,7 @@ func _process_tick() -> void:
 		_progress = effective_distance
 		_current_position = _target
 		_mesh_instance.visible = false
-		_state = _State.DONE
+		_state = State.DONE
 		if loop:
 			play(_origin, _target, _projectile_type, _trajectory, _arc_height)
 		else:
@@ -210,36 +222,30 @@ func _evaluate_parabolic_arc(t: float) -> float:
 	return 4.0 * _arc_height * t * (1.0 - t)
 
 
-# PSX bow arc constants
-const PSX_PER_GODOT: float = MapData.TILE_SIDE_LENGTH
-const PSX_ARC_K: float = 4096.0
-const PSX_ARC_R: float = 336.0
-const PSX_HEIGHT_UNIT: float = 12.0  # 1h = 12 PSX world units
-
 ## Compute PSX-accurate low-arc bow height (bulge above straight line).
 ## Computes H from the quadratic endpoint constraint, then derives
 ## arc_height = (H^2+K^2)*D^2/(4*K^3*R*ppg) — matching the B coefficient
 ## between PSX's parabola and Godot's 4t(1-t) arc system.
 static func compute_psx_bow_arc(godot_xz_dist: float, godot_delta_y: float) -> float:
-	var D: float = godot_xz_dist * PSX_PER_GODOT * 64.0  # Q6 fixed-point
-	var delta_y: float = godot_delta_y * PSX_PER_GODOT / PSX_HEIGHT_UNIT  # h units
+	var arc_d: float = godot_xz_dist * PSX_PER_GODOT * 64.0 # Q6 fixed-point
+	var delta_y: float = godot_delta_y * PSX_PER_GODOT / PSX_HEIGHT_UNIT # h units
 
-	if D < 1.0:
-		return 0.0  # same-tile: no meaningful arc
+	if arc_d < 1.0:
+		return 0.0 # same-tile: no meaningful arc
 
-	var K: float = PSX_ARC_K
-	var R: float = PSX_ARC_R
-	var disc: float = R * R - 4.0 * delta_y * R - 4.0 * D * D / (K * K)
+	var arc_k: float = PSX_ARC_K
+	var arc_r: float = PSX_ARC_R
+	var disc: float = arc_r * arc_r - 4.0 * delta_y * arc_r - 4.0 * arc_d * arc_d / (arc_k * arc_k)
 	if disc <= 0.0:
-		return 0.0  # beyond valid range
+		return 0.0 # beyond valid range
 
 	# Low arc H (minus sign = flatter trajectory)
-	var H: float = K * K * (R - sqrt(disc)) / (2.0 * D)
+	var arc_h: float = arc_k * arc_k * (arc_r - sqrt(disc)) / (2.0 * arc_d)
 
 	# arc_height = (H^2+K^2)*D^2/(4*K^3*R*ppg) — bulge above straight line
-	var K2: float = K * K
-	var K3: float = K2 * K
-	return (H * H + K2) * D * D / (4.0 * K3 * R * PSX_PER_GODOT)
+	var arc_k2: float = arc_k * arc_k
+	var arc_k3: float = arc_k2 * arc_k
+	return (arc_h * arc_h + arc_k2) * arc_d * arc_d / (4.0 * arc_k3 * arc_r * PSX_PER_GODOT)
 
 
 func _update_transform() -> void:
@@ -277,7 +283,7 @@ func _update_transform() -> void:
 # ============================================================
 
 static func _build_mesh(vertices: Array[Vector3], faces: Array) -> ArrayMesh:
-	var st := SurfaceTool.new()
+	var st: SurfaceTool = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 
 	# Deduplicate faces (some PSX models have duplicates with different colors)
@@ -303,8 +309,13 @@ static func _build_mesh(vertices: Array[Vector3], faces: Array) -> ArrayMesh:
 	return st.commit()
 
 
-static func _add_triangle(st: SurfaceTool, vertices: Array[Vector3],
-		indices: Array, colors: Array, tri_order: Array) -> void:
+static func _add_triangle(
+		st: SurfaceTool,
+		vertices: Array[Vector3],
+		indices: Array,
+		colors: Array,
+		tri_order: Array,
+) -> void:
 	for i: int in tri_order:
 		var idx: int = indices[i]
 		var v: Vector3 = vertices[idx]
