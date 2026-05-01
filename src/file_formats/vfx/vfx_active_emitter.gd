@@ -79,8 +79,8 @@ func _process_frame() -> void:
 func _spawn_particles() -> void:
 	var count: int = _get_particle_count()
 
-	for i in range(count):
-		var particle := VfxParticleData.new()
+	for i: int in range(count):
+		var particle: VfxParticleData = VfxParticleData.new()
 		_initialize_particle(particle)
 		particles.append(particle)
 
@@ -361,8 +361,8 @@ func spawn_particles_for_timeline(spawn_counter: int) -> void:
 		return
 
 	var count: int = _get_particle_count()
-	for i in range(count):
-		var particle := VfxParticleData.new()
+	for i: int in range(count):
+		var particle: VfxParticleData = VfxParticleData.new()
 		_initialize_particle(particle)
 		particles.append(particle)
 
