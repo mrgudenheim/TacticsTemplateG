@@ -128,13 +128,13 @@ class EmitterTimeline:
 	var has_unknown_flags: bool = false
 
 
-	func _init(new_bytes: PackedByteArray):
+	func _init(new_bytes: PackedByteArray) -> void:
 		bytes = new_bytes
 		# Layout: 25×u16 times (0x00), first emitter_id = 0 then 24×u8 emitter_ids (0x32), 25×u16 action_flags (0x4a), u16 num_kf (0x7E)
 		action_flags = bytes.slice(0x4a, 0x4a + 50)
 		num_keyframes = bytes.decode_s16(0x7E)
 
-		for idx in 25:
+		for idx: int in 25:
 			var time: int = bytes.decode_u16(idx * 2)
 			times.append(time)
 
@@ -204,9 +204,6 @@ var image_color_depth: int = 0 # 8bpp or 4bpp
 # MULTI - camera will point at a single location, but make sure all targets are in view
 enum CameraFocus {SINGLE, SEQUENTIAL, MULTI} 
 
-var sound_effects
-var partical_effects
-
 enum VfxSections {
 	FRAMES = 0,
 	ANIMATION = 1,
@@ -243,8 +240,8 @@ func init_from_file() -> void:
 
 	#### header data
 	header_start = RomReader.battle_bin_data.ability_vfx_header_offsets[vfx_id]
-	var entry_size = 4
-	var num_entries = 10
+	var entry_size: int = 4
+	var num_entries: int = 10
 	var header_bytes: PackedByteArray = vfx_bytes.slice(header_start, header_start + (entry_size * num_entries))
 	var data_bytes: PackedByteArray = header_bytes
 	section_offsets.resize(num_entries)
@@ -252,7 +249,7 @@ func init_from_file() -> void:
 		section_offsets[id] = header_bytes.decode_u32(id * entry_size) + header_start
 
 	#### frame data (and image color depth)
-	var section_num = VfxSections.FRAMES
+	var section_num: int = VfxSections.FRAMES
 	var section_start: int = section_offsets[section_num]
 	data_bytes = vfx_bytes.slice(section_start, section_offsets[section_num + 1])
 
@@ -297,11 +294,11 @@ func init_from_file() -> void:
 	for frame_set_id: int in num_frame_sets:
 		var frame_set: VfxFrameSet = VfxFrameSet.new()
 
-		var next_section_start: int = data_bytes.size()
+		var next_frame_section_start: int = data_bytes.size()
 		if frame_set_id < num_frame_sets - 1:
-			next_section_start = frame_set_offsets[frame_set_id + 1]
+			next_frame_section_start = frame_set_offsets[frame_set_id + 1]
 
-		var frame_set_bytes: PackedByteArray = data_bytes.slice(frame_set_offsets[frame_set_id], next_section_start)
+		var frame_set_bytes: PackedByteArray = data_bytes.slice(frame_set_offsets[frame_set_id], next_frame_section_start)
 		frame_set.flags = frame_set_bytes.decode_u16(0)
 		var num_frames: int = frame_set_bytes.decode_u16(2)
 		frame_set.num_frames = num_frames
@@ -347,7 +344,7 @@ func init_from_file() -> void:
 				# FRAME: 3 bytes (frameset_id, duration, depth_mode)
 				if byte_index + 3 > anim_bytes.size():
 					break
-				var anim_frame_data := VfxAnimationFrame.new()
+				var anim_frame_data: VfxAnimationFrame = VfxAnimationFrame.new()
 				anim_frame_data.frameset_id = opcode
 				anim_frame_data.duration = anim_bytes.decode_s8(byte_index + 1)
 				anim_frame_data.byte_02 = anim_bytes.decode_u8(byte_index + 2)
@@ -355,7 +352,7 @@ func init_from_file() -> void:
 				byte_index += 3
 			elif opcode == ANIM_OPCODE_LOOP:
 				# LOOP: 1 byte — store as marker, stop parsing
-				var anim_frame_data := VfxAnimationFrame.new()
+				var anim_frame_data: VfxAnimationFrame = VfxAnimationFrame.new()
 				anim_frame_data.frameset_id = ANIM_OPCODE_LOOP
 				animation.animation_frames.append(anim_frame_data)
 				break
@@ -372,7 +369,7 @@ func init_from_file() -> void:
 				# ADD_OFFSET: 3 bytes (opcode, s8 dx, s8 dy)
 				if byte_index + 3 > anim_bytes.size():
 					break
-				var anim_frame_data := VfxAnimationFrame.new()
+				var anim_frame_data: VfxAnimationFrame = VfxAnimationFrame.new()
 				anim_frame_data.frameset_id = VfxConstants.AnimOpcode.ADD_OFFSET
 				anim_frame_data.duration = anim_bytes.decode_s8(byte_index + 1)
 				anim_frame_data.byte_02 = anim_bytes.decode_u8(byte_index + 2)
@@ -416,17 +413,6 @@ func init_from_file() -> void:
 		var emitter_data_bytes: PackedByteArray = emitter_control_bytes.slice(emitter_data_start, emitter_data_start + 196)
 		var emitter: VfxEmitter = VfxEmitter.new(emitter_data_bytes, self)
 
-		# emitter.anim_index = emitter_data_bytes.decode_u8(1)
-		# emitter.motion_type_flag = emitter_data_bytes.decode_u8(2)
-		# emitter.animation_target_flag = emitter_data_bytes.decode_u8(3)
-		# emitter.frameset_group_index = emitter_data_bytes.decode_u8(4)
-		# emitter.byte_05 = emitter_data_bytes.decode_u8(5)
-		# emitter.color_masking_motion_flags = emitter_data_bytes.decode_u8(6)
-		# emitter.byte_07 = emitter_data_bytes.decode_u8(7)
-
-		# emitter.start_position = Vector3i(emitter_data_bytes.decode_s16(0x14), -emitter_data_bytes.decode_s16(0x16), emitter_data_bytes.decode_s16(0x18))
-		# emitter.end_position = Vector3i(emitter_data_bytes.decode_s16(0x1a), -emitter_data_bytes.decode_s16(0x1c), emitter_data_bytes.decode_s16(0x1e))
-
 		emitters[emitter_id] = emitter
 
 	# Curves
@@ -440,13 +426,13 @@ func init_from_file() -> void:
 		next_section_start = section_offsets[section_num + 2] # skip to EFFECT_FLAGS
 	else:
 		next_section_start = section_offsets[section_num + 1]
-	var curve_section_bytes = vfx_bytes.slice(section_start, next_section_start)
+	var curve_section_bytes: PackedByteArray = vfx_bytes.slice(section_start, next_section_start)
 
 	num_curves = curve_section_bytes.decode_u32(0)
 	curves_bytes.resize(num_curves)
 	curves.resize(num_curves)
-	var curve_length = 0xA0 # 160 bytes
-	for curve_idx in num_curves:
+	var curve_length: int = 0xA0 # 160 bytes
+	for curve_idx: int in num_curves:
 		var curve_data_start: int = 4 + (curve_idx * curve_length)
 		var curve_data_end: int = curve_data_start + curve_length
 		curves_bytes[curve_idx] = curve_section_bytes.slice(curve_data_start, curve_data_end)
@@ -464,10 +450,10 @@ func init_from_file() -> void:
 		time_scale_curve = vfx_bytes.slice(section_start, section_offsets[section_num + 1])
 		time_scale_outer.resize(600)
 		time_scale_for_each.resize(600)
-		for frame in range(600):
+		for frame: int in range(600):
 			var byte_val: int = time_scale_curve[frame / 2]
 			time_scale_outer[frame] = (byte_val & 0x0F) if (frame % 2 == 0) else (byte_val >> 4)
-		for frame in range(600):
+		for frame: int in range(600):
 			var byte_val: int = time_scale_curve[300 + frame / 2]
 			time_scale_for_each[frame] = (byte_val & 0x0F) if (frame % 2 == 0) else (byte_val >> 4)
 
@@ -480,50 +466,41 @@ func init_from_file() -> void:
 	time_scale_pattern1 = (effect_flags_byte & 0x20) != 0
 	time_scale_pattern2 = (effect_flags_byte & 0x40) != 0
 
-	### TODO timeline data
+	### timeline data
 	section_num = VfxSections.TIMELINES
 	section_start = section_offsets[section_num]
 	timer_data_bytes = vfx_bytes.slice(section_start, section_offsets[section_num + 1])
 
 	# Phase timing from TIMELINES section header (matches godot-learning)
 	phase1_duration = timer_data_bytes.decode_u16(4)
-	var target_switching_delay: int = timer_data_bytes.decode_u16(6)
+	# var target_switching_delay: int = timer_data_bytes.decode_u16(6) # unused?
 	phase2_offset = timer_data_bytes.decode_u16(10)
 
-	# TODO 5 emitter timing sections, 0x80 long each
+	# child emitter timing sections, 0x80 long each
 	for emitter_timing_section_id: int in 5:
 		var emitter_timing_data_start: int = 0x0c + (emitter_timing_section_id * 0x80)
 
-		var new_timeline: EmitterTimeline = EmitterTimeline.new(timer_data_bytes.slice(emitter_timing_data_start, emitter_timing_data_start + 0x80))
+		var new_timeline: EmitterTimeline = EmitterTimeline.new(
+			timer_data_bytes.slice(emitter_timing_data_start, emitter_timing_data_start + 0x80)
+		)
 		child_emitter_timelines.append(new_timeline)
-
-		# var times: PackedInt32Array = []
-		# times.resize(25)
-		# var emitter_ids: PackedInt32Array = []
-		# emitter_ids.resize(times.size())
-		# for time_index: int in times.size():
-		# 	var time: int = timer_data_bytes.decode_u16(emitter_timing_data_start + (time_index * 2))
-		# 	times[time_index] = time
-		# 	var emitter_id: int = timer_data_bytes.decode_u8(emitter_timing_data_start + 0x32 + time_index)
-		# 	emitter_ids[time_index] = emitter_id
-		# 	if emitter_id - 1 >= emitters.size():
-		# 		push_warning(file_name + ": time_index " + str(time_index) + "; emitter " + str(emitter_id - 1) + "/" + str(emitters.size()))
-		# 	elif emitter_id > 0:
-		# 		if emitters[emitter_id - 1].start_time == 0 and time < 0x200: # TODO can an emitter be started multiple times? Ex. Cure E001 2nd timing section
-		# 			emitters[emitter_id - 1].start_time = time # TODO figure out special 'times' of 0x257, 0x0258, and 0x0259
 
 	# Parent Phase1 Emitters
 	for emitter_timing_section_id: int in 5:
 		var emitter_timing_data_start: int = 0x82A + (emitter_timing_section_id * 0x80)
 
-		var new_timeline: EmitterTimeline = EmitterTimeline.new(timer_data_bytes.slice(emitter_timing_data_start, emitter_timing_data_start + 0x80))
+		var new_timeline: EmitterTimeline = EmitterTimeline.new(
+			timer_data_bytes.slice(emitter_timing_data_start, emitter_timing_data_start + 0x80)
+		)
 		phase1_emitter_timelines.append(new_timeline)
 
 	# Phase2 Emitters
 	for emitter_timing_section_id: int in 5:
 		var emitter_timing_data_start: int = 0xAAA + (emitter_timing_section_id * 0x80)
 
-		var new_timeline: EmitterTimeline = EmitterTimeline.new(timer_data_bytes.slice(emitter_timing_data_start, emitter_timing_data_start + 0x80))
+		var new_timeline: EmitterTimeline = EmitterTimeline.new(
+			timer_data_bytes.slice(emitter_timing_data_start, emitter_timing_data_start + 0x80)
+		)
 		phase2_emitter_timelines.append(new_timeline)
 
 	#### image and palette data
@@ -556,8 +533,6 @@ func init_from_file() -> void:
 	vfx_spr.set_palette_data(palette_bytes)
 	vfx_spr.color_indices = vfx_spr.set_color_indices(data_bytes.slice(1024 + 4))
 
-	# TODO fix transparency - some frames should be opaque, like summons (Odin), some should just be less transparent, like songs and some geomancy (waterfall)
-
 	#vfx_spr.color_palette[vfx_spr.color_indices[0]].a8 = 0 # set background color (ie. color of top left pixel) as transparent
 
 	vfx_spr.set_pixel_colors()
@@ -583,7 +558,7 @@ func get_frame_mesh(composite_frame_idx: int, frame_idx: int = 0) -> ArrayMesh:
 	var vfx_frame: VfxFrame = framesets[composite_frame_idx].frameset[frame_idx]
 
 	# TODO use object pooling and just adjust the vertex positions
-	var st = SurfaceTool.new()
+	var st: SurfaceTool = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 
 	for vert_index: int in [0, 1, 2]:
@@ -612,8 +587,8 @@ func get_frame_mesh(composite_frame_idx: int, frame_idx: int = 0) -> ArrayMesh:
 	mesh_material.render_priority = 1
 	mesh_material.vertex_color_use_as_albedo = true
 
-	# TODO maybe byte 1, bit 0x02 turns semi-transparency on or off?
-	# Mostly (only?) affects Summon's creature and texture squares, meteor, pitfall, carve model, local quake, small bomb, empty black squares on some others
+	# Mostly (only?) affects Summon's creature and texture squares, meteor, pitfall, carve model, local quake, small bomb,
+	#  empty black squares on some others
 	#var semi_transparency_on = ((vfx_frame.vram_bytes[1] & 0x02) >> 1) == 1
 	if vfx_frame.semi_transparency_on:
 		#var semi_transparency_mode = (vfx_frame.vram_bytes[0] & 0x60) >> 5 # TODO maybe byte 0, bit 0x60 is semi-transparency mode?
