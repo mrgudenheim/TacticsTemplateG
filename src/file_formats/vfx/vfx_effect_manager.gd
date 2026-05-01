@@ -3,7 +3,11 @@ extends RefCounted
 ## Orchestrator — manages active emitters, physics, animation, timelines, and child spawning
 ## Port of godot-learning's EmitterManager.gd
 
+# Signal for action flags (Phase 6 battle integration)
+signal action_flags_triggered(flags: int, channel_index: int, frame: int)
+
 const PHYSICS_TIMESTEP: float = VfxConstants.TICK_DURATION
+const BASE_PACING: int = 2
 
 # Effect data
 var vfx_data: VisualEffectData
@@ -34,7 +38,6 @@ var tick_accumulator: float = 0.0
 # Time scaling — per-frame pacing from effect data creates slow-motion moments
 var time_scale_factor: float = 1.0
 var _current_pacing: int = 2
-const BASE_PACING: int = 2
 var _phase1_was_finished_last_frame: bool = false
 
 # First-update flag to prevent large delta jumps on init/reset
@@ -55,9 +58,6 @@ var debug_emitter_mask: Array[bool] = []
 # Debug: color curve logging (one-shot per emitter + per-particle tracking)
 var _debug_color_logged_emitters: Dictionary = {}  # emitter_index → true
 var debug_color_curves_enabled: bool = false
-
-# Signal for action flags (Phase 6 battle integration)
-signal action_flags_triggered(flags: int, channel_index: int, frame: int)
 
 
 func initialize(data: VisualEffectData) -> void:
@@ -93,7 +93,7 @@ func _create_controller(timelines: Array[VisualEffectData.EmitterTimeline]) -> V
 	if not has_data:
 		return null
 
-	var ctrl := VfxTimelineController.new()
+	var ctrl: VfxTimelineController = VfxTimelineController.new()
 	ctrl.initialize(timelines)
 	ctrl.action_flags_triggered.connect(_on_action_flags)
 	return ctrl
@@ -114,7 +114,7 @@ func start_emitter(emitter_index: int, duration: int = 120) -> VfxActiveEmitter:
 		return null
 
 	var emitter_config: VfxEmitter = vfx_data.emitters[emitter_index]
-	var emitter := VfxActiveEmitter.new()
+	var emitter: VfxActiveEmitter = VfxActiveEmitter.new()
 	emitter.initialize(emitter_config, emitter_index, vfx_data, duration)
 	_apply_anchors(emitter)
 	active_emitters.append(emitter)
@@ -217,7 +217,7 @@ func _get_or_create_emitter(emitter_index: int, channel_idx: int = 0) -> VfxActi
 		return null
 
 	var emitter_config: VfxEmitter = vfx_data.emitters[emitter_index]
-	var emitter := VfxActiveEmitter.new()
+	var emitter: VfxActiveEmitter = VfxActiveEmitter.new()
 	# Timeline emitters use duration_frames=10000 (matching godot-learning).
 	# The spawn_counter passed to spawn_particles_for_timeline() drives curve
 	# sampling via frame index, not via normalized time t.
@@ -261,7 +261,7 @@ func _check_homing_arrival(particle: VfxParticleData) -> void:
 	if particle.homing_arrival_threshold <= 0.0:
 		return
 	if particle.lifetime == -1:
-		return  # Already animation-driven
+		return # Already animation-driven
 	# Per-axis check: all three must be within threshold
 	var threshold: float = particle.homing_arrival_threshold
 	if absf(particle.position.x - particle.homing_target.x) >= threshold:
@@ -271,7 +271,7 @@ func _check_homing_arrival(particle: VfxParticleData) -> void:
 	if absf(particle.position.z - particle.homing_target.z) >= threshold:
 		return
 	# Arrived — transition to animation-driven death
-	particle.animation_held = false  # Clear hold so terminal frame can trigger death
+	particle.animation_held = false # Clear hold so terminal frame can trigger death
 	particle.lifetime = -1
 
 
@@ -286,7 +286,8 @@ func _process_midlife_children(emitter: VfxActiveEmitter) -> void:
 			particle.child_emitter_mid_life,
 			particle.position,
 			particle.age,
-			particle.channel_index)
+			particle.channel_index,
+		)
 
 
 func _sample_color_curves(emitter: VfxActiveEmitter) -> void:
@@ -304,7 +305,9 @@ func _sample_color_curves(emitter: VfxActiveEmitter) -> void:
 	if r_idx < 0 and g_idx < 0 and b_idx < 0:
 		if debug_color_curves_enabled and not _debug_color_logged_emitters.has(emitter.emitter_index):
 			_debug_color_logged_emitters[emitter.emitter_index] = true
-			print("[COLOR_CURVE] Emitter %d: all curve indices < 0 (R=%d G=%d B=%d) — skipping" % [emitter.emitter_index, r_idx, g_idx, b_idx])
+			print("[COLOR_CURVE] Emitter %d: all curve indices < 0 (R=%d G=%d B=%d) — skipping" % 
+				[emitter.emitter_index, r_idx, g_idx, b_idx]
+			)
 		return
 	var r_curve: VfxCurve = vfx_data.get_curve(r_idx) if r_idx >= 0 else null
 	var g_curve: VfxCurve = vfx_data.get_curve(g_idx) if g_idx >= 0 else null
@@ -359,7 +362,7 @@ func _cleanup_dead_particles() -> void:
 			request.child_index,
 			request.position,
 			request.age,
-			request.get("channel_index", 0)
+			request.get("channel_index", 0),
 		)
 
 
@@ -397,15 +400,28 @@ func _spawn_child_emitter(child_emitter_index: int, parent_pos: Vector3, frame_c
 
 	# Resolve target anchor for child emitter (PARENT mode → use target)
 	var child_target_anchor: Vector3 = VfxConstants.resolve_anchor(
-		config.target_anchor_mode, anchor_world, anchor_cursor,
-		anchor_origin, anchor_target, anchor_target)
+		config.target_anchor_mode,
+		anchor_world,
+		anchor_cursor,
+		anchor_origin,
+		anchor_target,
+		anchor_target,
+	)
 
 	var count: int = config.particle_count_start
-	for i in range(count):
-		var particle := VfxParticleData.new()
+	for i: int in range(count):
+		var particle: VfxParticleData = VfxParticleData.new()
 		VfxActiveEmitter.initialize_particle_from_config(
-			particle, config, child_emitter_index, vfx_data,
-			parent_pos, child_target_anchor, frame_counter, channel_idx, caster_facing_angle)
+			particle,
+			config,
+			child_emitter_index,
+			vfx_data,
+			parent_pos,
+			child_target_anchor,
+			frame_counter,
+			channel_idx,
+			caster_facing_angle,
+		)
 		child_emitter.particles.append(particle)
 
 
@@ -483,11 +499,11 @@ func _controller_is_done(controller: VfxTimelineController) -> bool:
 	if controller.is_finished():
 		return true
 	# Not finished yet — but are there any future emitters to spawn?
-	for state in controller.channel_states:
+	for state: VfxTimelineController.ChannelState in controller.channel_states:
 		if state.finished:
 			continue
 		# Check current and all future keyframes for any non-zero emitter_id
-		for kf_idx in range(state.current_keyframe, mini(state.timeline.num_keyframes + 1, state.timeline.keyframes.size())):
+		for kf_idx: int in range(state.current_keyframe, mini(state.timeline.num_keyframes + 1, state.timeline.keyframes.size())):
 			if state.timeline.keyframes[kf_idx].emitter_id != 0:
 				return false
 	return true
