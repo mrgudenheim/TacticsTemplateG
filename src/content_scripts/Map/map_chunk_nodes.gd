@@ -1,7 +1,7 @@
 class_name MapChunkNodes
 extends StaticBody3D
 
-const map_scene: PackedScene = preload("res://src/content_scripts/Map/map_chunk_nodes.tscn")
+const MAP_SCENE: PackedScene = preload("res://src/content_scripts/Map/map_chunk_nodes.tscn")
 
 @export var mesh_instance: MeshInstance3D
 @export var collision_shape: CollisionShape3D
@@ -10,7 +10,7 @@ var map_data: MapData
 
 
 static func instantiate() -> MapChunkNodes:
-	return map_scene.instantiate()
+	return MAP_SCENE.instantiate()
 
 
 func play_animations(local_map_data: MapData) -> void:
