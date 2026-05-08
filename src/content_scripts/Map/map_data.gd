@@ -185,6 +185,7 @@ func create_map(mesh_bytes: PackedByteArray, texture_bytes: PackedByteArray = []
 				texture_animation.animation_type = 0 # UV animation
 				texture_animation.texture_page = texture_anim_instruction_bytes.decode_u8(0) * 4 / 256
 				texture_animation.canvas_x = texture_anim_instruction_bytes.decode_u8(0) * 4 % 256
+				texture_animation.frame1_texture_page = texture_anim_instruction_bytes.decode_u8(8) * 4 / 256
 				texture_animation.frame1_x = texture_anim_instruction_bytes.decode_u8(8) * 4 % 256
 			elif (texture_anim_instruction_bytes.decode_u8(1) == 0x00
 				and texture_anim_instruction_bytes.decode_u8(2) == 0xe0
@@ -851,6 +852,7 @@ class TextureAnimationData:
 	var frame_duration: int # 1/30ths of a second (ie. 2 frames)
 	var texture_page: int
 	var canvas_x: int
+	var frame1_texture_page: int
 	var frame1_x: int
 	var palette_id_to_animate: int
 	var animation_starting_index: int

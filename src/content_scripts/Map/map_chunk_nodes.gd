@@ -37,7 +37,7 @@ func play_animations(local_map_data: MapData) -> void:
 			canvas_sizes[anim_id] = Vector2(local_map_data.texture_animations[anim_id].canvas_width / float(MapData.TEXTURE_SIZE.x * num_palettes),
 					local_map_data.texture_animations[anim_id].canvas_height / float(MapData.TEXTURE_SIZE.y))
 			frame_positions[anim_id] = Vector2(local_map_data.texture_animations[anim_id].frame1_x / float(MapData.TEXTURE_SIZE.x * num_palettes), 
-					(local_map_data.texture_animations[anim_id].frame1_y + (256 * local_map_data.texture_animations[anim_id].texture_page)) / float(MapData.TEXTURE_SIZE.y))
+					(local_map_data.texture_animations[anim_id].frame1_y + (256 * local_map_data.texture_animations[anim_id].frame1_texture_page)) / float(MapData.TEXTURE_SIZE.y))
 	
 	var map_shader_material: ShaderMaterial = mesh_instance.material_override as ShaderMaterial
 	map_shader_material.set_shader_parameter("canvas_pos", canvas_positions)
