@@ -18,10 +18,17 @@ enum EffectType {
 	REMOVE_EQUIPMENT, # Steal if transfer = true
 	#PHYSICAL_EVADE, 
 	#MAGIC_EVADE,
+	PUSH,
 }
 
 
-func _init(new_type: EffectType = EffectType.UNIT_STAT, new_effect_stat: Unit.StatType = Unit.StatType.HP, new_show_ui: bool = true, new_transfer_to_user: bool = false, new_set_value: bool = false) -> void:
+func _init(
+	new_type: EffectType = EffectType.UNIT_STAT, 
+	new_effect_stat: Unit.StatType = Unit.StatType.HP, 
+	new_show_ui: bool = true, 
+	new_transfer_to_user: bool = false, 
+	new_set_value: bool = false,
+) -> void:
 	type = new_type
 	effect_stat_type = new_effect_stat
 	show_ui = new_show_ui
@@ -97,6 +104,10 @@ func apply_value(apply_unit: Unit, value: int) -> int:
 		EffectType.REMOVE_EQUIPMENT:
 			pass
 			# TODO implement action_effect removing equipment from unit.equip_slot
+		EffectType.PUSH:
+			pass
+			# TODO implment push
+			# get direction based on user and targert, get path, determine obstructions, and move unit
 	
 	var effect_text: String = get_text(value)
 	apply_unit.show_popup_text(effect_text)
