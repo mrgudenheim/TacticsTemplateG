@@ -7,6 +7,8 @@ const FILE_SUFFIX: String = "scenario"
 @export var display_name: String = "display_name" # TODO add ui to set scenario name
 @export var description: String = "description"
 
+var is_loaded: bool = false
+
 @export var background_gradient_top: Color = Color.LIGHT_GRAY
 @export var background_gradient_bottom: Color = Color.DARK_BLUE
 @export var map_chunks: Array[MapChunk] = []
@@ -19,9 +21,18 @@ const FILE_SUFFIX: String = "scenario"
 
 @export var is_fft_scenario: bool = false
 
+
+static func lazy_init(new_unique_name: String) -> Scenario:
+	var new_scenario: Scenario = Scenario.new()
+	new_scenario.unique_name = new_unique_name
+
+	return new_scenario
+
+
 static func create_from_json(json_string: String) -> Scenario:
 	var property_dict: Dictionary = JSON.parse_string(json_string)
 	var new_scenario: Scenario = create_from_dictionary(property_dict)
+	new_scenario.is_loaded = true
 	
 	return new_scenario
 
