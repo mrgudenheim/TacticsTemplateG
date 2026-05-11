@@ -167,3 +167,20 @@ func get_array_unique(array: Array) -> Array:
 func disconnect_all_connections(signal_to_disconnect: Signal) -> void:
 	for connection_dictionary: Dictionary in signal_to_disconnect.get_connections():
 		signal_to_disconnect.disconnect(connection_dictionary.callable)
+
+
+func get_file_list_recursive(directory_path: String, ignore_hidden: bool = true) -> PackedStringArray:
+	var all_file_paths: PackedStringArray = []
+	var new_file_names: PackedStringArray = DirAccess.get_files_at(directory_path)
+	var new_sub_directories: PackedStringArray = DirAccess.get_directories_at(directory_path)
+
+	for file_name: String in new_file_names:
+		if file_name.begins_with(".") and ignore_hidden:
+			continue # skip hidden files
+		all_file_paths.append(directory_path + file_name)
+	
+	for sub_directory: String in new_sub_directories:
+		var sub_directory_file_paths: PackedStringArray = get_file_list_recursive(directory_path + sub_directory)
+		all_file_paths.append_array(sub_directory_file_paths)
+
+	return all_file_paths

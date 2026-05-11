@@ -5,7 +5,8 @@ var is_ready: bool = false
 
 var shps: Dictionary[String, Shp] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
 var seqs: Dictionary[String, Seq] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
-var maps: Dictionary[String, MapData] = {}
+var maps_gltf: Dictionary[String, Node] = {}
+var maps_data: Dictionary[String, FftMapData] = {} # var map_tiles: Dictionary[Vector2i, Array] = {} # Array[TerrainTile], palettes, gradient, animations, traps?, move find item?
 var vfx: Array[VisualEffectData] = []
 var items: Dictionary[String, ItemData] = {} # [unique_name, ItemData]
 var status_effects: Dictionary[String, StatusEffect] = {} # [unique_name, StatusEffect]
@@ -22,75 +23,51 @@ var frame_bin_texture: Texture2D
 var items_texture: Texture2D
 
 
-func import_data(filepath: String) -> void:
-	# order of loading matters. Triggered Actions, PassiveEffect reference actions. Abilities, StatusEffect reference PassiveEffect. Items reference a lot.
-	var folder_names: PackedStringArray = [
-		"actions",
-		"passive_effects",
-		"triggered_actions",
-		"status_effects",
-		"items",
-		"abilities",
-		"scenarios",
-		"maps",
-	]
+func import_data(directory_path: String) -> void:
+		var file_paths: PackedStringArray = Utilities.get_file_list_recursive(directory_path)
 
-	for content_folder: String in folder_names:
-		var dir_path: String = filepath + content_folder + "/"
-		var dir: DirAccess = DirAccess.open(dir_path)
+		for file_path: String in file_paths:
+			if file_path.ends_with(".json"):
+				var data_type: String = file_path.split(".")[-2]
+				var file_text: String = FileAccess.get_file_as_string(file_path)
 
-		if dir:
-			dir.list_dir_begin()
-			var file_name: String = dir.get_next()
-			while file_name != "":
-				if not file_name.begins_with("."): # Exclude hidden files
-					#push_warning("Found file: " + file_name)
-					if file_name.ends_with(".json"):
-						var file_path: String = dir_path + file_name
-						var data_type: String = file_name.split(".")[-2]
-
-						var file: FileAccess = FileAccess.open(file_path, FileAccess.READ)
-						var file_text: String = file.get_as_text()
-
-						match data_type:
-							"action":
-								var new_content: Action = Action.create_from_json(file_text)
-								if not actions.keys().has(new_content.unique_name):
-									new_content.add_to_global_list()
-							"ability":
-								var new_content: Ability = Ability.create_from_json(file_text)
-								if not abilities.keys().has(new_content.unique_name):
-									new_content.add_to_global_list()
-							"triggered_action":
-								var new_content: TriggeredAction = TriggeredAction.create_from_json(file_text)
-								if not triggered_actions.keys().has(new_content.unique_name):
-									new_content.add_to_global_list()
-							"passive_effect":
-								var new_content: PassiveEffect = PassiveEffect.create_from_json(file_text)
-								if not passive_effects.keys().has(new_content.unique_name):
-									new_content.add_to_global_list()
-							"status_effect":
-								var new_content: StatusEffect = StatusEffect.create_from_json(file_text)
-								if not status_effects.keys().has(new_content.unique_name):
-									new_content.add_to_global_list()
-							"item":
-								var new_content: ItemData = ItemData.create_from_json(file_text)
-								if not items.keys().has(new_content.unique_name): # TODO allow overwriting content
-									new_content.add_to_global_list()
-							"scenario":
-								var new_content: Scenario = Scenario.lazy_init(file_name)
-								if not _scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
-									new_content.add_to_global_list()
-					elif file_name.ends_with(".tres"):
-						# TODO import map_data, shp, seq, vfx
-						pass
-					elif file_name.ends_with(".glb"):
-						# TODO import map gltf?
-						pass
-				file_name = dir.get_next()
-			dir.list_dir_end()
-		else:
-			push_warning("Could not open directory: " + dir_path)
+				match data_type:
+					"action":
+						var new_content: Action = Action.create_from_json(file_text)
+						if not actions.keys().has(new_content.unique_name):
+							new_content.add_to_global_list()
+					"ability":
+						var new_content: Ability = Ability.create_from_json(file_text)
+						if not abilities.keys().has(new_content.unique_name):
+							new_content.add_to_global_list()
+					"triggered_action":
+						var new_content: TriggeredAction = TriggeredAction.create_from_json(file_text)
+						if not triggered_actions.keys().has(new_content.unique_name):
+							new_content.add_to_global_list()
+					"passive_effect":
+						var new_content: PassiveEffect = PassiveEffect.create_from_json(file_text)
+						if not passive_effects.keys().has(new_content.unique_name):
+							new_content.add_to_global_list()
+					"status_effect":
+						var new_content: StatusEffect = StatusEffect.create_from_json(file_text)
+						if not status_effects.keys().has(new_content.unique_name):
+							new_content.add_to_global_list()
+					"item":
+						var new_content: ItemData = ItemData.create_from_json(file_text)
+						if not items.keys().has(new_content.unique_name): # TODO allow overwriting content
+							new_content.add_to_global_list()
+					"scenario":
+						var file_name: String = ".".join(file_path.get_file().split(".").slice(0, -2))
+						var new_content: Scenario = Scenario.lazy_init(file_name)
+						if not _scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
+							new_content.add_to_global_list()
+					# TODO map_data?
+			elif file_path.ends_with(".tres"):
+				# TODO import map_tiles?, shp, seq, vfx
+				pass
+			elif file_path.ends_with(".glb"):
+				# TODO import map gltf?
+				pass
 
 
 func connect_data_references() -> void:
