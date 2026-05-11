@@ -1,5 +1,5 @@
 #https://ffhacktics.com/wiki/Maps/Mesh
-class_name MapData
+class_name FftMapData
 extends Resource
 
 const TILE_SIDE_LENGTH: int = 28

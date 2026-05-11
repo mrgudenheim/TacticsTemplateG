@@ -545,7 +545,7 @@ class VfxFrame:
 			Vector2(bottom_right_xy),
 		]
 		for vert: Vector2 in vertices_xy:
-			quad_vertices.append(Vector3(vert.x, -vert.y, 0) * MapData.SCALE)
+			quad_vertices.append(Vector3(vert.x, -vert.y, 0) * FftMapData.SCALE)
 
 
 class VfxAnimation:

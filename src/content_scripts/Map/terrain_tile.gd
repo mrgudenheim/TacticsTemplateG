@@ -48,7 +48,7 @@ func get_world_position(use_bottom_height: bool = false) -> Vector3:
 	if use_bottom_height:
 		height_position = height_bottom + depth
 	var tile_position: Vector3 = Vector3(location.x, height_position, location.y)
-	var tile_world_position: Vector3 = tile_position * Vector3(1, MapData.HEIGHT_SCALE, 1)
+	var tile_world_position: Vector3 = tile_position * Vector3(1, FftMapData.HEIGHT_SCALE, 1)
 	tile_world_position += Vector3(0.5, 0, 0.5)
 	
 	return tile_world_position
@@ -94,7 +94,7 @@ func get_tile_mesh() -> MeshInstance3D:
 		Vector3(tile_side_length / 2, 0, -tile_side_length / 2),
 	]
 	for vertex_index: int in quad_vertices.size():
-		quad_vertices[vertex_index] += Vector3.UP * slope_height * MapData.HEIGHT_SCALE * vertex_heights[vertex_index]
+		quad_vertices[vertex_index] += Vector3.UP * slope_height * FftMapData.HEIGHT_SCALE * vertex_heights[vertex_index]
 	
 	var quad_uvs: PackedVector2Array = [
 		Vector2(0, 0),

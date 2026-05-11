@@ -68,11 +68,15 @@ Color(1, 1, 0, 1): ExtResource("7_f2r6p"),
 Color(0, 0, 0, 1): ExtResource("6_l2dig"),
 Color(1, 1, 1, 1): ExtResource("8_kb1q2")
 })
+global_passive_effects = null
 battle_view = NodePath("ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport/BattleView")
 action_menu = NodePath("ActionMenu")
 action_button_list = NodePath("ActionMenu/ActionButtonsList")
 units_container = NodePath("ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport/BattleView/Units")
+teams = null
 controller = NodePath("CharacterController")
+battle_is_running = null
+safe_to_load_map = null
 battle_end_panel = NodePath("BattleEnd")
 post_battle_messages = NodePath("BattleEnd/VBoxContainer/Messages")
 start_new_battle_button = NodePath("BattleEnd/VBoxContainer/StartNewBattle")

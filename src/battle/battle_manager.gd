@@ -5,8 +5,8 @@ signal map_input_event(action_instance: ActionInstance, camera: Camera3D, event:
 signal unit_created(new_unit: Unit)
 signal delayed_action_completed
 
-const SCALE: float = 1.0 / MapData.TILE_SIDE_LENGTH
-const SCALED_UNITS_PER_HEIGHT: float = SCALE * MapData.UNITS_PER_HEIGHT
+const SCALE: float = 1.0 / FftMapData.TILE_SIDE_LENGTH
+const SCALED_UNITS_PER_HEIGHT: float = SCALE * FftMapData.UNITS_PER_HEIGHT
 
 @export var texture_viewer: Sprite3D # for debugging
 @export var reference_quad: MeshInstance3D # for debugging
@@ -172,7 +172,7 @@ func load_scenario(new_scenario: Scenario) -> void:
 
 
 func load_map_chunk(map_chunk: Scenario.MapChunk) -> void:
-	var map_chunk_data: MapData = RomReader.maps[map_chunk.unique_name]
+	var map_chunk_data: FftMapData = RomReader.maps[map_chunk.unique_name]
 	if not map_chunk_data.is_initialized:
 		map_chunk_data.init_map()
 
@@ -198,7 +198,7 @@ func load_map_chunk(map_chunk: Scenario.MapChunk) -> void:
 			vertex = (vertex - original_mesh_center) * mirror_vec + (mesh_aabb.size / 2.0)
 			surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx] = vertex
 
-		var custom0_flags: int = MapData.mirror_custom0(surface_arrays, original_mesh_center, mirror_vec, mesh_aabb.size / 2.0)
+		var custom0_flags: int = FftMapData.mirror_custom0(surface_arrays, original_mesh_center, mirror_vec, mesh_aabb.size / 2.0)
 
 		var sum_scale: int = map_chunk.mirror_scale.x + map_chunk.mirror_scale.y + map_chunk.mirror_scale.z
 		if sum_scale == 1 or sum_scale == -3:
@@ -232,7 +232,7 @@ func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
 	total_map_tiles.clear()
 
 	for map_chunk: Scenario.MapChunk in map_chunks:
-		var map_chunk_data: MapData = RomReader.maps[map_chunk.unique_name]
+		var map_chunk_data: FftMapData = RomReader.maps[map_chunk.unique_name]
 		if not map_chunk_data.is_initialized:
 			continue
 		
@@ -265,7 +265,7 @@ func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
 			total_tile.location = total_location
 			total_tile.tile_scale.x = map_chunk.mirror_scale.x
 			total_tile.tile_scale.z = map_chunk.mirror_scale.z
-			total_tile.height_bottom += map_chunk.corner_position.y + roundi(mesh_aabb.end.y / MapData.HEIGHT_SCALE)
+			total_tile.height_bottom += map_chunk.corner_position.y + roundi(mesh_aabb.end.y / FftMapData.HEIGHT_SCALE)
 			total_tile.height_mid = total_tile.height_bottom + (total_tile.slope_height / 2.0)
 			
 			# sort tiles by ascending height
@@ -276,7 +276,7 @@ func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
 
 
 func update_units_data_tile_location(units_data: Array[UnitData], map_chunk: Scenario.MapChunk) -> Array[UnitData]:
-	var map_chunk_data: MapData = RomReader.maps[map_chunk.unique_name]
+	var map_chunk_data: FftMapData = RomReader.maps[map_chunk.unique_name]
 	var map_tile_offset: Vector2i = Vector2i(map_chunk.corner_position.x, map_chunk.corner_position.z)
 	var mesh_aabb: AABB = map_chunk_data.mesh.get_aabb()
 	for unit_data: UnitData in units_data:
@@ -861,7 +861,7 @@ func start_units_turn(unit: Unit) -> void:
 	#new_unit.start_turn(self)
 
 
-func get_map(new_map_data: MapData, map_position: Vector3, map_scale: Vector3, gltf_map_mesh: MeshInstance3D = null) -> MapChunkNodes:
+func get_map(new_map_data: FftMapData, map_position: Vector3, map_scale: Vector3, gltf_map_mesh: MeshInstance3D = null) -> MapChunkNodes:
 	map_scale.y = -1 # vanilla used -y as up
 	var new_map_instance: MapChunkNodes = MapChunkNodes.instantiate()
 	new_map_instance.map_data = new_map_data
@@ -933,7 +933,7 @@ func initialize_map_tiles() -> void:
 			total_tile.location = total_location
 			total_tile.tile_scale.x = map_chunk.mesh_instance.scale.x
 			total_tile.tile_scale.z = map_chunk.mesh_instance.scale.z
-			total_tile.height_bottom += roundi(map_chunk.position.y / MapData.HEIGHT_SCALE)
+			total_tile.height_bottom += roundi(map_chunk.position.y / FftMapData.HEIGHT_SCALE)
 			total_tile.height_mid = total_tile.height_bottom + (total_tile.slope_height / 2.0)
 			total_map_tiles[total_location].append(total_tile)
 
@@ -1004,9 +1004,9 @@ func get_tile(input_position: Vector3) -> TerrainTile:
 		for new_tile: TerrainTile in total_map_tiles[tile_location]:
 			if tile == null:
 				tile = new_tile
-				current_vert_error = abs(((new_tile.height_mid + new_tile.depth) * MapData.HEIGHT_SCALE) - input_position.y)
+				current_vert_error = abs(((new_tile.height_mid + new_tile.depth) * FftMapData.HEIGHT_SCALE) - input_position.y)
 			else:
-				var new_vert_error: float = abs(((new_tile.height_mid + new_tile.depth) * MapData.HEIGHT_SCALE) - input_position.y)
+				var new_vert_error: float = abs(((new_tile.height_mid + new_tile.depth) * FftMapData.HEIGHT_SCALE) - input_position.y)
 				if new_vert_error < current_vert_error:
 					current_vert_error = new_vert_error
 					tile = new_tile

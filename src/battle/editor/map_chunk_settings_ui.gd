@@ -31,7 +31,7 @@ func _ready() -> void:
 	chunk_name_dropdown.item_selected.connect(on_chunk_selected)
 	position_edit.vector_changed.connect(set_map_chunk_position)
 	
-	for map_data: MapData in RomReader.maps.values():
+	for map_data: FftMapData in RomReader.maps.values():
 		chunk_name_dropdown.add_item(map_data.unique_name)
 
 	var map_index: int = range(1, chunk_name_dropdown.item_count).pick_random() # don't include map 0 that causes error
@@ -99,7 +99,7 @@ func on_mirror_changed(_toggled_on: bool) -> void:
 
 
 func get_map_chunk_nodes(map_chunk_unique_name: String) -> MapChunkNodes:
-	var map_chunk_data: MapData = RomReader.maps[map_chunk_unique_name]
+	var map_chunk_data: FftMapData = RomReader.maps[map_chunk_unique_name]
 	if not map_chunk_data.is_initialized:
 		map_chunk_data.init_map()
 
@@ -125,7 +125,7 @@ func get_map_chunk_nodes(map_chunk_unique_name: String) -> MapChunkNodes:
 			vertex = (vertex - original_mesh_center) * mirror_vec + (mesh_aabb.size / 2.0)
 			surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx] = vertex
 
-		var custom0_flags: int = MapData.mirror_custom0(surface_arrays, original_mesh_center, mirror_vec, mesh_aabb.size / 2.0)
+		var custom0_flags: int = FftMapData.mirror_custom0(surface_arrays, original_mesh_center, mirror_vec, mesh_aabb.size / 2.0)
 
 		var sum_scale: int = map_chunk.mirror_scale.x + map_chunk.mirror_scale.y + map_chunk.mirror_scale.z
 		if sum_scale == 1 or sum_scale == -3:
@@ -154,6 +154,6 @@ func get_map_chunk_nodes(map_chunk_unique_name: String) -> MapChunkNodes:
 func set_map_chunk_position(new_position: Vector3i) -> void:
 	map_chunk.corner_position = new_position
 	map_chunk_nodes.position = new_position
-	map_chunk_nodes.position.y = map_chunk_nodes.position.y * MapData.HEIGHT_SCALE
+	map_chunk_nodes.position.y = map_chunk_nodes.position.y * FftMapData.HEIGHT_SCALE
 
 	map_chunk_settings_changed.emit(self)

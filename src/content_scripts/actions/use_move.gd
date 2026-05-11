@@ -18,7 +18,7 @@ func walk_to_tile(user: Unit, to_tile: TerrainTile) -> void:
 		user.char_body.velocity.y = 1.1 * distance_to_move # hop over intermediate tiles
 	elif to_tile.height_mid - user.tile_position.height_mid >= 3:
 		user.update_unit_facing(immediate_path)
-		var vert_distance: float = (to_tile.height_mid - user.tile_position.height_mid) * MapData.HEIGHT_SCALE
+		var vert_distance: float = (to_tile.height_mid - user.tile_position.height_mid) * FftMapData.HEIGHT_SCALE
 		user.char_body.velocity.y = sqrt(vert_distance) * 4.5 # jump for steep changes in height, to get to bridges that don't have walls
 		await user.get_tree().create_timer(vert_distance * 0.19).timeout
 	else:

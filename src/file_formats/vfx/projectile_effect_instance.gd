@@ -31,7 +31,7 @@ const STONE_SCALE: float = 0.1
 const SPECIAL_SCALE: float = 0.1
 
 # PSX bow arc constants
-const PSX_PER_GODOT: float = MapData.TILE_SIDE_LENGTH
+const PSX_PER_GODOT: float = FftMapData.TILE_SIDE_LENGTH
 const PSX_ARC_K: float = 4096.0
 const PSX_ARC_R: float = 336.0
 const PSX_HEIGHT_UNIT: float = 12.0 # 1h = 12 PSX world units

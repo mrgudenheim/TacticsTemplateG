@@ -117,7 +117,7 @@ func _load_map() -> void:
 		if map_mat:
 			map_mat.set_shader_parameter("debug_depth", true)
 
-	var map_data: MapData = map_node.map_data
+	var map_data: FftMapData = map_node.map_data
 
 	# Find tile positions
 	for tile: TerrainTile in map_data.terrain_tiles:

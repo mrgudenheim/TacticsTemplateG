@@ -9,7 +9,7 @@ static func load_mirrored_map(map_index: int, container: Node3D) -> MapChunkNode
 		push_warning("[VfxTestUtils] Map index %d out of range" % map_index)
 		return null
 
-	var map_data: MapData = RomReader.maps_array[map_index]
+	var map_data: FftMapData = RomReader.maps_array[map_index]
 	if not map_data.is_initialized:
 		map_data.init_map()
 
@@ -28,7 +28,7 @@ static func load_mirrored_map(map_index: int, container: Node3D) -> MapChunkNode
 		vertex = (vertex - original_mesh_center) * mirror_scale + (mesh_aabb.size / 2.0)
 		surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx] = vertex
 
-	var custom0_flags: int = MapData.mirror_custom0(surface_arrays, original_mesh_center, mirror_scale, mesh_aabb.size / 2.0)
+	var custom0_flags: int = FftMapData.mirror_custom0(surface_arrays, original_mesh_center, mirror_scale, mesh_aabb.size / 2.0)
 
 	# Flip winding order for odd-axis mirror
 	for idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size() / 3:

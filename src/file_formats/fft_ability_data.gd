@@ -422,7 +422,7 @@ func display_stasis_sword_vfx(location: Node3D) -> void:
 		mesh_instance.position.y += 5
 		var target_pos: Vector3 = Vector3.ZERO
 		if frame_mesh_idx == 5:
-			target_pos.y -= 15 * MapData.SCALE
+			target_pos.y -= 15 * FftMapData.SCALE
 		
 		# https://docs.godotengine.org/en/stable/classes/class_tween.html
 		var tween: Tween = location.create_tween()

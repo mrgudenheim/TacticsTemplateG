@@ -39,8 +39,8 @@ var shps_array: Array[Shp] = []
 var shps: Dictionary[String, Shp] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
 var seqs_array: Array[Seq] = []
 var seqs: Dictionary[String, Seq] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
-var maps_array: Array[MapData] = []
-var maps: Dictionary[String, MapData] = {}
+var maps_array: Array[FftMapData] = []
+var maps: Dictionary[String, FftMapData] = {}
 var vfx: Array[VisualEffectData] = []
 var fft_abilities: Array[FftAbilityData] = []
 var fft_entds: Array[FftEntd] = []
@@ -203,7 +203,7 @@ func process_rom() -> void:
 	section_start = _profile_section("trap_effect_data.init_from_rom", section_start)
 
 	for map_idx: int in maps_array.size():
-		var map_data: MapData = maps_array[map_idx]
+		var map_data: FftMapData = maps_array[map_idx]
 		map_data.unique_name = map_data.file_name.trim_suffix(".GNS")
 		if map_idx != 0 and map_idx <= RomReader.fft_text.map_names.size():
 			map_data.display_name = RomReader.fft_text.map_names[map_idx - 1]
@@ -472,7 +472,7 @@ func process_file_records(sectors: PackedInt32Array, folder_name: String = "") -
 				seqs[new_seq.file_name] = new_seq
 			elif file_extension == "GNS":
 				record.type_index = maps_array.size()
-				maps_array.append(MapData.new(record.name))
+				maps_array.append(FftMapData.new(record.name))
 			
 			byte_index += record_length
 			if byte_index < DATA_BYTES_PER_SECTOR:
