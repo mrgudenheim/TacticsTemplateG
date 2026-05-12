@@ -24,50 +24,51 @@ var items_texture: Texture2D
 
 
 func import_data(directory_path: String) -> void:
-		var file_paths: PackedStringArray = Utilities.get_file_list_recursive(directory_path)
+	var file_paths: PackedStringArray = Utilities.get_file_list_recursive(directory_path)
 
-		for file_path: String in file_paths:
-			if file_path.ends_with(".json"):
-				var data_type: String = file_path.split(".")[-2]
-				var file_text: String = FileAccess.get_file_as_string(file_path)
+	for file_path: String in file_paths:
+		var data_type: String = file_path.split(".")[-2]
+		
+		if file_path.ends_with(".json"):
+			var file_text: String = FileAccess.get_file_as_string(file_path)
 
-				match data_type:
-					"action":
-						var new_content: Action = Action.create_from_json(file_text)
-						if not actions.keys().has(new_content.unique_name):
-							new_content.add_to_global_list()
-					"ability":
-						var new_content: Ability = Ability.create_from_json(file_text)
-						if not abilities.keys().has(new_content.unique_name):
-							new_content.add_to_global_list()
-					"triggered_action":
-						var new_content: TriggeredAction = TriggeredAction.create_from_json(file_text)
-						if not triggered_actions.keys().has(new_content.unique_name):
-							new_content.add_to_global_list()
-					"passive_effect":
-						var new_content: PassiveEffect = PassiveEffect.create_from_json(file_text)
-						if not passive_effects.keys().has(new_content.unique_name):
-							new_content.add_to_global_list()
-					"status_effect":
-						var new_content: StatusEffect = StatusEffect.create_from_json(file_text)
-						if not status_effects.keys().has(new_content.unique_name):
-							new_content.add_to_global_list()
-					"item":
-						var new_content: ItemData = ItemData.create_from_json(file_text)
-						if not items.keys().has(new_content.unique_name): # TODO allow overwriting content
-							new_content.add_to_global_list()
-					"scenario":
-						var file_name: String = ".".join(file_path.get_file().split(".").slice(0, -2))
-						var new_content: Scenario = Scenario.lazy_init(file_name)
-						if not _scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
-							new_content.add_to_global_list()
-					# TODO map_data?
-			elif file_path.ends_with(".tres"):
-				# TODO import map_tiles?, shp, seq, vfx
-				pass
-			elif file_path.ends_with(".glb"):
-				# TODO import map gltf?
-				pass
+			match data_type:
+				"action":
+					var new_content: Action = Action.create_from_json(file_text)
+					if not actions.keys().has(new_content.unique_name):
+						new_content.add_to_global_list()
+				"ability":
+					var new_content: Ability = Ability.create_from_json(file_text)
+					if not abilities.keys().has(new_content.unique_name):
+						new_content.add_to_global_list()
+				"triggered_action":
+					var new_content: TriggeredAction = TriggeredAction.create_from_json(file_text)
+					if not triggered_actions.keys().has(new_content.unique_name):
+						new_content.add_to_global_list()
+				"passive_effect":
+					var new_content: PassiveEffect = PassiveEffect.create_from_json(file_text)
+					if not passive_effects.keys().has(new_content.unique_name):
+						new_content.add_to_global_list()
+				"status_effect":
+					var new_content: StatusEffect = StatusEffect.create_from_json(file_text)
+					if not status_effects.keys().has(new_content.unique_name):
+						new_content.add_to_global_list()
+				"item":
+					var new_content: ItemData = ItemData.create_from_json(file_text)
+					if not items.keys().has(new_content.unique_name): # TODO allow overwriting content
+						new_content.add_to_global_list()
+				"scenario":
+					var file_name: String = ".".join(file_path.get_file().split(".").slice(0, -2))
+					var new_content: Scenario = Scenario.lazy_init(file_name)
+					if not _scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
+						new_content.add_to_global_list()
+				# TODO map_data?
+		elif file_path.ends_with(".tres"):
+			# TODO import map_tiles?, shp, seq, vfx
+			pass
+		elif file_path.ends_with(".glb"):
+			# TODO import map gltf?
+			pass
 
 
 func connect_data_references() -> void:
