@@ -16,6 +16,7 @@ var triggered_actions: Dictionary[String, TriggeredAction] = {} # [unique_name, 
 var passive_effects: Dictionary[String, PassiveEffect] = {} # [unique_name, TriggeredAction]
 var abilities: Dictionary[String, Ability] = {} # [unique_name, Ability]
 var _scenarios: Dictionary[String, Scenario] = {} # [unique_name, Scenario]
+var names: Dictionary[String, PackedStringArray] = {} # [name_category, possible names]
 
 # Textures
 var unit_spritesheets: Dictionary[String, Texture2D] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
