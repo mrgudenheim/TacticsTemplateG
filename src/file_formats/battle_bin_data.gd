@@ -265,8 +265,8 @@ func init_from_battle_bin() -> void:
 	num_entries = 22
 	status_icon_locations.resize(num_entries)
 	status_icon_rects.resize(num_entries)
-	var data_bytes_x = battle_bytes.slice(status_bubble_locations_x_start, status_bubble_locations_x_start + (num_entries * entry_size))
-	var data_bytes_y = battle_bytes.slice(status_bubble_locations_y_start, status_bubble_locations_y_start + (num_entries * entry_size))
+	var data_bytes_x: PackedByteArray = battle_bytes.slice(status_bubble_locations_x_start, status_bubble_locations_x_start + (num_entries * entry_size))
+	var data_bytes_y: PackedByteArray = battle_bytes.slice(status_bubble_locations_y_start, status_bubble_locations_y_start + (num_entries * entry_size))
 	for idx: int in num_entries:
 		var x: int = data_bytes_x.decode_u8(idx * entry_size)
 		var y: int = data_bytes_y.decode_u8(idx * entry_size)
@@ -329,7 +329,7 @@ func _parse_projectile_model(data: PackedByteArray, offset: int) -> Dictionary:
 
 	# Parse vertices (8 bytes each: s16 x, s16 y, s16 z, s16 flags)
 	var vertices: Array[Vector3] = []
-	for i in range(vertex_count):
+	for i: int in range(vertex_count):
 		var v_off: int = vertex_offset_abs + (i * 8)
 		vertices.append(Vector3(data.decode_s16(v_off), data.decode_s16(v_off + 2), data.decode_s16(v_off + 4)))
 
@@ -366,12 +366,12 @@ func _parse_projectile_model(data: PackedByteArray, offset: int) -> Dictionary:
 			break
 
 		var colors: Array = []
-		for c in range(num_verts):
+		for c: int in range(num_verts):
 			var co: int = color_start + (c * 4)
 			colors.append([data[co], data[co + 1], data[co + 2]])
 
 		var indices: Array = []
-		for idx in range(num_verts):
+		for idx: int in range(num_verts):
 			indices.append(data.decode_u16(index_start + (idx * 2)))
 
 		faces.append([indices, colors, type_str])

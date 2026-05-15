@@ -224,8 +224,8 @@ static func create_paletted_bmp(image: Image, palette: Array[Color], local_bits_
 	
 	# Pixel Data - left to right, bottom to top	
 	var index: int = 0
-	for y in image.get_height():
-		for x in image.get_width():
+	for y: int in image.get_height():
+		for x: int in image.get_width():
 			var pixel_index: int = x + (image.get_width() * y)
 			var color:Color = image.get_pixel(x, image.get_height() - y - 1)
 			var color_string:String = str(color)
