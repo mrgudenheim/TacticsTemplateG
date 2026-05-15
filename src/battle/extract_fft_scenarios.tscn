@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://xjitsrxa1gwl"]
 
 [ext_resource type="Script" uid="uid://odqiqyvvgy0u" path="res://src/battle/extract_fft_scenarios.gd" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://26tg32417lfm" path="res://src/load_rom.tscn" id="2_load_rom"]
+[ext_resource type="PackedScene" uid="uid://26tg32417lfm" path="res://src/rom_manager/load_rom.tscn" id="2_load_rom"]
 
-[node name="ExtractFftScenarios" type="Control" node_paths=PackedStringArray("load_rom_button", "rom_path_label", "auto_load_checkbox", "clear_path_button", "extract_button", "status_label", "close_button")]
+[node name="ExtractFftScenarios" type="Control" unique_id=2021249416 node_paths=PackedStringArray("load_rom_button", "rom_path_label", "auto_load_checkbox", "clear_path_button", "extract_button", "status_label", "close_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -19,7 +19,7 @@ extract_button = NodePath("MarginContainer/VBoxContainer/ExtractButton")
 status_label = NodePath("MarginContainer/VBoxContainer/StatusLabel")
 close_button = NodePath("MarginContainer/VBoxContainer/CloseButton")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=967869593]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -31,57 +31,57 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=2104146263]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1474970050]
 layout_mode = 2
 text = "FFT Setup Tool"
 horizontal_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1663845225]
 layout_mode = 2
 
-[node name="RomRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="RomRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1417691031]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="LoadRom" parent="MarginContainer/VBoxContainer/RomRow" instance=ExtResource("2_load_rom")]
+[node name="LoadRom" parent="MarginContainer/VBoxContainer/RomRow" unique_id=1265686774 instance=ExtResource("2_load_rom")]
 layout_mode = 2
 
-[node name="RomPathLabel" type="Label" parent="MarginContainer/VBoxContainer/RomRow"]
+[node name="RomPathLabel" type="Label" parent="MarginContainer/VBoxContainer/RomRow" unique_id=64634993]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "No ROM path saved"
 text_overrun_behavior = 3
 
-[node name="AutoLoadCheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer"]
+[node name="AutoLoadCheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer" unique_id=1574129978]
 layout_mode = 2
 text = "Auto-load ROM on startup"
 
-[node name="ClearPathButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="ClearPathButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1497313974]
 layout_mode = 2
 size_flags_horizontal = 0
 text = "Clear Saved Path"
 
-[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=609458734]
 layout_mode = 2
 
-[node name="ExtractButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="ExtractButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=712318270]
 layout_mode = 2
 size_flags_horizontal = 0
 disabled = true
 text = "Extract Scenarios"
 
-[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1851297739]
 layout_mode = 2
 text = "ROM not loaded"
 
-[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=2066836584]
 layout_mode = 2
 
-[node name="CloseButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="CloseButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=2029084735]
 layout_mode = 2
 size_flags_horizontal = 0
 text = "Close"

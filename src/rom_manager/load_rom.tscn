@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://26tg32417lfm"]
 
-[ext_resource type="Script" uid="uid://dtyy308r01gri" path="res://src/load_rom_button.gd" id="1_kahi1"]
+[ext_resource type="Script" uid="uid://dtyy308r01gri" path="res://src/rom_manager/load_rom_button.gd" id="1_kahi1"]
 
 [node name="LoadRom" type="Button" unique_id=1554311548 node_paths=PackedStringArray("load_rom_dialog")]
 text = "Load ROM

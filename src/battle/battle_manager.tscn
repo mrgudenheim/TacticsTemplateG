@@ -5,7 +5,7 @@
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_black.tres" id="6_l2dig"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_yellow.tres" id="7_f2r6p"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_white.tres" id="8_kb1q2"]
-[ext_resource type="PackedScene" uid="uid://26tg32417lfm" path="res://src/load_rom.tscn" id="9_pbg35"]
+[ext_resource type="PackedScene" uid="uid://26tg32417lfm" path="res://src/rom_manager/load_rom.tscn" id="9_pbg35"]
 [ext_resource type="Script" uid="uid://cl143w048iago" path="res://src/Unit/character_controller_realtime.gd" id="10_d5yoq"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_blue.tres" id="11_1os5c"]
 [ext_resource type="PackedScene" uid="uid://7tn6b6eup5na" path="res://src/camera_controller.tscn" id="12_l2dig"]
@@ -68,15 +68,11 @@ Color(1, 1, 0, 1): ExtResource("7_f2r6p"),
 Color(0, 0, 0, 1): ExtResource("6_l2dig"),
 Color(1, 1, 1, 1): ExtResource("8_kb1q2")
 })
-global_passive_effects = null
 battle_view = NodePath("ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport/BattleView")
 action_menu = NodePath("ActionMenu")
 action_button_list = NodePath("ActionMenu/ActionButtonsList")
 units_container = NodePath("ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport/BattleView/Units")
-teams = null
 controller = NodePath("CharacterController")
-battle_is_running = null
-safe_to_load_map = null
 battle_end_panel = NodePath("BattleEnd")
 post_battle_messages = NodePath("BattleEnd/VBoxContainer/Messages")
 start_new_battle_button = NodePath("BattleEnd/VBoxContainer/StartNewBattle")

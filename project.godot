@@ -19,7 +19,7 @@ config/icon="uid://b05fn7pqo1rrn"
 
 [autoload]
 
-RomReader="*res://src/rom_reader.gd"
+RomReader="*res://src/rom_manager/rom_reader.gd"
 Raycaster="*res://src/utilities/raycaster.gd"
 Utilities="*res://src/utilities/utilities.gd"
 GltfManagerNode="*res://src/utilities/gltf_manager.gd"
