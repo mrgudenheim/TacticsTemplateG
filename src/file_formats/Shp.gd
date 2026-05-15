@@ -278,7 +278,7 @@ func _get_subframe_data(bytes: PackedByteArray) -> SubFrameData:
 	return subframe
 
 
-func write_shp() -> void:
+func write_shp(path: String = "user://FFTorama") -> void:
 	var bytes: PackedByteArray = []
 	var total_size: int = section1_length + section2_length + section3_length
 	if has_submerged_data:
@@ -310,8 +310,8 @@ func write_shp() -> void:
 	if swim_pointer > section2_length:
 		bytes = _write_sections23_bytes(bytes, swim_pointer, frame_pointers_submerged, frames_submerged, frames_submerged_length)
 	
-	DirAccess.make_dir_recursive_absolute("user://FFTorama")
-	var save_file: FileAccess = FileAccess.open("user://FFTorama/" + file_name + ".shp", FileAccess.WRITE)
+	DirAccess.make_dir_recursive_absolute(path)
+	var save_file: FileAccess = FileAccess.open(path + "/" + file_name + ".shp", FileAccess.WRITE)
 	save_file.store_buffer(bytes)
 
 
