@@ -129,11 +129,10 @@ func object_properties_to_json(object: Object, exclude_property_names: PackedStr
 	return JSON.stringify(property_dict, "\t")
 
 
-func save_json(object: Object, save_path: String = "") -> void:
-	if save_path == "":
-		save_path = object.SAVE_DIRECTORY_PATH
+func save_json(object: Object, save_path: String = "user://overrides/") -> void:
+	save_path = save_path.path_join(object.SAVE_FOLDER)
 	DirAccess.make_dir_recursive_absolute(save_path)
-	var file_path: String = save_path + object.unique_name + "." + object.FILE_SUFFIX + ".json"
+	var file_path: String = save_path.path_join(object.unique_name + "." + object.FILE_SUFFIX + ".json")
 	var json_file: FileAccess = FileAccess.open(file_path, FileAccess.WRITE)
 	if json_file == null:
 		var err: Error = FileAccess.get_open_error()

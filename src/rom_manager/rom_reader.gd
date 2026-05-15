@@ -184,7 +184,7 @@ func process_rom() -> void:
 	battle_bin_data.init_from_battle_bin()
 	section_start = _profile_section("battle_bin_data.init_from_battle_bin", section_start)
 
-	var scenario_dir: DirAccess = DirAccess.open(Scenario.SAVE_DIRECTORY_PATH)
+	var scenario_dir: DirAccess = DirAccess.open("user://overrides/" + Scenario.SAVE_FOLDER)
 	var fft_scenarios_pre_extracted: bool = scenario_dir != null and Array(scenario_dir.get_files()).any(func(scenario_file_name: String) -> bool: return scenario_file_name.ends_with(".scenario.json"))
 
 	if not fft_scenarios_pre_extracted:
@@ -644,7 +644,7 @@ func import_custom_data() -> void:
 	]
 
 	# Also scan user:// for pre-extracted scenarios
-	var user_scenario_dir: DirAccess = DirAccess.open(Scenario.SAVE_DIRECTORY_PATH)
+	var user_scenario_dir: DirAccess = DirAccess.open("user://overrides/" + Scenario.SAVE_FOLDER)
 	if user_scenario_dir:
 		user_scenario_dir.list_dir_begin()
 		var scenario_file: String = user_scenario_dir.get_next()
@@ -652,7 +652,7 @@ func import_custom_data() -> void:
 			if scenario_file.ends_with(".scenario.json"):
 				var unique_name: String = scenario_file.trim_suffix(".scenario.json")
 				if not has_scenario(unique_name):
-					scenario_paths[unique_name] = Scenario.SAVE_DIRECTORY_PATH + scenario_file
+					scenario_paths[unique_name] = ("user://overrides/" + Scenario.SAVE_FOLDER).path_join(scenario_file)
 			scenario_file = user_scenario_dir.get_next()
 		user_scenario_dir.list_dir_end()
 
@@ -960,39 +960,39 @@ func add_entds(file_name: String) -> void:
 		fft_entds.append(new_entd)
 
 
-func generate_passive_effects() -> void:
+func generate_passive_effects(save_path: String) -> void:
 	var new_passive_effect: PassiveEffect
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "attack_up"
 	new_passive_effect.power_modifier_user = Modifier.new("value * 1.33", Modifier.ModifierType.MULT)
 	# new_passive_effect.power_modifier_user = Modifier.new(1.33, Modifier.ModifierType.MULT)
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "magic_attack_up"
 	new_passive_effect.power_modifier_user = Modifier.new("value * 1.33", Modifier.ModifierType.MULT)
 	# new_passive_effect.power_modifier_user = Modifier.new(1.33, Modifier.ModifierType.MULT)
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "martial_arts"
 	new_passive_effect.power_modifier_user = Modifier.new("value * 1.5", Modifier.ModifierType.MULT)
 	# new_passive_effect.power_modifier_user = Modifier.new(1.5, Modifier.ModifierType.MULT)
 	new_passive_effect.requires_user_item_type = ["FIST"]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "defense_up"
 	new_passive_effect.power_modifier_user = Modifier.new("value * 0.66", Modifier.ModifierType.MULT)
 	# new_passive_effect.power_modifier_targeted = Modifier.new(0.66, Modifier.ModifierType.MULT)
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "magic_defense_up"
 	new_passive_effect.power_modifier_user = Modifier.new("value * 0.66", Modifier.ModifierType.MULT)
 	# new_passive_effect.power_modifier_targeted = Modifier.new(0.66, Modifier.ModifierType.MULT)
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "concentrate"
@@ -1003,61 +1003,61 @@ func generate_passive_effects() -> void:
 		EvadeData.EvadeSource.WEAPON: Modifier.new("0.0", Modifier.ModifierType.SET),
 	}
 	new_passive_effect.evade_source_modifiers_user = evade_modifier_dict
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 	
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "monster_talk"
 	new_passive_effect.add_applicable_target_stat_bases = [Unit.StatBasis.MONSTER]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "maintenance"
 	new_passive_effect.hit_chance_modifier_targeted = Modifier.new("0.0", Modifier.ModifierType.SET)
 	# new_passive_effect.hit_chance_modifier_targeted = Modifier.new(0, Modifier.ModifierType.SET)
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "defend"
 	new_passive_effect.added_actions_names = ["defend"]
 	# TODO create defend action
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "half_of_mp"
 	new_passive_effect.action_mp_modifier = Modifier.new("value * 0.5", Modifier.ModifierType.MULT)
 	# new_passive_effect.action_mp_modifier = Modifier.new(0.5, Modifier.ModifierType.MULT)
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "throw_item"
 	new_passive_effect.action_max_range_modifier = Modifier.new("value + 3", Modifier.ModifierType.ADD)
 	# new_passive_effect.action_max_range_modifier = Modifier.new(3, Modifier.ModifierType.ADD)
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "short_charge"
 	new_passive_effect.action_charge_time_modifier = Modifier.new("value * 0.5", Modifier.ModifierType.MULT)
 	# new_passive_effect.action_charge_time_modifier = Modifier.new(0.5, Modifier.ModifierType.MULT)
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "non_charge"
 	new_passive_effect.action_charge_time_modifier = Modifier.new("0.0", Modifier.ModifierType.SET)
 	# new_passive_effect.action_charge_time_modifier = Modifier.new(0.0, Modifier.ModifierType.SET)
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "equip_change"
 	new_passive_effect.added_actions_names = ["equip_change"]
 	# TODO create equip_change action
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "monster_skill"
 	new_passive_effect.effect_range = 3
 	new_passive_effect.unit_basis_filter = [Unit.StatBasis.MONSTER]
 	new_passive_effect.added_actions_names = ["choco_ball"] # TODO change to 'learned' flag for each job's unique action?
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "move+1"
@@ -1065,7 +1065,7 @@ func generate_passive_effects() -> void:
 		Unit.StatType.MOVE: Modifier.new("value + 1", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "move+2"
@@ -1073,7 +1073,7 @@ func generate_passive_effects() -> void:
 		Unit.StatType.MOVE: Modifier.new("value + 2", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "move+3"
@@ -1081,7 +1081,7 @@ func generate_passive_effects() -> void:
 		Unit.StatType.MOVE: Modifier.new("value + 3", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "jump+1"
@@ -1089,7 +1089,7 @@ func generate_passive_effects() -> void:
 		Unit.StatType.JUMP: Modifier.new("value + 1", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "jump+2"
@@ -1097,7 +1097,7 @@ func generate_passive_effects() -> void:
 		Unit.StatType.JUMP: Modifier.new("value + 2", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "jump+3"
@@ -1105,12 +1105,12 @@ func generate_passive_effects() -> void:
 		Unit.StatType.JUMP: Modifier.new("value + 3", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "ignore_height"
 	new_passive_effect.ignore_height = true
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "ignore_terrain"
@@ -1122,30 +1122,30 @@ func generate_passive_effects() -> void:
 		0x2d: Modifier.new("1", Modifier.ModifierType.SET),
 	}
 	new_passive_effect.terrain_cost_modifiers = terrain_modifier_dict
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "walk_on_water"
 	# TODO handle depth
 	new_passive_effect.terrain_cost_modifiers = terrain_modifier_dict
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "swim"
 	# TODO handle depth
 	new_passive_effect.terrain_cost_modifiers = terrain_modifier_dict
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "move_underwater"
 	# TODO handle depth
 	new_passive_effect.terrain_cost_modifiers = terrain_modifier_dict
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "walk_on_lava"
 	new_passive_effect.remove_prohibited_terrain = [0x12]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	# new_passive_effect = PassiveEffect.new()
 	# new_passive_effect.unique_name = "ignore_weather"
@@ -1158,30 +1158,30 @@ func generate_passive_effects() -> void:
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "float"
 	new_passive_effect.status_always = ["float"]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "fly"
 	new_passive_effect.added_actions_names = ["fly"]
 	# TODO create fly action
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "teleport"
 	new_passive_effect.added_actions_names = ["teleport"]
 	# TODO create teleport action
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "teleport_2"
 	new_passive_effect.added_actions_names = ["teleport_2"]
 	# TODO create teleport_2 action
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "reflect"
 	new_passive_effect.status_always = ["reflect"]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "standard_move"
@@ -1191,7 +1191,7 @@ func generate_passive_effects() -> void:
 		28,
 		63,
 	]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "standard_evade"
@@ -1200,69 +1200,69 @@ func generate_passive_effects() -> void:
 		EvadeData.EvadeSource.SHIELD,
 		EvadeData.EvadeSource.ACCESSORY,
 	]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "equip_armour"
 	new_passive_effect.added_equipment_types_equipable = [
 		ItemData.ItemType.ARMOR
 	]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "equip_axe"
 	new_passive_effect.added_equipment_types_equipable = [
 		ItemData.ItemType.AXE
 	]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "equip_crossbow"
 	new_passive_effect.added_equipment_types_equipable = [
 		ItemData.ItemType.CROSSBOW
 	]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "equip_gun"
 	new_passive_effect.added_equipment_types_equipable = [
 		ItemData.ItemType.GUN
 	]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "equip_katana"
 	new_passive_effect.added_equipment_types_equipable = [
 		ItemData.ItemType.KATANA
 	]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "equip_shield"
 	new_passive_effect.added_equipment_types_equipable = [
 		ItemData.ItemType.SHIELD
 	]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "equip_spear"
 	new_passive_effect.added_equipment_types_equipable = [
 		ItemData.ItemType.SPEAR
 	]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "equip_sword"
 	new_passive_effect.added_equipment_types_equipable = [
 		ItemData.ItemType.SWORD
 	]
-	Utilities.save_json(new_passive_effect)
+	Utilities.save_json(new_passive_effect, save_path)
 
 	var new_action: Action = Action.new()
 	
 	new_action.display_name = "Defend"
 	new_action.unique_name = "defend"
-	new_action.status_chance = 100
+	new_action.target_status_chance = 100
 	new_action.target_status_list = ["defending"]
 	new_action.target_status_list_type = Action.StatusListType.ALL
 	new_action.targeting_type = Action.TargetingTypes.RANGE
@@ -1293,7 +1293,7 @@ func generate_passive_effects() -> void:
 		"maintenance",
 		"finger_guard",
 	]
-	Utilities.save_json(new_action)
+	Utilities.save_json(new_action, save_path)
 
 
 func export_data(save_path: String) -> void:
@@ -1330,17 +1330,17 @@ func export_data(save_path: String) -> void:
 	for shp: Shp in shps.values():
 		shp.write_shp(save_path + "/shps/")
 	for seq: Seq in seqs.values():
-		seq.write_seq(save_path + "/seqs/")
+		seq.write_seq(save_path + "/seqs/" + seq.file_name)
 
 
 	maps # TODO export maps
-	vfx # TPDP export vfx data
+	vfx # TODO export vfx data
 
 	for item: ItemData in items.values():
 		Utilities.save_json(item, save_path)
 	for status_effect: StatusEffect in status_effects.values():
 		Utilities.save_json(status_effect, save_path)
-	for job_data: Action in jobs_data.values():
+	for job_data: JobData in jobs_data.values():
 		Utilities.save_json(job_data, save_path)
 	for action: Action in actions.values():
 		Utilities.save_json(action, save_path)
@@ -1373,13 +1373,16 @@ func export_data(save_path: String) -> void:
 
 	# Text
 	var text_path: String = save_path + "/text/"
-	DirAccess.make_dir_recursive_absolute(other_images_path)
+	DirAccess.make_dir_recursive_absolute(text_path)
 	var names: PackedStringArray = fft_text.unit_names_list
 	var names_string: String = JSON.stringify(names, "\t")
 	var names_filepath: String = text_path + "names.text.json"
 	var names_file: FileAccess = FileAccess.open(names_filepath, FileAccess.WRITE)
 	names_file.store_line(names_string)
 	names_file.close()
+	
+	generate_passive_effects(save_path)
+
 
 class SpritesheetRegionData:
 	var shp_type: String

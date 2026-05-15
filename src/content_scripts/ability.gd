@@ -8,7 +8,7 @@ enum SlotType {
 	MOVEMENT,
 }
 
-const SAVE_DIRECTORY_PATH: String = "user://overrides/abilities/"
+const SAVE_FOLDER: String = "abilities/"
 const FILE_SUFFIX: String = "ability"
 
 @export var unique_name: String = "unique_name"

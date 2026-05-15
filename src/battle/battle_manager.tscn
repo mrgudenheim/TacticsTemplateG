@@ -5,6 +5,7 @@
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_black.tres" id="6_l2dig"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_yellow.tres" id="7_f2r6p"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_white.tres" id="8_kb1q2"]
+[ext_resource type="Script" uid="uid://ccsa6hgqk6q5g" path="res://src/rom_manager/export_rom_data.gd" id="8_qgxlc"]
 [ext_resource type="PackedScene" uid="uid://26tg32417lfm" path="res://src/rom_manager/load_rom.tscn" id="9_pbg35"]
 [ext_resource type="Script" uid="uid://cl143w048iago" path="res://src/Unit/character_controller_realtime.gd" id="10_d5yoq"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_blue.tres" id="11_1os5c"]
@@ -96,6 +97,7 @@ grow_vertical = 2
 texture = SubResource("GradientTexture2D_1dnhu")
 
 [node name="LoadRom" parent="." unique_id=801972973 instance=ExtResource("9_pbg35")]
+visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -107,6 +109,72 @@ offset_right = 57.0
 offset_bottom = 14.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="DataSettingsPanel" type="PanelContainer" parent="." unique_id=769059005]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -191.0
+offset_top = -30.0
+offset_right = 191.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="DataSettingsPanel" unique_id=1317102780]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="DataSettingsPanel/MarginContainer" unique_id=1125605306]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="DataSettingsPanel/MarginContainer/VBoxContainer" unique_id=714746537]
+layout_mode = 2
+
+[node name="LoadData" type="Button" parent="DataSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=831085962]
+layout_mode = 2
+text = "Load Data"
+
+[node name="FileDialog" type="FileDialog" parent="DataSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer/LoadData" unique_id=946556545]
+title = "Open a Directory"
+file_mode = 2
+display_mode = 1
+access = 2
+use_native_dialog = true
+
+[node name="LineEdit" type="LineEdit" parent="DataSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=962279174]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Select Folder to Load Data"
+select_all_on_focus = true
+
+[node name="ExportRomData" type="Button" parent="DataSettingsPanel/MarginContainer/VBoxContainer" unique_id=292541097 node_paths=PackedStringArray("rom_file_dialog", "destination_file_dialog")]
+layout_mode = 2
+text = "Export Data from ROM"
+script = ExtResource("8_qgxlc")
+rom_file_dialog = NodePath("RomFileDialog")
+destination_file_dialog = NodePath("DestinationFileDialog")
+
+[node name="RomFileDialog" type="FileDialog" parent="DataSettingsPanel/MarginContainer/VBoxContainer/ExportRomData" unique_id=1983317614]
+title = "Select Rom"
+initial_position = 1
+ok_button_text = "Select"
+file_mode = 0
+display_mode = 1
+access = 2
+filters = PackedStringArray("*.bin")
+use_native_dialog = true
+
+[node name="DestinationFileDialog" type="FileDialog" parent="DataSettingsPanel/MarginContainer/VBoxContainer/ExportRomData" unique_id=360565316]
+title = "Select Destination"
+initial_position = 1
+file_mode = 2
+display_mode = 1
+access = 2
+filters = PackedStringArray("*.bin")
+use_native_dialog = true
 
 [node name="CharacterController" type="Node3D" parent="." unique_id=853182301]
 script = ExtResource("10_d5yoq")

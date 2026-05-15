@@ -3,7 +3,7 @@ extends Resource
 
 # https://ffhacktics.com/wiki/Item_Data
 
-const SAVE_DIRECTORY_PATH: String = "user://overrides/items/"
+const SAVE_FOLDER: String = "items"
 const FILE_SUFFIX: String = "item"
 
 @export var unique_name: String = "unique_name"
@@ -134,6 +134,8 @@ func _init(idx: int = 0) -> void:
 	item_idx = idx
 	item_type = RomReader.scus_data.item_types[idx] as ItemType
 	slot_type = RomReader.scus_data.item_slot_types[idx] & 0xfc as SlotType # skip rare flag
+	if slot_type == 0:
+		slot_type = SlotType.NONE
 	is_rare = RomReader.scus_data.item_slot_types[idx] & 0x02 == 0x02 # rare flag
 	
 	item_graphic_id = RomReader.scus_data.item_sprite_ids[idx]

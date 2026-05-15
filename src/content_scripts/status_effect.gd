@@ -3,7 +3,7 @@
 class_name StatusEffect
 extends Resource
 
-const SAVE_DIRECTORY_PATH: String = "user://overrides/status_effects/"
+const SAVE_FOLDER: String = "status_effects/"
 const FILE_SUFFIX: String = "status_effect"
 @export var unique_name: String = "unique_name"
 

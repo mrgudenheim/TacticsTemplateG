@@ -1,7 +1,7 @@
 class_name PassiveEffect
 extends Resource
 
-const SAVE_DIRECTORY_PATH: String = "user://overrides/passive_effects/"
+const SAVE_FOLDER: String = "passive_effects/"
 const FILE_SUFFIX: String = "passive_effect"
 @export var unique_name: String = "unique_name"
 

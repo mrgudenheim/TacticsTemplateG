@@ -334,12 +334,12 @@ func write_seq(path: String) -> void:
 	var bytes: PackedByteArray = get_seq_bytes()
 	
 	# clean up file name
-	if path.get_slice(".", 1).to_lower() == path.get_slice(".", 2).to_lower():
+	if path.get_slice(".", 1) != path and path.get_slice(".", 1).to_lower() == path.get_slice(".", 2).to_lower():
 		path = path.trim_suffix(path.get_slice(".", 2))
 	
 	# save file
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
-	var save_file: FileAccess = FileAccess.open(path.get_basename(), FileAccess.WRITE)
+	var save_file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	save_file.store_buffer(bytes)
 
 

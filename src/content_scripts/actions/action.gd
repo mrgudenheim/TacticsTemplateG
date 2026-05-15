@@ -1,7 +1,7 @@
 class_name Action
 extends Resource
 
-const SAVE_DIRECTORY_PATH: String = "user://overrides/actions/"
+const SAVE_FOLDER: String = "actions"
 const FILE_SUFFIX: String = "action"
 # static var current_id: int = 0
 

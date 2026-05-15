@@ -1,5 +1,8 @@
 extends Node
 
+const DATA_PATH_CONFIG: String = "user://data_path.cfg"
+var data_path: String = ""
+
 var is_ready: bool = false
 
 var shps: Dictionary[String, Shp] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
@@ -21,6 +24,18 @@ var names: Dictionary[String, PackedStringArray] = {} # [name_category, possible
 var unit_spritesheets: Dictionary[String, Texture2D] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
 var frame_bin_texture: Texture2D
 var items_texture: Texture2D
+
+func _ready() -> void:
+	data_path = _get_saved_data_path()
+	if not data_path.is_empty() and FileAccess.file_exists(data_path):
+		call_deferred("import_data", data_path)
+
+
+func _get_saved_data_path() -> String:
+	if not FileAccess.file_exists(DATA_PATH_CONFIG):
+		return ""
+	var file: FileAccess = FileAccess.open(DATA_PATH_CONFIG, FileAccess.READ)
+	return file.get_line().strip_edges()
 
 
 func import_data(directory_path: String) -> void:

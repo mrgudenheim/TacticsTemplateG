@@ -31,7 +31,7 @@ enum HitRequirement {
 	MISS,
 } # TODO other hit requirements for specific evade types?
 
-const SAVE_DIRECTORY_PATH: String = "user://overrides/triggered_actions/"
+const SAVE_FOLDER: String = "triggered_actions/"
 const FILE_SUFFIX: String = "triggered_action"
 
 @export var unique_name: String = "unique_name.triggered"

@@ -1,7 +1,7 @@
 class_name JobData
 extends Resource
 
-const SAVE_DIRECTORY_PATH: String = "user://overrides/jobs/"
+const SAVE_FOLDER: String = "jobs"
 const FILE_SUFFIX: String = "job"
 @export var unique_name: String = "unique_name" # "ATTACK" and "COPY" are special cases
 
