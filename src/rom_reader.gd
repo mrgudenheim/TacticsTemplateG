@@ -36,9 +36,9 @@ var spr_id_file_idxs: PackedInt32Array = [] # 0x60 starts generic jobs
 var spritesheets: Dictionary[String, Spr] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
 
 var shps_array: Array[Shp] = []
-var shps: Dictionary[String, Shp] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
+var shps: Dictionary[String, Shp] = {} # [unique_name (eg. filename without extension), Shp] TODO fill with data
 var seqs_array: Array[Seq] = []
-var seqs: Dictionary[String, Seq] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
+var seqs: Dictionary[String, Seq] = {} # [unique_name (eg. filename without extension), Seq] TODO fill with data
 var maps_array: Array[FftMapData] = []
 var maps: Dictionary[String, FftMapData] = {}
 var vfx: Array[VisualEffectData] = []
@@ -51,7 +51,7 @@ var status_effects: Dictionary[String, StatusEffect] = {} # [unique_name, Status
 var jobs_data: Dictionary[String, JobData] = {} # [unique_name, JobData]
 var actions: Dictionary[String, Action] = {} # [unique_name, Action]
 var triggered_actions: Dictionary[String, TriggeredAction] = {} # [unique_name, TriggeredAction]
-var passive_effects: Dictionary[String, PassiveEffect] = {} # [unique_name, TriggeredAction]
+var passive_effects: Dictionary[String, PassiveEffect] = {} # [unique_name, PassiveEffect]
 var abilities: Dictionary[String, Ability] = {} # [unique_name, Ability]
 var scenarios: Dictionary[String, Scenario] = {} # [unique_name, Scenario]
 var scenario_paths: Dictionary[String, String] = {} # [unique_name, file_path] for lazy-loaded scenarios
@@ -377,49 +377,6 @@ func process_rom() -> void:
 	# var file_name: String = "vfx_animation_params"
 	# var save_file := FileAccess.open("user://wiki_tables/" + file_name + ".txt", FileAccess.WRITE)
 	# save_file.store_string(final_output)
-
-	#for action: Action in actions.values():
-		#Utilities.save_json(action)
-#
-	#for ability: Ability in abilities.values():
-		#Utilities.save_json(ability)
-
-	# var new_action: Action = Action.new()
-	
-	# new_action.display_name = "Defend"
-	# new_action.unique_name = "defend"
-	# new_action.status_chance = 100
-	# new_action.target_status_list = ["defending"]
-	# new_action.target_status_list_type = Action.StatusListType.ALL
-	# new_action.targeting_type = Action.TargetingTypes.RANGE
-	# new_action.auto_target = true
-	# new_action.max_targeting_range = 0
-	# new_action.status_prevents_use_any = [
-	# 	"crystal",
-	# 	"dead",
-	# 	"petrify",
-	# 	"blood_suck",
-	# 	"treasure",
-	# 	"berserk",
-	# 	"chicken",
-	# 	"frog",
-	# 	"stop",
-	# 	"don't_act",
-	# ]
-	# new_action.ignore_passives = [
-	# 	"protect_status",
-	# 	"shell_status",
-	# 	"attack_up",
-	# 	"defense_up",
-	# 	"magic_attack_up",
-	# 	"magic_defense_up",
-	# 	"martial_arts",
-	# 	"throw_item",
-	# 	"monster_talk",
-	# 	"maintenance",
-	# 	"finger_guard",
-	# ]
-	# Utilities.save_json(new_action)
 
 	# generate_passive_effects()
 
@@ -1301,6 +1258,128 @@ func generate_passive_effects() -> void:
 	]
 	Utilities.save_json(new_passive_effect)
 
+	var new_action: Action = Action.new()
+	
+	new_action.display_name = "Defend"
+	new_action.unique_name = "defend"
+	new_action.status_chance = 100
+	new_action.target_status_list = ["defending"]
+	new_action.target_status_list_type = Action.StatusListType.ALL
+	new_action.targeting_type = Action.TargetingTypes.RANGE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = [
+		"crystal",
+		"dead",
+		"petrify",
+		"blood_suck",
+		"treasure",
+		"berserk",
+		"chicken",
+		"frog",
+		"stop",
+		"don't_act",
+	]
+	new_action.ignore_passives = [
+		"protect_status",
+		"shell_status",
+		"attack_up",
+		"defense_up",
+		"magic_attack_up",
+		"magic_defense_up",
+		"martial_arts",
+		"throw_item",
+		"monster_talk",
+		"maintenance",
+		"finger_guard",
+	]
+	Utilities.save_json(new_action)
+
+
+func export_data(save_path: String) -> void:
+	DirAccess.make_dir_recursive_absolute(save_path)
+	
+	var spritesheet_path: String = save_path + "/unit_spritesheets/"
+	DirAccess.make_dir_recursive_absolute(spritesheet_path)
+	for unit_spritesheet: Spr in spritesheets.values():
+		if not unit_spritesheet.is_initialized:
+			unit_spritesheet.set_data()
+		if unit_spritesheet.file_name == "ITEM.BIN":
+			continue
+
+		var bmp_bytes: PackedByteArray = Spr.create_paletted_bmp(unit_spritesheet.spritesheet, unit_spritesheet.color_palette, unit_spritesheet.bits_per_pixel)
+		var bmp_file_path: String = spritesheet_path + unit_spritesheet.file_name + ".unit_spritesheet.bmp"
+		var file: FileAccess = FileAccess.open(bmp_file_path, FileAccess.WRITE)
+		file.store_buffer(bmp_bytes)
+		file.close()
+
+		var spritesheet_data: Dictionary = {
+			"unique_name": unit_spritesheet.file_name,
+			"shp_name" : unit_spritesheet.shp_name,
+			"seq_name" : unit_spritesheet.seq_name,
+			"sprite_id" : unit_spritesheet.sprite_id,
+			"flying_flag" : unit_spritesheet.flying_flag,
+			"graphic_height" : unit_spritesheet.graphic_height,
+		}
+		var spritesheet_data_string: String = JSON.stringify(spritesheet_data, "\t")
+		var data_filepath: String = spritesheet_path + unit_spritesheet.file_name + ".unit_spritesheet.json"
+		var data_file: FileAccess = FileAccess.open(data_filepath, FileAccess.WRITE)
+		data_file.store_line(spritesheet_data_string)
+		data_file.close()
+
+	for shp: Shp in shps.values():
+		shp.write_shp(save_path + "/shps/")
+	for seq: Seq in seqs.values():
+		seq.write_seq(save_path + "/seqs/")
+
+
+	maps # TODO export maps
+	vfx # TPDP export vfx data
+
+	for item: ItemData in items.values():
+		Utilities.save_json(item, save_path)
+	for status_effect: StatusEffect in status_effects.values():
+		Utilities.save_json(status_effect, save_path)
+	for job_data: Action in jobs_data.values():
+		Utilities.save_json(job_data, save_path)
+	for action: Action in actions.values():
+		Utilities.save_json(action, save_path)
+	for triggered_action: TriggeredAction in triggered_actions.values():
+		Utilities.save_json(triggered_action, save_path)
+	for passive_effect: PassiveEffect in passive_effects.values():
+		Utilities.save_json(passive_effect, save_path)
+	for ability: Ability in abilities.values():
+		Utilities.save_json(ability, save_path)
+	for scenario: Scenario in scenarios.values():
+		Utilities.save_json(scenario, save_path)
+
+	trap_effect_data # TODO export TrapEffectData # TRAP particle effects from BATTLE.BIN
+
+	# Other Images
+	var other_images_path: String = save_path + "/other_images/"
+	DirAccess.make_dir_recursive_absolute(other_images_path)
+	# frame.bin
+	var frame_bin_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(frame_bin_texture.get_image(), frame_bin.color_palette, frame_bin.bits_per_pixel)
+	var frame_bin_bmp_file_path: String = other_images_path + "misc" + ".other.bmp"
+	var frame_bin_file: FileAccess = FileAccess.open(frame_bin_bmp_file_path, FileAccess.WRITE)
+	frame_bin_file.store_buffer(frame_bin_bmp_bytes)
+	frame_bin_file.close()
+	# item_bin
+	var items_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(item_bin_texture.get_image(), spritesheets["ITEM.BIN"].color_palette, spritesheets["ITEM.BIN"].bits_per_pixel)
+	var items_bmp_file_path: String = other_images_path + "items" + ".other.bmp"
+	var items_file: FileAccess = FileAccess.open(items_bmp_file_path, FileAccess.WRITE)
+	items_file.store_buffer(items_bmp_bytes)
+	items_file.close()
+
+	# Text
+	var text_path: String = save_path + "/text/"
+	DirAccess.make_dir_recursive_absolute(other_images_path)
+	var names: PackedStringArray = fft_text.unit_names_list
+	var names_string: String = JSON.stringify(names, "\t")
+	var names_filepath: String = text_path + "names.text.json"
+	var names_file: FileAccess = FileAccess.open(names_filepath, FileAccess.WRITE)
+	names_file.store_line(names_string)
+	names_file.close()
 
 class SpritesheetRegionData:
 	var shp_type: String
