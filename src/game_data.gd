@@ -1,4 +1,3 @@
-class_name GameData
 extends Node
 
 var is_ready: bool = false
