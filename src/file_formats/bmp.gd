@@ -15,7 +15,7 @@ var color_palette: PackedColorArray = []
 var color_indices: Array[int] = []
 var pixel_colors: PackedColorArray = []
 
-const BIT_DEPTH = {
+const BIT_DEPTH: Dictionary = {
 	ONE = 1,
 	FOUR = 4,
 	EIGHT = 8,
@@ -44,7 +44,7 @@ func _init(bmp_file: PackedByteArray = [], new_name: String = "file_name") -> vo
 	if bits_per_pixel > 8:
 		push_warning("Bit depth > 8, no palette to extract") # a compressed 16bpp format can use a palette, but is not covered by this utility
 	else:
-		for i in num_colors:
+		for i: int in num_colors:
 			var color: Color = Color.BLACK
 			color.b8 = bmp_file.decode_u8(palette_data_start + (i*4)) # blue
 			color.g8 = bmp_file.decode_u8(palette_data_start + (i*4) + 1) # green
@@ -58,7 +58,7 @@ func _init(bmp_file: PackedByteArray = [], new_name: String = "file_name") -> vo
 		push_warning("Bit depth > 8, colors are not indexed") # a compressed 16bpp format can use indexed colors, but is not covered by this utility
 	else:
 		color_indices.resize(num_pixels)
-		for i in num_pixels:
+		for i: int in num_pixels:
 			var pixel_offset: int = (i * bits_per_pixel)/8
 			var byte: int = bmp_file.decode_u8(pixel_data_start + pixel_offset)
 			
@@ -114,13 +114,13 @@ func set_color_indexed_data(image: Image, palette: Array[Color]) -> void:
 	color_palette = palette.duplicate()
 	
 	#push_warning(color_palette)
-	var color_palette_lookup := {}
-	for i in num_colors:
+	var color_palette_lookup: Dictionary = {}
+	for i: int in num_colors:
 		if not color_palette_lookup.has(str(color_palette[i])): # only get lowest index lookup
 			color_palette_lookup[str(color_palette[i])] = i
 	
-	for x in width:
-		for y in height:
+	for x: int in width:
+		for y: int in height:
 			var pixel_color: Color = image.get_pixel(x, height - y - 1) # stores data left to right, bottom to top
 			pixel_colors[x + (y * width)] = pixel_color
 			var color_string: String = str(pixel_color)
@@ -145,10 +145,10 @@ func get_color(x:int, y:int) -> Color:
 func get_rgba8_image() -> Image:
 	var image:Image = Image.create_empty(width, height, false, Image.FORMAT_RGBA8)
 	
-	for x in width:
-		for y in height:
-			var color:Color = pixel_colors[x + (y * width)]
-			var color8:Color = Color8(color.r8, color.g8, color.b8, color.a8) # use Color8 function to prevent issues with format conversion changing color by 1/255
+	for x: int in width:
+		for y: int in height:
+			var color: Color = pixel_colors[x + (y * width)]
+			var color8: Color = Color8(color.r8, color.g8, color.b8, color.a8) # use Color8 function to prevent issues with format conversion changing color by 1/255
 			image.set_pixel(x,height - y - 1, color8) # bmp stores pixel data left to right, bottom to top
 			#push_warning(str(Vector2i(x, height - y - 1)) + " - " + str(pixel_colors[x + (y * width)]) + " - " + str(image.get_pixel(x, height - y - 1)))
 	
@@ -157,7 +157,7 @@ func get_rgba8_image() -> Image:
 
 func set_colors_by_indices() -> void:
 	if bits_per_pixel <= 8:
-		for i in color_indices.size():
+		for i: int in color_indices.size():
 			if color_indices[i] >= color_palette.size():
 				push_warning("Pixel " + str(i) + " trying to index to color " + str(color_indices[i]) + ", but color palette only has " + str(color_palette.size()) + " colors")
 			else:
@@ -209,7 +209,7 @@ static func create_paletted_bmp(image: Image, palette: Array[Color], local_bits_
 
 	# Color Table 0x0036 - either 16 (4bpp) colors long or 256 (8 bpp) colors long	
 	var color_index: Dictionary[String, int] = {} # Dictionary[string, int] to determine index based on pixel color
-	for i in palette_num_colors:
+	for i: int in palette_num_colors:
 		var palette_color_string: String = str(palette[i]) # use string to allow for correct dictionary lookup
 		if color_index.has(palette_color_string): # keep lowest index for color
 			if i < color_index[palette_color_string]:
