@@ -208,7 +208,7 @@ func process_rom() -> void:
 		if map_idx != 0 and map_idx <= RomReader.fft_text.map_names.size():
 			map_data.display_name = RomReader.fft_text.map_names[map_idx - 1]
 			map_data.unique_name += " " + map_data.display_name
-		map_data.unique_name = map_data.unique_name.to_snake_case()
+		map_data.unique_name = map_data.unique_name.to_snake_case().remove_char('"'.unicode_at(0))
 		maps[map_data.unique_name] = map_data
 	section_start = _profile_section("map_naming", section_start)
 
