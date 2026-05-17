@@ -42,7 +42,7 @@ var passive_effects: Array[PassiveEffect] = [] # TODO job_data move stat modifie
 
 func _init(new_job_id: int = -1, job_bytes: PackedByteArray = []) -> void:
 	if new_job_id == -1 or job_bytes.is_empty():
-		push_warning("creating empty job data")
+		#push_warning("creating empty job data")
 		return
 	
 	job_id = new_job_id

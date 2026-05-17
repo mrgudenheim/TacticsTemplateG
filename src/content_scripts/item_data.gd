@@ -128,7 +128,10 @@ enum ItemType {
 }
 
 # In SCUS data tables
-func _init(idx: int = 0) -> void:
+func _init(idx: int = -1) -> void:
+	if idx == -1:
+		return
+	
 	display_name = RomReader.fft_text.item_names[idx]
 	description = RomReader.fft_text.item_descriptions[idx]
 	item_idx = idx
