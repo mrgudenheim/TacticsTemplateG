@@ -1,7 +1,11 @@
 extends Node
 
-const DATA_PATH_CONFIG: String = "user://data_path.cfg"
-var data_path: String = ""
+const DATA_PATH_CONFIG: String = "user://external_data_paths.cfg"
+var external_data_paths: Dictionary [String, String] = {
+	"LOAD_PATH" : "",
+	"ROM_PATH" : "",
+	"EXPORT_PATH" : "",
+}
 
 var is_ready: bool = false
 
@@ -26,16 +30,33 @@ var frame_bin_texture: Texture2D
 var items_texture: Texture2D
 
 func _ready() -> void:
-	data_path = _get_saved_data_path()
-	if not data_path.is_empty() and FileAccess.file_exists(data_path):
-		call_deferred("import_data", data_path)
+	external_data_paths = _get_saved_data_paths()
+	if not external_data_paths.is_empty() and FileAccess.file_exists(external_data_paths["LOAD_PATH"]):
+		call_deferred("import_data", external_data_paths["LOAD_PATH"])
 
 
-func _get_saved_data_path() -> String:
-	if not FileAccess.file_exists(DATA_PATH_CONFIG):
-		return ""
+func _get_saved_data_paths() -> Dictionary [String, String]:
 	var file: FileAccess = FileAccess.open(DATA_PATH_CONFIG, FileAccess.READ)
-	return file.get_line().strip_edges()
+	if file == null:
+		var err: Error = FileAccess.get_open_error()
+		push_error(err)
+		return {
+			"LOAD_PATH" : "",
+			"ROM_PATH" : "",
+			"EXPORT_PATH" : "",
+		}
+
+	var file_text: String = file.get_as_text()
+	var untyped_dict : Dictionary = JSON.parse_string(file_text)
+	var typed_dict : Dictionary[String, String] = {}
+	typed_dict.assign(untyped_dict)
+	return typed_dict
+
+
+func save_data_paths() -> void:
+	var json_file: FileAccess = FileAccess.open(DATA_PATH_CONFIG, FileAccess.WRITE)
+	json_file.store_line(JSON.stringify(external_data_paths, "\t"))
+	json_file.close()
 
 
 func import_data(directory_path: String) -> void:

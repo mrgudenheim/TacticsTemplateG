@@ -4,10 +4,12 @@
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_red.tres" id="4_f2r6p"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_black.tres" id="6_l2dig"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_yellow.tres" id="7_f2r6p"]
+[ext_resource type="Texture2D" uid="uid://e6xsp0scu0wy" path="res://src/godot_license/FolderBrowse_godot.svg" id="8_bes1w"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_white.tres" id="8_kb1q2"]
-[ext_resource type="Script" uid="uid://ccsa6hgqk6q5g" path="res://src/rom_manager/export_rom_data.gd" id="8_qgxlc"]
+[ext_resource type="Script" uid="uid://daxiihrijoonn" path="res://src/external_data_setup_panel.gd" id="8_we1pw"]
 [ext_resource type="PackedScene" uid="uid://26tg32417lfm" path="res://src/rom_manager/load_rom.tscn" id="9_pbg35"]
 [ext_resource type="Script" uid="uid://cl143w048iago" path="res://src/Unit/character_controller_realtime.gd" id="10_d5yoq"]
+[ext_resource type="Texture2D" uid="uid://boj84aajpk67b" path="res://src/godot_license/FileBrowse_godot.svg" id="10_we1pw"]
 [ext_resource type="Material" path="res://src/content_scripts/Map/tile_highlight_blue.tres" id="11_1os5c"]
 [ext_resource type="PackedScene" uid="uid://7tn6b6eup5na" path="res://src/camera_controller.tscn" id="12_l2dig"]
 [ext_resource type="PackedScene" uid="uid://djqalqt20isme" path="res://src/battle/editor/job_select_button.tscn" id="14_f2r6p"]
@@ -110,7 +112,7 @@ offset_bottom = 14.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="DataSettingsPanel" type="PanelContainer" parent="." unique_id=769059005]
+[node name="ExternalDataSetupPanel" type="PanelContainer" parent="." unique_id=769059005 node_paths=PackedStringArray("rom_path_line_edit", "rom_find_button", "rom_file_dialog", "destination_path_line_edit", "destination_find_button", "destination_file_dialog", "export_data_button")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -122,43 +124,78 @@ offset_right = 191.0
 offset_bottom = 30.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("8_we1pw")
+rom_path_line_edit = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationLineEdit")
+rom_find_button = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationButton")
+rom_file_dialog = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationButton/RomFileDialog")
+destination_path_line_edit = NodePath("MarginContainer/VBoxContainer/GridContainer/ExportLocationLineEdit")
+destination_find_button = NodePath("MarginContainer/VBoxContainer/GridContainer/ExportLocationButton")
+destination_file_dialog = NodePath("MarginContainer/VBoxContainer/GridContainer/ExportLocationButton/DestinationFileDialog")
+export_data_button = NodePath("MarginContainer/VBoxContainer/ExportRomData")
 
-[node name="MarginContainer" type="MarginContainer" parent="DataSettingsPanel" unique_id=1317102780]
+[node name="MarginContainer" type="MarginContainer" parent="ExternalDataSetupPanel" unique_id=1317102780]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="DataSettingsPanel/MarginContainer" unique_id=1125605306]
+[node name="VBoxContainer" type="VBoxContainer" parent="ExternalDataSetupPanel/MarginContainer" unique_id=1125605306]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="DataSettingsPanel/MarginContainer/VBoxContainer" unique_id=714746537]
+[node name="LoadData" type="HBoxContainer" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer" unique_id=714746537]
 layout_mode = 2
 
-[node name="LoadData" type="Button" parent="DataSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=831085962]
+[node name="LoadLabel" type="Label" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/LoadData" unique_id=445131132]
 layout_mode = 2
-text = "Load Data"
+text = "Load:"
 
-[node name="FileDialog" type="FileDialog" parent="DataSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer/LoadData" unique_id=946556545]
-title = "Open a Directory"
-file_mode = 2
-display_mode = 1
-access = 2
-use_native_dialog = true
-
-[node name="LineEdit" type="LineEdit" parent="DataSettingsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=962279174]
+[node name="LoadDataLineEdit" type="LineEdit" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/LoadData" unique_id=962279174]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Select Folder to Load Data"
 select_all_on_focus = true
 
-[node name="ExportRomData" type="Button" parent="DataSettingsPanel/MarginContainer/VBoxContainer" unique_id=292541097 node_paths=PackedStringArray("rom_file_dialog", "destination_file_dialog")]
+[node name="LoadDataButton" type="Button" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/LoadData" unique_id=831085962]
 layout_mode = 2
-text = "Export Data from ROM"
-script = ExtResource("8_qgxlc")
-rom_file_dialog = NodePath("RomFileDialog")
-destination_file_dialog = NodePath("DestinationFileDialog")
+icon = ExtResource("8_bes1w")
 
-[node name="RomFileDialog" type="FileDialog" parent="DataSettingsPanel/MarginContainer/VBoxContainer/ExportRomData" unique_id=1983317614]
-title = "Select Rom"
+[node name="FileDialog" type="FileDialog" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/LoadData/LoadDataButton" unique_id=946556545]
+title = "Open a Directory"
+file_mode = 2
+display_mode = 1
+access = 2
+use_native_dialog = true
+
+[node name="HSeparator" type="HSeparator" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer" unique_id=1031954641]
+layout_mode = 2
+
+[node name="ExportRomData" type="Button" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer" unique_id=292541097]
+layout_mode = 2
+tooltip_text = "Invalid path to ROM
+Invalid path to destination"
+disabled = true
+text = "Export Data from ROM"
+
+[node name="GridContainer" type="GridContainer" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer" unique_id=1495722691]
+layout_mode = 2
+columns = 3
+
+[node name="RomLabel" type="Label" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=1708253938]
+layout_mode = 2
+text = "ROM:"
+
+[node name="RomLocationLineEdit" type="LineEdit" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=379594843]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Select ROM location"
+emoji_menu_enabled = false
+select_all_on_focus = true
+
+[node name="RomLocationButton" type="Button" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=1337816677]
+layout_mode = 2
+icon = ExtResource("10_we1pw")
+
+[node name="RomFileDialog" type="FileDialog" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/GridContainer/RomLocationButton" unique_id=1983317614]
+title = "Open a File"
 initial_position = 1
 ok_button_text = "Select"
 file_mode = 0
@@ -167,8 +204,24 @@ access = 2
 filters = PackedStringArray("*.bin")
 use_native_dialog = true
 
-[node name="DestinationFileDialog" type="FileDialog" parent="DataSettingsPanel/MarginContainer/VBoxContainer/ExportRomData" unique_id=360565316]
-title = "Select Destination"
+[node name="ExportLabel" type="Label" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=2108210912]
+layout_mode = 2
+text = "Export:"
+
+[node name="ExportLocationLineEdit" type="LineEdit" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=1955837463]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Select Export Destination"
+emoji_menu_enabled = false
+select_all_on_focus = true
+
+[node name="ExportLocationButton" type="Button" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/GridContainer" unique_id=1266053653]
+layout_mode = 2
+icon = ExtResource("8_bes1w")
+
+[node name="DestinationFileDialog" type="FileDialog" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/GridContainer/ExportLocationButton" unique_id=360565316]
+title = "Open a Directory"
 initial_position = 1
 file_mode = 2
 display_mode = 1
