@@ -26,7 +26,7 @@ func _on_destination_path_selected(path: String) -> void:
 	destination_file_dialog.visible = false
 	
 	# TODO progress bar/timings
-	#RomReader.on_load_rom_dialog_file_selected(path)
+	RomReader.on_load_rom_dialog_file_selected(rom_path)
 	
 	RomReader.export_data(destination_path)
 	push_warning("data export complete: " + destination_path)

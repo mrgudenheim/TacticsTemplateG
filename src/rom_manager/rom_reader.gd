@@ -77,10 +77,10 @@ var fft_text: FftText = FftText.new()
 	#pass
 
 
-func _ready() -> void:
-	var auto_load_path: String = _get_saved_rom_path()
-	if not auto_load_path.is_empty() and FileAccess.file_exists(auto_load_path):
-		call_deferred("on_load_rom_dialog_file_selected", auto_load_path)
+# func _ready() -> void:
+# 	var auto_load_path: String = _get_saved_rom_path()
+# 	if not auto_load_path.is_empty() and FileAccess.file_exists(auto_load_path):
+# 		call_deferred("on_load_rom_dialog_file_selected", auto_load_path)
 
 
 func get_scenario(scenario_name: String) -> Scenario:
@@ -186,6 +186,7 @@ func process_rom() -> void:
 
 	var scenario_dir: DirAccess = DirAccess.open("user://overrides/" + Scenario.SAVE_FOLDER)
 	var fft_scenarios_pre_extracted: bool = scenario_dir != null and Array(scenario_dir.get_files()).any(func(scenario_file_name: String) -> bool: return scenario_file_name.ends_with(".scenario.json"))
+	fft_scenarios_pre_extracted = false
 
 	if not fft_scenarios_pre_extracted:
 		wldcore_data.init_from_wldcore()
