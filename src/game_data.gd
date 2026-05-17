@@ -21,7 +21,7 @@ var actions: Dictionary[String, Action] = {} # [unique_name, Action]
 var triggered_actions: Dictionary[String, TriggeredAction] = {} # [unique_name, TriggeredAction]
 var passive_effects: Dictionary[String, PassiveEffect] = {} # [unique_name, TriggeredAction]
 var abilities: Dictionary[String, Ability] = {} # [unique_name, Ability]
-var _scenarios: Dictionary[String, Scenario] = {} # [unique_name, Scenario]
+var scenarios: Dictionary[String, Scenario] = {} # [unique_name, Scenario]
 var names: Dictionary[String, PackedStringArray] = {} # [name_category, possible names]
 
 # Textures
@@ -77,35 +77,41 @@ func import_data(directory_path: String) -> void:
 				"action":
 					var new_content: Action = Action.create_from_json(file_text)
 					if not actions.keys().has(new_content.unique_name):
-						new_content.add_to_global_list()
+						actions[new_content.unique_name] = new_content
 				"ability":
 					var new_content: Ability = Ability.create_from_json(file_text)
 					if not abilities.keys().has(new_content.unique_name):
-						new_content.add_to_global_list()
+						abilities[new_content.unique_name] = new_content
 				"triggered_action":
 					var new_content: TriggeredAction = TriggeredAction.create_from_json(file_text)
 					if not triggered_actions.keys().has(new_content.unique_name):
-						new_content.add_to_global_list()
+						triggered_actions[new_content.unique_name] = new_content
 				"passive_effect":
 					var new_content: PassiveEffect = PassiveEffect.create_from_json(file_text)
 					if not passive_effects.keys().has(new_content.unique_name):
-						new_content.add_to_global_list()
+						passive_effects[new_content.unique_name] = new_content
 				"status_effect":
 					var new_content: StatusEffect = StatusEffect.create_from_json(file_text)
 					if not status_effects.keys().has(new_content.unique_name):
-						new_content.add_to_global_list()
+						status_effects[new_content.unique_name] = new_content
 				"item":
 					var new_content: ItemData = ItemData.create_from_json(file_text)
 					if not items.keys().has(new_content.unique_name): # TODO allow overwriting content
-						new_content.add_to_global_list()
+						items[new_content.unique_name] = new_content
 				"scenario":
-					var file_name: String = ".".join(file_path.get_file().split(".").slice(0, -2))
-					var new_content: Scenario = Scenario.lazy_init(file_name)
-					if not _scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
-						new_content.add_to_global_list()
+					var new_content: Scenario = Scenario.create_from_json(file_text)
+					if not scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
+						scenarios[new_content.unique_name] = new_content
+				
+					#var file_name: String = ".".join(file_path.get_file().split(".").slice(0, -2))
+					#var new_content: Scenario = Scenario.lazy_init(file_name)
+					#if not scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
+						#scenarios[new_content.unique_name] = new_content
+				"job":
+					var new_content: JobData = JobData.create_from_json(file_text)
+					if not scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
+						jobs_data[new_content.unique_name] = new_content
 				# TODO map_data?
-			push_warning("Time to import json files (ms): " + str(Time.get_ticks_msec() - start_time))
-			start_time = Time.get_ticks_msec()
 		
 		elif file_path.ends_with(".tres"):
 			# TODO import map_tiles?, shp, seq, vfx
@@ -113,6 +119,9 @@ func import_data(directory_path: String) -> void:
 		elif file_path.ends_with(".glb"):
 			# TODO import map gltf?
 			pass
+		
+	push_warning("Time to import files (ms): " + str(Time.get_ticks_msec() - start_time))
+	start_time = Time.get_ticks_msec()
 
 
 func connect_data_references() -> void:
@@ -179,13 +188,13 @@ func connect_data_references() -> void:
 			item.weapon_attack_action = actions[item.weapon_attack_action_name]
 
 
-func get_scenario(unique_name: String) -> Scenario:
-	if _scenarios[unique_name].is_loaded:
-		return _scenarios[unique_name]
-	
-	var data_filepath: String = "user://"
-	var filepath: String = data_filepath + "scenarios/" + unique_name + ".scenario.json"
-	var file_text: String = FileAccess.get_file_as_string(filepath)
-	var new_scenario: Scenario = Scenario.create_from_json(file_text)
-	_scenarios[new_scenario.unique_name] = new_scenario
-	return new_scenario
+#func get_scenario(unique_name: String) -> Scenario:
+	#if _scenarios[unique_name].is_loaded:
+		#return _scenarios[unique_name]
+	#
+	#var data_filepath: String = "user://"
+	#var filepath: String = data_filepath + "scenarios/" + unique_name + ".scenario.json"
+	#var file_text: String = FileAccess.get_file_as_string(filepath)
+	#var new_scenario: Scenario = Scenario.create_from_json(file_text)
+	#_scenarios[new_scenario.unique_name] = new_scenario
+	#return new_scenario
