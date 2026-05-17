@@ -166,6 +166,7 @@ func set_colors_by_indices() -> void:
 		push_warning("Bit depth > 8, colors are not indexed")
 
 
+# https://www.ece.ualberta.ca/~elliott/ee552/studentAppNotes/2003_w/misc/bmp_file_format/bmp_file_format.htm
 static func create_paletted_bmp(image: Image, palette: Array[Color], local_bits_per_pixel: int = 8) -> PackedByteArray:
 	var bmp_file: PackedByteArray = []
 	if not (local_bits_per_pixel == 1 or local_bits_per_pixel == 4 or local_bits_per_pixel == 8 or local_bits_per_pixel == 16 or local_bits_per_pixel == 24):

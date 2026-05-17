@@ -503,6 +503,7 @@ func cache_associated_files() -> void:
 	item_spr.color_indices = item_spr.set_color_indices(item_spr_data.slice(0, 0x8000))
 	item_spr.set_pixel_colors()
 	item_spr.spritesheet = item_spr.get_rgba8_image()
+	item_spr.is_initialized = true
 	sprs.append(item_spr)
 	spritesheets["ITEM.BIN"] = item_spr
 
@@ -1303,10 +1304,11 @@ func export_data(save_path: String) -> void:
 	var spritesheet_path: String = save_path + "/unit_spritesheets/"
 	DirAccess.make_dir_recursive_absolute(spritesheet_path)
 	for unit_spritesheet: Spr in spritesheets.values():
-		if not unit_spritesheet.is_initialized:
-			unit_spritesheet.set_data()
 		if unit_spritesheet.file_name == "ITEM.BIN":
 			continue
+		
+		if not unit_spritesheet.is_initialized:
+			unit_spritesheet.set_data()
 
 		var bmp_bytes: PackedByteArray = Spr.create_paletted_bmp(unit_spritesheet.spritesheet, unit_spritesheet.color_palette, unit_spritesheet.bits_per_pixel)
 		var bmp_file_path: String = spritesheet_path + unit_spritesheet.file_name + ".unit_spritesheet.bmp"
@@ -1360,13 +1362,15 @@ func export_data(save_path: String) -> void:
 	var other_images_path: String = save_path + "/other_images/"
 	DirAccess.make_dir_recursive_absolute(other_images_path)
 	# frame.bin
-	var frame_bin_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(frame_bin_texture.get_image(), frame_bin.color_palette, frame_bin.bits_per_pixel)
+	var frame_bin_palette: int = 5
+	var frame_bin_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(frame_bin_texture.get_image(), frame_bin.color_palette.slice(frame_bin_palette * 16, (frame_bin_palette + 1) * 16), frame_bin.bits_per_pixel)
 	var frame_bin_bmp_file_path: String = other_images_path + "misc" + ".other.bmp"
 	var frame_bin_file: FileAccess = FileAccess.open(frame_bin_bmp_file_path, FileAccess.WRITE)
 	frame_bin_file.store_buffer(frame_bin_bmp_bytes)
 	frame_bin_file.close()
 	# item_bin
-	var items_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(item_bin_texture.get_image(), spritesheets["ITEM.BIN"].color_palette, spritesheets["ITEM.BIN"].bits_per_pixel)
+	var item_spr: Spr = spritesheets["ITEM.BIN"]
+	var items_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(item_spr.spritesheet, item_spr.color_palette, item_spr.bits_per_pixel)
 	var items_bmp_file_path: String = other_images_path + "items" + ".other.bmp"
 	var items_file: FileAccess = FileAccess.open(items_bmp_file_path, FileAccess.WRITE)
 	items_file.store_buffer(items_bmp_bytes)
