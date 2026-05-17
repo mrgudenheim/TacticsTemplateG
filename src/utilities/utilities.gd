@@ -178,10 +178,10 @@ func get_file_list_recursive(directory_path: String, ignore_hidden: bool = true)
 	for file_name: String in new_file_names:
 		if file_name.begins_with(".") and ignore_hidden:
 			continue # skip hidden files
-		all_file_paths.append(directory_path + file_name)
+		all_file_paths.append(directory_path.path_join(file_name))
 	
 	for sub_directory: String in new_sub_directories:
-		var sub_directory_file_paths: PackedStringArray = get_file_list_recursive(directory_path + sub_directory)
+		var sub_directory_file_paths: PackedStringArray = get_file_list_recursive(directory_path.path_join(sub_directory))
 		all_file_paths.append_array(sub_directory_file_paths)
 
 	return all_file_paths
