@@ -31,7 +31,7 @@ var items_texture: Texture2D
 
 func _ready() -> void:
 	external_data_paths = _get_saved_data_paths()
-	if not external_data_paths.is_empty() and FileAccess.file_exists(external_data_paths["LOAD_PATH"]):
+	if DirAccess.dir_exists_absolute(external_data_paths["LOAD_PATH"]):
 		call_deferred("import_data", external_data_paths["LOAD_PATH"])
 
 
@@ -60,7 +60,12 @@ func save_data_paths() -> void:
 
 
 func import_data(directory_path: String) -> void:
+	var start_time: int = Time.get_ticks_msec()
+
 	var file_paths: PackedStringArray = Utilities.get_file_list_recursive(directory_path)
+
+	push_warning("Time to find import files (ms): " + str(Time.get_ticks_msec() - start_time))
+	start_time = Time.get_ticks_msec()
 
 	for file_path: String in file_paths:
 		var data_type: String = file_path.split(".")[-2]
@@ -99,6 +104,9 @@ func import_data(directory_path: String) -> void:
 					if not _scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
 						new_content.add_to_global_list()
 				# TODO map_data?
+			push_warning("Time to import json files (ms): " + str(Time.get_ticks_msec() - start_time))
+			start_time = Time.get_ticks_msec()
+		
 		elif file_path.ends_with(".tres"):
 			# TODO import map_tiles?, shp, seq, vfx
 			pass

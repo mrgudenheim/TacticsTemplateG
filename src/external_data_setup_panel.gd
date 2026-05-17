@@ -1,6 +1,10 @@
 class_name ExternalDataSetupPanel
 extends PanelContainer
 
+@export var load_path_line_edit: LineEdit
+@export var load_find_button: Button
+@export var load_file_dialog: FileDialog
+
 @export var rom_path_line_edit: LineEdit
 @export var rom_find_button: Button
 @export var rom_file_dialog: FileDialog
@@ -11,8 +15,6 @@ extends PanelContainer
 
 @export var export_data_button: Button
 
-var rom_path: String
-var destination_path: String
 
 func _ready() -> void:
 	rom_path_line_edit.text_changed.connect(_on_rom_path_selected)
@@ -27,16 +29,15 @@ func _ready() -> void:
 
 	await get_tree().process_frame
 
-	rom_path = GameData.external_data_paths["ROM_PATH"]
-	rom_path_line_edit.text = rom_path
-	destination_path = GameData.external_data_paths["EXPORT_PATH"]
-	destination_path_line_edit.text = destination_path
+	load_path_line_edit.text = GameData.external_data_paths["LOAD_PATH"]
+	rom_path_line_edit.text = GameData.external_data_paths["ROM_PATH"]
+	destination_path_line_edit.text = GameData.external_data_paths["EXPORT_PATH"]
 	update_export_enabled()
 
 
 func update_export_enabled() -> void:
-	var rom_path_is_valid: bool = rom_path.is_absolute_path()
-	var destination_path_is_valid: bool = destination_path.is_absolute_path()
+	var rom_path_is_valid: bool = FileAccess.file_exists(GameData.external_data_paths["ROM_PATH"])
+	var destination_path_is_valid: bool = DirAccess.dir_exists_absolute(GameData.external_data_paths["EXPORT_PATH"])
 	
 	if rom_path_is_valid and destination_path_is_valid:
 		export_data_button.disabled = false
@@ -52,28 +53,30 @@ func update_export_enabled() -> void:
 
 
 func _on_rom_path_selected(path: String) -> void:
-	rom_path = path
+	GameData.external_data_paths["ROM_PATH"] = path
 	rom_path_line_edit.text = path
 	rom_file_dialog.visible = false
-	update_export_enabled()
 
-	GameData.external_data_paths["ROM_PATH"] = rom_path
 	GameData.save_data_paths()
+	update_export_enabled()
 
 
 func _on_destination_path_selected(path: String) -> void:
-	destination_path = path
 	destination_path_line_edit.text = path
 	destination_file_dialog.visible = false
-	update_export_enabled()
 
-	GameData.external_data_paths["EXPORT_PATH"] = destination_path
+	if GameData.external_data_paths["LOAD_PATH"].is_empty() or GameData.external_data_paths["LOAD_PATH"] == GameData.external_data_paths["EXPORT_PATH"]:
+		load_path_line_edit.text = path
+		GameData.external_data_paths["LOAD_PATH"] = path
+	GameData.external_data_paths["EXPORT_PATH"] = path
+	
 	GameData.save_data_paths()
+	update_export_enabled()
 
 
 func export_data() -> void:
 	# TODO progress bar/timings
-	RomReader.on_load_rom_dialog_file_selected(rom_path)
+	RomReader.on_load_rom_dialog_file_selected(GameData.external_data_paths["ROM_PATH"])
 	
-	RomReader.export_data(destination_path)
-	push_warning("data export complete: " + destination_path)
+	RomReader.export_data(GameData.external_data_paths["EXPORT_PATH"])
+	push_warning("data export complete: " + GameData.external_data_paths["EXPORT_PATH"])
