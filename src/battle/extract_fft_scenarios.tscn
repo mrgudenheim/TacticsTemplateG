@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://xjitsrxa1gwl"]
 
 [ext_resource type="Script" uid="uid://odqiqyvvgy0u" path="res://src/battle/extract_fft_scenarios.gd" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://26tg32417lfm" path="res://src/rom_manager/load_rom.tscn" id="2_load_rom"]
+[ext_resource type="PackedScene" uid="uid://26tg32417lfm" path="res://src/external_data_manager/load_rom.tscn" id="2_load_rom"]
 
 [node name="ExtractFftScenarios" type="Control" unique_id=2021249416 node_paths=PackedStringArray("load_rom_button", "rom_path_label", "auto_load_checkbox", "clear_path_button", "extract_button", "status_label", "close_button")]
 layout_mode = 3
