@@ -167,7 +167,7 @@ func set_colors_by_indices() -> void:
 
 
 static func create_paletted_bmp(image: Image, palette: Array[Color], local_bits_per_pixel: int = 8) -> PackedByteArray:
-	var bmp_file:PackedByteArray = []
+	var bmp_file: PackedByteArray = []
 	if not (local_bits_per_pixel == 1 or local_bits_per_pixel == 4 or local_bits_per_pixel == 8 or local_bits_per_pixel == 16 or local_bits_per_pixel == 24):
 		push_warning("not valid bits_per_pixel: " + str(local_bits_per_pixel))
 		return bmp_file
@@ -182,7 +182,7 @@ static func create_paletted_bmp(image: Image, palette: Array[Color], local_bits_
 	var header_size: int = 54
 	var palette_data_size: int = palette_num_colors * 4
 	var new_pixel_data_start: int = header_size + palette_data_size
-	var pixel_data_size:int = pixel_count * (local_bits_per_pixel/8.0)
+	var pixel_data_size: int = pixel_count * (local_bits_per_pixel/8.0)
 	var file_size: int = header_size + palette_data_size + pixel_data_size
 	bmp_file.resize(file_size)
 	bmp_file.fill(0)
@@ -208,14 +208,14 @@ static func create_paletted_bmp(image: Image, palette: Array[Color], local_bits_
 	bmp_file.encode_u32(0x0032, palette_num_colors) # Important Colors (4 bytes) 0x0032
 
 	# Color Table 0x0036 - either 16 (4bpp) colors long or 256 (8 bpp) colors long	
-	var color_index: Dictionary[String, int] = {} # Dictionary[string, int] to determine index based on pixel color
+	var color_table: Dictionary[String, int] = {} # Dictionary[string, int] to determine index based on pixel color
 	for i: int in palette_num_colors:
 		var palette_color_string: String = str(palette[i]) # use string to allow for correct dictionary lookup
-		if color_index.has(palette_color_string): # keep lowest index for color
-			if i < color_index[palette_color_string]:
-				color_index[palette_color_string] = i
+		if color_table.has(palette_color_string): # keep lowest index for color
+			if i < color_table[palette_color_string]:
+				color_table[palette_color_string] = i
 		else:
-			color_index[palette_color_string] = i
+			color_table[palette_color_string] = i
 		
 		bmp_file.encode_u8(0x0036 + (i*4), palette[i].b8) # blue
 		bmp_file.encode_u8(0x0036 + (i*4) + 1, palette[i].g8) # green
@@ -223,23 +223,23 @@ static func create_paletted_bmp(image: Image, palette: Array[Color], local_bits_
 		bmp_file.encode_u8(0x0036 + (i*4) + 3, palette[i].a8) # alpha
 	
 	# Pixel Data - left to right, bottom to top	
-	var index: int = 0
+	var color_index: int = 0
 	for y: int in image.get_height():
 		for x: int in image.get_width():
 			var pixel_index: int = x + (image.get_width() * y)
-			var color:Color = image.get_pixel(x, image.get_height() - y - 1)
-			var color_string:String = str(color)
+			var color: Color = image.get_pixel(x, image.get_height() - y - 1)
+			var color_string: String = str(color)
 			
-			if color_index.has(color_string):
-				index = color_index[color_string]
+			if color_table.has(color_string):
+				color_index = color_table[color_string]
 			else:
-				push_warning("color at " + str(Vector2i(x,y)) + " not in palette: " + color_string + " - " + str(color * 255))
-				index = 0
+				push_warning("color at " + str(Vector2i(x, y)) + " not in palette: " + color_string + " - " + str(color * 255))
+				color_index = 0
 				
 			if local_bits_per_pixel <= 8:
-				var index_shifted: int = index << (8-local_bits_per_pixel) - (local_bits_per_pixel * (local_bits_per_pixel % (8/local_bits_per_pixel))) # shift to position
-				index_shifted = index_shifted | bmp_file.decode_u8(new_pixel_data_start + floor(pixel_index/(8/local_bits_per_pixel))) # keep all bits
-				bmp_file.encode_u8(new_pixel_data_start + floor(pixel_index/(8/local_bits_per_pixel)), index_shifted)
+				var color_index_shifted: int = color_index << (8 - local_bits_per_pixel) - (local_bits_per_pixel * (x % (8 / local_bits_per_pixel))) # shift to sub-byte position
+				color_index_shifted = color_index_shifted | bmp_file.decode_u8(new_pixel_data_start + floor(pixel_index / (8 / local_bits_per_pixel))) # keep all bits
+				bmp_file.encode_u8(new_pixel_data_start + floor(pixel_index / (8 / local_bits_per_pixel)), color_index_shifted)
 			elif local_bits_per_pixel == 16:
 				var word: int = bmp_file.decode_u16(new_pixel_data_start + (pixel_index * 2))
 				word = word | color.b8 # blue is least significant 5 bits
