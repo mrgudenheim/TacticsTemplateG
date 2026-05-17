@@ -1,9 +1,11 @@
 class_name ExternalDataSetupPanel
 extends PanelContainer
 
-@export var load_path_line_edit: LineEdit
-@export var load_find_button: Button
-@export var load_file_dialog: FileDialog
+@export var import_button: Button
+
+@export var import_path_line_edit: LineEdit
+@export var import_find_button: Button
+@export var import_file_dialog: FileDialog
 
 @export var rom_path_line_edit: LineEdit
 @export var rom_find_button: Button
@@ -26,10 +28,11 @@ func _ready() -> void:
 	destination_file_dialog.dir_selected.connect(_on_destination_path_selected)
 
 	export_data_button.pressed.connect(export_data)
+	import_button.pressed.connect(func() -> void: GameData.import_data(GameData.external_data_paths["IMPORT_PATH"]))
 
 	await get_tree().process_frame
 
-	load_path_line_edit.text = GameData.external_data_paths["LOAD_PATH"]
+	import_path_line_edit.text = GameData.external_data_paths["IMPORT_PATH"]
 	rom_path_line_edit.text = GameData.external_data_paths["ROM_PATH"]
 	destination_path_line_edit.text = GameData.external_data_paths["EXPORT_PATH"]
 	update_export_enabled()
@@ -65,9 +68,9 @@ func _on_destination_path_selected(path: String) -> void:
 	destination_path_line_edit.text = path
 	destination_file_dialog.visible = false
 
-	if GameData.external_data_paths["LOAD_PATH"].is_empty() or GameData.external_data_paths["LOAD_PATH"] == GameData.external_data_paths["EXPORT_PATH"]:
-		load_path_line_edit.text = path
-		GameData.external_data_paths["LOAD_PATH"] = path
+	if GameData.external_data_paths["IMPORT_PATH"].is_empty() or GameData.external_data_paths["IMPORT_PATH"] == GameData.external_data_paths["EXPORT_PATH"]:
+		import_path_line_edit.text = path
+		GameData.external_data_paths["IMPORT_PATH"] = path
 	GameData.external_data_paths["EXPORT_PATH"] = path
 	
 	GameData.save_data_paths()

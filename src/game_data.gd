@@ -2,7 +2,7 @@ extends Node
 
 const DATA_PATH_CONFIG: String = "user://external_data_paths.cfg"
 var external_data_paths: Dictionary [String, String] = {
-	"LOAD_PATH" : "",
+	"IMPORT_PATH" : "",
 	"ROM_PATH" : "",
 	"EXPORT_PATH" : "",
 }
@@ -31,8 +31,8 @@ var items_texture: Texture2D
 
 func _ready() -> void:
 	external_data_paths = _get_saved_data_paths()
-	if DirAccess.dir_exists_absolute(external_data_paths["LOAD_PATH"]):
-		call_deferred("import_data", external_data_paths["LOAD_PATH"])
+	if not external_data_paths["IMPORT_PATH"].is_empty() and DirAccess.dir_exists_absolute(external_data_paths["IMPORT_PATH"]):
+		call_deferred("import_data", external_data_paths["IMPORT_PATH"])
 
 
 func _get_saved_data_paths() -> Dictionary [String, String]:
@@ -41,7 +41,7 @@ func _get_saved_data_paths() -> Dictionary [String, String]:
 		var err: Error = FileAccess.get_open_error()
 		push_error(err)
 		return {
-			"LOAD_PATH" : "",
+			"IMPORT_PATH" : "",
 			"ROM_PATH" : "",
 			"EXPORT_PATH" : "",
 		}

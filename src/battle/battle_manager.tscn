@@ -112,7 +112,7 @@ offset_bottom = 14.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ExternalDataSetupPanel" type="PanelContainer" parent="." unique_id=769059005 node_paths=PackedStringArray("load_path_line_edit", "load_find_button", "load_file_dialog", "rom_path_line_edit", "rom_find_button", "rom_file_dialog", "destination_path_line_edit", "destination_find_button", "destination_file_dialog", "export_data_button")]
+[node name="ExternalDataSetupPanel" type="PanelContainer" parent="." unique_id=769059005 node_paths=PackedStringArray("import_button", "import_path_line_edit", "import_find_button", "import_file_dialog", "rom_path_line_edit", "rom_find_button", "rom_file_dialog", "destination_path_line_edit", "destination_find_button", "destination_file_dialog", "export_data_button")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -125,9 +125,10 @@ offset_bottom = 30.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("8_we1pw")
-load_path_line_edit = NodePath("MarginContainer/VBoxContainer/LoadData/LoadDataLocationLineEdit")
-load_find_button = NodePath("MarginContainer/VBoxContainer/LoadData/LoadDataLocationButton")
-load_file_dialog = NodePath("MarginContainer/VBoxContainer/LoadData/LoadDataLocationButton/LoadDataFileDialog")
+import_button = NodePath("MarginContainer/VBoxContainer/ImportData/ImportButton")
+import_path_line_edit = NodePath("MarginContainer/VBoxContainer/ImportData/ImportLocationLineEdit")
+import_find_button = NodePath("MarginContainer/VBoxContainer/ImportData/ImportLocationButton")
+import_file_dialog = NodePath("../ScenarioEditor/MarginContainer/HBoxContainer/ImportScenario/ImportFileDialog")
 rom_path_line_edit = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationLineEdit")
 rom_find_button = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationButton")
 rom_file_dialog = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationButton/RomFileDialog")
@@ -142,25 +143,25 @@ layout_mode = 2
 [node name="VBoxContainer" type="VBoxContainer" parent="ExternalDataSetupPanel/MarginContainer" unique_id=1125605306]
 layout_mode = 2
 
-[node name="LoadData" type="HBoxContainer" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer" unique_id=714746537]
+[node name="ImportData" type="HBoxContainer" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer" unique_id=714746537]
 layout_mode = 2
 
-[node name="LoadDataButton" type="Button" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/LoadData" unique_id=2049096824]
+[node name="ImportButton" type="Button" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/ImportData" unique_id=2049096824]
 layout_mode = 2
-text = "Load Data"
+text = "Import"
 
-[node name="LoadDataLocationLineEdit" type="LineEdit" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/LoadData" unique_id=962279174]
+[node name="ImportLocationLineEdit" type="LineEdit" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/ImportData" unique_id=962279174]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Select Folder to Load Data"
 select_all_on_focus = true
 
-[node name="LoadDataLocationButton" type="Button" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/LoadData" unique_id=831085962]
+[node name="ImportLocationButton" type="Button" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/ImportData" unique_id=831085962]
 layout_mode = 2
 icon = ExtResource("8_bes1w")
 
-[node name="LoadDataFileDialog" type="FileDialog" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/LoadData/LoadDataLocationButton" unique_id=946556545]
+[node name="LoadDataFileDialog" type="FileDialog" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/ImportData/ImportLocationButton" unique_id=946556545]
 title = "Select A Folder"
 initial_position = 1
 file_mode = 2
