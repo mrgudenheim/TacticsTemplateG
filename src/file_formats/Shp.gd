@@ -594,8 +594,8 @@ func write_csvs() -> void:
 			
 			frame_data_string = ",".join(text_parts);
 		
-		var allText: PackedStringArray = [output, frame_data_string];
-		output = "\n".join(allText)
+		var all_text: PackedStringArray = [output, frame_data_string]
+		output = "\n".join(all_text)
 		
 		frame_id += 1
 	
@@ -626,8 +626,8 @@ func write_csvs() -> void:
 			
 			frame_data_string = ",".join(text_parts);
 		
-		var allText: PackedStringArray = [output, frame_data_string];
-		output = "\n".join(allText)
+		var all_text: PackedStringArray = [output, frame_data_string]
+		output = "\n".join(all_text)
 		
 		frame_id_submerged += 1
 	
