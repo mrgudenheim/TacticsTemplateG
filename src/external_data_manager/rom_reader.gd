@@ -1335,8 +1335,9 @@ func export_data(save_path: String) -> void:
 	var other_images_path: String = save_path + "/other_images/"
 	DirAccess.make_dir_recursive_absolute(other_images_path)
 	# frame.bin
-	var frame_bin_palette: int = 5
-	var frame_bin_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(frame_bin_texture.get_image(), frame_bin.color_palette.slice(frame_bin_palette * 16, (frame_bin_palette + 1) * 16), frame_bin.bits_per_pixel)
+	var frame_bin_palette_idx: int = 5
+	var frame_bin_palette_colors: PackedColorArray = frame_bin.color_palette.slice(frame_bin_palette_idx * 16, (frame_bin_palette_idx + 1) * 16)
+	var frame_bin_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(frame_bin_texture.get_image(), frame_bin_palette_colors, frame_bin.bits_per_pixel)
 	var frame_bin_bmp_file_path: String = other_images_path + "misc.other.bmp"
 	var frame_bin_file: FileAccess = FileAccess.open(frame_bin_bmp_file_path, FileAccess.WRITE)
 	frame_bin_file.store_buffer(frame_bin_bmp_bytes)
