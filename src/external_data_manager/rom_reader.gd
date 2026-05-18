@@ -1414,7 +1414,14 @@ func export_data(save_path: String) -> void:
 	message.emit("Exporting maps...")
 	await get_tree().process_frame
 
-	maps # TODO export maps
+	var maps_path: String = save_path + "/maps/"
+	DirAccess.make_dir_recursive_absolute(text_path)
+	for map_data: FftMapData in maps.values():
+		if map_data.unique_name == "map_000":
+			continue # skip map 0 - causes crash
+		var new_map_node: MapChunkNodes = map_data.get_map_scene(Vector3i(-1, -1, 1))
+		GltfManager.save_node(new_map_node, maps_path)
+		# TODO export map data: terrain, texture, texture animations
 
 	message.emit("Exporting vfx...")
 	await get_tree().process_frame

@@ -1,34 +1,27 @@
 class_name GltfManager
-extends Node
 
 
-func save_node(node_to_save: Node) -> void:
-	node_to_save.material_override = null
-	
-	var directory: String = "user://overrides/MAP/"
-	DirAccess.make_dir_recursive_absolute(directory)
-	var file_name: String = node_to_save.name
+static func save_node(node_to_save: Node, save_directory: String = "user://exports/maps/") -> void:
+	DirAccess.make_dir_recursive_absolute(save_directory)
+	var file_name: String = node_to_save.name + ".glb"
 	var gltf_state: GLTFState = GLTFState.new()
 	var gltf_document: GLTFDocument = GLTFDocument.new()
 	
 	gltf_document.append_from_scene(node_to_save, gltf_state)
-	var extension: String = ".glb"
-	gltf_document.write_to_filesystem(gltf_state, directory + file_name + extension)
+	gltf_document.write_to_filesystem(gltf_state, save_directory.path_join(file_name))
 	
-	push_warning("Saved: " + directory + file_name + extension)
+	push_warning("Saved: " + save_directory.path_join(file_name))
 
 
-func import_gltf(file_name: String) -> Node:
-	var directory: String = "user://overrides/MAP/"
+static func import_gltf(import_path: String) -> Node:
 	var gltf_state: GLTFState = GLTFState.new()
 	var gltf_document: GLTFDocument = GLTFDocument.new()
-	var import_path: String = directory + file_name + ".glb"
-	var error = gltf_document.append_from_file(import_path, gltf_state, 0, directory)
+	var error: int = gltf_document.append_from_file(import_path, gltf_state, 0, import_path.get_base_dir())
 	if error != 0:
-		push_warning(file_name + " failed to import as glb: " + str(error))
+		push_warning(import_path.get_file() + " failed to import as glb: " + str(error))
 		return null
 	
-	var node = gltf_document.generate_scene(gltf_state)
-	node.name = file_name
+	var node: Node = gltf_document.generate_scene(gltf_state)
+	node.name = import_path.get_file().get_basename()
 	
 	return node

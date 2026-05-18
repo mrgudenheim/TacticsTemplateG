@@ -88,7 +88,6 @@ func export_data() -> void:
 	rom_path_line_edit.editable = false
 	destination_path_line_edit.editable = false
 	
-
 	RomReader.message.connect(show_export_message)
 
 	show_export_message("Loading ROM...")
