@@ -23,7 +23,7 @@ RomReader="*res://src/external_data_manager/rom_reader.gd"
 Raycaster="*res://src/utilities/raycaster.gd"
 Utilities="*res://src/utilities/utilities.gd"
 GltfManagerNode="*res://src/utilities/gltf_manager.gd"
-GameData="*uid://27hf30uyfl2e"
+GameData="*uid://dswmqkavcf0yp"
 
 [debug]
 
