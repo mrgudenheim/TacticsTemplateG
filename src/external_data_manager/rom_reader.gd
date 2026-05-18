@@ -1331,34 +1331,6 @@ func export_data(save_path: String) -> void:
 		data_file.store_line(spritesheet_data_string)
 		data_file.close()
 
-	for shp: Shp in shps.values():
-		shp.write_shp(save_path + "/shps/")
-	for seq: Seq in seqs.values():
-		seq.write_seq(save_path + "/seqs/" + seq.file_name)
-
-
-	maps # TODO export maps
-	vfx # TODO export vfx data
-
-	for item: ItemData in items.values():
-		Utilities.save_json(item, save_path)
-	for status_effect: StatusEffect in status_effects.values():
-		Utilities.save_json(status_effect, save_path)
-	for job_data: JobData in jobs_data.values():
-		Utilities.save_json(job_data, save_path)
-	for action: Action in actions.values():
-		Utilities.save_json(action, save_path)
-	for triggered_action: TriggeredAction in triggered_actions.values():
-		Utilities.save_json(triggered_action, save_path)
-	for passive_effect: PassiveEffect in passive_effects.values():
-		Utilities.save_json(passive_effect, save_path)
-	for ability: Ability in abilities.values():
-		Utilities.save_json(ability, save_path)
-	for scenario: Scenario in scenarios.values():
-		Utilities.save_json(scenario, save_path)
-
-	trap_effect_data # TODO export TrapEffectData # TRAP particle effects from BATTLE.BIN
-
 	## Other Images
 	var other_images_path: String = save_path + "/other_images/"
 	DirAccess.make_dir_recursive_absolute(other_images_path)
@@ -1388,6 +1360,24 @@ func export_data(save_path: String) -> void:
 	items_palettes_file.store_line(JSON.stringify(item_spr.color_palette, "\t"))
 	items_palettes_file.close()
 
+	for item: ItemData in items.values():
+		Utilities.save_json(item, save_path)
+	for status_effect: StatusEffect in status_effects.values():
+		Utilities.save_json(status_effect, save_path)
+	for job_data: JobData in jobs_data.values():
+		Utilities.save_json(job_data, save_path)
+	for action: Action in actions.values():
+		Utilities.save_json(action, save_path)
+	for triggered_action: TriggeredAction in triggered_actions.values():
+		Utilities.save_json(triggered_action, save_path)
+	for passive_effect: PassiveEffect in passive_effects.values():
+		Utilities.save_json(passive_effect, save_path)
+	for ability: Ability in abilities.values():
+		Utilities.save_json(ability, save_path)
+	for scenario: Scenario in scenarios.values():
+		Utilities.save_json(scenario, save_path)
+
+	generate_passive_effects(save_path)
 
 	# Text
 	var text_path: String = save_path + "/text/"
@@ -1398,8 +1388,16 @@ func export_data(save_path: String) -> void:
 	var names_file: FileAccess = FileAccess.open(names_filepath, FileAccess.WRITE)
 	names_file.store_line(names_string)
 	names_file.close()
-	
-	generate_passive_effects(save_path)
+
+	for shp: Shp in shps.values():
+		shp.write_shp(save_path + "/shps/")
+	for seq: Seq in seqs.values():
+		seq.write_seq(save_path + "/seqs/" + seq.file_name)
+
+
+	maps # TODO export maps
+	vfx # TODO export vfx data
+	trap_effect_data # TODO export TrapEffectData # TRAP particle effects from BATTLE.BIN
 
 
 class SpritesheetRegionData:
