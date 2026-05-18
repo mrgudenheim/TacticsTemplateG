@@ -383,7 +383,7 @@ func process_rom() -> void:
 	# generate_passive_effects()
 
 	is_ready = true
-	rom_loaded.emit()
+	# rom_loaded.emit()
 
 
 func process_file_records(sectors: PackedInt32Array, folder_name: String = "") -> void:
