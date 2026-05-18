@@ -838,6 +838,83 @@ func handle_map053(gns_bytes: PackedByteArray) -> Array[MapFileRecord]:
 	return new_map_records
 
 
+func get_map_scene(mirror_scale: Vector3i) -> MapChunkNodes:
+	# map_scale.y = -1 # vanilla used -y as up
+	if not is_initialized:
+		init_map()
+
+	var new_map_instance: MapChunkNodes = MapChunkNodes.instantiate()
+	new_map_instance.map_data = self
+	new_map_instance.name = unique_name
+
+	var mesh_aabb: AABB = mesh.get_aabb()
+	if mirror_scale != Vector3i.ONE or mesh_aabb.position != Vector3.ZERO:
+		var surface_arrays: Array = mesh.surface_get_arrays(0)
+		var original_mesh_center: Vector3 = mesh_aabb.get_center()
+		var mirror_vec: Vector3 = Vector3(mirror_scale)
+		for vertex_idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size():
+			var vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx]
+			vertex = (vertex - original_mesh_center) * mirror_vec + (mesh_aabb.size / 2.0)
+			surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx] = vertex
+
+		var custom0_flags: int = FftMapData.mirror_custom0(surface_arrays, original_mesh_center, mirror_vec, mesh_aabb.size / 2.0)
+
+		# reorder verticies so polygon will have correct facing
+		var sum_scale: int = mirror_scale.x + mirror_scale.y + mirror_scale.z
+		if sum_scale == 1 or sum_scale == -3:
+			for idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size() / 3:
+				var tri_idx: int = idx * 3
+				var temp_vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][tri_idx]
+				surface_arrays[Mesh.ARRAY_VERTEX][tri_idx] = surface_arrays[Mesh.ARRAY_VERTEX][tri_idx + 2]
+				surface_arrays[Mesh.ARRAY_VERTEX][tri_idx + 2] = temp_vertex
+
+				var temp_uv: Vector2 = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx]
+				surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx] = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2]
+				surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2] = temp_uv
+
+		var modified_mesh: ArrayMesh = ArrayMesh.new()
+		modified_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays, [], {}, custom0_flags)
+		new_map_instance.mesh_instance.mesh = modified_mesh
+	else:
+		new_map_instance.mesh_instance.mesh = mesh
+
+	new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes)
+	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
+
+
+
+	
+	# new_map_instance.mesh_instance.mesh = mesh
+	# new_map_instance.mesh_instance.scale = map_scale
+	# # new_map_instance.position = map_position
+	# #new_map_instance.global_rotation_degrees = Vector3(0, 0, 0)
+	
+	# new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes)
+	
+	# #var shape_mesh: ConcavePolygonShape3D = new_map_data.mesh.create_trimesh_shape()
+	# if map_scale == Vector3.ONE:
+	# 	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
+	# else:
+	# 	new_map_instance.collision_shape.shape = get_scaled_collision_shape(map_scale)
+	
+	# # new_map_instance.play_animations(new_map_data)
+	# # new_map_instance.input_event.connect(on_map_input_event)
+	
+	return new_map_instance
+
+
+func get_scaled_collision_shape(collision_scale: Vector3) -> ConcavePolygonShape3D:
+	var new_collision_shape: ConcavePolygonShape3D = mesh.create_trimesh_shape()
+	var faces: PackedVector3Array = new_collision_shape.get_faces()
+	for i: int in faces.size():
+		faces[i] = faces[i] * collision_scale
+	
+	#push_warning(faces)
+	new_collision_shape.set_faces(faces)
+	new_collision_shape.backface_collision = true
+	return new_collision_shape
+
+
 class TextureAnimationData:
 	var texture_anim_instruction_bytes: PackedByteArray = []
 	var animation_type: int = -1 # error
