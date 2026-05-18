@@ -60,7 +60,7 @@ static var shp_aliases: Dictionary[String, String] = {
 const SP2_START_ANIMATION_ID: int = 194
 const SP2_V_OFFSET: int = 232 # pixels
 const SP2_V_OFFSET2: int = 256 # pixels
-#const constant_sp2_v_offsets: Dictionary[int, int] = { # using ShiShi spritesheet, sp2s loaded in order of ability id
+#const CONSTANT_SP2_V_OFFSETS: Dictionary[int, int] = { # using ShiShi spritesheet, sp2s loaded in order of ability id
 	#234: SP2_V_OFFSET,
 	#235: SP2_V_OFFSET,
 	#236: SP2_V_OFFSET + (SP2_V_OFFSET2 * 1),
@@ -75,7 +75,7 @@ const SP2_V_OFFSET2: int = 256 # pixels
 # ptr 232 - Compress (hammer) - IRON4.SP2
 # ptr 234 - Dispose (cannon) - IRON2.SP2
 # ptr 236 - Crush (drill) - IRON3.SP2
-const constant_sp2_v_offsets: Dictionary[int, int] = { # spritesheet with sp2s appended in order of file name
+const CONSTANT_SP2_V_OFFSETS: Dictionary[int, int] = { # spritesheet with sp2s appended in order of file name
 	234: SP2_V_OFFSET + (SP2_V_OFFSET2 * 1),
 	235: SP2_V_OFFSET + (SP2_V_OFFSET2 * 1),
 	236: SP2_V_OFFSET + (SP2_V_OFFSET2 * 2),
@@ -84,8 +84,8 @@ const constant_sp2_v_offsets: Dictionary[int, int] = { # spritesheet with sp2s a
 	233: SP2_V_OFFSET + (SP2_V_OFFSET2 * 3),
 	230: SP2_V_OFFSET + (SP2_V_OFFSET2 * 4),
 	231: SP2_V_OFFSET + (SP2_V_OFFSET2 * 4),
-	}
-const constant_sp2_files: Dictionary[int, int] = { # spritesheet with sp2s appended in order of file name
+}
+const CONSTANT_SP2_FILES: Dictionary[int, int] = { # spritesheet with sp2s appended in order of file name
 	234: 1,
 	235: 1,
 	236: 2,
@@ -94,7 +94,7 @@ const constant_sp2_files: Dictionary[int, int] = { # spritesheet with sp2s appen
 	233: 3,
 	230: 4,
 	231: 4,
-	}
+}
 
 
 var file_name: String = "default_file_name"
@@ -699,8 +699,8 @@ func get_v_offset(frame_index:int, subframe_index:int, animation_ptr_index: int,
 	elif file_name.contains("OTHER"):
 		v_offset = other_type_index * 24 * 2 # 2 rows each of chicken and frog frames
 	elif file_name.contains("MON"): # if y_top left is in bottom half, check if it should look into sp2
-		if constant_sp2_v_offsets.has(animation_ptr_index):
-			v_offset = constant_sp2_v_offsets[animation_ptr_index]
+		if CONSTANT_SP2_V_OFFSETS.has(animation_ptr_index):
+			v_offset = CONSTANT_SP2_V_OFFSETS[animation_ptr_index]
 		elif animation_ptr_index >= SP2_START_ANIMATION_ID:
 			v_offset = SP2_V_OFFSET + SP2_V_OFFSET2
 	

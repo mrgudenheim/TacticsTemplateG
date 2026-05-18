@@ -354,8 +354,8 @@ func create_frame_grid(anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: 
 	
 	for sp2_id: int in sp2s.size() + 1:
 		if sp2s.size() == 4: # handle hardcoded offsets for STEEL GIANT (aka TETSU.SPR)
-			for ptr_idx: int in Shp.constant_sp2_files.keys():
-				if Shp.constant_sp2_files[ptr_idx] == sp2_id:
+			for ptr_idx: int in Shp.CONSTANT_SP2_FILES.keys():
+				if Shp.CONSTANT_SP2_FILES[ptr_idx] == sp2_id:
 					anim_ptr_idx = ptr_idx
 			if file_name != "TETSU.SPR": # handle sp2s renamed/reordered by ShiShi
 				if [230, 231].has(anim_ptr_idx): # Destroy (electric fist)

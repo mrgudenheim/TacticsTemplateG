@@ -455,8 +455,8 @@ func get_animation_frame_offset(local_frame_offset_index: int, shp: Shp, back_fa
 
 func get_sp2_frame_offset(animation_ptr_id: int) -> int:
 	if global_seq.file_name == "MON.SEQ":
-		if Shp.constant_sp2_files.has(animation_ptr_id):
-			return Shp.constant_sp2_files[animation_ptr_id] * 256 # handle STEEL GIANT sp2 handling
+		if Shp.CONSTANT_SP2_FILES.has(animation_ptr_id):
+			return Shp.CONSTANT_SP2_FILES[animation_ptr_id] * 256 # handle STEEL GIANT sp2 handling
 		elif animation_ptr_id >= Shp.SP2_START_ANIMATION_ID:
 			return 256
 	
