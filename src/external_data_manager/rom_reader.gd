@@ -1323,6 +1323,7 @@ func export_data(save_path: String) -> void:
 			"sprite_id" : unit_spritesheet.sprite_id,
 			"flying_flag" : unit_spritesheet.flying_flag,
 			"graphic_height" : unit_spritesheet.graphic_height,
+			"palettes" : unit_spritesheet.color_palette,
 		}
 		var spritesheet_data_string: String = JSON.stringify(spritesheet_data, "\t")
 		var data_filepath: String = spritesheet_path + unit_spritesheet.file_name + ".unit_spritesheet.json"
@@ -1358,23 +1359,35 @@ func export_data(save_path: String) -> void:
 
 	trap_effect_data # TODO export TrapEffectData # TRAP particle effects from BATTLE.BIN
 
-	# Other Images
+	## Other Images
 	var other_images_path: String = save_path + "/other_images/"
 	DirAccess.make_dir_recursive_absolute(other_images_path)
 	# frame.bin
 	var frame_bin_palette: int = 5
 	var frame_bin_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(frame_bin_texture.get_image(), frame_bin.color_palette.slice(frame_bin_palette * 16, (frame_bin_palette + 1) * 16), frame_bin.bits_per_pixel)
-	var frame_bin_bmp_file_path: String = other_images_path + "misc" + ".other.bmp"
+	var frame_bin_bmp_file_path: String = other_images_path + "misc.other.bmp"
 	var frame_bin_file: FileAccess = FileAccess.open(frame_bin_bmp_file_path, FileAccess.WRITE)
 	frame_bin_file.store_buffer(frame_bin_bmp_bytes)
 	frame_bin_file.close()
+
+	var frame_bin_palettes_file_path: String = other_images_path + "misc.palettes.json"
+	var frame_bin_palettes_file: FileAccess = FileAccess.open(frame_bin_palettes_file_path, FileAccess.WRITE)
+	frame_bin_palettes_file.store_line(JSON.stringify(frame_bin.color_palette, "\t"))
+	frame_bin_palettes_file.close()
+
 	# item_bin
 	var item_spr: Spr = spritesheets["ITEM.BIN"]
 	var items_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(item_spr.spritesheet, item_spr.color_palette, item_spr.bits_per_pixel)
-	var items_bmp_file_path: String = other_images_path + "items" + ".other.bmp"
+	var items_bmp_file_path: String = other_images_path + "items.other.bmp"
 	var items_file: FileAccess = FileAccess.open(items_bmp_file_path, FileAccess.WRITE)
 	items_file.store_buffer(items_bmp_bytes)
 	items_file.close()
+	
+	var items_palettes_file_path: String = other_images_path + "items.palettes.json"
+	var items_palettes_file: FileAccess = FileAccess.open(items_palettes_file_path, FileAccess.WRITE)
+	items_palettes_file.store_line(JSON.stringify(item_spr.color_palette, "\t"))
+	items_palettes_file.close()
+
 
 	# Text
 	var text_path: String = save_path + "/text/"
