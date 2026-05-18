@@ -1421,7 +1421,16 @@ func export_data(save_path: String) -> void:
 			continue # skip map 0 - causes crash
 		var new_map_node: MapChunkNodes = map_data.get_map_scene(Vector3i(-1, -1, 1))
 		GltfManager.save_node(new_map_node, maps_path)
-		# TODO export map data: terrain, texture, texture animations
+
+		#var map_texture_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(map_data.albedo_texture.get_image(), map_data.texture_palettes, 8)
+		#var map_texture_bmp_file_path: String = maps_path.path_join(map_data.unique_name + ".texture.bmp")
+		#var map_texture_bmp_file: FileAccess = FileAccess.open(map_texture_bmp_file_path, FileAccess.WRITE)
+		#map_texture_bmp_file.store_buffer(map_texture_bmp_bytes)
+		#map_texture_bmp_file.close()
+		
+		var map_texture_webp_file_path: String = maps_path.path_join(map_data.unique_name + ".texture.webp")
+		map_data.albedo_texture.get_image().save_webp(map_texture_webp_file_path)
+		# TODO export map data: terrain, texture animations
 
 	message.emit("Exporting vfx...")
 	await get_tree().process_frame
