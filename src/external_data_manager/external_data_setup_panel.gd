@@ -17,6 +17,7 @@ extends PanelContainer
 
 @export var export_data_button: Button
 
+var _default_export_button_text: String
 
 func _ready() -> void:
 	rom_path_line_edit.text_changed.connect(_on_rom_path_selected)
@@ -29,6 +30,8 @@ func _ready() -> void:
 
 	export_data_button.pressed.connect(export_data)
 	import_button.pressed.connect(func() -> void: GameData.import_data(GameData.external_data_paths["IMPORT_PATH"]))
+
+	_default_export_button_text = export_data_button.text
 
 	await get_tree().process_frame
 
@@ -79,7 +82,34 @@ func _on_destination_path_selected(path: String) -> void:
 
 func export_data() -> void:
 	# TODO progress bar/timings
+	export_data_button.disabled = true
+	rom_find_button.disabled = true
+	destination_find_button.disabled = true
+	rom_path_line_edit.editable = false
+	destination_path_line_edit.editable = false
+	
+
+	RomReader.message.connect(show_export_message)
+
+	show_export_message("Loading ROM...")
+	await get_tree().process_frame
+	await get_tree().process_frame # waiting for two frames is needed for UI to update?
 	RomReader.on_load_rom_dialog_file_selected(GameData.external_data_paths["ROM_PATH"])
 	
-	RomReader.export_data(GameData.external_data_paths["EXPORT_PATH"])
-	push_warning("data export complete: " + GameData.external_data_paths["EXPORT_PATH"])
+	var start_time: int = Time.get_ticks_msec()
+	await RomReader.export_data(GameData.external_data_paths["EXPORT_PATH"])
+	var export_time: String = "(%.2f sec)" % ((Time.get_ticks_msec() - start_time) / 1000.0)
+	push_warning("data export complete " + export_time + ": " + GameData.external_data_paths["EXPORT_PATH"])
+
+	RomReader.message.disconnect(show_export_message)
+	export_data_button.text = _default_export_button_text
+	
+	export_data_button.disabled = false
+	rom_find_button.disabled = false
+	destination_find_button.disabled = false
+	rom_path_line_edit.editable = true
+	destination_path_line_edit.editable = true
+
+
+func show_export_message(message: String) -> void:
+	export_data_button.text = message

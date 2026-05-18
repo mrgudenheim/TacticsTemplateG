@@ -2,6 +2,7 @@
 extends Node
 
 signal rom_loaded
+signal message(message: String)
 
 const ROM_PATH_CONFIG: String = "user://rom_path.cfg"
 const DIRECTORY_DATA_SECTORS_ROOT: PackedInt32Array = [22]
@@ -1300,6 +1301,9 @@ func generate_passive_effects(save_path: String) -> void:
 
 func export_data(save_path: String) -> void:
 	DirAccess.make_dir_recursive_absolute(save_path)
+
+	message.emit("Exporting unit spritesheets...")
+	await get_tree().process_frame
 	
 	var spritesheet_path: String = save_path + "/unit_spritesheets/"
 	DirAccess.make_dir_recursive_absolute(spritesheet_path)
@@ -1331,6 +1335,9 @@ func export_data(save_path: String) -> void:
 		data_file.store_line(spritesheet_data_string)
 		data_file.close()
 
+	message.emit("Exporting other images...")
+	await get_tree().process_frame
+
 	## Other Images
 	var other_images_path: String = save_path + "/other_images/"
 	DirAccess.make_dir_recursive_absolute(other_images_path)
@@ -1361,6 +1368,9 @@ func export_data(save_path: String) -> void:
 	items_palettes_file.store_line(JSON.stringify(item_spr.color_palette, "\t"))
 	items_palettes_file.close()
 
+	message.emit("Exporting data tables...")
+	await get_tree().process_frame
+
 	for item: ItemData in items.values():
 		Utilities.save_json(item, save_path)
 	for status_effect: StatusEffect in status_effects.values():
@@ -1380,6 +1390,9 @@ func export_data(save_path: String) -> void:
 
 	generate_passive_effects(save_path)
 
+	message.emit("Exporting text...")
+	await get_tree().process_frame
+
 	# Text
 	var text_path: String = save_path + "/text/"
 	DirAccess.make_dir_recursive_absolute(text_path)
@@ -1390,13 +1403,22 @@ func export_data(save_path: String) -> void:
 	names_file.store_line(names_string)
 	names_file.close()
 
+	message.emit("Exporting SHPs and SEQs...")
+	await get_tree().process_frame
+
 	for shp: Shp in shps.values():
 		shp.write_shp(save_path + "/shps/")
 	for seq: Seq in seqs.values():
 		seq.write_seq(save_path + "/seqs/" + seq.file_name)
 
+	message.emit("Exporting maps...")
+	await get_tree().process_frame
 
 	maps # TODO export maps
+
+	message.emit("Exporting vfx...")
+	await get_tree().process_frame
+
 	vfx # TODO export vfx data
 	trap_effect_data # TODO export TrapEffectData # TRAP particle effects from BATTLE.BIN
 
