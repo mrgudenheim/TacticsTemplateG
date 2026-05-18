@@ -22,7 +22,6 @@ config/icon="uid://b05fn7pqo1rrn"
 RomReader="*res://src/external_data_manager/rom_reader.gd"
 Raycaster="*res://src/utilities/raycaster.gd"
 Utilities="*res://src/utilities/utilities.gd"
-GltfManagerNode="*res://src/utilities/gltf_manager.gd"
 GameData="*uid://dswmqkavcf0yp"
 
 [debug]
