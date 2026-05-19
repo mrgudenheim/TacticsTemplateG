@@ -22,6 +22,8 @@ static func init_from_fft_map_data(fft_map_data: FftMapData) -> MapData:
 	new_map_data.palettes = fft_map_data.texture_palettes.duplicate()
 	for fft_texture_animation: FftMapData.TextureAnimationData in fft_map_data.texture_animations:
 		var new_texture_anim: TextureAnimation = TextureAnimation.new(fft_texture_animation)
+		if new_texture_anim.animation_type == TextureAnimation.AnimType.OTHER:
+			continue
 		new_map_data.texture_animations.append(new_texture_anim)
 	
 	new_map_data.palette_animation_frames = fft_map_data.texture_animations_palette_frames.duplicate()

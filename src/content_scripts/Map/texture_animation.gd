@@ -21,12 +21,9 @@ enum AnimTechnique {
 @export var frame_duration: float = -1.0 # seconds
 
 # UV Animation
-@export var canvas_x: int = -1
-@export var canvas_y: int = -1
-@export var canvas_width: int = -1
-@export var canvas_height: int = -1
-@export var frame1_x: int = -1
-@export var frame1_y: int = -1
+@export var canvas_position: Vector2i = Vector2i.ONE * -1
+@export var canvas_size: Vector2i = Vector2i.ONE * -1
+@export var frame1_position: Vector2i = Vector2i.ONE * -1
 
 # Palette Animation
 @export var palette_id_to_animate: int = -1
@@ -58,12 +55,12 @@ func _init(fft_texture_animation: FftMapData.TextureAnimationData = null) -> voi
 	num_frames = fft_texture_animation.num_frames
 	frame_duration = fft_texture_animation.frame_duration / 30.0
 
-	canvas_x = fft_texture_animation.canvas_x
-	canvas_y = fft_texture_animation.canvas_y + (256 * fft_texture_animation.texture_page)
-	canvas_width = fft_texture_animation.canvas_width
-	canvas_height = fft_texture_animation.canvas_height
-	frame1_x = fft_texture_animation.frame1_x
-	frame1_y = fft_texture_animation.frame1_y + (256 * fft_texture_animation.frame1_texture_page)
+	canvas_position.x = fft_texture_animation.canvas_x
+	canvas_position.y = fft_texture_animation.canvas_y + (256 * fft_texture_animation.texture_page)
+	canvas_size.x = fft_texture_animation.canvas_width
+	canvas_size.y = fft_texture_animation.canvas_height
+	frame1_position.x = fft_texture_animation.frame1_x
+	frame1_position.y = fft_texture_animation.frame1_y + (256 * fft_texture_animation.frame1_texture_page)
 	
 	palette_id_to_animate = fft_texture_animation.palette_id_to_animate
 	animation_starting_index = fft_texture_animation.animation_starting_index
