@@ -1416,21 +1416,27 @@ func export_data(save_path: String) -> void:
 
 	var maps_path: String = save_path + "/maps/"
 	DirAccess.make_dir_recursive_absolute(text_path)
-	for map_data: FftMapData in maps.values():
-		if map_data.unique_name == "map_000":
+	for fft_map_data: FftMapData in maps.values():
+		if fft_map_data.unique_name == "map_000":
 			continue # skip map 0 - causes crash
-		var new_map_node: MapChunkNodes = map_data.get_map_scene(Vector3i(-1, -1, 1))
+		var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3i(-1, -1, 1))
 		GltfManager.save_node(new_map_node, maps_path)
 
-		#var map_texture_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(map_data.albedo_texture.get_image(), map_data.texture_palettes, 8)
-		#var map_texture_bmp_file_path: String = maps_path.path_join(map_data.unique_name + ".texture.bmp")
+		#var map_texture_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(fft_map_data.albedo_texture.get_image(), fft_map_data.texture_palettes, 8)
+		#var map_texture_bmp_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".texture.bmp")
 		#var map_texture_bmp_file: FileAccess = FileAccess.open(map_texture_bmp_file_path, FileAccess.WRITE)
 		#map_texture_bmp_file.store_buffer(map_texture_bmp_bytes)
 		#map_texture_bmp_file.close()
 		
-		var map_texture_webp_file_path: String = maps_path.path_join(map_data.unique_name + ".texture.webp")
-		map_data.albedo_texture.get_image().save_webp(map_texture_webp_file_path)
-		# TODO export map data: terrain, texture animations
+		var map_texture_webp_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".texture.webp")
+		fft_map_data.albedo_texture.get_image().save_webp(map_texture_webp_file_path)
+		
+		var new_map_data: MapData = MapData.init_from_fft_map_data(fft_map_data)
+		var map_data_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".data.tres")
+		var error: Error = ResourceSaver.save(new_map_data, map_data_file_path)
+		if error != Error.OK:
+			push_warning("error saving map data " + fft_map_data.unique_name + ": " + str(error))
+		
 
 	message.emit("Exporting vfx...")
 	await get_tree().process_frame
