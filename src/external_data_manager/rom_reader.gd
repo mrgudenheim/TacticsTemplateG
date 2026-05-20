@@ -1366,7 +1366,7 @@ func export_data(save_path: String) -> void:
 	await get_tree().process_frame
 
 	var maps_path: String = save_path + "/maps/"
-	DirAccess.make_dir_recursive_absolute(text_path)
+	DirAccess.make_dir_recursive_absolute(maps_path)
 	for fft_map_data: FftMapData in maps.values():
 		if fft_map_data.unique_name == "map_000":
 			continue # skip map 0 - causes crash
@@ -1383,7 +1383,7 @@ func export_data(save_path: String) -> void:
 		fft_map_data.albedo_texture.get_image().save_webp(map_texture_webp_file_path)
 		
 		var new_map_data: MapData = MapData.init_from_fft_map_data(fft_map_data)
-		var map_data_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".data.tres")
+		var map_data_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".map_data.tres")
 		var error: Error = ResourceSaver.save(new_map_data, map_data_file_path)
 		if error != Error.OK:
 			push_warning("error saving map data " + fft_map_data.unique_name + ": " + str(error))
@@ -1392,7 +1392,21 @@ func export_data(save_path: String) -> void:
 	message.emit("Exporting vfx...")
 	await get_tree().process_frame
 
-	vfx # TODO export vfx data
+	var vfx_path: String = save_path + "/vfx/"
+	DirAccess.make_dir_recursive_absolute(vfx_path)
+	for vfx_file: VisualEffectData in vfx:
+		vfx_file.init_from_file()
+		if not vfx_file.is_initialized: # skip empty vfx files
+			continue
+
+		var vfx_data_file_path: String = vfx_path.path_join(vfx_file.unique_name + ".vfx_data.tres")
+		var error: Error = ResourceSaver.save(vfx_file, vfx_data_file_path)
+		if error != Error.OK:
+			push_warning("error saving map data " + vfx_file.unique_name + ": " + str(error))
+
+		var vfx_texture_webp_file_path: String = vfx_path.path_join(vfx_file.unique_name + ".texture.webp")
+		vfx_file.texture.get_image().save_webp(vfx_texture_webp_file_path)
+
 	trap_effect_data # TODO export TrapEffectData # TRAP particle effects from BATTLE.BIN
 
 

@@ -514,12 +514,12 @@ func _on_show_background_toggled(on: bool) -> void:
 	directional_light.visible = on
 
 
-func _dump_timelines(label: String, timelines: Array[VisualEffectData.EmitterTimeline]) -> void:
+func _dump_timelines(label: String, timelines: Array[EmitterTimeline]) -> void:
 	for ch_idx in range(timelines.size()):
-		var tl: VisualEffectData.EmitterTimeline = timelines[ch_idx]
+		var tl: EmitterTimeline = timelines[ch_idx]
 		var spawns: Array[String] = []
 		for kf_idx in range(tl.keyframes.size()):
-			var kf: VisualEffectData.EmitterKeyframe = tl.keyframes[kf_idx]
+			var kf: EmitterTimeline.EmitterKeyframe = tl.keyframes[kf_idx]
 			if kf.emitter_id > 0:
 				spawns.append("kf[%d] t=%d eid=%d(e%d) flags=0x%04X" % [
 					kf_idx, kf.time, kf.emitter_id, kf.emitter_id - 1,

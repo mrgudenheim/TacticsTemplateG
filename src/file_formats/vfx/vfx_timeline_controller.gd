@@ -25,12 +25,12 @@ var channel_states: Array = []
 var current_frame: int = 0
 
 
-func initialize(timelines: Array[VisualEffectData.EmitterTimeline]) -> void:
+func initialize(timelines: Array[EmitterTimeline]) -> void:
 	channel_states.clear()
 	current_frame = 0
 
 	for ch_idx: int in timelines.size():
-		var timeline: VisualEffectData.EmitterTimeline = timelines[ch_idx]
+		var timeline: EmitterTimeline = timelines[ch_idx]
 		var state: ChannelState = ChannelState.new()
 		state.timeline = timeline
 		state.channel_index = ch_idx
@@ -51,7 +51,7 @@ func initialize(timelines: Array[VisualEffectData.EmitterTimeline]) -> void:
 				emitter_started.emit(emitter_id - 1, ch_idx, 0)
 
 			# Check action_flags on first keyframe
-			var kf: VisualEffectData.EmitterKeyframe = timeline.keyframes[1]
+			var kf: EmitterTimeline.EmitterKeyframe = timeline.keyframes[1]
 			var action_flag: int = _get_action_flag_bits(kf)
 			if action_flag != 0:
 				action_flags_triggered.emit(action_flag, ch_idx, 0)
@@ -75,8 +75,8 @@ func advance_frame() -> Array[Dictionary]:
 
 
 func _process_channel(state: ChannelState) -> Variant:
-	var timeline: VisualEffectData.EmitterTimeline = state.timeline
-	var kf: VisualEffectData.EmitterKeyframe = timeline.keyframes[state.current_keyframe]
+	var timeline: EmitterTimeline = state.timeline
+	var kf: EmitterTimeline.EmitterKeyframe = timeline.keyframes[state.current_keyframe]
 	var emitter_id: int = kf.emitter_id
 
 	var request: Variant = null
@@ -104,7 +104,7 @@ func _process_channel(state: ChannelState) -> Variant:
 
 
 func _advance_keyframe(state: ChannelState, prev_emitter_id: int) -> void:
-	var timeline: VisualEffectData.EmitterTimeline = state.timeline
+	var timeline: EmitterTimeline = state.timeline
 
 	if prev_emitter_id != 0:
 		emitter_stopped.emit(prev_emitter_id - 1, state.channel_index, current_frame)
@@ -116,8 +116,8 @@ func _advance_keyframe(state: ChannelState, prev_emitter_id: int) -> void:
 		return
 
 	# Duration = kf[N].time - kf[N-1].time
-	var current_kf: VisualEffectData.EmitterKeyframe = timeline.keyframes[state.current_keyframe]
-	var prev_kf: VisualEffectData.EmitterKeyframe = timeline.keyframes[state.current_keyframe - 1]
+	var current_kf: EmitterTimeline.EmitterKeyframe = timeline.keyframes[state.current_keyframe]
+	var prev_kf: EmitterTimeline.EmitterKeyframe = timeline.keyframes[state.current_keyframe - 1]
 	state.duration_remaining = current_kf.time - prev_kf.time
 
 	state.spawn_counter = 0
@@ -131,7 +131,7 @@ func _advance_keyframe(state: ChannelState, prev_emitter_id: int) -> void:
 		action_flags_triggered.emit(action_flag, state.channel_index, current_frame)
 
 
-func _get_action_flag_bits(kf: VisualEffectData.EmitterKeyframe) -> int:
+func _get_action_flag_bits(kf: EmitterTimeline.EmitterKeyframe) -> int:
 	# Reconstruct the 16-bit action_flags from parsed booleans
 	var flags: int = 0
 	if kf.display_damage:
@@ -165,7 +165,7 @@ func get_active_emitters() -> Array[int]:
 	var active_list: Array[int] = []
 	for state: ChannelState in channel_states:
 		if not state.finished:
-			var kf: VisualEffectData.EmitterKeyframe = state.timeline.keyframes[state.current_keyframe]
+			var kf: EmitterTimeline.EmitterKeyframe = state.timeline.keyframes[state.current_keyframe]
 			if kf.emitter_id != 0:
 				var emitter_idx: int = kf.emitter_id - 1
 				if emitter_idx not in active_list:
@@ -174,7 +174,7 @@ func get_active_emitters() -> Array[int]:
 
 
 class ChannelState:
-	var timeline: VisualEffectData.EmitterTimeline
+	var timeline: EmitterTimeline
 	var channel_index: int = 0
 	var current_keyframe: int = 1 # Start at 1, skip kf[0]
 	var duration_remaining: int = 0

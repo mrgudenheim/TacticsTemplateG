@@ -82,10 +82,10 @@ func initialize(data: VisualEffectData) -> void:
 	timeline_enabled = false
 
 
-func _create_controller(timelines: Array[VisualEffectData.EmitterTimeline]) -> VfxTimelineController:
+func _create_controller(timelines: Array[EmitterTimeline]) -> VfxTimelineController:
 	# Check if any channel has keyframes
 	var has_data: bool = false
-	for tl: VisualEffectData.EmitterTimeline in timelines:
+	for tl: EmitterTimeline in timelines:
 		if tl.num_keyframes >= 1:
 			has_data = true
 			break

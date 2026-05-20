@@ -1,5 +1,5 @@
 class_name VfxEmitter
-extends RefCounted
+extends Resource
 
 ## Unit conversion constants (FFT raw → Godot units)
 ## These match godot-learning/tools/transform_for_godot.py
@@ -9,27 +9,27 @@ const ACCEL_DIVISOR: float = 114688.0          ## raw → Godot units/frame² (4
 const ANGLE_TO_RADIANS: float = TAU / 4096.0   ## 0-4096 → radians
 
 var vfx_data: VisualEffectData
-var anim_index: int
-var motion_type_flag: int
-var align_to_velocity: bool = false
-var target_anchor_mode: int = 0
-var animation_target_flag: int
-var spread_mode: int = 0
-var emitter_anchor_mode: int = 0
-var frameset_group_index: int
+@export var anim_index: int
+@export var motion_type_flag: int
+@export var align_to_velocity: bool = false
+@export var target_anchor_mode: int = 0
+@export var animation_target_flag: int
+@export var spread_mode: int = 0
+@export var emitter_anchor_mode: int = 0
+@export var frameset_group_index: int
 # byte_05 unused
-var emitter_flags: int = 0 # bytes 0x06 and 0x07
-var child_death_mode: int = 0
-var child_midlife_mode: int = 0
-var is_velocity_inward: bool = false
-var enable_color_curve: bool = false
-var align_to_facing: bool = false
-var homing_arrival_threshold_raw: int = 0
+@export var emitter_flags: int = 0 # bytes 0x06 and 0x07
+@export var child_death_mode: int = 0
+@export var child_midlife_mode: int = 0
+@export var is_velocity_inward: bool = false
+@export var enable_color_curve: bool = false
+@export var align_to_facing: bool = false
+@export var homing_arrival_threshold_raw: int = 0
 
-var velocity_mode: int = 0
+@export var velocity_mode: int = 0
 
 # curves
-var interpolation_curve_indicies: Dictionary[int, int] = {
+@export var interpolation_curve_indicies: Dictionary[int, int] = {
 	VfxConstants.CurveParam.POSITION: 0,
 	VfxConstants.CurveParam.PARTICLE_SPREAD: 0,
 	VfxConstants.CurveParam.VELOCITY_ANGLE: 0,
@@ -50,115 +50,115 @@ var interpolation_curve_indicies: Dictionary[int, int] = {
 	VfxConstants.CurveParam.COLOR_B: 0,
 }
 
-var start_position: Vector3 = Vector3.ZERO
-var end_position: Vector3 = Vector3.ZERO
+@export var start_position: Vector3 = Vector3.ZERO
+@export var end_position: Vector3 = Vector3.ZERO
 
-var start_position_spread: Vector3 = Vector3.ZERO
-var end_position_spread: Vector3 = Vector3.ZERO
+@export var start_position_spread: Vector3 = Vector3.ZERO
+@export var end_position_spread: Vector3 = Vector3.ZERO
 
-var start_angle: Vector3 = Vector3.ZERO
-var end_angle: Vector3 = Vector3.ZERO
+@export var start_angle: Vector3 = Vector3.ZERO
+@export var end_angle: Vector3 = Vector3.ZERO
 
-var start_angle_spread: Vector3 = Vector3.ZERO
-var end_angle_spread: Vector3 = Vector3.ZERO
+@export var start_angle_spread: Vector3 = Vector3.ZERO
+@export var end_angle_spread: Vector3 = Vector3.ZERO
 
-var inertia_min_start: int = 0
-var inertia_max_start: int = 0
-var inertia_min_end: int = 0
-var inertia_max_end: int = 0
+@export var inertia_min_start: int = 0
+@export var inertia_max_start: int = 0
+@export var inertia_min_end: int = 0
+@export var inertia_max_end: int = 0
 
-var weight_min_start: int = 0
-var weight_max_start: int = 0
-var weight_min_end: int = 0
-var weight_max_end: int = 0
+@export var weight_min_start: int = 0
+@export var weight_max_start: int = 0
+@export var weight_min_end: int = 0
+@export var weight_max_end: int = 0
 
-var radial_velocity_min_start: int = 0
-var radial_velocity_max_start: int = 0
-var radial_velocity_min_end: int = 0
-var radial_velocity_max_end: int = 0
+@export var radial_velocity_min_start: int = 0
+@export var radial_velocity_max_start: int = 0
+@export var radial_velocity_min_end: int = 0
+@export var radial_velocity_max_end: int = 0
 
-var acceleration_min_start: Vector3 = Vector3.ZERO
-var acceleration_max_start: Vector3 = Vector3.ZERO
-var acceleration_min_end: Vector3 = Vector3.ZERO
-var acceleration_max_end: Vector3 = Vector3.ZERO
+@export var acceleration_min_start: Vector3 = Vector3.ZERO
+@export var acceleration_max_start: Vector3 = Vector3.ZERO
+@export var acceleration_min_end: Vector3 = Vector3.ZERO
+@export var acceleration_max_end: Vector3 = Vector3.ZERO
 
-var drag_min_start: Vector3 = Vector3.ZERO
-var drag_max_start: Vector3 = Vector3.ZERO
-var drag_min_end: Vector3 = Vector3.ZERO
-var drag_max_end: Vector3 = Vector3.ZERO
+@export var drag_min_start: Vector3 = Vector3.ZERO
+@export var drag_max_start: Vector3 = Vector3.ZERO
+@export var drag_min_end: Vector3 = Vector3.ZERO
+@export var drag_max_end: Vector3 = Vector3.ZERO
 
-var particle_lifetime_min_start: int = 0
-var particle_lifetime_max_start: int = 0
-var particle_lifetime_min_end: int = 0
-var particle_lifetime_max_end: int = 0
+@export var particle_lifetime_min_start: int = 0
+@export var particle_lifetime_max_start: int = 0
+@export var particle_lifetime_min_end: int = 0
+@export var particle_lifetime_max_end: int = 0
 
-var target_offset_start: Vector3 = Vector3.ZERO
-var target_offset_end: Vector3 = Vector3.ZERO
+@export var target_offset_start: Vector3 = Vector3.ZERO
+@export var target_offset_end: Vector3 = Vector3.ZERO
 
-var particle_count_start: int = 0
-var particle_count_end: int = 0
+@export var particle_count_start: int = 0
+@export var particle_count_end: int = 0
 
-var spawn_interval_start: int = 0
-var spawn_interval_end: int = 0
+@export var spawn_interval_start: int = 0
+@export var spawn_interval_end: int = 0
 
-var homing_strength_min_start: int = 0
-var homing_strength_max_start: int = 0
-var homing_strength_min_end: int = 0
-var homing_strength_max_end: int = 0
+@export var homing_strength_min_start: int = 0
+@export var homing_strength_max_start: int = 0
+@export var homing_strength_min_end: int = 0
+@export var homing_strength_max_end: int = 0
 
-var child_emitter_idx_on_death: int = 0
-var child_emitter_idx_on_interval: int = 0
+@export var child_emitter_idx_on_death: int = 0
+@export var child_emitter_idx_on_interval: int = 0
 
 ## Converted fields (Godot units, matching godot-learning's EffectEmitter)
 ## Positions: / 28.0 with Y-flip
-var conv_position_start: Vector3 = Vector3.ZERO
-var conv_position_end: Vector3 = Vector3.ZERO
-var conv_spread_start: Vector3 = Vector3.ZERO
-var conv_spread_end: Vector3 = Vector3.ZERO
+@export var conv_position_start: Vector3 = Vector3.ZERO
+@export var conv_position_end: Vector3 = Vector3.ZERO
+@export var conv_spread_start: Vector3 = Vector3.ZERO
+@export var conv_spread_end: Vector3 = Vector3.ZERO
 ## Angles: * TAU / 4096.0 (radians)
-var conv_angle_start: Vector3 = Vector3.ZERO
-var conv_angle_end: Vector3 = Vector3.ZERO
-var conv_angle_spread_start: Vector3 = Vector3.ZERO
-var conv_angle_spread_end: Vector3 = Vector3.ZERO
+@export var conv_angle_start: Vector3 = Vector3.ZERO
+@export var conv_angle_end: Vector3 = Vector3.ZERO
+@export var conv_angle_spread_start: Vector3 = Vector3.ZERO
+@export var conv_angle_spread_end: Vector3 = Vector3.ZERO
 ## Inertia/weight: cast to float (no unit conversion, used directly in physics formula)
-var conv_inertia_min_start: float = 0.0
-var conv_inertia_max_start: float = 0.0
-var conv_inertia_min_end: float = 0.0
-var conv_inertia_max_end: float = 0.0
-var conv_weight_min_start: float = 0.0
-var conv_weight_max_start: float = 0.0
-var conv_weight_min_end: float = 0.0
-var conv_weight_max_end: float = 0.0
+@export var conv_inertia_min_start: float = 0.0
+@export var conv_inertia_max_start: float = 0.0
+@export var conv_inertia_min_end: float = 0.0
+@export var conv_inertia_max_end: float = 0.0
+@export var conv_weight_min_start: float = 0.0
+@export var conv_weight_max_start: float = 0.0
+@export var conv_weight_min_end: float = 0.0
+@export var conv_weight_max_end: float = 0.0
 ## Radial velocity: / 14336.0 (signed)
-var conv_radial_velocity_min_start: float = 0.0
-var conv_radial_velocity_max_start: float = 0.0
-var conv_radial_velocity_min_end: float = 0.0
-var conv_radial_velocity_max_end: float = 0.0
+@export var conv_radial_velocity_min_start: float = 0.0
+@export var conv_radial_velocity_max_start: float = 0.0
+@export var conv_radial_velocity_min_end: float = 0.0
+@export var conv_radial_velocity_max_end: float = 0.0
 ## Acceleration: / 114688.0 with Y-flip (signed)
-var conv_acceleration_min_start: Vector3 = Vector3.ZERO
-var conv_acceleration_max_start: Vector3 = Vector3.ZERO
-var conv_acceleration_min_end: Vector3 = Vector3.ZERO
-var conv_acceleration_max_end: Vector3 = Vector3.ZERO
+@export var conv_acceleration_min_start: Vector3 = Vector3.ZERO
+@export var conv_acceleration_max_start: Vector3 = Vector3.ZERO
+@export var conv_acceleration_min_end: Vector3 = Vector3.ZERO
+@export var conv_acceleration_max_end: Vector3 = Vector3.ZERO
 ## Drag: / 114688.0 with Y-flip (signed)
-var conv_drag_min_start: Vector3 = Vector3.ZERO
-var conv_drag_max_start: Vector3 = Vector3.ZERO
-var conv_drag_min_end: Vector3 = Vector3.ZERO
-var conv_drag_max_end: Vector3 = Vector3.ZERO
+@export var conv_drag_min_start: Vector3 = Vector3.ZERO
+@export var conv_drag_max_start: Vector3 = Vector3.ZERO
+@export var conv_drag_min_end: Vector3 = Vector3.ZERO
+@export var conv_drag_max_end: Vector3 = Vector3.ZERO
 ## Target offset: / 28.0 with Y-flip (signed)
-var conv_target_offset_start: Vector3 = Vector3.ZERO
-var conv_target_offset_end: Vector3 = Vector3.ZERO
+@export var conv_target_offset_start: Vector3 = Vector3.ZERO
+@export var conv_target_offset_end: Vector3 = Vector3.ZERO
 ## Homing strength: / 114688.0 (signed)
-var conv_homing_strength_min_start: float = 0.0
-var conv_homing_strength_max_start: float = 0.0
-var conv_homing_strength_min_end: float = 0.0
-var conv_homing_strength_max_end: float = 0.0
+@export var conv_homing_strength_min_start: float = 0.0
+@export var conv_homing_strength_max_start: float = 0.0
+@export var conv_homing_strength_min_end: float = 0.0
+@export var conv_homing_strength_max_end: float = 0.0
 
 # var color_masking_motion_flags: int # byte 06
 # var byte_07: int
 # var start_position: Vector3i
 # var end_position: Vector3i
 
-func _init(emitter_bytes: PackedByteArray = [], new_vfx_data: VisualEffectData = null):
+func _init(emitter_bytes: PackedByteArray = [], new_vfx_data: VisualEffectData = null) -> void:
 	if emitter_bytes.size() == 0:
 		return
 	
