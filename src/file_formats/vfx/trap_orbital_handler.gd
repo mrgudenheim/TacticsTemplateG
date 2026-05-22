@@ -59,7 +59,7 @@ func start(origin: Vector3) -> void:
 
 	# Initialize ring buffer: 3 rings × 10 slots, all zero
 	ring_buffer.clear()
-	for _r in range(RING_COUNT):
+	for r: int in range(RING_COUNT):
 		var ring: Array[Vector3] = []
 		ring.resize(SLOTS_PER_RING)
 		ring.fill(Vector3.ZERO)
@@ -69,8 +69,8 @@ func start(origin: Vector3) -> void:
 	particles.clear()
 	var trap_data: TrapEffectData = RomReader.trap_effect_data
 	var emitter: TrapEffectData.TrapEmitter = trap_data.emitters[EMITTER_INDEX] if EMITTER_INDEX < trap_data.emitters.size() else null
-	for _i in range(TOTAL_PARTICLES):
-		var p := VfxParticleData.new()
+	for i: int in range(TOTAL_PARTICLES):
+		var p: VfxParticleData = VfxParticleData.new()
 		p.initialize(anchor, Vector3.ZERO, PARTICLE_LIFETIME, EMITTER_INDEX)
 		p.weight = 0.0
 		if emitter != null:
@@ -137,7 +137,7 @@ func _tick_fade() -> void:
 func _compute_orbital_positions() -> void:
 	accumulated_angle += angular_velocity
 
-	for r in range(RING_COUNT):
+	for r: int in range(RING_COUNT):
 		var angle: int = accumulated_angle + r * RING_PHASE_OFFSET
 		var theta: float = float(angle) * TAU / float(FULL_CIRCLE)
 
@@ -148,9 +148,9 @@ func _compute_orbital_positions() -> void:
 
 
 func _assign_particle_positions() -> void:
-	for r in range(RING_COUNT):
+	for r: int in range(RING_COUNT):
 		var read_idx: int = write_head
-		for slot in range(SLOTS_PER_RING):
+		for slot: int in range(SLOTS_PER_RING):
 			var particle_idx: int = r * SLOTS_PER_RING + slot
 			var p: VfxParticleData = particles[particle_idx]
 
@@ -161,8 +161,8 @@ func _assign_particle_positions() -> void:
 
 
 func _compute_brightness() -> void:
-	for r in range(RING_COUNT):
-		for slot in range(SLOTS_PER_RING):
+	for r: int in range(RING_COUNT):
+		for slot: int in range(SLOTS_PER_RING):
 			var particle_idx: int = r * SLOTS_PER_RING + slot
 			var weight: int = BRIGHTNESS_WEIGHTS[slot]
 			# PSX: brightness = weight * brightness_scale / 128 (range 0-255, 128 = neutral)
