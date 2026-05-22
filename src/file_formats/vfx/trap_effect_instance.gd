@@ -319,7 +319,7 @@ func _spawn_particles_for_tick(trap_data: TrapEffectData) -> void:
 			if p.emitter_index == emitter_idx:
 				current_count += 1
 
-		for _i: int in range(emitter.spawn_rate):
+		for i: int in range(emitter.spawn_rate):
 			if current_count >= emitter.max_particles:
 				break
 			var p: VfxParticleData = _create_particle(emitter_idx, emitter, trap_data)
