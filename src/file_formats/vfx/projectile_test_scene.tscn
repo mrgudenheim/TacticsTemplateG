@@ -31,7 +31,7 @@ albedo_color = Color(0.2, 0.5, 1, 1)
 radius = 0.08
 height = 0.16
 
-[node name="ProjectileTestScene" type="Node3D" unique_id=1513227548 node_paths=PackedStringArray("camera_controller", "maps_container", "target_marker", "origin_marker", "units_container", "effect_container", "variant_option", "trajectory_option", "arc_height_slider", "arc_height_label", "play_button", "loop_checkbox", "speed_slider", "speed_label", "direction_slider", "direction_label", "distance_slider", "distance_label", "height_offset_slider", "height_offset_label", "info_label")]
+[node name="ProjectileTestScene" type="Node3D" unique_id=1513227548 node_paths=PackedStringArray("camera_controller", "maps_container", "target_marker", "origin_marker", "units_container", "effect_container", "projectile_type_option", "trajectory_option", "arc_height_slider", "arc_height_label", "play_button", "loop_checkbox", "speed_slider", "speed_label", "direction_slider", "direction_label", "distance_slider", "distance_label", "height_offset_slider", "height_offset_label", "info_label")]
 script = ExtResource("1_script")
 camera_controller = NodePath("CameraController")
 maps_container = NodePath("Maps")
@@ -39,7 +39,7 @@ target_marker = NodePath("TargetMarker")
 origin_marker = NodePath("OriginMarker")
 units_container = NodePath("UnitsContainer")
 effect_container = NodePath("EffectContainer")
-variant_option = NodePath("DebugUI/LeftPanel/Margin/VBox/VariantRow/VariantOption")
+projectile_type_option = NodePath("DebugUI/LeftPanel/Margin/VBox/ProjectileTypeRow/ProjectileTypeOption")
 trajectory_option = NodePath("DebugUI/LeftPanel/Margin/VBox/TrajectoryRow/TrajectoryOption")
 arc_height_slider = NodePath("DebugUI/LeftPanel/Margin/VBox/ArcHeightRow/ArcHeightSlider")
 arc_height_label = NodePath("DebugUI/LeftPanel/Margin/VBox/ArcHeightLabel")
@@ -109,14 +109,14 @@ layout_mode = 2
 layout_mode = 2
 text = "Projectile Debug"
 
-[node name="VariantRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=1518367091]
+[node name="ProjectileTypeRow" type="HBoxContainer" parent="DebugUI/LeftPanel/Margin/VBox" unique_id=1518367091]
 layout_mode = 2
 
-[node name="VariantLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/VariantRow" unique_id=1191778536]
+[node name="ProjectileTypeLabel" type="Label" parent="DebugUI/LeftPanel/Margin/VBox/ProjectileTypeRow" unique_id=1191778536]
 layout_mode = 2
 text = "Variant:"
 
-[node name="VariantOption" type="OptionButton" parent="DebugUI/LeftPanel/Margin/VBox/VariantRow" unique_id=1005301863]
+[node name="ProjectileTypeOption" type="OptionButton" parent="DebugUI/LeftPanel/Margin/VBox/ProjectileTypeRow" unique_id=1005301863]
 layout_mode = 2
 size_flags_horizontal = 3
 
