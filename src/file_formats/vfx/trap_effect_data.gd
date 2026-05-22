@@ -3,6 +3,9 @@ class_name TrapEffectData
 ## TRAP particle effect system — melee hit dust, charge shimmer, earth claw, etc.
 ## 17 emitter configs baked into BATTLE.BIN + texture from WEP.SPR TRAP1 section.
 
+enum DirectionMode { NONE, DIRECTIONAL, FACING }
+enum VelocityMode { SPHERICAL_RANDOM, SCATTER, DIRECTIONAL, FACING_DIRECTIONAL, ZERO }
+
 # BATTLE.BIN offsets (RAM addr - 0x67000, matching battle_bin_data.gd pattern)
 const FRAMES_OFFSET: int = 0x1b7690 - 0x67000
 const ANIMATIONS_OFFSET: int = 0x1b8320 - 0x67000
@@ -67,9 +70,6 @@ const HANDLER_CONFIGS: Dictionary = {
 	21: [11],                    # knight break (overbright white triangles, palette 10)
 	22: [14],                    # summon charge orbs
 }
-
-enum DirectionMode { NONE, DIRECTIONAL, FACING }
-enum VelocityMode { SPHERICAL_RANDOM, SCATTER, DIRECTIONAL, FACING_DIRECTIONAL, ZERO }
 
 const HANDLER_GROUP_NAMES: Dictionary = {
 	2: "Hit Clouds",
@@ -156,113 +156,6 @@ const ELEMENT_TO_TRAP_ID: Dictionary = {
 	Action.ElementTypes.DARK: 8,
 }
 
-static func element_type_to_trap_id(el: Action.ElementTypes) -> int:
-	return ELEMENT_TO_TRAP_ID.get(el, 0)
-
-
-static func get_element_color(p_element_id: int) -> Color:
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
-	if p_element_id >= 0 and p_element_id < trap_data.element_colors.size():
-		return trap_data.element_colors[p_element_id]
-	return Color.WHITE
-
-
-class TrapEmitter:
-	const FLAG_DIRECTIONAL: int = 0x400
-	const FLAG_FACING: int = 0x010
-	const FLAG_DIRECTIONAL_AND_FACING: int = FLAG_DIRECTIONAL | FLAG_FACING # 0x410
-	const FLAG_VELOCITY_ZERO: int = 0x1000
-
-	var index: int = 0
-	var name: String = ""
-	var anim_index: int = 0
-	var spawn_check_lo: int = 0
-	var spawn_check_hi: int = 0
-	var max_particles: int = 0
-	var direction_mode: DirectionMode = DirectionMode.NONE
-	var velocity_mode: VelocityMode = VelocityMode.SPHERICAL_RANDOM
-	var pos_scatter: Vector3 = Vector3.ZERO
-	var velocity: Vector3 = Vector3.ZERO # spawn ellipsoid
-	var vel_range: Vector3 = Vector3.ZERO # radians
-	var scatter_half_range: Vector3 = Vector3.ZERO # radians
-	var weight_min: int = 0
-	var weight_max: int = 0
-	var radius_min: int = 0 # signed: negative = fly away
-	var radius_max: int = 0
-	var spawn_rate: int = 0
-	var spawn_count: int = 0
-	var lifetime_min: int = 0 # -1 = animation-driven
-	var lifetime_max: int = 0
-
-	func _init(config_bytes: PackedByteArray, emitter_index: int) -> void:
-		index = emitter_index
-		name = EMITTER_NAMES.get(emitter_index, "config_%d" % emitter_index)
-		_parse_raw(config_bytes)
-		_convert_units(config_bytes)
-
-	func _parse_raw(config_bytes: PackedByteArray) -> void:
-		anim_index = config_bytes.decode_u8(0x00)
-		spawn_check_lo = config_bytes.decode_u8(0x02)
-		spawn_check_hi = config_bytes.decode_u8(0x03)
-		max_particles = config_bytes.decode_u8(0x04)
-
-		# Direction flags
-		var direction_flags: int = config_bytes.decode_u16(0x06)
-		if direction_flags & FLAG_DIRECTIONAL_AND_FACING == FLAG_DIRECTIONAL_AND_FACING:
-			direction_mode = DirectionMode.FACING
-		elif direction_flags & FLAG_DIRECTIONAL:
-			direction_mode = DirectionMode.DIRECTIONAL
-		else:
-			direction_mode = DirectionMode.NONE
-
-		# Velocity mode flags
-		var velocity_mode_flags: int = config_bytes.decode_u16(0x08)
-		if velocity_mode_flags & FLAG_VELOCITY_ZERO:
-			velocity_mode = VelocityMode.ZERO
-		elif velocity_mode_flags & FLAG_DIRECTIONAL_AND_FACING == FLAG_DIRECTIONAL_AND_FACING:
-			velocity_mode = VelocityMode.FACING_DIRECTIONAL
-		elif velocity_mode_flags & FLAG_DIRECTIONAL:
-			velocity_mode = VelocityMode.DIRECTIONAL
-		elif velocity_mode_flags & FLAG_FACING:
-			velocity_mode = VelocityMode.SCATTER
-		else:
-			velocity_mode = VelocityMode.SPHERICAL_RANDOM
-
-		weight_min = config_bytes.decode_s16(0x22)
-		weight_max = config_bytes.decode_s16(0x24)
-		radius_min = config_bytes.decode_s16(0x26)
-		radius_max = config_bytes.decode_s16(0x28)
-		spawn_rate = config_bytes.decode_u8(0x2A)
-		spawn_count = config_bytes.decode_u8(0x2B)
-		lifetime_min = config_bytes.decode_s8(0x2C)
-		lifetime_max = config_bytes.decode_s8(0x2D)
-
-	func _convert_units(config_bytes: PackedByteArray) -> void:
-		# Position scatter (/ POSITION_DIVISOR, Y-flip)
-		pos_scatter = Vector3(
-			config_bytes.decode_s16(0x0A) / VfxEmitter.POSITION_DIVISOR,
-			-config_bytes.decode_s16(0x0C) / VfxEmitter.POSITION_DIVISOR,
-			config_bytes.decode_s16(0x0E) / VfxEmitter.POSITION_DIVISOR)
-
-		# Velocity = spawn position ellipsoid (/ POSITION_DIVISOR, Y-flip)
-		velocity = Vector3(
-			config_bytes.decode_s16(0x10) / VfxEmitter.POSITION_DIVISOR,
-			-config_bytes.decode_s16(0x12) / VfxEmitter.POSITION_DIVISOR,
-			config_bytes.decode_s16(0x14) / VfxEmitter.POSITION_DIVISOR)
-
-		# Vel range (radians)
-		vel_range = Vector3(
-			config_bytes.decode_s16(0x16) * VfxEmitter.ANGLE_TO_RADIANS,
-			config_bytes.decode_s16(0x18) * VfxEmitter.ANGLE_TO_RADIANS,
-			config_bytes.decode_s16(0x1A) * VfxEmitter.ANGLE_TO_RADIANS)
-
-		# Scatter half range (radians, unsigned)
-		scatter_half_range = Vector3(
-			config_bytes.decode_u16(0x1C) * VfxEmitter.ANGLE_TO_RADIANS,
-			config_bytes.decode_u16(0x1E) * VfxEmitter.ANGLE_TO_RADIANS,
-			config_bytes.decode_u16(0x20) * VfxEmitter.ANGLE_TO_RADIANS)
-
-
 # Parsed data
 var gravity_raw: Vector3i = Vector3i.ZERO
 var gravity: Vector3 = Vector3.ZERO
@@ -274,6 +167,17 @@ var element_colors: Array[Color] = []
 var texture: Texture2D
 var textures_by_palette: Dictionary[int, Texture2D] = {}
 var trap_spr: Spr
+
+
+static func element_type_to_trap_id(el: Action.ElementTypes) -> int:
+	return ELEMENT_TO_TRAP_ID.get(el, 0)
+
+
+static func get_element_color(p_element_id: int) -> Color:
+	var trap_data: TrapEffectData = RomReader.trap_effect_data
+	if p_element_id >= 0 and p_element_id < trap_data.element_colors.size():
+		return trap_data.element_colors[p_element_id]
+	return Color.WHITE
 
 
 func init_from_rom() -> void:
@@ -491,3 +395,99 @@ func get_palette_texture(palette_id: int) -> Texture2D:
 	var tex: Texture2D = ImageTexture.create_from_image(img)
 	textures_by_palette[palette_id] = tex
 	return tex
+
+
+class TrapEmitter:
+	const FLAG_DIRECTIONAL: int = 0x400
+	const FLAG_FACING: int = 0x010
+	const FLAG_DIRECTIONAL_AND_FACING: int = FLAG_DIRECTIONAL | FLAG_FACING # 0x410
+	const FLAG_VELOCITY_ZERO: int = 0x1000
+
+	var index: int = 0
+	var name: String = ""
+	var anim_index: int = 0
+	var spawn_check_lo: int = 0
+	var spawn_check_hi: int = 0
+	var max_particles: int = 0
+	var direction_mode: DirectionMode = DirectionMode.NONE
+	var velocity_mode: VelocityMode = VelocityMode.SPHERICAL_RANDOM
+	var pos_scatter: Vector3 = Vector3.ZERO
+	var velocity: Vector3 = Vector3.ZERO # spawn ellipsoid
+	var vel_range: Vector3 = Vector3.ZERO # radians
+	var scatter_half_range: Vector3 = Vector3.ZERO # radians
+	var weight_min: int = 0
+	var weight_max: int = 0
+	var radius_min: int = 0 # signed: negative = fly away
+	var radius_max: int = 0
+	var spawn_rate: int = 0
+	var spawn_count: int = 0
+	var lifetime_min: int = 0 # -1 = animation-driven
+	var lifetime_max: int = 0
+
+	func _init(config_bytes: PackedByteArray, emitter_index: int) -> void:
+		index = emitter_index
+		name = EMITTER_NAMES.get(emitter_index, "config_%d" % emitter_index)
+		_parse_raw(config_bytes)
+		_convert_units(config_bytes)
+
+	func _parse_raw(config_bytes: PackedByteArray) -> void:
+		anim_index = config_bytes.decode_u8(0x00)
+		spawn_check_lo = config_bytes.decode_u8(0x02)
+		spawn_check_hi = config_bytes.decode_u8(0x03)
+		max_particles = config_bytes.decode_u8(0x04)
+
+		# Direction flags
+		var direction_flags: int = config_bytes.decode_u16(0x06)
+		if direction_flags & FLAG_DIRECTIONAL_AND_FACING == FLAG_DIRECTIONAL_AND_FACING:
+			direction_mode = DirectionMode.FACING
+		elif direction_flags & FLAG_DIRECTIONAL:
+			direction_mode = DirectionMode.DIRECTIONAL
+		else:
+			direction_mode = DirectionMode.NONE
+
+		# Velocity mode flags
+		var velocity_mode_flags: int = config_bytes.decode_u16(0x08)
+		if velocity_mode_flags & FLAG_VELOCITY_ZERO:
+			velocity_mode = VelocityMode.ZERO
+		elif velocity_mode_flags & FLAG_DIRECTIONAL_AND_FACING == FLAG_DIRECTIONAL_AND_FACING:
+			velocity_mode = VelocityMode.FACING_DIRECTIONAL
+		elif velocity_mode_flags & FLAG_DIRECTIONAL:
+			velocity_mode = VelocityMode.DIRECTIONAL
+		elif velocity_mode_flags & FLAG_FACING:
+			velocity_mode = VelocityMode.SCATTER
+		else:
+			velocity_mode = VelocityMode.SPHERICAL_RANDOM
+
+		weight_min = config_bytes.decode_s16(0x22)
+		weight_max = config_bytes.decode_s16(0x24)
+		radius_min = config_bytes.decode_s16(0x26)
+		radius_max = config_bytes.decode_s16(0x28)
+		spawn_rate = config_bytes.decode_u8(0x2A)
+		spawn_count = config_bytes.decode_u8(0x2B)
+		lifetime_min = config_bytes.decode_s8(0x2C)
+		lifetime_max = config_bytes.decode_s8(0x2D)
+
+	func _convert_units(config_bytes: PackedByteArray) -> void:
+		# Position scatter (/ POSITION_DIVISOR, Y-flip)
+		pos_scatter = Vector3(
+			config_bytes.decode_s16(0x0A) / VfxEmitter.POSITION_DIVISOR,
+			-config_bytes.decode_s16(0x0C) / VfxEmitter.POSITION_DIVISOR,
+			config_bytes.decode_s16(0x0E) / VfxEmitter.POSITION_DIVISOR)
+
+		# Velocity = spawn position ellipsoid (/ POSITION_DIVISOR, Y-flip)
+		velocity = Vector3(
+			config_bytes.decode_s16(0x10) / VfxEmitter.POSITION_DIVISOR,
+			-config_bytes.decode_s16(0x12) / VfxEmitter.POSITION_DIVISOR,
+			config_bytes.decode_s16(0x14) / VfxEmitter.POSITION_DIVISOR)
+
+		# Vel range (radians)
+		vel_range = Vector3(
+			config_bytes.decode_s16(0x16) * VfxEmitter.ANGLE_TO_RADIANS,
+			config_bytes.decode_s16(0x18) * VfxEmitter.ANGLE_TO_RADIANS,
+			config_bytes.decode_s16(0x1A) * VfxEmitter.ANGLE_TO_RADIANS)
+
+		# Scatter half range (radians, unsigned)
+		scatter_half_range = Vector3(
+			config_bytes.decode_u16(0x1C) * VfxEmitter.ANGLE_TO_RADIANS,
+			config_bytes.decode_u16(0x1E) * VfxEmitter.ANGLE_TO_RADIANS,
+			config_bytes.decode_u16(0x20) * VfxEmitter.ANGLE_TO_RADIANS)
