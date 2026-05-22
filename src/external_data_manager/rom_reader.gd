@@ -1407,7 +1407,24 @@ func export_data(save_path: String) -> void:
 		var vfx_texture_webp_file_path: String = vfx_path.path_join(vfx_file.unique_name + ".texture.webp")
 		vfx_file.texture.get_image().save_webp(vfx_texture_webp_file_path)
 
-	trap_effect_data # TODO export TrapEffectData # TRAP particle effects from BATTLE.BIN
+	
+	var trap_texture_webp_file_path: String = vfx_path.path_join("shared_vfx.texture.webp")
+	trap_effect_data.texture.get_image().save_webp(trap_texture_webp_file_path)
+	
+	var shared_vfx_data_file_path: String = vfx_path.path_join("shared_vfx.data.tres")
+	var error: Error = ResourceSaver.save(trap_effect_data, shared_vfx_data_file_path)
+	if error != Error.OK:
+		push_warning("error saving shared vfx data: " + str(error))
+	
+	var shared_vfx_palettes_string: String = JSON.stringify(trap_effect_data.trap_spr.color_palette, "\t")
+	var shared_vfx_palettes_filepath: String = vfx_path.path_join("shared_vfx.palettes.json")
+	var shared_vfx_palettes_file: FileAccess = FileAccess.open(shared_vfx_palettes_filepath, FileAccess.WRITE)
+	shared_vfx_palettes_file.store_line(shared_vfx_palettes_string)
+	shared_vfx_palettes_file.close()
+
+	# TODO export TrapEffectData # TRAP particle effects from BATTLE.BIN
+
+	# TODO projectiles
 
 
 class SpritesheetRegionData:

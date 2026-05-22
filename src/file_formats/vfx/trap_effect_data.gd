@@ -1,4 +1,5 @@
 class_name TrapEffectData
+extends Resource
 
 ## TRAP particle effect system — melee hit dust, charge shimmer, earth claw, etc.
 ## 17 emitter configs baked into BATTLE.BIN + texture from WEP.SPR TRAP1 section.
@@ -158,12 +159,12 @@ const ELEMENT_TO_TRAP_ID: Dictionary = {
 
 # Parsed data
 var gravity_raw: Vector3i = Vector3i.ZERO
-var gravity: Vector3 = Vector3.ZERO
-var inertia_threshold: int = 0
-var emitters: Array[TrapEmitter] = []
-var framesets: Array[VisualEffectData.VfxFrameSet] = []
-var animations: Array[VisualEffectData.VfxAnimation] = []
-var element_colors: Array[Color] = []
+@export var gravity: Vector3 = Vector3.ZERO
+@export var inertia_threshold: int = 0
+@export var emitters: Array[TrapEmitter] = []
+@export var framesets: Array[VisualEffectData.VfxFrameSet] = []
+@export var animations: Array[VisualEffectData.VfxAnimation] = []
+@export var element_colors: Array[Color] = []
 var texture: Texture2D
 var textures_by_palette: Dictionary[int, Texture2D] = {}
 var trap_spr: Spr
@@ -397,32 +398,32 @@ func get_palette_texture(palette_id: int) -> Texture2D:
 	return tex
 
 
-class TrapEmitter:
+class TrapEmitter extends Resource:
 	const FLAG_DIRECTIONAL: int = 0x400
 	const FLAG_FACING: int = 0x010
 	const FLAG_DIRECTIONAL_AND_FACING: int = FLAG_DIRECTIONAL | FLAG_FACING # 0x410
 	const FLAG_VELOCITY_ZERO: int = 0x1000
 
 	var index: int = 0
-	var name: String = ""
-	var anim_index: int = 0
-	var spawn_check_lo: int = 0
-	var spawn_check_hi: int = 0
-	var max_particles: int = 0
-	var direction_mode: DirectionMode = DirectionMode.NONE
-	var velocity_mode: VelocityMode = VelocityMode.SPHERICAL_RANDOM
-	var pos_scatter: Vector3 = Vector3.ZERO
-	var velocity: Vector3 = Vector3.ZERO # spawn ellipsoid
-	var vel_range: Vector3 = Vector3.ZERO # radians
-	var scatter_half_range: Vector3 = Vector3.ZERO # radians
-	var weight_min: int = 0
-	var weight_max: int = 0
-	var radius_min: int = 0 # signed: negative = fly away
-	var radius_max: int = 0
-	var spawn_rate: int = 0
-	var spawn_count: int = 0
-	var lifetime_min: int = 0 # -1 = animation-driven
-	var lifetime_max: int = 0
+	@export var name: String = ""
+	@export var anim_index: int = 0
+	@export var spawn_check_lo: int = 0
+	@export var spawn_check_hi: int = 0
+	@export var max_particles: int = 0
+	@export var direction_mode: DirectionMode = DirectionMode.NONE
+	@export var velocity_mode: VelocityMode = VelocityMode.SPHERICAL_RANDOM
+	@export var pos_scatter: Vector3 = Vector3.ZERO
+	@export var velocity: Vector3 = Vector3.ZERO # spawn ellipsoid
+	@export var vel_range: Vector3 = Vector3.ZERO # radians
+	@export var scatter_half_range: Vector3 = Vector3.ZERO # radians
+	@export var weight_min: int = 0
+	@export var weight_max: int = 0
+	@export var radius_min: int = 0 # signed: negative = fly away
+	@export var radius_max: int = 0
+	@export var spawn_rate: int = 0
+	@export var spawn_count: int = 0
+	@export var lifetime_min: int = 0 # -1 = animation-driven
+	@export var lifetime_max: int = 0
 
 	func _init(config_bytes: PackedByteArray, emitter_index: int) -> void:
 		index = emitter_index
