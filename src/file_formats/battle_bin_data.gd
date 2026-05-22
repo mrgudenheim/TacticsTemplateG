@@ -52,7 +52,7 @@ const PROJECTILE_MODEL_OFFSETS: Dictionary = {
 	1: 0x14FD00,  # Stone
 	2: 0x1503B8,  # Special (shuriken)
 }
-var projectile_models: Dictionary = {}  # Variant int -> {"vertices": Array[Vector3], "faces": Array}
+var projectile_model_data: Dictionary = {}  # model_id int -> {"vertices": Array[Vector3], "faces": Array}
 
 # https://ffhacktics.com/wiki/Secondary_effects_by_Charge_Animation
 var charging_vfx_ids_start: int = 0x1b84ac - 0x67000 # 1 byte each?, 0x13 total
@@ -316,9 +316,9 @@ func _load_battle_bin_sprite_data() -> void:
 
 
 func _parse_projectile_models(battle_bytes: PackedByteArray) -> void:
-	for variant_id: int in PROJECTILE_MODEL_OFFSETS:
-		var offset: int = PROJECTILE_MODEL_OFFSETS[variant_id]
-		projectile_models[variant_id] = _parse_projectile_model(battle_bytes, offset)
+	for model_id: int in PROJECTILE_MODEL_OFFSETS:
+		var offset: int = PROJECTILE_MODEL_OFFSETS[model_id]
+		projectile_model_data[model_id] = _parse_projectile_model(battle_bytes, offset)
 
 
 func _parse_projectile_model(data: PackedByteArray, offset: int) -> Dictionary:

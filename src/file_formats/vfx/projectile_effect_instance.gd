@@ -95,11 +95,11 @@ func initialize() -> void:
 	add_child(_mesh_instance)
 
 	# Build variant meshes from parsed BATTLE.BIN data
-	var models: Dictionary = RomReader.battle_bin_data.projectile_models
-	for variant_id: int in models:
-		var verts: Array[Vector3] = models[variant_id]["vertices"]
-		var faces: Array = models[variant_id]["faces"]
-		_meshes[variant_id] = _build_mesh(verts, faces)
+	var models: Dictionary = RomReader.battle_bin_data.projectile_model_data
+	for model_id: int in models:
+		var verts: Array[Vector3] = models[model_id]["vertices"]
+		var faces: Array = models[model_id]["faces"]
+		_meshes[model_id] = build_mesh(verts, faces)
 
 
 func play(
@@ -282,7 +282,7 @@ func _update_transform() -> void:
 #  Mesh building — SurfaceTool, same approach as ProjectileMeshBuilder
 # ============================================================
 
-static func _build_mesh(vertices: Array[Vector3], faces: Array) -> ArrayMesh:
+static func build_mesh(vertices: Array[Vector3], faces: Array) -> ArrayMesh:
 	var st: SurfaceTool = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 
