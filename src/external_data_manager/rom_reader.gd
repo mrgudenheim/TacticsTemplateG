@@ -1253,6 +1253,16 @@ func generate_passive_effects(save_path: String) -> void:
 func export_data(save_path: String) -> void:
 	DirAccess.make_dir_recursive_absolute(save_path)
 
+	await export_unit_spritesheets(save_path)
+	await export_other_images(save_path)
+	await export_data_tables(save_path)
+	await export_text(save_path)
+	await export_unit_animations(save_path)
+	await export_maps(save_path)
+	await export_vfx(save_path)
+
+
+func export_unit_spritesheets(save_path: String) -> void:
 	message.emit("Exporting unit spritesheets...")
 	await get_tree().process_frame
 	
@@ -1286,10 +1296,11 @@ func export_data(save_path: String) -> void:
 		data_file.store_line(spritesheet_data_string)
 		data_file.close()
 
+
+func export_other_images(save_path: String) -> void:
 	message.emit("Exporting other images...")
 	await get_tree().process_frame
-
-	## Other Images
+	
 	var other_images_path: String = save_path + "/other_images/"
 	DirAccess.make_dir_recursive_absolute(other_images_path)
 	# frame.bin
@@ -1319,9 +1330,11 @@ func export_data(save_path: String) -> void:
 	items_palettes_file.store_line(JSON.stringify(item_spr.color_palette, "\t"))
 	items_palettes_file.close()
 
+
+func export_data_tables(save_path: String) -> void:
 	message.emit("Exporting data tables...")
 	await get_tree().process_frame
-
+	
 	for item: ItemData in items.values():
 		Utilities.save_json(item, save_path)
 	for status_effect: StatusEffect in status_effects.values():
@@ -1341,10 +1354,11 @@ func export_data(save_path: String) -> void:
 
 	generate_passive_effects(save_path)
 
+
+func export_text(save_path: String) -> void:
 	message.emit("Exporting text...")
 	await get_tree().process_frame
-
-	# Text
+	
 	var text_path: String = save_path + "/text/"
 	DirAccess.make_dir_recursive_absolute(text_path)
 	var names: PackedStringArray = fft_text.unit_names_list
@@ -1354,17 +1368,21 @@ func export_data(save_path: String) -> void:
 	names_file.store_line(names_string)
 	names_file.close()
 
+
+func export_unit_animations(save_path: String) -> void:
 	message.emit("Exporting SHPs and SEQs...")
 	await get_tree().process_frame
-
+	
 	for shp: Shp in shps.values():
 		shp.write_shp(save_path + "/shps/")
 	for seq: Seq in seqs.values():
 		seq.write_seq(save_path + "/seqs/" + seq.file_name)
 
+
+func export_maps(save_path: String) -> void:
 	message.emit("Exporting maps...")
 	await get_tree().process_frame
-
+	
 	var maps_path: String = save_path + "/maps/"
 	DirAccess.make_dir_recursive_absolute(maps_path)
 	for fft_map_data: FftMapData in maps.values():
@@ -1387,11 +1405,12 @@ func export_data(save_path: String) -> void:
 		var error: Error = ResourceSaver.save(new_map_data, map_data_file_path)
 		if error != Error.OK:
 			push_warning("error saving map data " + fft_map_data.unique_name + ": " + str(error))
-		
 
+
+func export_vfx(save_path: String) -> void:
 	message.emit("Exporting vfx...")
 	await get_tree().process_frame
-
+	
 	var vfx_path: String = save_path + "/vfx/"
 	DirAccess.make_dir_recursive_absolute(vfx_path)
 	for vfx_file: VisualEffectData in vfx:
@@ -1422,10 +1441,17 @@ func export_data(save_path: String) -> void:
 	shared_vfx_palettes_file.store_line(shared_vfx_palettes_string)
 	shared_vfx_palettes_file.close()
 
-	# TODO export TrapEffectData # TRAP particle effects from BATTLE.BIN
+	# projectiles
+	var models_data: Dictionary = RomReader.battle_bin_data.projectile_model_data
+	for model_id: int in models_data:
+		var verts: Array[Vector3] = models_data[model_id]["vertices"]
+		var faces: Array = models_data[model_id]["faces"]
 
-	# TODO projectiles
-
+		var new_mesh_instance: MeshInstance3D = MeshInstance3D.new()
+		new_mesh_instance.mesh = ProjectileEffectInstance.build_mesh(verts, faces)
+		new_mesh_instance.name = "projectile_" + ProjectileEffectInstance.ProjectileType.keys()[model_id]
+		GltfManager.save_node(new_mesh_instance, vfx_path)
+		new_mesh_instance.queue_free()
 
 class SpritesheetRegionData:
 	var shp_type: String
