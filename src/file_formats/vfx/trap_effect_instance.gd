@@ -515,7 +515,7 @@ func _spawn_handler_sparkles(trap_data: TrapEffectData) -> void:
 	if emitter_idx >= trap_data.emitters.size():
 		return
 	var emitter: TrapEffectData.TrapEmitter = trap_data.emitters[emitter_idx]
-	for _i in range(count):
+	for i: int in range(count):
 		var p: VfxParticleData = _create_particle(emitter_idx, emitter, trap_data)
 		_particles.append(p)
 		handler.active_sparkle_count += 1
