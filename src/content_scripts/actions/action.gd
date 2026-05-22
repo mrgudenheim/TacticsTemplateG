@@ -606,14 +606,14 @@ func show_trap_hit(action_instance: ActionInstance, target_unit: Unit) -> void:
 	battle_manager.trap_instance.play(trap_hit_handler_id, trap_element, dir, flash_unit)
 
 
-func show_projectile(action_instance: ActionInstance, target_unit: Unit, variant: ProjectileEffectInstance.ProjectileType) -> void:
+func show_projectile(action_instance: ActionInstance, target_unit: Unit, projectile_type: ProjectileEffectInstance.ProjectileType) -> void:
 	var battle_manager: BattleManager = action_instance.user.global_battle_manager
 	if battle_manager == null or battle_manager.projectile_instance == null:
 		push_warning("[Action.show_projectile] battle_manager or projectile_instance is null")
 		return
 	var origin: Vector3 = action_instance.user.char_body.global_position
 	var target: Vector3 = target_unit.char_body.global_position
-	battle_manager.projectile_instance.play(origin, target, variant)
+	battle_manager.projectile_instance.play(origin, target, projectile_type)
 
 
 # TODO set action type directly for each action? maybe as part of action processing per target to check values after formula processing and passive effect modifications

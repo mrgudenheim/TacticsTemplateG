@@ -62,10 +62,10 @@ var _spin_x: float = 0.0
 
 var _tick_timer: float = 0.0
 
-# Rendering — baked ArrayMesh per variant, transformed via MeshInstance3D
+# Rendering — baked ArrayMesh per projectile_type, transformed via MeshInstance3D
 var _mesh_instance: MeshInstance3D
 var _material: StandardMaterial3D
-var _meshes: Dictionary = { } # Variant -> ArrayMesh (cached)
+var _meshes: Dictionary = { } # projectile_type -> ArrayMesh (cached)
 
 
 func _process(delta: float) -> void:
@@ -94,7 +94,7 @@ func initialize() -> void:
 	_mesh_instance.visible = false
 	add_child(_mesh_instance)
 
-	# Build variant meshes from parsed BATTLE.BIN data
+	# Build projectile_type meshes from parsed BATTLE.BIN data
 	var models: Dictionary = RomReader.battle_bin_data.projectile_model_data
 	for model_id: int in models:
 		var verts: Array[Vector3] = models[model_id]["vertices"]
@@ -105,7 +105,7 @@ func initialize() -> void:
 func play(
 		origin: Vector3,
 		target: Vector3,
-		variant: ProjectileType,
+		projectile_type: ProjectileType,
 		trajectory: Trajectory = Trajectory.LINEAR,
 		arc_height: float = 2.0,
 ) -> void:
@@ -119,13 +119,13 @@ func play(
 	_total_distance = _delta.length()
 
 	if trajectory == Trajectory.PARABOLIC:
-		variant = ProjectileType.ARROW # Handler 1 is arrow-only
+		projectile_type = ProjectileType.ARROW # Handler 1 is arrow-only
 		# XZ-only distance (handler 1 ignores Y in distance calc)
 		var xz_delta: Vector3 = Vector3(_delta.x, 0.0, _delta.z)
 		_xz_distance = xz_delta.length()
 		_xz_direction = xz_delta.normalized() if _xz_distance > 0.001 else Vector3.FORWARD
 
-	_projectile_type = variant
+	_projectile_type = projectile_type
 
 	var effective_distance: float = _xz_distance if trajectory == Trajectory.PARABOLIC else _total_distance
 	if effective_distance < 0.001:
@@ -145,7 +145,7 @@ func play(
 
 	_orientation = _compute_orientation(_delta)
 
-	_mesh_instance.mesh = _meshes[variant]
+	_mesh_instance.mesh = _meshes[projectile_type]
 	_mesh_instance.visible = true
 
 	_tick_timer = 0.0
@@ -199,7 +199,7 @@ func _process_tick() -> void:
 		# Linear interpolation
 		_current_position = _origin.lerp(_target, t)
 
-	# Update rotation per variant
+	# Update rotation per projectile_type
 	match _projectile_type:
 		ProjectileType.STONE:
 			_tumble_y += STONE_TUMBLE_Y_RATE
@@ -258,7 +258,7 @@ func _update_transform() -> void:
 		ProjectileType.SPECIAL:
 			model_scale = SPECIAL_SCALE
 
-	# Build rotation: orientation along trajectory + variant-specific tumble
+	# Build rotation: orientation along trajectory + projectile_type-specific tumble
 	var tumble_basis: Basis = Basis.IDENTITY
 	match _projectile_type:
 		ProjectileType.ARROW:

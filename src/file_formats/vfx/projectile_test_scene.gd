@@ -11,7 +11,7 @@ extends Node3D
 @export var effect_container: Node3D
 
 # UI
-@export var variant_option: OptionButton
+@export var projectile_type_option: OptionButton
 @export var trajectory_option: OptionButton
 @export var arc_height_slider: HSlider
 @export var arc_height_label: Label
@@ -42,7 +42,7 @@ var _mesh_aabb: AABB
 
 
 func _ready() -> void:
-	variant_option.item_selected.connect(_on_variant_changed)
+	projectile_type_option.item_selected.connect(_on_projectile_type_changed)
 	trajectory_option.item_selected.connect(_on_trajectory_changed)
 	arc_height_slider.value_changed.connect(_on_arc_height_changed)
 	play_button.pressed.connect(_on_play_pressed)
@@ -142,11 +142,11 @@ func _setup_projectile_instance() -> void:
 
 
 func _populate_ui() -> void:
-	variant_option.clear()
-	variant_option.add_item("Arrow", ProjectileEffectInstance.ProjectileType.ARROW)
-	variant_option.add_item("Stone", ProjectileEffectInstance.ProjectileType.STONE)
-	variant_option.add_item("Special", ProjectileEffectInstance.ProjectileType.SPECIAL)
-	variant_option.select(1) # Default to Stone
+	projectile_type_option.clear()
+	projectile_type_option.add_item("Arrow", ProjectileEffectInstance.ProjectileType.ARROW)
+	projectile_type_option.add_item("Stone", ProjectileEffectInstance.ProjectileType.STONE)
+	projectile_type_option.add_item("Special", ProjectileEffectInstance.ProjectileType.SPECIAL)
+	projectile_type_option.select(1) # Default to Stone
 
 	trajectory_option.clear()
 	trajectory_option.add_item("Linear", ProjectileEffectInstance.Trajectory.LINEAR)
@@ -170,9 +170,9 @@ func _update_positions() -> void:
 
 
 func _update_info_display() -> void:
-	var variant_names: PackedStringArray = ["Arrow", "Stone", "Special"]
+	var projectile_type_names: PackedStringArray = ["Arrow", "Stone", "Special"]
 	var trajectory_names: PackedStringArray = ["Linear", "Parabolic"]
-	var variant_idx: int = variant_option.get_selected_id()
+	var projectile_type_idx: int = projectile_type_option.get_selected_id()
 	var trajectory_idx: int = trajectory_option.get_selected_id()
 
 	var attacker_pos: Vector3 = attacker_unit.char_body.global_position if attacker_unit != null else Vector3.ZERO
@@ -180,7 +180,7 @@ func _update_info_display() -> void:
 
 	var text: String = ""
 	text += "[b]Projectile Debug[/b]\n"
-	text += "variant: %s\n" % variant_names[variant_idx]
+	text += "projectile_type: %s\n" % projectile_type_names[projectile_type_idx]
 	text += "trajectory: %s\n" % trajectory_names[trajectory_idx]
 	if trajectory_idx == ProjectileEffectInstance.Trajectory.PARABOLIC:
 		text += "arc height: %.2f\n" % arc_height_slider.value
@@ -196,17 +196,17 @@ func _update_info_display() -> void:
 #  UI Callbacks
 # ============================================================
 
-func _on_variant_changed(_index: int) -> void:
+func _on_projectile_type_changed(_index: int) -> void:
 	_update_info_display()
 
 
 func _on_trajectory_changed(index: int) -> void:
 	if index == ProjectileEffectInstance.Trajectory.PARABOLIC:
-		# Handler 1 is arrow-only — force Arrow variant and disable dropdown
-		variant_option.select(0) # Arrow
-		variant_option.disabled = true
+		# Handler 1 is arrow-only — force Arrow projectile_type and disable dropdown
+		projectile_type_option.select(0) # Arrow
+		projectile_type_option.disabled = true
 	else:
-		variant_option.disabled = false
+		projectile_type_option.disabled = false
 	_update_info_display()
 
 
@@ -219,12 +219,12 @@ func _on_play_pressed() -> void:
 	if _projectile_instance == null or attacker_unit == null or target_unit == null:
 		return
 
-	var variant: ProjectileEffectInstance.ProjectileType = variant_option.get_selected_id() as ProjectileEffectInstance.ProjectileType
+	var projectile_type: ProjectileEffectInstance.ProjectileType = projectile_type_option.get_selected_id() as ProjectileEffectInstance.ProjectileType
 	var trajectory: ProjectileEffectInstance.Trajectory = trajectory_option.get_selected_id() as ProjectileEffectInstance.Trajectory
 	var origin_pos: Vector3 = attacker_unit.char_body.global_position
 	var target_pos: Vector3 = target_unit.char_body.global_position
 	_projectile_instance.loop = loop_checkbox.button_pressed
-	_projectile_instance.play(origin_pos, target_pos, variant, trajectory, arc_height_slider.value)
+	_projectile_instance.play(origin_pos, target_pos, projectile_type, trajectory, arc_height_slider.value)
 	_update_info_display()
 
 
