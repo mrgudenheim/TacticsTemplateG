@@ -29,7 +29,7 @@ const TRAP1_PIXEL_SIZE: int = 0x4800
 const TRAP1_VRAM_Y_OFFSET: int = 112
 
 # BSS (runtime-initialized) fallback values from PSX RAM captures
-const BSS_GRAVITY_RAW := Vector3i(0, 4096, 0)
+const BSS_GRAVITY_RAW: Vector3i = Vector3i(0, 4096, 0)
 const BSS_INERTIA_THRESHOLD: int = 560
 
 const FRAME_DATA_SIZE: int = 0x18 # 24 bytes per frame
@@ -193,7 +193,7 @@ func init_from_rom() -> void:
 	# BATTLE.BIN file has zeros at these addresses. Hardcode from runtime captures:
 	#   gravity = (0, 4096, 0) in PSX coords (Y-down), inertia_threshold = 560
 	#   damping factor = (4096 - 560) / 4096 ≈ 0.863
-	var file_gravity_raw := Vector3i(
+	var file_gravity_raw: Vector3i = Vector3i(
 		battle_bytes.decode_s32(GRAVITY_OFFSET),
 		battle_bytes.decode_s32(GRAVITY_OFFSET + 4),
 		battle_bytes.decode_s32(GRAVITY_OFFSET + 8))
