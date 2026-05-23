@@ -7,6 +7,9 @@ extends PanelContainer
 @export var import_find_button: Button
 @export var import_file_dialog: FileDialog
 
+@export var import_progress_ui: Container
+@export var import_progress: ProgressBar
+
 @export var rom_path_line_edit: LineEdit
 @export var rom_find_button: Button
 @export var rom_file_dialog: FileDialog
@@ -32,6 +35,8 @@ func _ready() -> void:
 	import_button.pressed.connect(func() -> void: GameData.import_data(GameData.external_data_paths["IMPORT_PATH"]))
 
 	_default_export_button_text = export_data_button.text
+
+	GameData.import_progress.connect(update_import_progress)
 
 	await get_tree().process_frame
 
@@ -112,3 +117,11 @@ func export_data() -> void:
 
 func show_export_message(message: String) -> void:
 	export_data_button.text = message
+
+
+func update_import_progress(current_value: int, max_value: int) -> void:
+	import_progress.max_value = max_value
+	import_progress.value = current_value
+
+	if current_value >= max_value:
+		import_progress_ui.visible = false

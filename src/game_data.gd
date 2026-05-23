@@ -1,5 +1,8 @@
 extends Node
 
+signal message(message: String)
+signal import_progress(current_value: int, max_value: int)
+
 const DATA_PATH_CONFIG: String = "user://external_data_paths.cfg"
 var external_data_paths: Dictionary [String, String] = {
 	"IMPORT_PATH" : "",
@@ -72,8 +75,20 @@ func import_data(directory_path: String) -> void:
 
 	push_warning("Time to find import files (ms): " + str(Time.get_ticks_msec() - start_time))
 	start_time = Time.get_ticks_msec()
+	var last_frame_time: int = Time.get_ticks_msec()
+
+	var num_files: int = file_paths.size()
+	var current_file: int = 0
 
 	for file_path: String in file_paths:
+		current_file += 1
+		import_progress.emit(current_file, num_files)
+
+		var elapsed_time: float = (Time.get_ticks_msec() - last_frame_time) / 1000.0
+		if current_file == 1 or elapsed_time > (1/60.0):
+			await get_tree().process_frame
+			last_frame_time = Time.get_ticks_msec()
+
 		var data_type: String = file_path.split(".")[-2]
 		
 		if file_path.ends_with(".json"):

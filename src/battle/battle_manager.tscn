@@ -112,7 +112,7 @@ offset_bottom = 14.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ExternalDataSetupPanel" type="PanelContainer" parent="." unique_id=769059005 node_paths=PackedStringArray("import_button", "import_path_line_edit", "import_find_button", "import_file_dialog", "rom_path_line_edit", "rom_find_button", "rom_file_dialog", "destination_path_line_edit", "destination_find_button", "destination_file_dialog", "export_data_button")]
+[node name="ExternalDataSetupPanel" type="PanelContainer" parent="." unique_id=769059005 node_paths=PackedStringArray("import_button", "import_path_line_edit", "import_find_button", "import_file_dialog", "import_progress_ui", "import_progress", "rom_path_line_edit", "rom_find_button", "rom_file_dialog", "destination_path_line_edit", "destination_find_button", "destination_file_dialog", "export_data_button")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -129,6 +129,8 @@ import_button = NodePath("MarginContainer/VBoxContainer/ImportData/ImportButton"
 import_path_line_edit = NodePath("MarginContainer/VBoxContainer/ImportData/ImportLocationLineEdit")
 import_find_button = NodePath("MarginContainer/VBoxContainer/ImportData/ImportLocationButton")
 import_file_dialog = NodePath("../ScenarioEditor/MarginContainer/HBoxContainer/ImportScenario/ImportFileDialog")
+import_progress_ui = NodePath("MarginContainer/VBoxContainer/ImportDataProgress")
+import_progress = NodePath("MarginContainer/VBoxContainer/ImportDataProgress/ImportProgressBar")
 rom_path_line_edit = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationLineEdit")
 rom_find_button = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationButton")
 rom_file_dialog = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationButton/RomFileDialog")
@@ -168,6 +170,17 @@ file_mode = 2
 display_mode = 1
 access = 2
 use_native_dialog = true
+
+[node name="ImportDataProgress" type="HBoxContainer" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer" unique_id=518227237]
+layout_mode = 2
+
+[node name="ImportProgressLabel" type="Label" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/ImportDataProgress" unique_id=1948994666]
+layout_mode = 2
+text = "Importing:"
+
+[node name="ImportProgressBar" type="ProgressBar" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer/ImportDataProgress" unique_id=949915434]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="HSeparator" type="HSeparator" parent="ExternalDataSetupPanel/MarginContainer/VBoxContainer" unique_id=1031954641]
 layout_mode = 2
