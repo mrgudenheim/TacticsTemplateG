@@ -115,11 +115,7 @@ func import_data(directory_path: String) -> void:
 					var new_content: JobData = JobData.create_from_json(file_text)
 					if not scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
 						jobs_data[new_content.unique_name] = new_content
-				# TODO map_data?
 		
-		elif file_path.ends_with(".tres"):
-			# TODO import map_tiles?, shp, seq, vfx
-			pass
 		elif file_path.ends_with(".map.glb"):
 			maps_gltf[file_path.get_file().trim_suffix(".map.glb")] = GltfManager.import_gltf(file_path)
 		elif file_path.ends_with(".map_data.tres"):
@@ -127,8 +123,20 @@ func import_data(directory_path: String) -> void:
 		elif file_path.ends_with(".texture.webp"):
 			var new_image: Image = Image.load_from_file(file_path)
 			textures[file_path.get_file().trim_suffix(".texture.webp")] = ImageTexture.create_from_image(new_image)
+		elif file_path.to_lower().ends_with(".shp.tres"):
+			var new_shp: Shp = ResourceLoader.load(file_path, "Shp")
+			shps[file_path.get_file().trim_suffix(".shp.tres")] = new_shp
+		#elif file_path.to_lower().ends_with(".shp"):
+			#var file_name: String = file_path.to_lower().get_file().get_basename()
+			#var new_shp: Shp = Shp.new(file_name)
+			#new_shp.set_data_from_shp_file(file_path)
+			#shps[file_name] = new_shp
+		elif file_path.to_lower().ends_with(".seq"):
+			var file_name: String = file_path.to_lower().get_file().get_basename()
+			var new_seq: Seq = Seq.new(file_name)
+			new_seq.set_data_from_seq_file(file_path)
+			seqs[file_name] = new_seq
 
-		
 	push_warning("Time to import files (ms): " + str(Time.get_ticks_msec() - start_time))
 	start_time = Time.get_ticks_msec()
 

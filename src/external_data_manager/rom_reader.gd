@@ -1373,8 +1373,25 @@ func export_unit_animations(save_path: String) -> void:
 	message.emit("Exporting SHPs and SEQs...")
 	await get_tree().process_frame
 	
+	var shp_dir_path: String = save_path + "/shps/"
+	DirAccess.make_dir_recursive_absolute(shp_dir_path)
+	# var shp_subframe_sizes: PackedVector2Array = battle_bin_data.shp_subframe_sizes
+	# var shp_subframe_sizes_string: String = JSON.stringify(shp_subframe_sizes, "\t")
+	# var shp_subframe_sizes_filepath: String = shp_dir_path + "shp_subframes.json"
+	# var shp_subframe_sizes_file: FileAccess = FileAccess.open(shp_subframe_sizes_filepath, FileAccess.WRITE)
+	# shp_subframe_sizes_file.store_line(shp_subframe_sizes_string)
+	# shp_subframe_sizes_file.close()
+
 	for shp: Shp in shps.values():
-		shp.write_shp(save_path + "/shps/")
+		# shp.write_shp(shp_dir_path)
+		if not shp.is_initialized:
+			shp.set_data_from_shp_bytes(get_file_data(shp.file_name))
+
+		var shp_file_path: String = shp_dir_path.path_join(shp.file_name.to_lower().trim_suffix(".shp") + ".shp.tres")
+		var error: Error = ResourceSaver.save(shp, shp_file_path)
+		if error != Error.OK:
+			push_warning("error saving shp " + shp.file_name + ": " + str(error))
+
 	for seq: Seq in seqs.values():
 		seq.write_seq(save_path + "/seqs/" + seq.file_name)
 
@@ -1452,6 +1469,7 @@ func export_vfx(save_path: String) -> void:
 		new_mesh_instance.name = "projectile_" + ProjectileEffectInstance.ProjectileType.keys()[model_id]
 		GltfManager.save_node(new_mesh_instance, vfx_path, ".projectile.glb")
 		new_mesh_instance.queue_free()
+
 
 class SpritesheetRegionData:
 	var shp_type: String

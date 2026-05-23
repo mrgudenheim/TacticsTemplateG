@@ -1,4 +1,5 @@
 class_name Shp
+extends Resource
 
 var is_initialized: bool = false
 
@@ -96,27 +97,26 @@ const CONSTANT_SP2_FILES: Dictionary[int, int] = { # spritesheet with sp2s appen
 	231: 4,
 }
 
-
-var file_name: String = "default_file_name"
-var name_alias: String = "default_name_alias"
+@export var file_name: String = "default_file_name"
+@export var name_alias: String = "default_name_alias"
 
 # section 1
-var swim_pointer: int = 0
-var attack_start_index: int = 9999
-var sp_extra: int = 0
-var zero_frames: Array[int] = [] # only used in wep or eff
+@export var swim_pointer: int = 0
+@export var attack_start_index: int = 9999
+@export var sp_extra: int = 0
+@export var zero_frames: Array[int] = [] # only used in wep or eff
 var section1_length: int = 0:
 	get:
 		return 0x44 if (file_name.begins_with("WEP") or file_name.begins_with("EFF")) else 8
 
 # section 2
-var frame_pointers: Array[int] = []
+@export var frame_pointers: Array[int] = []
 var section2_length: int = 0:
 	get:
 		return 0x800 if (file_name.begins_with("WEP") or file_name.begins_with("EFF")) else 0x400
 	
 # section 3
-var frames: Array[FrameData] = []
+@export var frames: Array[FrameData] = []
 var section3_length: int = 0:
 	get:
 		var sum: int = 0
@@ -128,8 +128,8 @@ var section3_length: int = 0:
 var has_submerged_data: bool = false:
 	get:
 		return swim_pointer > 0
-var frame_pointers_submerged: Array[int] = []
-var frames_submerged: Array[FrameData] = []
+@export var frame_pointers_submerged: Array[int] = []
+@export var frames_submerged: Array[FrameData] = []
 var frames_submerged_length: int = 0:
 	get:
 		var sum: int = 0
@@ -138,8 +138,11 @@ var frames_submerged_length: int = 0:
 		return sum + 2 # bytes
 
 
-func _init(new_file_name: String) -> void:
-	set_name(new_file_name)
+func _init(new_file_name: String = "") -> void:
+	if new_file_name == "":
+		return
+	
+	set_file_name(new_file_name)
 
 
 func get_frame(frame_index: int, submerged_depth: int = 0) -> FrameData:
@@ -181,7 +184,7 @@ func set_data_from_shp_file(filepath:String) -> void:
 		set_data_from_shp_bytes(bytes)
 
 
-func set_name(new_file_name: String) -> void:
+func set_file_name(new_file_name: String) -> void:
 	#new_file_name = new_file_name.trim_suffix(".shp")
 	#new_file_name = new_file_name.trim_suffix(".SHP")
 	#new_file_name = new_file_name.trim_suffix(".Shp")
