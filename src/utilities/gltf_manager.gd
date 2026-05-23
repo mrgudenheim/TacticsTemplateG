@@ -1,9 +1,9 @@
 class_name GltfManager
 
 
-static func save_node(node_to_save: Node, save_directory: String = "user://exports/maps/") -> void:
+static func save_node(node_to_save: Node, save_directory: String = "user://exports/", extension: String = ".glb") -> void:
 	DirAccess.make_dir_recursive_absolute(save_directory)
-	var file_name: String = node_to_save.name + ".glb"
+	var file_name: String = node_to_save.name + extension
 	var gltf_state: GLTFState = GLTFState.new()
 	var gltf_document: GLTFDocument = GLTFDocument.new()
 	
