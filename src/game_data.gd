@@ -12,8 +12,9 @@ var is_ready: bool = false
 var shps: Dictionary[String, Shp] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
 var seqs: Dictionary[String, Seq] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
 var maps_gltf: Dictionary[String, Node] = {}
-var maps_data: Dictionary[String, FftMapData] = {} # var map_tiles: Dictionary[Vector2i, Array] = {} # Array[TerrainTile], palettes, gradient, animations, traps?, move find item?
-var vfx: Array[VisualEffectData] = []
+var maps_data: Dictionary[String, MapData] = {} # var map_tiles: Dictionary[Vector2i, Array] = {} # Array[TerrainTile], palettes, animations
+var vfx: Dictionary[String, VisualEffectData] = {}
+var projectiles_gltf: Dictionary[String, Node] = {}
 var items: Dictionary[String, ItemData] = {} # [unique_name, ItemData]
 var status_effects: Dictionary[String, StatusEffect] = {} # [unique_name, StatusEffect]
 var jobs_data: Dictionary[String, JobData] = {} # [unique_name, JobData]
@@ -24,10 +25,13 @@ var abilities: Dictionary[String, Ability] = {} # [unique_name, Ability]
 var scenarios: Dictionary[String, Scenario] = {} # [unique_name, Scenario]
 var names: Dictionary[String, PackedStringArray] = {} # [name_category, possible names]
 
+var textures: Dictionary[String, Texture2D] = {}
+
 # Textures
 var unit_spritesheets: Dictionary[String, Texture2D] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
 var frame_bin_texture: Texture2D
 var items_texture: Texture2D
+
 
 func _ready() -> void:
 	external_data_paths = _get_saved_data_paths()
@@ -116,9 +120,14 @@ func import_data(directory_path: String) -> void:
 		elif file_path.ends_with(".tres"):
 			# TODO import map_tiles?, shp, seq, vfx
 			pass
-		elif file_path.ends_with(".glb"):
-			# TODO import map gltf?
-			pass
+		elif file_path.ends_with(".map.glb"):
+			maps_gltf[file_path.get_file().trim_suffix(".map.glb")] = GltfManager.import_gltf(file_path)
+		elif file_path.ends_with(".map_data.tres"):
+			maps_data[file_path.get_file().trim_suffix(".map_data.tres")] = ResourceLoader.load(file_path, "MapData")
+		elif file_path.ends_with(".texture.webp"):
+			var new_image: Image = Image.load_from_file(file_path)
+			textures[file_path.get_file().trim_suffix(".texture.webp")] = ImageTexture.create_from_image(new_image)
+
 		
 	push_warning("Time to import files (ms): " + str(Time.get_ticks_msec() - start_time))
 	start_time = Time.get_ticks_msec()
