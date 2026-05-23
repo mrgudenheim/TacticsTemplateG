@@ -18,7 +18,7 @@ var length: int = 0:
 func _to_string() -> String:
 	var total_string: String = opcode_name + "("
 	var parameters_string: PackedStringArray = []
-	for parameter in parameters:
+	for parameter: int in parameters:
 		parameters_string.append(str(parameter))
 	return total_string + ",".join(parameters_string) + ")"
 
@@ -26,6 +26,6 @@ func _to_string() -> String:
 func to_string_hex() -> String:
 	var total_string: String = opcode_name + "("
 	var parameters_string: PackedStringArray = []
-	for parameter in parameters:
+	for parameter: int in parameters:
 		parameters_string.append("0x%02x" % [parameter if parameter >=0 else parameter + 256])
 	return total_string + ",".join(parameters_string) + ")"
