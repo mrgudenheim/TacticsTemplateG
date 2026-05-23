@@ -1253,12 +1253,12 @@ func generate_passive_effects(save_path: String) -> void:
 func export_data(save_path: String) -> void:
 	DirAccess.make_dir_recursive_absolute(save_path)
 
-	# await export_unit_spritesheets(save_path)
-	# await export_other_images(save_path)
-	# await export_data_tables(save_path)
-	# await export_text(save_path)
-	# await export_unit_animations(save_path)
-	# await export_maps(save_path)
+	await export_unit_spritesheets(save_path)
+	await export_other_images(save_path)
+	await export_data_tables(save_path)
+	await export_text(save_path)
+	await export_unit_animations(save_path)
+	await export_maps(save_path)
 	await export_vfx(save_path)
 
 
