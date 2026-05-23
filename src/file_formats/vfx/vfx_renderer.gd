@@ -66,7 +66,7 @@ func render(particles: Array[VfxParticleData], vfx_data: VisualEffectData) -> vo
 		if frameset_idx < 0 or frameset_idx >= vfx_data.framesets.size():
 			continue
 
-		var frameset: VisualEffectData.VfxFrameSet = vfx_data.framesets[frameset_idx]
+		var frameset: VfxFrameSet = vfx_data.framesets[frameset_idx]
 		if frameset.frameset.is_empty():
 			continue
 
@@ -103,14 +103,14 @@ func render(particles: Array[VfxParticleData], vfx_data: VisualEffectData) -> vo
 		var pi: int = renderable_uids[uid]
 		var p: VfxParticleData = particles[pi]
 		var frameset_idx: int = p.current_frameset
-		var frameset: VisualEffectData.VfxFrameSet = vfx_data.framesets[frameset_idx]
+		var frameset: VfxFrameSet = vfx_data.framesets[frameset_idx]
 		var align: bool = p.emitter_index >= 0 and p.emitter_index < _emitter_align_flags.size() and _emitter_align_flags[p.emitter_index]
 		var entries: Array = _particle_meshes[uid]
 		var slot: int = 0
 
 		var num_frames: int = frameset.frameset.size()
 		for frame_index: int in range(num_frames):
-			var vfx_frame: VisualEffectData.VfxFrame = frameset.frameset[frame_index]
+			var vfx_frame: VfxFrame = frameset.frameset[frame_index]
 
 			var opaque_entry: Dictionary = entries[slot]
 			opaque_entry.mat.render_priority = frame_index
@@ -152,7 +152,7 @@ func _render_frame(
 		mesh: MeshInstance3D,
 		mat: ShaderMaterial,
 		p: VfxParticleData,
-		vfx_frame: VisualEffectData.VfxFrame,
+		vfx_frame: VfxFrame,
 		is_opaque_pass: bool,
 		frame_camera: Camera3D,
 		align_to_velocity: bool,

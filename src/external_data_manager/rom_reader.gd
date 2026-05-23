@@ -278,7 +278,7 @@ func process_rom() -> void:
 		#var ability: FftAbilityData = fft_abilities[ability_id]
 		#for frameset_idx: int in ability.vfx_data.frame_sets.size():
 			#for frame_idx: int in ability.vfx_data.frame_sets[frameset_idx].frame_set.size():
-				#var frame_data: VisualEffectData.VfxFrame = ability.vfx_data.frame_sets[frameset_idx].frame_set[frame_idx]
+				#var frame_data: VfxFrame = ability.vfx_data.frame_sets[frameset_idx].frame_set[frame_idx]
 				#if ((frame_data.vram_bytes[1] & 0x02) >> 1) == 0:
 					#push_warning([ability_id, ability.name, ability.vfx_data.vfx_id, frameset_idx, frame_idx])
 	
@@ -1253,12 +1253,12 @@ func generate_passive_effects(save_path: String) -> void:
 func export_data(save_path: String) -> void:
 	DirAccess.make_dir_recursive_absolute(save_path)
 
-	await export_unit_spritesheets(save_path)
-	await export_other_images(save_path)
-	await export_data_tables(save_path)
-	await export_text(save_path)
-	await export_unit_animations(save_path)
-	await export_maps(save_path)
+	# await export_unit_spritesheets(save_path)
+	# await export_other_images(save_path)
+	# await export_data_tables(save_path)
+	# await export_text(save_path)
+	# await export_unit_animations(save_path)
+	# await export_maps(save_path)
 	await export_vfx(save_path)
 
 

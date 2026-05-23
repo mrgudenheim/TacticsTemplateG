@@ -187,9 +187,9 @@ func _play_effect() -> void:
 
 	if debug_depth:
 		for ai in range(vfx_data.animations.size()):
-			var anim: VisualEffectData.VfxAnimation = vfx_data.animations[ai]
+			var anim: VfxAnimation = vfx_data.animations[ai]
 			var depth_modes: Dictionary = {}
-			for af: VisualEffectData.VfxAnimationFrame in anim.animation_frames:
+			for af: VfxAnimationFrame in anim.animation_frames:
 				if af.frameset_id <= VfxConstants.MAX_FRAMESET_ID:
 					depth_modes[af.byte_02] = depth_modes.get(af.byte_02, 0) + 1
 			if not depth_modes.is_empty():
@@ -427,9 +427,9 @@ func _process(delta: float) -> void:
 					var fs_idx: int = p.current_frameset
 					if fs_idx < 0 or fs_idx >= vfx_data.framesets.size():
 						continue
-					var fs: VisualEffectData.VfxFrameSet = vfx_data.framesets[fs_idx]
+					var fs: VfxFrameSet = vfx_data.framesets[fs_idx]
 					var info: String = ""
-					for fr: VisualEffectData.VfxFrame in fs.frameset:
+					for fr: VfxFrame in fs.frameset:
 						var label: String = "OPAQUE" if not fr.semi_transparency_on else "SEMI(%d)" % fr.semi_transparency_mode
 						info += "[%s] " % label
 					print("[EMITTERS]   e%d uid=%d age=%d fs=%d %s" % [p.emitter_index, p.uid, p.age, fs_idx, info])
@@ -450,7 +450,7 @@ func _on_effect_changed(value: float) -> void:
 	# Clear anchor UI so the new effect gets fresh defaults
 	anchor_spinboxes.clear()
 	anchor_checkboxes.clear()
-	for child in anchor_list_container.get_children():
+	for child: Node in anchor_list_container.get_children():
 		child.queue_free()
 	_play_effect()
 
@@ -519,7 +519,7 @@ func _dump_timelines(label: String, timelines: Array[EmitterTimeline]) -> void:
 		var tl: EmitterTimeline = timelines[ch_idx]
 		var spawns: Array[String] = []
 		for kf_idx in range(tl.keyframes.size()):
-			var kf: EmitterTimeline.EmitterKeyframe = tl.keyframes[kf_idx]
+			var kf: EmitterKeyframe = tl.keyframes[kf_idx]
 			if kf.emitter_id > 0:
 				spawns.append("kf[%d] t=%d eid=%d(e%d) flags=0x%04X" % [
 					kf_idx, kf.time, kf.emitter_id, kf.emitter_id - 1,

@@ -1,7 +1,7 @@
 class_name VfxAnimator
 extends RefCounted
 ## Animation driver — bakes VfxAnimation opcodes into frame-by-frame lookup
-## Reads from VisualEffectData.VfxAnimation (binary-parsed) instead of JSON opcodes
+## Reads from VfxAnimation (binary-parsed) instead of JSON opcodes
 
 var vfx_data: VisualEffectData
 var baked_animations: Array = [] # [emitter_index] → Array[BakedFrame]
@@ -55,7 +55,7 @@ func _bake_animation_for_emitter(emitter: VfxEmitter) -> Array:
 	if emitter.anim_index < 0 or emitter.anim_index >= vfx_data.animations.size():
 		return []
 
-	var raw_anim: VisualEffectData.VfxAnimation = vfx_data.animations[emitter.anim_index]
+	var raw_anim: VfxAnimation = vfx_data.animations[emitter.anim_index]
 
 	# Compute frameset group offset (same logic as visual_effect_data.gd init)
 	var frameset_offset: int = 0
@@ -65,7 +65,7 @@ func _bake_animation_for_emitter(emitter: VfxEmitter) -> Array:
 	var frames: Array[BakedFrame] = []
 	var current_offset: Vector2 = Vector2(raw_anim.screen_offset)
 
-	for anim_frame: VisualEffectData.VfxAnimationFrame in raw_anim.animation_frames:
+	for anim_frame: VfxAnimationFrame in raw_anim.animation_frames:
 		if anim_frame.frameset_id == VfxConstants.AnimOpcode.ADD_OFFSET:
 			# ADD_OFFSET: duration=dx, byte_02=dy (sign-extend dy from u8)
 			var dy: int = anim_frame.byte_02

@@ -446,11 +446,11 @@ static func init_trap_animation(p: VfxParticleData, emitter: TrapEffectData.Trap
 
 	if p.anim_index < 0 or p.anim_index >= trap_data.animations.size():
 		return
-	var animation: VisualEffectData.VfxAnimation = trap_data.animations[p.anim_index]
+	var animation: VfxAnimation = trap_data.animations[p.anim_index]
 	if animation.animation_frames.is_empty():
 		return
 
-	var first: VisualEffectData.VfxAnimationFrame = animation.animation_frames[0]
+	var first: VfxAnimationFrame = animation.animation_frames[0]
 	if first.frameset_id <= VfxConstants.MAX_FRAMESET_ID:
 		p.current_frameset = first.frameset_id
 		p.anim_time = first.duration
@@ -464,7 +464,7 @@ static func _tick_trap_animation(p: VfxParticleData, trap_data: TrapEffectData) 
 	if p.anim_index < 0 or p.anim_index >= trap_data.animations.size():
 		return
 
-	var animation: VisualEffectData.VfxAnimation = trap_data.animations[p.anim_index]
+	var animation: VfxAnimation = trap_data.animations[p.anim_index]
 	if animation.animation_frames.is_empty():
 		return
 
@@ -476,9 +476,9 @@ static func _tick_trap_animation(p: VfxParticleData, trap_data: TrapEffectData) 
 	_resolve_trap_animation_frame(p, animation)
 
 
-static func _resolve_trap_animation_frame(p: VfxParticleData, animation: VisualEffectData.VfxAnimation) -> void:
+static func _resolve_trap_animation_frame(p: VfxParticleData, animation: VfxAnimation) -> void:
 	while p.anim_frame < animation.animation_frames.size():
-		var af: VisualEffectData.VfxAnimationFrame = animation.animation_frames[p.anim_frame]
+		var af: VfxAnimationFrame = animation.animation_frames[p.anim_frame]
 
 		if af.frameset_id == VisualEffectData.ANIM_OPCODE_LOOP:
 			mark_animation_terminal(p)

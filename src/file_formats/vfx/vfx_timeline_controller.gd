@@ -51,7 +51,7 @@ func initialize(timelines: Array[EmitterTimeline]) -> void:
 				emitter_started.emit(emitter_id - 1, ch_idx, 0)
 
 			# Check action_flags on first keyframe
-			var kf: EmitterTimeline.EmitterKeyframe = timeline.keyframes[1]
+			var kf: EmitterKeyframe = timeline.keyframes[1]
 			var action_flag: int = _get_action_flag_bits(kf)
 			if action_flag != 0:
 				action_flags_triggered.emit(action_flag, ch_idx, 0)
@@ -76,7 +76,7 @@ func advance_frame() -> Array[Dictionary]:
 
 func _process_channel(state: ChannelState) -> Variant:
 	var timeline: EmitterTimeline = state.timeline
-	var kf: EmitterTimeline.EmitterKeyframe = timeline.keyframes[state.current_keyframe]
+	var kf: EmitterKeyframe = timeline.keyframes[state.current_keyframe]
 	var emitter_id: int = kf.emitter_id
 
 	var request: Variant = null
@@ -116,8 +116,8 @@ func _advance_keyframe(state: ChannelState, prev_emitter_id: int) -> void:
 		return
 
 	# Duration = kf[N].time - kf[N-1].time
-	var current_kf: EmitterTimeline.EmitterKeyframe = timeline.keyframes[state.current_keyframe]
-	var prev_kf: EmitterTimeline.EmitterKeyframe = timeline.keyframes[state.current_keyframe - 1]
+	var current_kf: EmitterKeyframe = timeline.keyframes[state.current_keyframe]
+	var prev_kf: EmitterKeyframe = timeline.keyframes[state.current_keyframe - 1]
 	state.duration_remaining = current_kf.time - prev_kf.time
 
 	state.spawn_counter = 0
@@ -131,7 +131,7 @@ func _advance_keyframe(state: ChannelState, prev_emitter_id: int) -> void:
 		action_flags_triggered.emit(action_flag, state.channel_index, current_frame)
 
 
-func _get_action_flag_bits(kf: EmitterTimeline.EmitterKeyframe) -> int:
+func _get_action_flag_bits(kf: EmitterKeyframe) -> int:
 	# Reconstruct the 16-bit action_flags from parsed booleans
 	var flags: int = 0
 	if kf.display_damage:
@@ -165,7 +165,7 @@ func get_active_emitters() -> Array[int]:
 	var active_list: Array[int] = []
 	for state: ChannelState in channel_states:
 		if not state.finished:
-			var kf: EmitterTimeline.EmitterKeyframe = state.timeline.keyframes[state.current_keyframe]
+			var kf: EmitterKeyframe = state.timeline.keyframes[state.current_keyframe]
 			if kf.emitter_id != 0:
 				var emitter_idx: int = kf.emitter_id - 1
 				if emitter_idx not in active_list:

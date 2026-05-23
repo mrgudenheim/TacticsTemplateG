@@ -162,8 +162,8 @@ var gravity_raw: Vector3i = Vector3i.ZERO
 @export var gravity: Vector3 = Vector3.ZERO
 @export var inertia_threshold: int = 0
 @export var emitters: Array[TrapEmitter] = []
-@export var framesets: Array[VisualEffectData.VfxFrameSet] = []
-@export var animations: Array[VisualEffectData.VfxAnimation] = []
+@export var framesets: Array[VfxFrameSet] = []
+@export var animations: Array[VfxAnimation] = []
 @export var element_colors: Array[Color] = []
 var texture: Texture2D
 var textures_by_palette: Dictionary[int, Texture2D] = {}
@@ -245,7 +245,7 @@ func init_from_rom() -> void:
 	if trap_spr != null:
 		for frameset_idx: int in framesets.size():
 			for frame_idx: int in framesets[frameset_idx].frameset.size():
-				var vfx_frame: VisualEffectData.VfxFrame = framesets[frameset_idx].frameset[frame_idx]
+				var vfx_frame: VfxFrame = framesets[frameset_idx].frameset[frame_idx]
 				vfx_frame.quad_uvs.resize(vfx_frame.quad_uvs_pixels.size())
 				for vert_idx: int in vfx_frame.quad_uvs_pixels.size():
 					vfx_frame.quad_uvs[vert_idx] = Vector2(
@@ -293,7 +293,7 @@ func _parse_frames(data: PackedByteArray) -> void:
 		if fs_offset + 4 > data.size():
 			break
 
-		var frame_set: VisualEffectData.VfxFrameSet = VisualEffectData.VfxFrameSet.new()
+		var frame_set: VfxFrameSet = VfxFrameSet.new()
 		frame_set.flags = data.decode_u16(fs_offset)
 		var frame_count: int = data.decode_u16(fs_offset + 2)
 
@@ -310,7 +310,7 @@ func _parse_frames(data: PackedByteArray) -> void:
 				break
 
 			var frame_bytes: PackedByteArray = data.slice(frame_offset, frame_offset + FRAME_DATA_SIZE)
-			var new_frame: VisualEffectData.VfxFrame = VisualEffectData.VfxFrame.new()
+			var new_frame: VfxFrame = VfxFrame.new()
 			new_frame.parse_vram_bytes(frame_bytes)
 			new_frame.parse_geometry_bytes(frame_bytes, TRAP1_VRAM_Y_OFFSET)
 
@@ -331,7 +331,7 @@ func _parse_animations(data: PackedByteArray) -> void:
 
 	animations.resize(NUM_ANIMATIONS)
 	for i: int in NUM_ANIMATIONS:
-		var animation: VisualEffectData.VfxAnimation = VisualEffectData.VfxAnimation.new()
+		var animation: VfxAnimation = VfxAnimation.new()
 		var seq_offset: int = offsets[i]
 
 		if seq_offset + 2 > data.size():
@@ -348,14 +348,14 @@ func _parse_animations(data: PackedByteArray) -> void:
 			var duration: int = data.decode_u8(entry_offset)
 			var frame_index: int = data.decode_u8(entry_offset + 1)
 
-			var anim_frame: VisualEffectData.VfxAnimationFrame = VisualEffectData.VfxAnimationFrame.new()
+			var anim_frame: VfxAnimationFrame = VfxAnimationFrame.new()
 			anim_frame.frameset_id = frame_index
 			anim_frame.duration = duration
 			anim_frame.byte_02 = 1 # PULL_FORWARD_8 depth mode (standard for TRAP)
 			animation.animation_frames.append(anim_frame)
 
 		# Append loop marker
-		var loop_frame: VisualEffectData.VfxAnimationFrame = VisualEffectData.VfxAnimationFrame.new()
+		var loop_frame: VfxAnimationFrame = VfxAnimationFrame.new()
 		loop_frame.frameset_id = VisualEffectData.ANIM_OPCODE_LOOP
 		animation.animation_frames.append(loop_frame)
 

@@ -35,6 +35,8 @@ var items_texture: Texture2D
 
 func _ready() -> void:
 	external_data_paths = _get_saved_data_paths()
+	await get_tree().process_frame
+	await get_tree().process_frame
 	if not external_data_paths["IMPORT_PATH"].is_empty() and DirAccess.dir_exists_absolute(external_data_paths["IMPORT_PATH"]):
 		call_deferred("import_data", external_data_paths["IMPORT_PATH"])
 
@@ -136,11 +138,14 @@ func import_data(directory_path: String) -> void:
 			#var new_shp: Shp = Shp.new(file_name)
 			#new_shp.set_data_from_shp_file(file_path)
 			#shps[file_name] = new_shp
-		elif file_path.to_lower().ends_with(".seq"):
-			var file_name: String = file_path.to_lower().get_file().get_basename()
-			var new_seq: Seq = Seq.new(file_name)
-			new_seq.set_data_from_seq_file(file_path)
-			seqs[file_name] = new_seq
+		# elif file_path.to_lower().ends_with(".seq"):
+		# 	var file_name: String = file_path.to_lower().get_file().get_basename()
+		# 	var new_seq: Seq = Seq.new(file_name)
+		# 	new_seq.set_data_from_seq_file(file_path)
+		# 	seqs[file_name] = new_seq
+		elif file_path.to_lower().ends_with(".vfx_data.tres"):
+			var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")
+			vfx[file_path.get_file().trim_suffix(".vfx_data.tres")] = new_vfx
 
 	push_warning("Time to import files (ms): " + str(Time.get_ticks_msec() - start_time))
 	start_time = Time.get_ticks_msec()

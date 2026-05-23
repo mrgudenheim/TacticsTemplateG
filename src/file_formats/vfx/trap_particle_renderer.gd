@@ -71,7 +71,7 @@ func _collect_renderable(particles: Array[VfxParticleData], trap_data: TrapEffec
 		if frameset_idx < 0 or frameset_idx >= trap_data.framesets.size():
 			continue
 
-		var frameset: VisualEffectData.VfxFrameSet = trap_data.framesets[frameset_idx]
+		var frameset: VfxFrameSet = trap_data.framesets[frameset_idx]
 		if frameset.frameset.is_empty():
 			continue
 
@@ -92,7 +92,7 @@ func _resize_particle_meshes(renderable: Dictionary, particles: Array[VfxParticl
 	for uid: int in renderable:
 		var pi: int = renderable[uid]
 		var p: VfxParticleData = particles[pi]
-		var frameset: VisualEffectData.VfxFrameSet = trap_data.framesets[p.current_frameset]
+		var frameset: VfxFrameSet = trap_data.framesets[p.current_frameset]
 		var needed: int = frameset.frameset.size() * 2
 		var current: PackedInt32Array = _pool.particle_mesh_map.get(uid, PackedInt32Array())
 		var have: int = current.size()
@@ -115,12 +115,12 @@ func _draw_particles(renderable: Dictionary, particles: Array[VfxParticleData],
 		var pi: int = renderable[uid]
 		var p: VfxParticleData = particles[pi]
 		var frameset_idx: int = p.current_frameset
-		var frameset: VisualEffectData.VfxFrameSet = trap_data.framesets[frameset_idx]
+		var frameset: VfxFrameSet = trap_data.framesets[frameset_idx]
 		var mesh_indices: PackedInt32Array = _pool.particle_mesh_map[uid]
 		var local_slot: int = 0
 
 		for fi in range(frameset.frameset.size()):
-			var vfx_frame: VisualEffectData.VfxFrame = frameset.frameset[fi]
+			var vfx_frame: VfxFrame = frameset.frameset[fi]
 			if vfx_frame == null:
 				local_slot += 2
 				continue
@@ -140,7 +140,7 @@ func _draw_particles(renderable: Dictionary, particles: Array[VfxParticleData],
 
 
 func _render_frame(mesh_inst: MeshInstance3D, mat: ShaderMaterial, p: VfxParticleData,
-		vfx_frame: VisualEffectData.VfxFrame, is_opaque_pass: bool, draw_order: int,
+		vfx_frame: VfxFrame, is_opaque_pass: bool, draw_order: int,
 		emitter_palette: Dictionary[int, int]) -> void:
 	var t := Transform3D.IDENTITY
 	t.origin = p.position

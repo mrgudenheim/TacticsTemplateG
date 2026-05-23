@@ -14,7 +14,10 @@ var num_keyframes: int = 0
 var has_unknown_flags: bool = false
 
 
-func _init(new_bytes: PackedByteArray) -> void:
+func _init(new_bytes: PackedByteArray = []) -> void:
+	if new_bytes.is_empty():
+		return
+
 	bytes = new_bytes
 	# Layout: 25×u16 times (0x00), first emitter_id = 0 then 24×u8 emitter_ids (0x32), 25×u16 action_flags (0x4a), u16 num_kf (0x7E)
 	action_flags = bytes.slice(0x4a, 0x4a + 50)
@@ -48,16 +51,3 @@ func _init(new_bytes: PackedByteArray) -> void:
 		new_keyframe.unused_flag_80 = action_flag & 0x8000 == 0x8000
 
 		keyframes.append(new_keyframe)
-
-
-class EmitterKeyframe extends Resource:
-	@export var time: int = -1 # frames
-	@export var emitter_id: int = -1
-	@export var flags: PackedByteArray = []
-	@export var display_damage: bool = false
-	@export var status_change: bool = false
-	@export var target_animation: bool = false
-	@export var use_global_target: bool = false
-	@export var callback_slot: int = -1
-	@export var animation_param: int = 0
-	var unused_flag_80: bool = false
