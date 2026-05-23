@@ -126,6 +126,9 @@ func import_data(directory_path: String) -> void:
 		elif file_path.to_lower().ends_with(".shp.tres"):
 			var new_shp: Shp = ResourceLoader.load(file_path, "Shp")
 			shps[file_path.get_file().trim_suffix(".shp.tres")] = new_shp
+		elif file_path.to_lower().ends_with(".seq.tres"):
+			var new_seq: Seq = ResourceLoader.load(file_path, "Seq")
+			seqs[file_path.get_file().trim_suffix(".seq.tres")] = new_seq
 		#elif file_path.to_lower().ends_with(".shp"):
 			#var file_name: String = file_path.to_lower().get_file().get_basename()
 			#var new_shp: Shp = Shp.new(file_name)

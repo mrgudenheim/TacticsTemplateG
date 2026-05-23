@@ -1,17 +1,18 @@
 class_name SeqPart
+extends Resource
 
-var opcode: String = "LoadFrameAndWait"
-var opcode_name: String = "LoadFrameAndWait"
-var parameters: Array[int] = []
+@export var opcode: String = "LoadFrameAndWait"
+@export var opcode_name: String = "LoadFrameAndWait"
+@export var parameters: Array[int] = []
 
-var isOpcode: bool = false:
+var is_opcode: bool = false:
 	get:
 		return opcode != "LoadFrameAndWait"
 
 var length: int = 0:
 	get:
 		var length_temp: int = parameters.size()
-		if isOpcode:
+		if is_opcode:
 			length_temp += 2
 		return length_temp
 

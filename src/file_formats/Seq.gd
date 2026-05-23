@@ -1,4 +1,5 @@
 class_name Seq
+extends Resource
 
 var is_initialized: bool = false
 
@@ -58,8 +59,8 @@ var shp_name: String:
 				return "TYPE1.SHP"
 
 
-var file_name: String = "default_file_name"
-var name_alias: String = "default_name_alias"
+@export var file_name: String = "default_file_name"
+@export var name_alias: String = "default_name_alias"
 
 # section 1
 var AA: int = 0
@@ -67,11 +68,11 @@ var BB: int = 0
 var section1_length: int = 4
 
 # section 2
-var sequence_pointers: Array[int] = []
+@export var sequence_pointers: Array[int] = []
 var section2_length: int = 0x400
 	
 # section 3
-var sequences: Array[Sequence] = []
+@export var sequences: Array[Sequence] = []
 var section3_length: int = 0:
 	get:
 		var sum: int = 2
@@ -94,11 +95,14 @@ static func _static_init() -> void:
 	load_seq_name_data()
 
 
-func _init(new_file_name: String) -> void:
-	set_name(new_file_name)
+func _init(new_file_name: String = "") -> void:
+	if new_file_name == "":
+		return
+	
+	set_file_name(new_file_name)
 
 
-func set_data_from_seq_object(seq_object:Seq) -> void:
+func set_data_from_seq_object(seq_object: Seq) -> void:
 	file_name = seq_object.file_name
 	name_alias = seq_object.name_alias
 
@@ -113,17 +117,17 @@ func set_data_from_seq_object(seq_object:Seq) -> void:
 	sequences = seq_object.sequences.duplicate()
 
 
-func set_data_from_seq_file(filepath:String) -> void:
-	var new_file_name:String = filepath.get_file()
-	set_name(new_file_name)
+func set_data_from_seq_file(filepath: String) -> void:
+	var new_file_name: String = filepath.get_file()
+	set_file_name(new_file_name)
 	
-	var bytes:PackedByteArray = FileAccess.get_file_as_bytes(filepath)
+	var bytes: PackedByteArray = FileAccess.get_file_as_bytes(filepath)
 	if bytes.size() == 0:
 		push_warning("Open Error: " + filepath)
 		return
 
 
-func set_name(new_file_name: String) -> void:
+func set_file_name(new_file_name: String) -> void:
 	#new_file_name = new_file_name.trim_suffix(".seq")
 	#new_file_name = new_file_name.trim_suffix(".SEQ")
 	#new_file_name = new_file_name.trim_suffix(".Seq")
@@ -269,7 +273,7 @@ func get_sequence_data(bytes: PackedByteArray) -> Sequence:
 			
 		for param:int in num_params:
 			var offset: int = seq_part_pointer + param
-			if seq_part.isOpcode:
+			if seq_part.is_opcode:
 				offset += 2
 			# signed parameters
 			if (seq_part.opcode == "ffc0" # WaitForDistort
@@ -319,7 +323,7 @@ func get_seq_bytes() -> PackedByteArray:
 	var offset: int = section1_length + section2_length + 2
 	for seq_index: int in sequences.size():
 		for seq_part:SeqPart in sequences[seq_index].seq_parts:
-			if seq_part.isOpcode:
+			if seq_part.is_opcode:
 				bytes.encode_u8(offset, 0xFF)
 				bytes.encode_u8(offset + 1, seq_part.opcode.substr(2).hex_to_int())
 				offset += 2
@@ -517,15 +521,15 @@ func write_csv() -> void:
 		for seq_part:SeqPart in seq.seq_parts:
 			var text_parts: PackedStringArray = [seq_data_string]
 			
-			if seq_part.isOpcode:
+			if seq_part.is_opcode:
 				text_parts.append(seq_part.opcode_name)
 			if seq_part.parameters.size() > 0:
 				text_parts.append(",".join(seq_part.parameters))
 
 			seq_data_string = ",".join(text_parts);
 		
-		var allText: PackedStringArray = [output, seq_data_string];
-		output = "\n".join(allText)
+		var all_text: PackedStringArray = [output, seq_data_string]
+		output = "\n".join(all_text)
 	
 		seq_id += 1
 
@@ -582,7 +586,7 @@ static func load_seq_name_data() -> void:
 	var lines: PackedStringArray = input.split("\n");
 
 	# skip first row of headers
-	var line_index:int = 1
+	var line_index: int = 1
 	while line_index < lines.size():
 		var parts: PackedStringArray = lines[line_index].split(",")
 		if parts.size() <= 2:

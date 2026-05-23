@@ -1383,17 +1383,26 @@ func export_unit_animations(save_path: String) -> void:
 	# shp_subframe_sizes_file.close()
 
 	for shp: Shp in shps.values():
-		# shp.write_shp(shp_dir_path)
 		if not shp.is_initialized:
 			shp.set_data_from_shp_bytes(get_file_data(shp.file_name))
+		# shp.write_shp(shp_dir_path)
 
 		var shp_file_path: String = shp_dir_path.path_join(shp.file_name.to_lower().trim_suffix(".shp") + ".shp.tres")
 		var error: Error = ResourceSaver.save(shp, shp_file_path)
 		if error != Error.OK:
 			push_warning("error saving shp " + shp.file_name + ": " + str(error))
 
+	var seq_dir_path: String = save_path + "/seqs/"
+	DirAccess.make_dir_recursive_absolute(seq_dir_path)
 	for seq: Seq in seqs.values():
-		seq.write_seq(save_path + "/seqs/" + seq.file_name)
+		if not seq.is_initialized:
+			seq.set_data_from_seq_bytes(get_file_data(seq.file_name))
+		# seq.write_seq(save_path + "/seqs/" + seq.file_name)
+
+		var seq_file_path: String = seq_dir_path.path_join(seq.file_name.to_lower().trim_suffix(".seq") + ".seq.tres")
+		var error: Error = ResourceSaver.save(seq, seq_file_path)
+		if error != Error.OK:
+			push_warning("error saving shp " + seq.file_name + ": " + str(error))
 
 
 func export_maps(save_path: String) -> void:

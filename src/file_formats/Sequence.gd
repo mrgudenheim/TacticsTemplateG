@@ -1,15 +1,9 @@
 class_name Sequence
+extends Resource
 
-var seq_parts: Array[SeqPart] = []
-var seq_name: String = ""
-
-var length: int = 0 # num bytes
-
-func duplicate() -> Sequence:
-	var new_sequence: Sequence = Sequence.new()
-	new_sequence.seq_name = seq_name
-	new_sequence.seq_parts = seq_parts.duplicate_deep(Resource.DEEP_DUPLICATE_ALL)
-	return new_sequence
+@export var seq_parts: Array[SeqPart] = []
+@export var seq_name: String = ""
+@export var length: int = 0 # num bytes
 
 
 func update_length() -> void:

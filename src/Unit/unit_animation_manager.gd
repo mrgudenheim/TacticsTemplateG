@@ -89,7 +89,7 @@ func start_animation(fft_animation: FftAnimation, draw_target: Sprite3D, is_play
 	
 	var only_opcodes: bool = true
 	for animation_part: SeqPart in fft_animation.sequence.seq_parts:
-		if not animation_part.isOpcode:
+		if not animation_part.is_opcode:
 			only_opcodes = false
 			break
 	
@@ -136,7 +136,7 @@ func play_animation(fft_animation: FftAnimation, draw_target: Sprite3D, isLoopin
 		
 		animation_part_id = await process_seq_part(fft_animation, animation_part_id, draw_target)
 		
-		if not seq_part.isOpcode:
+		if not seq_part.is_opcode:
 			var delay_frames: int = seq_part.parameters[1]  # param 1 is delay
 			if delay_frames == 0 and fft_animation.is_primary_anim:
 				animation_frame_loaded.emit(2 / animation_speed, fft_animation.frame_count)
@@ -171,7 +171,7 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 	var seq_part: SeqPart = fft_animation.sequence.seq_parts[seq_part_id]
 	
 	var frame_id_label: String = ""
-	if seq_part.isOpcode:
+	if seq_part.is_opcode:
 		frame_id_label = seq_part.to_string()
 	else:
 		frame_id_label = str(seq_part.parameters[0])
@@ -180,7 +180,7 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 		fft_animation.primary_anim_opcode_part_id = fft_animation.sequence.seq_parts.size()
 	
 	# handle LoadFrameWait
-	if not seq_part.isOpcode:
+	if not seq_part.is_opcode:
 		var new_frame_id: int = seq_part.parameters[0]
 		var frame_id_offset: int = get_animation_frame_offset(unit_data.primary_weapon.item_type, fft_animation.shp, fft_animation.back_face_offset)
 		new_frame_id = new_frame_id + frame_id_offset + opcode_frame_offset
@@ -199,7 +199,7 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 			#if fft_animation.is_primary_anim:
 				#animation_frame_loaded.emit()
 	# Handle opcodes
-	elif seq_part.isOpcode:
+	elif seq_part.is_opcode:
 		#push_warning(anim_part_start)
 		if seq_part.opcode_name == "QueueSpriteAnim":
 			#push_warning("Performing " + anim_part_start) 
