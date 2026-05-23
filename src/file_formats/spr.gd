@@ -9,14 +9,14 @@ var spritesheet: Image
 var has_compressed: bool = true
 var is_sp2: bool = false
 var sp2s: Dictionary = {}
-var shp_name: String = ""
-var seq_name: String = ""
+@export var shp_name: String = ""
+@export var seq_name: String = ""
 var sprite_id: int = 0
 
 var shp_id: int = 0
 var seq_id: int = 0
-var flying_flag: int = 0
-var graphic_height: int = 0
+@export var flying_flag: int = 0
+@export var graphic_height: int = 0
 
 
 func _init(new_file_name: String) -> void:
@@ -159,12 +159,26 @@ func set_pixel_colors(palette_id: int = 0) -> void:
 func get_rgba8_image() -> Image:
 	@warning_ignore("integer_division")
 	height = color_indices.size() / width
-	var image:Image = Image.create_empty(width, height, false, Image.FORMAT_RGBA8)
+	var image: Image = Image.create_empty(width, height, false, Image.FORMAT_RGBA8)
 	for x: int in width:
 		for y: int in height:
-			var color:Color = pixel_colors[x + (y * width)]
-			var color8:Color = Color8(color.r8, color.g8, color.b8, color.a8) # use Color8 function to prevent issues with format conversion changing color by 1/255
-			image.set_pixel(x,y, color8) # spr stores pixel data left to right, top to bottm
+			var color: Color = pixel_colors[x + (y * width)]
+			var color8: Color = Color8(color.r8, color.g8, color.b8, color.a8) # use Color8 function to prevent issues with format conversion changing color by 1/255
+			image.set_pixel(x, y, color8) # spr stores pixel data left to right, top to bottm
+	
+	return image
+
+
+func get_index_image() -> Image:
+	@warning_ignore("integer_division")
+	height = color_indices.size() / width
+	var image: Image = Image.create_empty(width, height, false, Image.FORMAT_RGBA8)
+	for x: int in width:
+		for y: int in height:
+			var color_index: int = color_indices[x + (y * width)]
+			var color: Color = Color.BLACK
+			color.r8 = color_index
+			image.set_pixel(x, y, color) # spr stores pixel data left to right, top to bottm
 	
 	return image
 

@@ -130,7 +130,7 @@ func set_color_indexed_data(image: Image, palette: Array[Color]) -> void:
 				color_indices[x + (y * width)] = color_palette_lookup[color_string] # stores data left to right, bottom to top
 
 
-func get_color_index(x:int, y:int) -> int:
+func get_color_index(x: int, y: int) -> int:
 	if bits_per_pixel > 8:
 		push_warning("Bit depth > 8, colors are not indexed") # a compressed 16bpp format can use indexed colors, but is not covered by this utility
 		return -1
@@ -138,12 +138,12 @@ func get_color_index(x:int, y:int) -> int:
 	return color_indices[x + ((height - y - 1) * width)]
 
 
-func get_color(x:int, y:int) -> Color:
+func get_color(x: int, y: int) -> Color:
 	return pixel_colors[x + ((height - y - 1) * width)]
 
 
 func get_rgba8_image() -> Image:
-	var image:Image = Image.create_empty(width, height, false, Image.FORMAT_RGBA8)
+	var image: Image = Image.create_empty(width, height, false, Image.FORMAT_RGBA8)
 	
 	for x: int in width:
 		for y: int in height:

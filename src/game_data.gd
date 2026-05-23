@@ -29,6 +29,7 @@ var scenarios: Dictionary[String, Scenario] = {} # [unique_name, Scenario]
 var names: Dictionary[String, PackedStringArray] = {} # [name_category, possible names]
 
 var textures: Dictionary[String, Texture2D] = {}
+var unit_spritesheets_data: Dictionary[String, UnitSpritesheetData] = {}
 
 # Textures
 var unit_spritesheets: Dictionary[String, Texture2D] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
@@ -134,7 +135,15 @@ func import_data(directory_path: String) -> void:
 						jobs_data[new_content.unique_name] = new_content
 				"text":
 					names["all"] = JSON.parse_string(file_text) as PackedStringArray
-		
+				# "unit_spritesheet":
+				# 	var new_spritesheet_data: Dictionary = JSON.parse_string(file_text)
+		# elif file_path.ends_with(".unit_spitesheet.bmp"):
+		# 	var bmp_bytes: PackedByteArray = FileAccess.get_file_as_bytes(file_path)
+		# 	var bmp_file_name: String = file_path.get_file().trim_suffix(".unit_spitesheet.bmp")
+		# 	var new_bmp: Bmp = Bmp.new(bmp_bytes, bmp_file_name)
+		elif file_path.ends_with(".unit_spitesheet.tres"):
+			var new_spritesheet_data: UnitSpritesheetData = ResourceLoader.load(file_path, "UnitSpritesheetData")
+			unit_spritesheets_data[file_path.get_file().trim_suffix(".unit_spitesheet.tres")] = new_spritesheet_data
 		elif file_path.ends_with(".map.glb"):
 			maps_gltf[file_path.get_file().trim_suffix(".map.glb")] = GltfManager.import_gltf(file_path)
 		elif file_path.ends_with(".map_data.tres"):

@@ -1275,26 +1275,36 @@ func export_unit_spritesheets(save_path: String) -> void:
 		if not unit_spritesheet.is_initialized:
 			unit_spritesheet.set_data()
 
-		var bmp_bytes: PackedByteArray = Spr.create_paletted_bmp(unit_spritesheet.spritesheet, unit_spritesheet.color_palette, unit_spritesheet.bits_per_pixel)
-		var bmp_file_path: String = spritesheet_path + unit_spritesheet.file_name + ".unit_spritesheet.bmp"
-		var file: FileAccess = FileAccess.open(bmp_file_path, FileAccess.WRITE)
-		file.store_buffer(bmp_bytes)
-		file.close()
+		# var bmp_bytes: PackedByteArray = Spr.create_paletted_bmp(unit_spritesheet.spritesheet, unit_spritesheet.color_palette, unit_spritesheet.bits_per_pixel)
+		# var bmp_file_path: String = spritesheet_path + unit_spritesheet.file_name + ".unit_spritesheet.bmp"
+		# var file: FileAccess = FileAccess.open(bmp_file_path, FileAccess.WRITE)
+		# file.store_buffer(bmp_bytes)
+		# file.close()
 
-		var spritesheet_data: Dictionary = {
-			"unique_name": unit_spritesheet.file_name,
-			"shp_name" : unit_spritesheet.shp_name,
-			"seq_name" : unit_spritesheet.seq_name,
-			"sprite_id" : unit_spritesheet.sprite_id,
-			"flying_flag" : unit_spritesheet.flying_flag,
-			"graphic_height" : unit_spritesheet.graphic_height,
-			"palettes" : unit_spritesheet.color_palette,
-		}
-		var spritesheet_data_string: String = JSON.stringify(spritesheet_data, "\t")
-		var data_filepath: String = spritesheet_path + unit_spritesheet.file_name + ".unit_spritesheet.json"
-		var data_file: FileAccess = FileAccess.open(data_filepath, FileAccess.WRITE)
-		data_file.store_line(spritesheet_data_string)
-		data_file.close()
+		var spritesheet_data: UnitSpritesheetData = UnitSpritesheetData.new(unit_spritesheet)
+		var spritesheet_data_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name + ".unit_spritesheet.tres")
+		var error: Error = ResourceSaver.save(spritesheet_data, spritesheet_data_file_path)
+		if error != Error.OK:
+			push_warning("error saving map data " + spritesheet_data.unique_name + ": " + str(error))
+
+		var index_image: Image = unit_spritesheet.get_index_image()
+		var unit_spritesheet_texture_webp_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name + ".texture.webp")
+		index_image.save_webp(unit_spritesheet_texture_webp_file_path)
+
+		# var spritesheet_data: Dictionary = {
+		# 	"unique_name": unit_spritesheet.file_name,
+		# 	"shp_name" : unit_spritesheet.shp_name,
+		# 	"seq_name" : unit_spritesheet.seq_name,
+		# 	"sprite_id" : unit_spritesheet.sprite_id,
+		# 	"flying_flag" : unit_spritesheet.flying_flag,
+		# 	"graphic_height" : unit_spritesheet.graphic_height,
+		# 	"palettes" : unit_spritesheet.color_palette,
+		# }
+		# var spritesheet_data_string: String = JSON.stringify(spritesheet_data, "\t")
+		# var data_filepath: String = spritesheet_path + unit_spritesheet.file_name + ".unit_spritesheet.json"
+		# var data_file: FileAccess = FileAccess.open(data_filepath, FileAccess.WRITE)
+		# data_file.store_line(spritesheet_data_string)
+		# data_file.close()
 
 
 func export_other_images(save_path: String) -> void:
