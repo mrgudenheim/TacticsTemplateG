@@ -30,10 +30,10 @@ var gif_frame_nums: PackedInt32Array = []
 @export var frame_list_row_tscn: PackedScene
 
 # https://en.wikipedia.org/wiki/CD-ROM#CD-ROM_XA_extension
-const bytes_per_sector: int = 2352
-const bytes_per_sector_header: int = 24
-const bytes_per_sector_footer: int = 280
-const data_bytes_per_sector: int = 2048
+const BYTES_PER_SECTOR: int = 2352
+const BYTES_PER_SECTOR_HEADER: int = 24
+const BYTES_PER_SECTOR_FOOTER: int = 280
+const DATA_BYTES_PER_SECTOR: int = 2048
 
 # load gif exporter module and quantization module that you want to use
 const GIFExporter = preload("res://addons/gdgifexporter/exporter.gd")
@@ -193,7 +193,7 @@ func get_xml() -> String:
 		
 		var file: String = seq_temp.file_name
 		files_changed.append(file)
-		var xml_size_location_start: String = '<Location offset="%08x" ' % (RomReader.file_records[file].record_location_offset + FileRecord.OFFSET_SIZE - bytes_per_sector_header)
+		var xml_size_location_start: String = '<Location offset="%08x" ' % (RomReader.file_records[file].record_location_offset + FileRecord.OFFSET_SIZE - BYTES_PER_SECTOR_HEADER)
 		xml_size_location_start += ('sector="%x">' % RomReader.file_records[file].record_location_sector)
 		var file_size_hex: String = '%08x' % seq_temp.toal_length
 		var file_size_hex_bytes: PackedStringArray = [
@@ -459,7 +459,7 @@ func _on_seq_file_options_item_selected(index: int, select_shp: bool = true) -> 
 	var type: String = ui_manager.seq_options.get_item_text(index)
 	
 	if RomReader.file_records.has(type):
-		ui_manager.max_bytes = ceil(RomReader.file_records[type].size / float(data_bytes_per_sector)) * data_bytes_per_sector as int
+		ui_manager.max_bytes = ceil(RomReader.file_records[type].size / float(DATA_BYTES_PER_SECTOR)) * DATA_BYTES_PER_SECTOR as int
 	
 	animation_list_container.get_parent().get_parent().get_parent().name = seq.file_name + " Animations"
 	

@@ -582,7 +582,7 @@ func show_vfx(action_instance: ActionInstance, position: Vector3) -> Node3D:
 
 	var parent_node: Node = action_instance.user.get_parent()
 
-	var instance := VfxEffectInstance.new()
+	var instance: VfxEffectInstance = VfxEffectInstance.new()
 	instance.name = "VfxEffectInstance"
 	instance.position = position
 	parent_node.add_child(instance)

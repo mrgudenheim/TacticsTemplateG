@@ -192,7 +192,7 @@ func load_map_chunk(map_chunk: Scenario.MapChunk) -> void:
 	if map_chunk.mirror_scale != Vector3i.ONE or mesh_aabb.position != Vector3.ZERO:
 		var surface_arrays: Array = map_chunk_data.mesh.surface_get_arrays(0)
 		var original_mesh_center: Vector3 = mesh_aabb.get_center()
-		var mirror_vec := Vector3(map_chunk.mirror_scale)
+		var mirror_vec: Vector3 = Vector3(map_chunk.mirror_scale)
 		for vertex_idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size():
 			var vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx]
 			vertex = (vertex - original_mesh_center) * mirror_vec + (mesh_aabb.size / 2.0)

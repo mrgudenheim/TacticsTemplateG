@@ -41,20 +41,20 @@ func _to_string() -> String:
 
 func get_file_data(rom: PackedByteArray) -> PackedByteArray:
 	var file_data: PackedByteArray = []
-	var file_data_start: int = (sector_location * FFTae.bytes_per_sector) + FFTae.bytes_per_sector_header
-	var num_sectors_full: int = floor(size / float(FFTae.data_bytes_per_sector))
+	var file_data_start: int = (sector_location * FFTae.BYTES_PER_SECTOR) + FFTae.BYTES_PER_SECTOR_HEADER
+	var num_sectors_full: int = floor(size / float(FFTae.DATA_BYTES_PER_SECTOR))
 	#var extra_size_sector_bytes: int =  num_sectors_full * (FFTae.bytes_per_sector_footer + FFTae.bytes_per_sector_header)
 	#var file_data_end: int = file_data_start + size + extra_size_sector_bytes
 	
 	for sector_index: int in num_sectors_full:
-		var sector_data_start: int = file_data_start + (sector_index * FFTae.bytes_per_sector)
-		var sector_data_end: int = sector_data_start + FFTae.data_bytes_per_sector
+		var sector_data_start: int = file_data_start + (sector_index * FFTae.BYTES_PER_SECTOR)
+		var sector_data_end: int = sector_data_start + FFTae.DATA_BYTES_PER_SECTOR
 		var sector_data: PackedByteArray = rom.slice(sector_data_start, sector_data_end)
 		file_data.append_array(sector_data)
 	
 	# add data from last sector
-	var last_sector_data_start: int = file_data_start + (num_sectors_full * FFTae.bytes_per_sector)
-	var last_sector_data_end: int = last_sector_data_start + (size % FFTae.data_bytes_per_sector)
+	var last_sector_data_start: int = file_data_start + (num_sectors_full * FFTae.BYTES_PER_SECTOR)
+	var last_sector_data_end: int = last_sector_data_start + (size % FFTae.DATA_BYTES_PER_SECTOR)
 	var last_sector_data: PackedByteArray = rom.slice(last_sector_data_start, last_sector_data_end)
 	file_data.append_array(last_sector_data)
 	
