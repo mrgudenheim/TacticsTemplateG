@@ -115,6 +115,8 @@ func import_data(directory_path: String) -> void:
 					var new_content: JobData = JobData.create_from_json(file_text)
 					if not scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
 						jobs_data[new_content.unique_name] = new_content
+				"text":
+					names["all"] = JSON.parse_string(file_text) as PackedStringArray
 		
 		elif file_path.ends_with(".map.glb"):
 			maps_gltf[file_path.get_file().trim_suffix(".map.glb")] = GltfManager.import_gltf(file_path)
