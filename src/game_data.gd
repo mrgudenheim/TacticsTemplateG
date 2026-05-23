@@ -146,6 +146,8 @@ func import_data(directory_path: String) -> void:
 		elif file_path.to_lower().ends_with(".vfx_data.tres"):
 			var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")
 			vfx[file_path.get_file().trim_suffix(".vfx_data.tres")] = new_vfx
+		elif file_path.ends_with(".projectile.glb"):
+			projectiles_gltf[file_path.get_file().trim_suffix(".projectile.glb")] = GltfManager.import_gltf(file_path)
 
 	push_warning("Time to import files (ms): " + str(Time.get_ticks_msec() - start_time))
 	start_time = Time.get_ticks_msec()
