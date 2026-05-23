@@ -1389,7 +1389,7 @@ func export_maps(save_path: String) -> void:
 		if fft_map_data.unique_name == "map_000":
 			continue # skip map 0 - causes crash
 		var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3i(-1, -1, 1))
-		GltfManager.save_node(new_map_node, maps_path)
+		GltfManager.save_node(new_map_node, maps_path, ".map.glb")
 
 		#var map_texture_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(fft_map_data.albedo_texture.get_image(), fft_map_data.texture_palettes, 8)
 		#var map_texture_bmp_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".texture.bmp")
@@ -1450,7 +1450,7 @@ func export_vfx(save_path: String) -> void:
 		var new_mesh_instance: MeshInstance3D = MeshInstance3D.new()
 		new_mesh_instance.mesh = ProjectileEffectInstance.build_mesh(verts, faces)
 		new_mesh_instance.name = "projectile_" + ProjectileEffectInstance.ProjectileType.keys()[model_id]
-		GltfManager.save_node(new_mesh_instance, vfx_path)
+		GltfManager.save_node(new_mesh_instance, vfx_path, ".projectile.glb")
 		new_mesh_instance.queue_free()
 
 class SpritesheetRegionData:
