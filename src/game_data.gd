@@ -141,9 +141,9 @@ func import_data(directory_path: String) -> void:
 		# 	var bmp_bytes: PackedByteArray = FileAccess.get_file_as_bytes(file_path)
 		# 	var bmp_file_name: String = file_path.get_file().trim_suffix(".unit_spitesheet.bmp")
 		# 	var new_bmp: Bmp = Bmp.new(bmp_bytes, bmp_file_name)
-		elif file_path.ends_with(".unit_spitesheet.tres"):
+		elif file_path.ends_with(".unit_spritesheet.tres"):
 			var new_spritesheet_data: UnitSpritesheetData = ResourceLoader.load(file_path, "UnitSpritesheetData")
-			unit_spritesheets_data[file_path.get_file().trim_suffix(".unit_spitesheet.tres")] = new_spritesheet_data
+			unit_spritesheets_data[file_path.get_file().trim_suffix(".unit_spritesheet.tres")] = new_spritesheet_data
 		elif file_path.ends_with(".map.glb"):
 			maps_gltf[file_path.get_file().trim_suffix(".map.glb")] = GltfManager.import_gltf(file_path)
 		elif file_path.ends_with(".map_data.tres"):
