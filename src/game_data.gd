@@ -1,5 +1,6 @@
 extends Node
 
+signal data_imported
 signal message(message: String)
 signal import_progress(current_value: int, max_value: int)
 
@@ -69,7 +70,34 @@ func save_data_paths() -> void:
 	json_file.close()
 
 
+func clear_data() -> void:
+	is_ready = false
+	shps = {} 
+	seqs = {} 
+	maps_gltf = {}
+	maps_data = {} 
+	vfx = {}
+	projectiles_gltf = {}
+	items = {} 
+	status_effects = {} 
+	jobs_data = {} 
+	actions = {} 
+	triggered_actions = {}
+	passive_effects = {} 
+	abilities = {} 
+	scenarios = {} 
+	names = {}
+	palettes = {}
+	textures = {}
+	unit_spritesheets_data = {}
+	unit_spritesheets = {} 
+	frame_bin_texture = null
+	items_texture = null
+
+
 func import_data(directory_path: String) -> void:
+	clear_data()
+	
 	var start_time: int = Time.get_ticks_msec()
 
 	var file_paths: PackedStringArray = Utilities.get_file_list_recursive(directory_path)
@@ -80,6 +108,9 @@ func import_data(directory_path: String) -> void:
 
 	var num_files: int = file_paths.size()
 	var current_file: int = 0
+
+	if num_files == 0:
+		import_progress.emit(0, 0)
 
 	for file_path: String in file_paths:
 		current_file += 1
@@ -174,7 +205,8 @@ func import_data(directory_path: String) -> void:
 			projectiles_gltf[file_path.get_file().trim_suffix(".projectile.glb")] = GltfManager.import_gltf(file_path)
 
 	push_warning("Time to import files (ms): " + str(Time.get_ticks_msec() - start_time))
-	start_time = Time.get_ticks_msec()
+	is_ready = true
+	data_imported.emit()
 
 
 func connect_data_references() -> void:

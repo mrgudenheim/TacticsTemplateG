@@ -125,3 +125,5 @@ func update_import_progress(current_value: int, max_value: int) -> void:
 
 	if current_value >= max_value:
 		import_progress_ui.visible = false
+	else:
+		import_progress_ui.visible = true
