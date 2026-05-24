@@ -76,7 +76,8 @@ func _on_destination_path_selected(path: String) -> void:
 	destination_path_line_edit.text = path
 	destination_file_dialog.visible = false
 
-	if GameData.external_data_paths["IMPORT_PATH"].is_empty() or GameData.external_data_paths["IMPORT_PATH"] == GameData.external_data_paths["EXPORT_PATH"]:
+	var import_path_is_export_path: bool = GameData.external_data_paths["IMPORT_PATH"] == GameData.external_data_paths["EXPORT_PATH"]
+	if GameData.external_data_paths["IMPORT_PATH"].is_empty() or import_path_is_export_path:
 		import_path_line_edit.text = path
 		GameData.external_data_paths["IMPORT_PATH"] = path
 	GameData.external_data_paths["EXPORT_PATH"] = path
