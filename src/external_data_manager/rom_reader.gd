@@ -428,6 +428,7 @@ func cache_associated_files() -> void:
 	eff_spr.shp_name = "EFF1.SHP"
 	eff_spr.seq_name = "EFF1.SEQ"
 	sprs.append(eff_spr)
+	spritesheets["EFF"] = eff_spr
 	
 	# TRAP effects parsed in process_rom() via trap_effect_data.init_from_rom()
 	
@@ -439,6 +440,7 @@ func cache_associated_files() -> void:
 	wep_spr.shp_name = "WEP1.SHP"
 	wep_spr.seq_name = "WEP1.SEQ"
 	sprs[wep_spr_index] = wep_spr
+	spritesheets["WEP"] = wep_spr
 	
 	# get item graphics
 	var item_record: FileRecord = FileRecord.new()
@@ -1276,13 +1278,13 @@ func export_unit_spritesheets(save_path: String) -> void:
 			unit_spritesheet.set_data()
 
 		var spritesheet_data: UnitSpritesheetData = UnitSpritesheetData.new(unit_spritesheet)
-		var spritesheet_data_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name + ".unit_spritesheet.tres")
+		var spritesheet_data_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name.to_lower() + ".unit_spritesheet.tres")
 		var error: Error = ResourceSaver.save(spritesheet_data, spritesheet_data_file_path)
 		if error != Error.OK:
 			push_warning("error saving unit spritesheet data " + spritesheet_data.unique_name + ": " + str(error))
 
 		var index_image: Image = unit_spritesheet.get_index_image()
-		var unit_spritesheet_texture_webp_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name + ".texture.webp")
+		var unit_spritesheet_texture_webp_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name.to_lower() + ".texture.webp")
 		index_image.save_webp(unit_spritesheet_texture_webp_file_path)
 
 
@@ -1397,7 +1399,7 @@ func export_maps(save_path: String) -> void:
 		GltfManager.save_node(new_map_node, maps_path, fft_map_data.unique_name + ".map.glb")
 		
 		var map_texture_webp_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".texture.webp")
-		fft_map_data.albedo_texture.get_image().save_webp(map_texture_webp_file_path)
+		fft_map_data.albedo_texture_indexed.get_image().save_webp(map_texture_webp_file_path)
 		
 		var new_map_data: MapData = MapData.init_from_fft_map_data(fft_map_data)
 		var map_data_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".map_data.tres")
