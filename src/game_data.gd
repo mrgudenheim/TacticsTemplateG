@@ -141,15 +141,15 @@ func import_data(directory_path: String) -> void:
 						status_effects[new_content.unique_name] = new_content
 				"item":
 					var new_content: ItemData = ItemData.create_from_json(file_text)
-					if not items.keys().has(new_content.unique_name): # TODO allow overwriting content
+					if not items.keys().has(new_content.unique_name):
 						items[new_content.unique_name] = new_content
 				"scenario":
 					var new_content: Scenario = Scenario.create_from_json(file_text)
-					if not scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
+					if not scenarios.keys().has(new_content.unique_name):
 						scenarios[new_content.unique_name] = new_content
 				"job":
 					var new_content: JobData = JobData.create_from_json(file_text)
-					if not scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
+					if not scenarios.keys().has(new_content.unique_name):
 						jobs_data[new_content.unique_name] = new_content
 				"text":
 					names["all"] = JSON.parse_string(file_text) as PackedStringArray
@@ -247,6 +247,10 @@ func connect_data_references() -> void:
 			item.passive_effect = passive_effects[item.passive_effect_name]
 		if actions.has(item.weapon_attack_action_name):
 			item.weapon_attack_action = actions[item.weapon_attack_action_name]
+
+
+static func get_16_color_palette(palette_id: int, full_palette: PackedColorArray) -> PackedColorArray:
+	return full_palette.slice(palette_id * 16, (palette_id + 1) * 16)
 
 
 #func get_scenario(unique_name: String) -> Scenario:
