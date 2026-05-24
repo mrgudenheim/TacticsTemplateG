@@ -178,7 +178,10 @@ func import_data(directory_path: String) -> void:
 			vfx[file_path.get_file().trim_suffix(".vfx_data.tres")] = new_vfx
 		elif file_path.ends_with(".projectile.glb"):
 			projectiles_gltf[file_path.get_file().trim_suffix(".projectile.glb")] = GltfManager.import_gltf(file_path)
-		
+	
+	for map_data: MapData in maps_data.values():
+		var mesh_instance: MeshInstance3D = maps_gltf[map_data.unique_name].get_child(1)
+		map_data.mesh = mesh_instance.mesh
 
 	push_warning("Time to import files (ms): " + str(Time.get_ticks_msec() - start_time))
 	is_ready = true

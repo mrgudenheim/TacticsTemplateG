@@ -10,6 +10,7 @@ extends Resource
 @export var texture_animations: Array[TextureAnimation] = []
 @export var palette_animation_frames: Array[PackedColorArray] = []
 
+var mesh: Mesh
 
 static func init_from_fft_map_data(fft_map_data: FftMapData) -> MapData:
 	var new_map_data: MapData = MapData.new()
