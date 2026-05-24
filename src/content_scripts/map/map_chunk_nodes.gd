@@ -6,15 +6,15 @@ const MAP_SCENE: PackedScene = preload("uid://buljw4afjva1d")
 @export var mesh_instance: MeshInstance3D
 @export var collision_shape: CollisionShape3D
 @export var map_shader: Shader
-var map_data: FftMapData
+var map_data: MapData
 
 
 static func instantiate() -> MapChunkNodes:
 	return MAP_SCENE.instantiate()
 
 
-func play_animations(local_map_data: FftMapData) -> void:
-	if not local_map_data.has_texture_animations:
+func play_animations(local_map_data: MapData) -> void:
+	if local_map_data.texture_animations.is_empty():
 		return
 	
 	# set up shader parameters for uv_animations
@@ -29,15 +29,16 @@ func play_animations(local_map_data: FftMapData) -> void:
 	frame_positions.resize(num_texture_animations)
 	frame_idxs.resize(num_texture_animations)
 	
-	var num_palettes: float = 16.0
+	var texture_size: Vector2 = GameData.textures[local_map_data.unique_name].get_size()
+	# var num_palettes: float = 16.0
 	for anim_id: int in num_texture_animations:
 		if [0x01, 0x02, 0x05, 0x15].has(local_map_data.texture_animations[anim_id].anim_technique):
-			canvas_positions[anim_id] = Vector2(local_map_data.texture_animations[anim_id].canvas_x / float(FftMapData.TEXTURE_SIZE.x * num_palettes), 
-					(local_map_data.texture_animations[anim_id].canvas_y + (256 * local_map_data.texture_animations[anim_id].texture_page)) / float(FftMapData.TEXTURE_SIZE.y))
-			canvas_sizes[anim_id] = Vector2(local_map_data.texture_animations[anim_id].canvas_width / float(FftMapData.TEXTURE_SIZE.x * num_palettes),
-					local_map_data.texture_animations[anim_id].canvas_height / float(FftMapData.TEXTURE_SIZE.y))
-			frame_positions[anim_id] = Vector2(local_map_data.texture_animations[anim_id].frame1_x / float(FftMapData.TEXTURE_SIZE.x * num_palettes), 
-					(local_map_data.texture_animations[anim_id].frame1_y + (256 * local_map_data.texture_animations[anim_id].frame1_texture_page)) / float(FftMapData.TEXTURE_SIZE.y))
+			canvas_positions[anim_id] = Vector2(local_map_data.texture_animations[anim_id].canvas_position.x / texture_size.x, 
+					(local_map_data.texture_animations[anim_id].canvas_position.y) / texture_size.y)
+			canvas_sizes[anim_id] = Vector2(local_map_data.texture_animations[anim_id].canvas_size.x / texture_size.x,
+					local_map_data.texture_animations[anim_id].canvas_size.y / texture_size.y)
+			frame_positions[anim_id] = Vector2(local_map_data.texture_animations[anim_id].frame1_position.x / texture_size.x, 
+					(local_map_data.texture_animations[anim_id].frame1_position.y) / texture_size.y)
 	
 	var map_shader_material: ShaderMaterial = mesh_instance.material_override as ShaderMaterial
 	map_shader_material.set_shader_parameter("canvas_pos", canvas_positions)

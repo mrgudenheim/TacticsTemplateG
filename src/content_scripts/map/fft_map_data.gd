@@ -844,7 +844,7 @@ func get_map_scene(mirror_scale: Vector3i) -> MapChunkNodes:
 		init_map()
 
 	var new_map_instance: MapChunkNodes = MapChunkNodes.instantiate()
-	new_map_instance.map_data = self
+	new_map_instance.map_data = MapData.init_from_fft_map_data(self)
 	new_map_instance.name = unique_name
 
 	var mesh_aabb: AABB = mesh.get_aabb()

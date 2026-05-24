@@ -30,3 +30,78 @@ static func init_from_fft_map_data(fft_map_data: FftMapData) -> MapData:
 	new_map_data.palette_animation_frames = fft_map_data.texture_animations_palette_frames.duplicate()
 
 	return new_map_data
+
+
+func animate_palette(texture_anim: TextureAnimation, map: MapChunkNodes, anim_fps: float) -> void:
+	var frame_id: int = 0
+	var dir: int = 1
+	var colors_per_palette: int = 16
+
+	var map_shader_material: ShaderMaterial = map.mesh_instance.material_override as ShaderMaterial
+	while frame_id < texture_anim.num_frames:
+		if not is_instance_valid(map):
+			break
+
+		var new_anim_palette_id: int = frame_id + texture_anim.animation_starting_index
+		var new_palette: PackedColorArray = palette_animation_frames[new_anim_palette_id]
+		var new_texture_palette: PackedColorArray = map_shader_material.get_shader_parameter("palettes_colors")
+		for color_id: int in colors_per_palette:
+			new_texture_palette[color_id + (texture_anim.palette_id_to_animate * colors_per_palette)] = new_palette[color_id]
+		map_shader_material.set_shader_parameter("palettes_colors", new_texture_palette)
+
+		#map.mesh.mesh = mesh
+		await Engine.get_main_loop().create_timer(texture_anim.frame_duration / anim_fps).timeout
+		if texture_anim.anim_technique == 0x3: # loop forward
+			frame_id += dir
+			frame_id = frame_id % texture_anim.num_frames
+		elif texture_anim.anim_technique == 0x4: # loop back and forth
+			if frame_id == texture_anim.num_frames - 1:
+				dir = -1
+			elif frame_id == 0:
+				dir = 1
+			frame_id += dir
+
+
+func animate_uv(texture_anim: TextureAnimation, map: MapChunkNodes, anim_idx: int, anim_fps: float) -> void:
+	var frame_id: int = 0
+	var dir: int = 1
+
+	var map_shader_material: ShaderMaterial = map.mesh_instance.material_override as ShaderMaterial
+	while frame_id < texture_anim.num_frames:
+		if not is_instance_valid(map):
+			break
+
+		var frame_idxs: PackedFloat32Array = map_shader_material.get_shader_parameter("frame_idx")
+		frame_idxs[anim_idx] = float(frame_id)
+		map_shader_material.set_shader_parameter("frame_idx", frame_idxs)
+
+		await Engine.get_main_loop().create_timer(texture_anim.frame_duration / anim_fps).timeout
+		if texture_anim.anim_technique == 0x1: # loop forward
+			frame_id += dir
+			frame_id = frame_id % texture_anim.num_frames
+		elif texture_anim.anim_technique == 0x2: # loop back and forth
+			if frame_id == texture_anim.num_frames - 1:
+				dir = -1
+			elif frame_id == 0:
+				dir = 1
+			frame_id += dir
+
+
+class TextureAnimationData:
+	var texture_anim_instruction_bytes: PackedByteArray = []
+	var animation_type: int = -1 # error
+	var canvas_y: int
+	var canvas_width: int
+	var canvas_height: int
+	var frame1_y: int
+	# UV animation: 0x01 repeat loop forward, 0x02 loop ping pong forward <-> backward, 0x05 script command, 0x15 script command
+	# palette animation: 0x03 repeat loop forward, 0x04 loop ping pong forward <-> backward, 0x00 script command, 0x13 script command
+	var anim_technique: int
+	var num_frames: int
+	var frame_duration: int # 1/30ths of a second (ie. 2 frames)
+	var texture_page: int
+	var canvas_x: int
+	var frame1_texture_page: int
+	var frame1_x: int
+	var palette_id_to_animate: int
+	var animation_starting_index: int

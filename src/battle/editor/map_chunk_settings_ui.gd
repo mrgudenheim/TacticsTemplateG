@@ -31,7 +31,7 @@ func _ready() -> void:
 	chunk_name_dropdown.item_selected.connect(on_chunk_selected)
 	position_edit.vector_changed.connect(set_map_chunk_position)
 	
-	for map_data: FftMapData in RomReader.maps.values():
+	for map_data: MapData in GameData.maps_data.values():
 		chunk_name_dropdown.add_item(map_data.unique_name)
 
 	var map_index: int = range(1, chunk_name_dropdown.item_count).pick_random() # don't include map 0 that causes error
@@ -40,7 +40,7 @@ func _ready() -> void:
 		# mirror along x to get the un-mirrored look after mirroring along y	
 		map_chunk.set_mirror_xyz([true, true, false])
 	else:
-		map_index = RomReader.maps.keys().find(map_chunk.unique_name)
+		map_index = GameData.maps_data.keys().find(map_chunk.unique_name)
 	
 	for idx: int in mirror_checkboxes.size():
 		mirror_checkboxes[idx].button_pressed = map_chunk.mirror_xyz[idx]
@@ -99,9 +99,9 @@ func on_mirror_changed(_toggled_on: bool) -> void:
 
 
 func get_map_chunk_nodes(map_chunk_unique_name: String) -> MapChunkNodes:
-	var map_chunk_data: FftMapData = RomReader.maps[map_chunk_unique_name]
-	if not map_chunk_data.is_initialized:
-		map_chunk_data.init_map()
+	var map_chunk_data: MapData = GameData.maps_data[map_chunk_unique_name]
+	#if not map_chunk_data.is_initialized:
+		#map_chunk_data.init_map()
 
 	var new_map_instance: MapChunkNodes = MapChunkNodes.instantiate()
 	new_map_instance.map_data = map_chunk_data
@@ -145,7 +145,7 @@ func get_map_chunk_nodes(map_chunk_unique_name: String) -> MapChunkNodes:
 	else:
 		new_map_instance.mesh_instance.mesh = map_chunk_data.mesh
 
-	new_map_instance.set_mesh_shader(map_chunk_data.albedo_texture_indexed, map_chunk_data.texture_palettes)
+	new_map_instance.set_mesh_shader(GameData.textures[map_chunk_data.unique_name], map_chunk_data.palettes)
 	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
 	
 	return new_map_instance

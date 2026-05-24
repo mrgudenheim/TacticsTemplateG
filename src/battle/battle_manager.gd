@@ -172,9 +172,9 @@ func load_scenario(new_scenario: Scenario) -> void:
 
 
 func load_map_chunk(map_chunk: Scenario.MapChunk) -> void:
-	var map_chunk_data: FftMapData = RomReader.maps[map_chunk.unique_name]
-	if not map_chunk_data.is_initialized:
-		map_chunk_data.init_map()
+	var map_chunk_data: MapData = GameData.maps_data[map_chunk.unique_name]
+	#if not map_chunk_data.is_initialized:
+		#map_chunk_data.init_map()
 
 	var new_map_instance: MapChunkNodes = MapChunkNodes.instantiate()
 	new_map_instance.map_data = map_chunk_data
@@ -232,9 +232,9 @@ func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
 	total_map_tiles.clear()
 
 	for map_chunk: Scenario.MapChunk in map_chunks:
-		var map_chunk_data: FftMapData = RomReader.maps[map_chunk.unique_name]
-		if not map_chunk_data.is_initialized:
-			continue
+		var map_chunk_data: MapData = GameData.maps_data[map_chunk.unique_name]
+		#if not map_chunk_data.is_initialized:
+			#continue
 		
 		var mesh_aabb: AABB = map_chunk_data.mesh.get_aabb()
 		
@@ -276,7 +276,7 @@ func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
 
 
 func update_units_data_tile_location(units_data: Array[UnitData], map_chunk: Scenario.MapChunk) -> Array[UnitData]:
-	var map_chunk_data: FftMapData = RomReader.maps[map_chunk.unique_name]
+	var map_chunk_data: MapData = GameData.maps_data[map_chunk.unique_name]
 	var map_tile_offset: Vector2i = Vector2i(map_chunk.corner_position.x, map_chunk.corner_position.z)
 	var mesh_aabb: AABB = map_chunk_data.mesh.get_aabb()
 	for unit_data: UnitData in units_data:
@@ -861,7 +861,7 @@ func start_units_turn(unit: Unit) -> void:
 	#new_unit.start_turn(self)
 
 
-func get_map(new_map_data: FftMapData, map_position: Vector3, map_scale: Vector3, gltf_map_mesh: MeshInstance3D = null) -> MapChunkNodes:
+func get_map(new_map_data: MapData, map_position: Vector3, map_scale: Vector3, gltf_map_mesh: MeshInstance3D = null) -> MapChunkNodes:
 	map_scale.y = -1 # vanilla used -y as up
 	var new_map_instance: MapChunkNodes = MapChunkNodes.instantiate()
 	new_map_instance.map_data = new_map_data
