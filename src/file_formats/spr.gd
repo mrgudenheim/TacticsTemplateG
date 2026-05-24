@@ -169,20 +169,6 @@ func get_rgba8_image() -> Image:
 	return image
 
 
-func get_index_image() -> Image:
-	@warning_ignore("integer_division")
-	height = color_indices.size() / width
-	var image: Image = Image.create_empty(width, height, false, Image.FORMAT_RGBA8)
-	for x: int in width:
-		for y: int in height:
-			var color_index: int = color_indices[x + (y * width)]
-			var color: Color = Color.BLACK
-			color.r8 = color_index
-			image.set_pixel(x, y, color) # spr stores pixel data left to right, top to bottm
-	
-	return image
-
-
 func decompress(compressed_bytes: PackedByteArray) -> PackedByteArray:
 	var num_pixels_compressed: int = 200 * width if has_compressed else 0
 	
