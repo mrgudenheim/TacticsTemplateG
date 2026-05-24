@@ -1394,7 +1394,7 @@ func export_maps(save_path: String) -> void:
 		if fft_map_data.unique_name == "map_000":
 			continue # skip map 0 - causes crash
 		var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3i(-1, -1, 1))
-		GltfManager.save_node(new_map_node, maps_path, ".map.glb")
+		GltfManager.save_node(new_map_node, maps_path, fft_map_data.unique_name + ".map.glb")
 		
 		var map_texture_webp_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".texture.webp")
 		fft_map_data.albedo_texture.get_image().save_webp(map_texture_webp_file_path)
