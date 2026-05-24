@@ -1275,12 +1275,6 @@ func export_unit_spritesheets(save_path: String) -> void:
 		if not unit_spritesheet.is_initialized:
 			unit_spritesheet.set_data()
 
-		# var bmp_bytes: PackedByteArray = Spr.create_paletted_bmp(unit_spritesheet.spritesheet, unit_spritesheet.color_palette, unit_spritesheet.bits_per_pixel)
-		# var bmp_file_path: String = spritesheet_path + unit_spritesheet.file_name + ".unit_spritesheet.bmp"
-		# var file: FileAccess = FileAccess.open(bmp_file_path, FileAccess.WRITE)
-		# file.store_buffer(bmp_bytes)
-		# file.close()
-
 		var spritesheet_data: UnitSpritesheetData = UnitSpritesheetData.new(unit_spritesheet)
 		var spritesheet_data_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name + ".unit_spritesheet.tres")
 		var error: Error = ResourceSaver.save(spritesheet_data, spritesheet_data_file_path)
@@ -1291,21 +1285,6 @@ func export_unit_spritesheets(save_path: String) -> void:
 		var unit_spritesheet_texture_webp_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name + ".texture.webp")
 		index_image.save_webp(unit_spritesheet_texture_webp_file_path)
 
-		# var spritesheet_data: Dictionary = {
-		# 	"unique_name": unit_spritesheet.file_name,
-		# 	"shp_name" : unit_spritesheet.shp_name,
-		# 	"seq_name" : unit_spritesheet.seq_name,
-		# 	"sprite_id" : unit_spritesheet.sprite_id,
-		# 	"flying_flag" : unit_spritesheet.flying_flag,
-		# 	"graphic_height" : unit_spritesheet.graphic_height,
-		# 	"palettes" : unit_spritesheet.color_palette,
-		# }
-		# var spritesheet_data_string: String = JSON.stringify(spritesheet_data, "\t")
-		# var data_filepath: String = spritesheet_path + unit_spritesheet.file_name + ".unit_spritesheet.json"
-		# var data_file: FileAccess = FileAccess.open(data_filepath, FileAccess.WRITE)
-		# data_file.store_line(spritesheet_data_string)
-		# data_file.close()
-
 
 func export_other_images(save_path: String) -> void:
 	message.emit("Exporting other images...")
@@ -1314,28 +1293,22 @@ func export_other_images(save_path: String) -> void:
 	var other_images_path: String = save_path + "/other_images/"
 	DirAccess.make_dir_recursive_absolute(other_images_path)
 	# frame.bin
-	var frame_bin_palette_idx: int = 5
-	var frame_bin_palette_colors: PackedColorArray = frame_bin.color_palette.slice(frame_bin_palette_idx * 16, (frame_bin_palette_idx + 1) * 16)
-	var frame_bin_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(frame_bin_texture.get_image(), frame_bin_palette_colors, frame_bin.bits_per_pixel)
-	var frame_bin_bmp_file_path: String = other_images_path + "misc.other.bmp"
-	var frame_bin_file: FileAccess = FileAccess.open(frame_bin_bmp_file_path, FileAccess.WRITE)
-	frame_bin_file.store_buffer(frame_bin_bmp_bytes)
-	frame_bin_file.close()
+	var misc_index_image: Image = frame_bin.get_index_image()
+	var misc_texture_webp_file_path: String = other_images_path.path_join("misc.texture.webp")
+	misc_index_image.save_webp(misc_texture_webp_file_path)
 
-	var frame_bin_palettes_file_path: String = other_images_path + "misc.palettes.json"
+	var frame_bin_palettes_file_path: String = other_images_path.path_join("misc.palettes.json")
 	var frame_bin_palettes_file: FileAccess = FileAccess.open(frame_bin_palettes_file_path, FileAccess.WRITE)
 	frame_bin_palettes_file.store_line(JSON.stringify(frame_bin.color_palette, "\t"))
 	frame_bin_palettes_file.close()
 
 	# item_bin
 	var item_spr: Spr = spritesheets["ITEM.BIN"]
-	var items_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(item_spr.spritesheet, item_spr.color_palette, item_spr.bits_per_pixel)
-	var items_bmp_file_path: String = other_images_path + "items.other.bmp"
-	var items_file: FileAccess = FileAccess.open(items_bmp_file_path, FileAccess.WRITE)
-	items_file.store_buffer(items_bmp_bytes)
-	items_file.close()
+	var items_index_image: Image = item_spr.get_index_image()
+	var items_texture_webp_file_path: String = other_images_path.path_join("items.texture.webp")
+	items_index_image.save_webp(items_texture_webp_file_path)
 	
-	var items_palettes_file_path: String = other_images_path + "items.palettes.json"
+	var items_palettes_file_path: String = other_images_path.path_join("items.palettes.json")
 	var items_palettes_file: FileAccess = FileAccess.open(items_palettes_file_path, FileAccess.WRITE)
 	items_palettes_file.store_line(JSON.stringify(item_spr.color_palette, "\t"))
 	items_palettes_file.close()
