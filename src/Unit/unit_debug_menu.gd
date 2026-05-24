@@ -43,23 +43,30 @@ func _process(delta: float) -> void:
 
 func populate_options() -> void:
 	weapon_options.clear()
-	for weapon_index: int in RomReader.NUM_WEAPONS:
-		var equipment_type_name: String = ""
-		if RomReader.items_array[weapon_index].item_type < RomReader.fft_text.equipment_types.size():
-			equipment_type_name = " (" + RomReader.fft_text.equipment_types[RomReader.items_array[weapon_index].item_type] + ")"
-		weapon_options.add_item(str(weapon_index) + " - " + RomReader.items_array[weapon_index].display_name + equipment_type_name)
-	
 	item_options.clear()
-	for item_index: int in RomReader.NUM_ITEMS:
-		var type_name: String = ""
-		if RomReader.items_array[item_index].item_type < RomReader.fft_text.equipment_types.size():
-			type_name = " (" + RomReader.fft_text.equipment_types[RomReader.items_array[item_index].item_type] + ")"
-		item_options.add_item(str(item_index) + " - " + RomReader.items_array[item_index].display_name + type_name )
+	#for weapon_index: int in RomReader.NUM_WEAPONS:
+		#var equipment_type_name: String = ""
+		#if RomReader.items_array[weapon_index].item_type < RomReader.fft_text.equipment_types.size():
+			#equipment_type_name = " (" + RomReader.fft_text.equipment_types[RomReader.items_array[weapon_index].item_type] + ")"
+		#weapon_options.add_item(str(weapon_index) + " - " + RomReader.items_array[weapon_index].display_name + equipment_type_name
+	
+	#item_options.clear()
+	#for item_index: int in RomReader.NUM_ITEMS:
+		#var type_name: String = ""
+		#if RomReader.items_array[item_index].item_type < RomReader.fft_text.equipment_types.size():
+			#type_name = " (" + RomReader.fft_text.equipment_types[RomReader.items_array[item_index].item_type] + ")"
+		#item_options.add_item(str(item_index) + " - " + RomReader.items_array[item_index].display_name + type_name )
+	
+	for item: ItemData in GameData.items.values():
+		var item_type_name: String = " (" + ItemData.ItemType.keys()[item.item_type] + ")"
+		if range(0, 20).has(item.item_type):
+			weapon_options.add_item(item.display_name + item_type_name)
+		item_options.add_item(item.display_name + item_type_name)
 	
 	
 	sprite_options.clear()
-	for spr: Spr in RomReader.sprs:
-		sprite_options.add_item(spr.file_name)
+	for unit_spritesheet_name: String in GameData.unit_spritesheets_data.keys():
+		sprite_options.add_item(unit_spritesheet_name)
 
 
 func populate_sprite_options() -> void:

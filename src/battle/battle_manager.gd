@@ -92,7 +92,7 @@ func _ready() -> void:
 	main_camera = camera_controller.camera
 
 	load_rom_button.file_selected.connect(RomReader.on_load_rom_dialog_file_selected)
-	RomReader.rom_loaded.connect(on_rom_loaded)
+	GameData.data_imported.connect(on_data_ready)
 	orthographic_check.toggled.connect(camera_controller.on_orthographic_toggled)
 	#camera_controller.zoom_changed.connect(update_phantom_camera_spring)
 
@@ -131,7 +131,7 @@ func toggle_debug_ui() -> void:
 			camera_controller.follow_node = null
 
 
-func on_rom_loaded() -> void:
+func on_data_ready() -> void:
 	push_warning("on rom loaded")
 	load_rom_button.visible = false
 
@@ -153,7 +153,7 @@ func on_rom_loaded() -> void:
 
 	scenario_editor.populate_option_lists()
 	scenario_editor.visible = true
-	var default_scenario: Scenario = RomReader.scenarios.get("test0")
+	var default_scenario: Scenario = GameData.scenarios.get("map_032_slums_in_dorter_01")
 	scenario_editor.init_scenario(default_scenario)
 
 
