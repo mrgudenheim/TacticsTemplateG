@@ -28,6 +28,7 @@ var passive_effects: Dictionary[String, PassiveEffect] = {} # [unique_name, Trig
 var abilities: Dictionary[String, Ability] = {} # [unique_name, Ability]
 var scenarios: Dictionary[String, Scenario] = {} # [unique_name, Scenario]
 var names: Dictionary[String, PackedStringArray] = {} # [name_category, possible names]
+var palettes: Dictionary[String, PackedColorArray] = {}
 
 var textures: Dictionary[String, Texture2D] = {}
 var unit_spritesheets_data: Dictionary[String, UnitSpritesheetData] = {}
@@ -155,23 +156,15 @@ func import_data(directory_path: String) -> void:
 					var new_content: Scenario = Scenario.create_from_json(file_text)
 					if not scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
 						scenarios[new_content.unique_name] = new_content
-				
-					#var file_name: String = ".".join(file_path.get_file().split(".").slice(0, -2))
-					#var new_content: Scenario = Scenario.lazy_init(file_name)
-					#if not scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
-						#scenarios[new_content.unique_name] = new_content
 				"job":
 					var new_content: JobData = JobData.create_from_json(file_text)
 					if not scenarios.keys().has(new_content.unique_name): # TODO allow overwriting content
 						jobs_data[new_content.unique_name] = new_content
 				"text":
 					names["all"] = JSON.parse_string(file_text) as PackedStringArray
-				# "unit_spritesheet":
-				# 	var new_spritesheet_data: Dictionary = JSON.parse_string(file_text)
-		# elif file_path.ends_with(".unit_spitesheet.bmp"):
-		# 	var bmp_bytes: PackedByteArray = FileAccess.get_file_as_bytes(file_path)
-		# 	var bmp_file_name: String = file_path.get_file().trim_suffix(".unit_spitesheet.bmp")
-		# 	var new_bmp: Bmp = Bmp.new(bmp_bytes, bmp_file_name)
+				"palettes":
+					palettes[file_path.get_file().trim_suffix(".palettes.json")] = JSON.parse_string(file_text) as PackedColorArray
+
 		elif file_path.ends_with(".unit_spritesheet.tres"):
 			var new_spritesheet_data: UnitSpritesheetData = ResourceLoader.load(file_path, "UnitSpritesheetData")
 			unit_spritesheets_data[file_path.get_file().trim_suffix(".unit_spritesheet.tres")] = new_spritesheet_data
@@ -188,16 +181,6 @@ func import_data(directory_path: String) -> void:
 		elif file_path.to_lower().ends_with(".seq.tres"):
 			var new_seq: Seq = ResourceLoader.load(file_path, "Seq")
 			seqs[file_path.get_file().trim_suffix(".seq.tres")] = new_seq
-		#elif file_path.to_lower().ends_with(".shp"):
-			#var file_name: String = file_path.to_lower().get_file().get_basename()
-			#var new_shp: Shp = Shp.new(file_name)
-			#new_shp.set_data_from_shp_file(file_path)
-			#shps[file_name] = new_shp
-		# elif file_path.to_lower().ends_with(".seq"):
-		# 	var file_name: String = file_path.to_lower().get_file().get_basename()
-		# 	var new_seq: Seq = Seq.new(file_name)
-		# 	new_seq.set_data_from_seq_file(file_path)
-		# 	seqs[file_name] = new_seq
 		elif file_path.to_lower().ends_with(".vfx_data.tres"):
 			var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")
 			vfx[file_path.get_file().trim_suffix(".vfx_data.tres")] = new_vfx
