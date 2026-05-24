@@ -29,14 +29,8 @@ var abilities: Dictionary[String, Ability] = {} # [unique_name, Ability]
 var scenarios: Dictionary[String, Scenario] = {} # [unique_name, Scenario]
 var names: Dictionary[String, PackedStringArray] = {} # [name_category, possible names]
 var palettes: Dictionary[String, PackedColorArray] = {}
-
 var textures: Dictionary[String, Texture2D] = {}
 var unit_spritesheets_data: Dictionary[String, UnitSpritesheetData] = {}
-
-# Textures
-var unit_spritesheets: Dictionary[String, Texture2D] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
-var frame_bin_texture: Texture2D
-var items_texture: Texture2D
 
 
 func _ready() -> void:
@@ -91,9 +85,6 @@ func clear_data() -> void:
 	palettes = {}
 	textures = {}
 	unit_spritesheets_data = {}
-	unit_spritesheets = {} 
-	frame_bin_texture = null
-	items_texture = null
 
 
 func import_data(directory_path: String) -> void:
@@ -162,9 +153,10 @@ func import_data(directory_path: String) -> void:
 						jobs_data[new_content.unique_name] = new_content
 				"text":
 					names["all"] = JSON.parse_string(file_text) as PackedStringArray
-				"palettes":
-					palettes[file_path.get_file().trim_suffix(".palettes.json")] = JSON.parse_string(file_text) as PackedColorArray
 
+		elif file_path.ends_with(".palette.tres"):
+			var new_palette: ColorPalette = ResourceLoader.load(file_path, "ColorPalette")
+			palettes[file_path.get_file().trim_suffix(".palette.tres")] = new_palette.colors
 		elif file_path.ends_with(".unit_spritesheet.tres"):
 			var new_spritesheet_data: UnitSpritesheetData = ResourceLoader.load(file_path, "UnitSpritesheetData")
 			unit_spritesheets_data[file_path.get_file().trim_suffix(".unit_spritesheet.tres")] = new_spritesheet_data
@@ -186,6 +178,7 @@ func import_data(directory_path: String) -> void:
 			vfx[file_path.get_file().trim_suffix(".vfx_data.tres")] = new_vfx
 		elif file_path.ends_with(".projectile.glb"):
 			projectiles_gltf[file_path.get_file().trim_suffix(".projectile.glb")] = GltfManager.import_gltf(file_path)
+		
 
 	push_warning("Time to import files (ms): " + str(Time.get_ticks_msec() - start_time))
 	is_ready = true

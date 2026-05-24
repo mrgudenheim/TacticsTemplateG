@@ -1279,7 +1279,7 @@ func export_unit_spritesheets(save_path: String) -> void:
 		var spritesheet_data_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name + ".unit_spritesheet.tres")
 		var error: Error = ResourceSaver.save(spritesheet_data, spritesheet_data_file_path)
 		if error != Error.OK:
-			push_warning("error saving map data " + spritesheet_data.unique_name + ": " + str(error))
+			push_warning("error saving unit spritesheet data " + spritesheet_data.unique_name + ": " + str(error))
 
 		var index_image: Image = unit_spritesheet.get_index_image()
 		var unit_spritesheet_texture_webp_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name + ".texture.webp")
@@ -1297,10 +1297,12 @@ func export_other_images(save_path: String) -> void:
 	var misc_texture_webp_file_path: String = other_images_path.path_join("misc.texture.webp")
 	misc_index_image.save_webp(misc_texture_webp_file_path)
 
-	var frame_bin_palettes_file_path: String = other_images_path.path_join("misc.palettes.json")
-	var frame_bin_palettes_file: FileAccess = FileAccess.open(frame_bin_palettes_file_path, FileAccess.WRITE)
-	frame_bin_palettes_file.store_line(JSON.stringify(frame_bin.color_palette, "\t"))
-	frame_bin_palettes_file.close()
+	var misc_texture_palettes_file_path: String = other_images_path.path_join("misc.palette.tres")
+	var misc_color_palette: ColorPalette = ColorPalette.new()
+	misc_color_palette.colors = frame_bin.color_palette
+	var error: Error = ResourceSaver.save(misc_color_palette, misc_texture_palettes_file_path)
+	if error != Error.OK:
+		push_warning("error saving palette data misc.palette.tres: " + str(error))
 
 	# item_bin
 	var item_spr: Spr = spritesheets["ITEM.BIN"]
@@ -1308,10 +1310,12 @@ func export_other_images(save_path: String) -> void:
 	var items_texture_webp_file_path: String = other_images_path.path_join("items.texture.webp")
 	items_index_image.save_webp(items_texture_webp_file_path)
 	
-	var items_palettes_file_path: String = other_images_path.path_join("items.palettes.json")
-	var items_palettes_file: FileAccess = FileAccess.open(items_palettes_file_path, FileAccess.WRITE)
-	items_palettes_file.store_line(JSON.stringify(item_spr.color_palette, "\t"))
-	items_palettes_file.close()
+	var items_texture_palettes_file_path: String = other_images_path.path_join("items.palette.tres")
+	var items_color_palette: ColorPalette = ColorPalette.new()
+	items_color_palette.colors = item_spr.color_palette
+	error = ResourceSaver.save(items_color_palette, items_texture_palettes_file_path)
+	if error != Error.OK:
+		push_warning("error saving palette data items.palette.tres: " + str(error))
 
 
 func export_data_tables(save_path: String) -> void:
@@ -1358,17 +1362,10 @@ func export_unit_animations(save_path: String) -> void:
 	
 	var shp_dir_path: String = save_path + "/shps/"
 	DirAccess.make_dir_recursive_absolute(shp_dir_path)
-	# var shp_subframe_sizes: PackedVector2Array = battle_bin_data.shp_subframe_sizes
-	# var shp_subframe_sizes_string: String = JSON.stringify(shp_subframe_sizes, "\t")
-	# var shp_subframe_sizes_filepath: String = shp_dir_path + "shp_subframes.json"
-	# var shp_subframe_sizes_file: FileAccess = FileAccess.open(shp_subframe_sizes_filepath, FileAccess.WRITE)
-	# shp_subframe_sizes_file.store_line(shp_subframe_sizes_string)
-	# shp_subframe_sizes_file.close()
 
 	for shp: Shp in shps.values():
 		if not shp.is_initialized:
 			shp.set_data_from_shp_bytes(get_file_data(shp.file_name))
-		# shp.write_shp(shp_dir_path)
 
 		var shp_file_path: String = shp_dir_path.path_join(shp.file_name.to_lower().trim_suffix(".shp") + ".shp.tres")
 		var error: Error = ResourceSaver.save(shp, shp_file_path)
@@ -1380,7 +1377,6 @@ func export_unit_animations(save_path: String) -> void:
 	for seq: Seq in seqs.values():
 		if not seq.is_initialized:
 			seq.set_data_from_seq_bytes(get_file_data(seq.file_name))
-		# seq.write_seq(save_path + "/seqs/" + seq.file_name)
 
 		var seq_file_path: String = seq_dir_path.path_join(seq.file_name.to_lower().trim_suffix(".seq") + ".seq.tres")
 		var error: Error = ResourceSaver.save(seq, seq_file_path)
@@ -1399,12 +1395,6 @@ func export_maps(save_path: String) -> void:
 			continue # skip map 0 - causes crash
 		var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3i(-1, -1, 1))
 		GltfManager.save_node(new_map_node, maps_path, ".map.glb")
-
-		#var map_texture_bmp_bytes: PackedByteArray = Bmp.create_paletted_bmp(fft_map_data.albedo_texture.get_image(), fft_map_data.texture_palettes, 8)
-		#var map_texture_bmp_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".texture.bmp")
-		#var map_texture_bmp_file: FileAccess = FileAccess.open(map_texture_bmp_file_path, FileAccess.WRITE)
-		#map_texture_bmp_file.store_buffer(map_texture_bmp_bytes)
-		#map_texture_bmp_file.close()
 		
 		var map_texture_webp_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".texture.webp")
 		fft_map_data.albedo_texture.get_image().save_webp(map_texture_webp_file_path)
@@ -1437,18 +1427,19 @@ func export_vfx(save_path: String) -> void:
 
 	
 	var trap_texture_webp_file_path: String = vfx_path.path_join("shared_vfx.texture.webp")
-	trap_effect_data.texture.get_image().save_webp(trap_texture_webp_file_path)
+	trap_effect_data.trap_spr.get_index_image().save_webp(trap_texture_webp_file_path)
 	
 	var shared_vfx_data_file_path: String = vfx_path.path_join("shared_vfx.data.tres")
 	var error: Error = ResourceSaver.save(trap_effect_data, shared_vfx_data_file_path)
 	if error != Error.OK:
 		push_warning("error saving shared vfx data: " + str(error))
-	
-	var shared_vfx_palettes_string: String = JSON.stringify(trap_effect_data.trap_spr.color_palette, "\t")
-	var shared_vfx_palettes_filepath: String = vfx_path.path_join("shared_vfx.palettes.json")
-	var shared_vfx_palettes_file: FileAccess = FileAccess.open(shared_vfx_palettes_filepath, FileAccess.WRITE)
-	shared_vfx_palettes_file.store_line(shared_vfx_palettes_string)
-	shared_vfx_palettes_file.close()
+
+	var shared_vfx_texture_palettes_file_path: String = vfx_path.path_join("shared_vfx.palette.tres")
+	var shared_vfx_color_palette: ColorPalette = ColorPalette.new()
+	shared_vfx_color_palette.colors = trap_effect_data.trap_spr.color_palette
+	error = ResourceSaver.save(shared_vfx_color_palette, shared_vfx_texture_palettes_file_path)
+	if error != Error.OK:
+		push_warning("error saving palette data shared_vfx.palette.tres: " + str(error))
 
 	# projectiles
 	var models_data: Dictionary = RomReader.battle_bin_data.projectile_model_data
