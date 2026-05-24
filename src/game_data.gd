@@ -103,6 +103,8 @@ func import_data(directory_path: String) -> void:
 
 	if num_files == 0:
 		import_progress.emit(0, 0)
+		push_warning("no files to import at: " + directory_path)
+		return
 
 	for file_path: String in file_paths:
 		current_file += 1
@@ -169,9 +171,11 @@ func import_data(directory_path: String) -> void:
 			textures[file_path.get_file().trim_suffix(".texture.webp")] = ImageTexture.create_from_image(new_image)
 		elif file_path.to_lower().ends_with(".shp.tres"):
 			var new_shp: Shp = ResourceLoader.load(file_path, "Shp")
+			new_shp.is_initialized = true
 			shps[file_path.get_file().trim_suffix(".shp.tres")] = new_shp
 		elif file_path.to_lower().ends_with(".seq.tres"):
 			var new_seq: Seq = ResourceLoader.load(file_path, "Seq")
+			new_seq.is_initialized = true
 			seqs[file_path.get_file().trim_suffix(".seq.tres")] = new_seq
 		elif file_path.to_lower().ends_with(".vfx_data.tres"):
 			var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")

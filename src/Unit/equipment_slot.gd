@@ -5,7 +5,7 @@ extends Resource
 @export var slot_types: Array[ItemData.SlotType] = []
 @export var item_unique_name: String
 var item: ItemData:
-	get: return RomReader.items[item_unique_name]
+	get: return GameData.items.get(item_unique_name, ItemData.new())
 
 
 static func create_from_dictionary(property_dict: Dictionary) -> EquipmentSlot:

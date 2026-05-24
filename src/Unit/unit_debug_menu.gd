@@ -82,13 +82,13 @@ func enable_ui() -> void:
 
 
 func _on_sprite_option_selected(index: int) -> void:
-	unit.on_sprite_idx_selected(index)
+	unit.on_sprite_selected(sprite_options.get_item_text(index))
 
 
 func _on_anim_id_spin_value_changed(value: int) -> void:
 	animation_manager.global_animation_ptr_id = value
 
 
-func _on_ability_id_value_changed(value: int) -> void:
-	unit.set_ability(value)
-	ability_name_line.text = RomReader.fft_text.ability_names[value]
+func _on_ability_id_value_changed(ability_name: String) -> void:
+	unit.set_ability(ability_name)
+	ability_name_line.text = ability_name

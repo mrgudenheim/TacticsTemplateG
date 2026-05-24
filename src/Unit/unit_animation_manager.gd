@@ -17,16 +17,23 @@ var global_spr: Spr
 var global_shp: Shp
 var global_seq: Seq
 
+var wep_texture: Texture2D
+var wep_spritesheet_data: UnitSpritesheetData
 var wep_spr: Spr
 var wep_shp: Shp
 var wep_seq: Seq
 
+var eff_texture: Texture2D
+var eff_spritesheet_data: UnitSpritesheetData
 var eff_spr: Spr
 var eff_shp: Shp
 var eff_seq: Seq
 
+var item_texture: Texture2D
 var item_spr: Spr
 
+var other_texture: Texture2D
+var other_spritesheet_data: UnitSpritesheetData
 var other_spr: Spr
 var other_shp: Shp
 var other_type_index: int = 0 # 0 = chicken/chest, 1 = frog, 2 = crystal
@@ -75,7 +82,7 @@ func _process(delta: float) -> void:
 		animation.increment_time(delta)
 
 
-func start_animation(fft_animation: FftAnimation, draw_target: Sprite3D, is_playing: bool, isLooping: bool, force_loop: bool = false) -> void:
+func start_animation(fft_animation: FftAnimation, draw_target: Sprite3D, is_playing: bool, is_looping: bool, force_loop: bool = false) -> void:
 	#if fft_animation.is_primary_anim:
 		#push_warning("Starting new animation")
 	fft_animation.id = animations.size()
@@ -114,12 +121,12 @@ func start_animation(fft_animation: FftAnimation, draw_target: Sprite3D, is_play
 		return
 	
 	if (is_playing):
-		await play_animation(fft_animation, draw_target, isLooping)
+		await play_animation(fft_animation, draw_target, is_looping)
 	else:
 		process_seq_part(fft_animation, 0, draw_target)
 
 
-func play_animation(fft_animation: FftAnimation, draw_target: Sprite3D, isLooping: bool) -> void:
+func play_animation(fft_animation: FftAnimation, draw_target: Sprite3D, is_looping: bool) -> void:
 	var animation_part_id: int = 0
 	while animation_part_id < fft_animation.sequence.seq_parts.size():
 		if fft_animation.primary_anim != global_fft_animation:
@@ -130,7 +137,7 @@ func play_animation(fft_animation: FftAnimation, draw_target: Sprite3D, isLoopin
 			processing_opcode.emit(animation_part_id) # update animation slider in FFTae
 		
 		# break loop animation when stopped or on selected animation changed to prevent 2 loops playing at once
-		if ((isLooping or fft_animation.is_primary_anim) 
+		if ((is_looping or fft_animation.is_primary_anim) 
 			and (!animation_is_playing or fft_animation != global_fft_animation)):
 			return
 		

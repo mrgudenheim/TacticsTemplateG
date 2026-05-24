@@ -7,7 +7,7 @@ extends Node3D
 signal initialized()
 signal data_updated(unit: Unit)
 
-signal ability_assigned(id: int)
+signal ability_assigned(name: String)
 signal ability_completed()
 signal primary_weapon_assigned(item_unique_name: String)
 signal image_changed(new_image: ImageTexture)
@@ -254,8 +254,8 @@ var facing_vector: Vector3 = Vector3.FORWARD:
 var is_in_air: bool = false
 var is_traveling_path: bool = false
 
-var active_ability_id: int = 0
-var ability_data: FftAbilityData
+var active_ability_name: String = ""
+var action_data: Action
 
 var active_action: ActionInstance
 #@export var action_instance: ActionInstance
@@ -340,30 +340,37 @@ func update_stat_bars_scale(camera_zoom: float) -> void:
 func initialize_unit() -> void:
 	debug_menu.populate_options()
 	
-	animation_manager.wep_spr = RomReader.sprs[RomReader.file_records["WEP.SPR"].type_index]
-	animation_manager.wep_shp = RomReader.shps_array[RomReader.file_records["WEP1.SHP"].type_index]
-	animation_manager.wep_seq = RomReader.seqs_array[RomReader.file_records["WEP1.SEQ"].type_index]
+	#animation_manager.wep_spr = RomReader.sprs[RomReader.file_records["WEP.SPR"].type_index]
+	animation_manager.wep_texture = GameData.textures["wep"]
+	animation_manager.wep_spritesheet_data = GameData.unit_spritesheets_data["wep"]
+	animation_manager.wep_shp = GameData.shps["wep1"]
+	animation_manager.wep_seq = GameData.seqs["wep1"]
 	
-	animation_manager.eff_spr = RomReader.sprs[RomReader.file_records["EFF.SPR"].type_index]
-	animation_manager.eff_shp = RomReader.shps_array[RomReader.file_records["EFF1.SHP"].type_index]
-	animation_manager.eff_seq = RomReader.seqs_array[RomReader.file_records["EFF1.SEQ"].type_index]
+	#animation_manager.eff_spr = RomReader.sprs[RomReader.file_records["EFF.SPR"].type_index]
+	animation_manager.eff_texture = GameData.textures["eff"]
+	animation_manager.eff_spritesheet_data = GameData.unit_spritesheets_data["eff"]
+	animation_manager.eff_shp = GameData.shps["eff1"]
+	animation_manager.eff_seq = GameData.seqs["eff1"]
 	
-	animation_manager.unit_sprites_manager.sprite_effect.texture = animation_manager.eff_spr.create_frame_grid_texture(0, 0, 0, 0, 0)
+	#animation_manager.unit_sprites_manager.sprite_effect.texture = animation_manager.eff_spr.create_frame_grid_texture(0, 0, 0, 0, 0)
+	animation_manager.unit_sprites_manager.sprite_effect.texture = GameData.unit_spritesheets_data["eff"].create_frame_grid_texture(0, 0, 0, 0, 0)
 	
-	animation_manager.item_spr = RomReader.sprs[RomReader.file_records["ITEM.BIN"].type_index]
+	#animation_manager.item_spr = RomReader.sprs[RomReader.file_records["ITEM.BIN"].type_index]
 	
-	animation_manager.unit_sprites_manager.sprite_item.texture = ImageTexture.create_from_image(RomReader.sprs[RomReader.file_records["ITEM.BIN"].type_index].spritesheet)
+	animation_manager.unit_sprites_manager.sprite_item.texture = GameData.textures["items"]
 	
-	animation_manager.other_spr = RomReader.sprs[RomReader.file_records["OTHER.SPR"].type_index]
-	animation_manager.other_shp = RomReader.shps_array[RomReader.file_records["OTHER.SHP"].type_index]
+	#animation_manager.other_spr = RomReader.sprs[RomReader.file_records["OTHER.SPR"].type_index]
+	animation_manager.other_texture = GameData.textures["other"]
+	animation_manager.other_shp = GameData.shps["other"]
 	
 	# 1 cure
 	# 0xc8 blood suck
 	# 0x9b stasis sword
-	set_ability(0x9b)
+	set_ability("stasis_sword")
 	set_primary_weapon("mythril_spear") # 1 - dagger, 72 - mythril gun, 101 - mythril spear
 	# TODO use equipment_slots
-	set_sprite_by_file_idx(98) # RAMUZA.SPR # TODO use sprite_id?
+	#set_sprite_by_file_idx(98) # RAMUZA.SPR # TODO use sprite_id?
+	set_sprite_by_file_name("ramuza")
 	#set_sprite_by_file_name("RAMUZA.SPR")
 	
 	update_unit_facing(FacingVectors[Facings.SOUTH])
@@ -970,14 +977,14 @@ func update_status_visuals() -> void:
 func use_attack() -> void:
 	can_move = false
 	push_warning("using attack: " + primary_weapon.display_name)
-	#push_warning("Animations: " + str(PackedInt32Array([ability_data.animation_start_id, ability_data.animation_charging_id, ability_data.animation_executing_id])))
-	#if ability_data.animation_start_id != 0:
-		#debug_menu.anim_id_spin.value = ability_data.animation_start_id + int(is_back_facing)
+	#push_warning("Animations: " + str(PackedInt32Array([action_data.animation_start_id, action_data.animation_charging_id, action_data.animation_executing_id])))
+	#if action_data.animation_start_id != 0:
+		#debug_menu.anim_id_spin.value = action_data.animation_start_id + int(is_back_facing)
 		#await animation_manager.animation_completed
 	#
-	#if ability_data.animation_charging_id != 0:
-		#debug_menu.anim_id_spin.value = ability_data.animation_charging_id + int(is_back_facing)
-		#await get_tree().create_timer(0.1 + (ability_data.ticks_charge_time * 0.1)).timeout
+	#if action_data.animation_charging_id != 0:
+		#debug_menu.anim_id_spin.value = action_data.animation_charging_id + int(is_back_facing)
+		#await get_tree().create_timer(0.1 + (action_data.ticks_charge_time * 0.1)).timeout
 	
 		#animation_executing_id = 0x3e * 2 # TODO look up based on equiped weapon and target relative height
 		#animation_manager.unit_debug_menu.anim_id_spin.value = 0x3e * 2 # TODO look up based on equiped weapon and target relative height
@@ -1003,31 +1010,31 @@ func use_attack() -> void:
 
 func use_ability(pos: Vector3) -> void:
 	can_move = false
-	push_warning("using: " + ability_data.display_name)
-	#push_warning("Animations: " + str(PackedInt32Array([ability_data.animation_start_id, ability_data.animation_charging_id, ability_data.animation_executing_id])))
-	if ability_data.animation_start_id != 0:
-		#debug_menu.anim_id_spin.value = ability_data.animation_start_id + int(is_back_facing)
-		current_animation_id_fwd = ability_data.animation_start_id
+	push_warning("using: " + action_data.display_name)
+	#push_warning("Animations: " + str(PackedInt32Array([action_data.animation_start_id, action_data.animation_charging_id, action_data.animation_executing_id])))
+	if action_data.animation_start_id != 0:
+		#debug_menu.anim_id_spin.value = action_data.animation_start_id + int(is_back_facing)
+		current_animation_id_fwd = action_data.animation_start_id
 		set_base_animation_ptr_id(current_animation_id_fwd)
 		await animation_manager.animation_completed
 	
-	if ability_data.animation_charging_id != 0:
-		#debug_menu.anim_id_spin.value = ability_data.animation_charging_id + int(is_back_facing)
-		current_animation_id_fwd = ability_data.animation_charging_id
+	if action_data.animation_charging_id != 0:
+		#debug_menu.anim_id_spin.value = action_data.animation_charging_id + int(is_back_facing)
+		current_animation_id_fwd = action_data.animation_charging_id
 		set_base_animation_ptr_id(current_animation_id_fwd)
-		await get_tree().create_timer(0.1 + (ability_data.ticks_charge_time * 0.1)).timeout
+		await get_tree().create_timer(0.1 + (action_data.ticks_charge_time * 0.1)).timeout
 	
-	#if ability_data.animation_executing_id != 0:
-	if ability_data.animation_executing_id < 0:
+	#if action_data.animation_executing_id != 0:
+	if action_data.animation_executing_id < 0:
 		pass
-	elif ability_data.animation_executing_id == 0:
+	elif action_data.animation_executing_id == 0:
 		#animation_executing_id = 0x3e * 2 # TODO look up based on equiped weapon and target relative height
 		#animation_manager.unit_debug_menu.anim_id_spin.value = 0x3e * 2 # TODO look up based on equiped weapon and target relative height
 		#debug_menu.anim_id_spin.value = (RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) + int(is_back_facing) # TODO lookup based on target relative height
 		current_animation_id_fwd = roundi(RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) # TODO lookup based on target relative height
 		set_base_animation_ptr_id(current_animation_id_fwd)
 	else:
-		var ability_animation_executing_id: int = ability_data.animation_executing_id
+		var ability_animation_executing_id: int = action_data.animation_executing_id
 		if ["RUKA.SEQ", "ARUTE.SEQ", "KANZEN.SEQ"].has(RomReader.sprs[sprite_file_idx].seq_name):
 			ability_animation_executing_id = 0x2c * 2 # https://ffhacktics.com/wiki/Set_attack_animation_flags_and_facing_3
 		#debug_menu.anim_id_spin.value = ability_animation_executing_id + int(is_back_facing)
@@ -1099,7 +1106,7 @@ func animate_start_action(animation_start_id: int, animation_charging_id: int) -
 	
 	if animation_charging_id != 0:
 		set_base_animation_ptr_id(animation_charging_id)
-		await get_tree().create_timer(0.1 + (ability_data.ticks_charge_time * 0.1)).timeout # TODO allow looping until changed, ie. charging a spell
+		await get_tree().create_timer(0.1 + (action_data.ticks_charge_time * 0.1)).timeout # TODO allow looping until changed, ie. charging a spell
 
 
 func animate_execute_action(animation_executing_id: int, vfx: VisualEffectData = null) -> void:
@@ -1294,24 +1301,24 @@ func set_job_id(new_job_id: int) -> void:
 	update_passive_effects()
 
 
-func set_ability(new_ability_id: int) -> void:
-	active_ability_id = new_ability_id
-	ability_data = RomReader.fft_abilities[new_ability_id]
+func set_ability(new_action_name: String) -> void:
+	active_ability_name = new_action_name
+	action_data = GameData.actions[new_action_name]
 	
-	if not ability_data.vfx_data.is_initialized:
-		ability_data.vfx_data.init_from_file()
+	# if not action_data.vfx_data.is_initialized:
+	# 	action_data.vfx_data.init_from_file()
 	
-	image_changed.emit(ImageTexture.create_from_image(ability_data.vfx_data.vfx_spr.spritesheet))
-	#debug_menu.sprite_viewer.texture = ImageTexture.create_from_image(ability_data.vfx_data.vfx_spr.spritesheet)
-	ability_assigned.emit(new_ability_id)
+	image_changed.emit(GameData.textures["E" + str(action_data.vfx_id)])
+	#debug_menu.sprite_viewer.texture = ImageTexture.create_from_image(action_data.vfx_data.vfx_spr.spritesheet)
+	ability_assigned.emit(new_action_name)
 
 
 func set_primary_weapon(new_weapon_unique_name: String) -> void:
 	equip_slots[0].item_unique_name = new_weapon_unique_name
-	primary_weapon = RomReader.items[new_weapon_unique_name]
+	primary_weapon = GameData.items[new_weapon_unique_name]
 	#animation_manager.weapon_id = new_weapon_id
 	#var weapon_palette_id = RomReader.battle_bin_data.weapon_graphic_palettes_1[primary_weapon.id]
-	animation_manager.unit_sprites_manager.set_weapon_texture(animation_manager.wep_spr.create_frame_grid_texture(
+	animation_manager.unit_sprites_manager.set_weapon_texture(animation_manager.wep_spritesheet_data.create_frame_grid_texture(
 		primary_weapon.wep_frame_palette, 0, 0, primary_weapon.wep_frame_v_offset, 0, animation_manager.wep_shp.file_name))
 	
 	attack_action = primary_weapon.weapon_attack_action
@@ -1511,7 +1518,7 @@ func set_sprite_by_file_idx(new_sprite_file_idx: int) -> void:
 	if RomReader.spr_file_name_to_id.has(spr.file_name):
 		sprite_id = RomReader.spr_file_name_to_id[spr.file_name]
 	debug_menu.sprite_options.select(new_sprite_file_idx)
-	on_sprite_idx_selected(new_sprite_file_idx)
+	#on_sprite_selected(new_sprite_file_idx)
 	if spr.file_name == "WEP.SPR":
 		animation_manager.unit_sprites_manager.sprite_primary.vframes = 32
 	else:
@@ -1522,8 +1529,20 @@ func set_sprite_by_file_idx(new_sprite_file_idx: int) -> void:
 
 
 func set_sprite_by_file_name(new_sprite_file_name: String) -> void:
-	var new_sprite_file_idx: int = RomReader.file_records[new_sprite_file_name].type_index
-	set_sprite_by_file_idx(new_sprite_file_idx)
+	#var new_sprite_file_idx: int = RomReader.file_records[new_sprite_file_name].type_index
+	#set_sprite_by_file_idx(new_sprite_file_idx)
+	
+	sprite_file_name = new_sprite_file_name
+	#debug_menu.sprite_options.select(new_sprite_file_idx)
+	on_sprite_selected(new_sprite_file_name)
+	var num_sp2s: int = min(0, (GameData.textures[new_sprite_file_name].get_height() - 488)) / 256
+	if new_sprite_file_name == "wep":
+		animation_manager.unit_sprites_manager.sprite_primary.vframes = 32
+	else:
+		animation_manager.unit_sprites_manager.sprite_primary.vframes = 16 + (16 * num_sp2s)
+	update_spritesheet_grid_texture()
+	
+	debug_menu.anim_id_spin.value = current_idle_animation_id
 
 
 func set_sprite_by_id(new_sprite_id: int) -> void:
@@ -1582,37 +1601,39 @@ func update_spritesheet_grid_texture() -> void:
 	animation_manager.unit_sprites_manager.set_primary_texture(new_spr.create_frame_grid_texture(palette_idx_final, 0, animation_manager.other_type_index, 0, submerged_depth))
 
 
-func on_sprite_idx_selected(index: int) -> void:
-	var spr: Spr = RomReader.sprs[index]
-	if not spr.is_initialized:
-		spr.set_data()
-		if RomReader.spr_file_name_to_id.keys().has(spr.file_name):
-			spr.set_spritesheet_data(RomReader.spr_file_name_to_id[spr.file_name])
-		else:
-			spr.set_spritesheet_data(-1) # get data for OTHER.SPR
+func on_sprite_selected(new_spritesheet_name: String) -> void:
+	# var spr: Spr = RomReader.sprs[index]
+	# if not spr.is_initialized:
+	# 	spr.set_data()
+	# 	if RomReader.spr_file_name_to_id.keys().has(spr.file_name):
+	# 		spr.set_spritesheet_data(RomReader.spr_file_name_to_id[spr.file_name])
+	# 	else:
+	# 		spr.set_spritesheet_data(-1) # get data for OTHER.SPR
 	
-	animation_manager.global_spr = spr
+	# animation_manager.global_spr = spr
 	
-	var shp: Shp = RomReader.shps_array[RomReader.file_records[spr.shp_name].type_index]
-	if not shp.is_initialized:
-		shp.set_data_from_shp_bytes(RomReader.get_file_data(shp.file_name))
+	# var shp: Shp = RomReader.shps_array[RomReader.file_records[spr.shp_name].type_index]
+	# if not shp.is_initialized:
+	# 	shp.set_data_from_shp_bytes(RomReader.get_file_data(shp.file_name))
 	
-	var seq: Seq = RomReader.seqs_array[RomReader.file_records[spr.seq_name].type_index]
-	if not seq.is_initialized:
-		seq.set_data_from_seq_bytes(RomReader.get_file_data(seq.file_name))
+	# var seq: Seq = RomReader.seqs_array[RomReader.file_records[spr.seq_name].type_index]
+	# if not seq.is_initialized:
+	# 	seq.set_data_from_seq_bytes(RomReader.get_file_data(seq.file_name))
 	
+	var shp: Shp = GameData.unit_spritesheets_data[new_spritesheet_name].shp
 	var animation_changed: bool = false
-	if shp.file_name == "TYPE2.SHP":
-		if animation_manager.wep_shp.file_name != "WEP2.SHP":
-			animation_manager.wep_shp = RomReader.shps_array[RomReader.file_records["WEP2.SHP"].type_index]
+	if shp.file_name == "type2":
+		if animation_manager.wep_shp.file_name != "wep2":
+			animation_manager.wep_shp = GameData.shps["wep2"]
 			set_primary_weapon(primary_weapon.unique_name) # get new texture based on wep2.shp
 			animation_changed = true
-		animation_manager.wep_seq = RomReader.seqs_array[RomReader.file_records["WEP2.SEQ"].type_index]
+		animation_manager.wep_seq = GameData.seqs["wep2"]
 	
+	var seq: Seq = GameData.unit_spritesheets_data[new_spritesheet_name].seq
 	if shp != animation_manager.global_shp or seq != animation_manager.global_seq:
 		animation_changed = true
 	
-	animation_manager.global_spr = spr
+	# animation_manager.global_spr = spr
 	animation_manager.global_shp = shp
 	animation_manager.global_seq = seq
 	

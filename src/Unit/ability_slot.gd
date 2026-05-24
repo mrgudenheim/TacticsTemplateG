@@ -5,7 +5,7 @@ extends Resource
 @export var slot_types: Array[Ability.SlotType] = []
 @export var ability_unique_name: String
 var ability: Ability:
-	get: return RomReader.abilities[ability_unique_name]
+	get: return GameData.abilities.get(ability_unique_name, Ability.new())
 
 
 static func create_from_dictionary(property_dict: Dictionary) -> AbilitySlot:
