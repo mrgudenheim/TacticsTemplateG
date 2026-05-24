@@ -1270,20 +1270,22 @@ func export_unit_spritesheets(save_path: String) -> void:
 	
 	var spritesheet_path: String = save_path + "/unit_spritesheets/"
 	DirAccess.make_dir_recursive_absolute(spritesheet_path)
-	for unit_spritesheet: Spr in spritesheets.values():
-		if unit_spritesheet.file_name == "ITEM.BIN":
+	for unit_spr: Spr in spritesheets.values():
+		if unit_spr.file_name == "ITEM.BIN":
 			continue
 		
-		if not unit_spritesheet.is_initialized:
-			unit_spritesheet.set_data()
+		if not unit_spr.is_initialized:
+			unit_spr.set_data()
+			var job_using_spr: JobData = jobs_data.values()[jobs_data.values().find_custom(func(job_data: JobData) -> bool: return RomReader.sprs[RomReader.spr_id_file_idxs[job_data.sprite_id]] == unit_spr)]
+			unit_spr.set_spritesheet_data(job_using_spr.sprite_id)
 
-		var spritesheet_data: UnitSpritesheetData = UnitSpritesheetData.new(unit_spritesheet)
+		var spritesheet_data: UnitSpritesheetData = UnitSpritesheetData.new(unit_spr)
 		var spritesheet_data_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name.to_lower() + ".unit_spritesheet.tres")
 		var error: Error = ResourceSaver.save(spritesheet_data, spritesheet_data_file_path)
 		if error != Error.OK:
 			push_warning("error saving unit spritesheet data " + spritesheet_data.unique_name + ": " + str(error))
 
-		var index_image: Image = unit_spritesheet.get_index_image()
+		var index_image: Image = unit_spr.get_index_image()
 		var unit_spritesheet_texture_webp_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name.to_lower() + ".texture.webp")
 		index_image.save_webp(unit_spritesheet_texture_webp_file_path)
 
