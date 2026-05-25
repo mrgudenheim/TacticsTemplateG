@@ -13,6 +13,8 @@ signal processing_opcode(index: int)
 var is_framerate_dependent: bool = false
 var animations: Dictionary[int, FftAnimation] = {}
 var global_fft_animation: FftAnimation
+var global_texture: Texture2D
+var global_spritesheet_data: UnitSpritesheetData
 var global_spr: Spr
 var global_shp: Shp
 var global_seq: Seq

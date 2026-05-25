@@ -660,7 +660,8 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> Unit:
 
 	new_unit.set_position_to_tile()
 	# new_unit.update_unit_facing(Unit.FacingVectors[Unit.Facings[unit_data.facing_direction]])
-	new_unit.set_job_id(RomReader.jobs_data[unit_data.job_unique_name].job_id)
+	#new_unit.set_job_id(RomReader.jobs_data[unit_data.job_unique_name].job_id)
+	new_unit.set_job(unit_data.job_unique_name)
 	new_unit.set_sprite_by_file_name(unit_data.spritesheeet_file_name)
 	new_unit.set_sprite_palette(unit_data.palette_id)
 	new_unit.update_unit_facing(Unit.FacingVectors[unit_data.facing_direction])
@@ -684,8 +685,8 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> Unit:
 	new_unit.update_stat_bars_scale(camera_controller.zoom)
 	camera_controller.zoom_changed.connect(new_unit.update_stat_bars_scale)
 	
-	new_unit.icon.texture = RomReader.frame_bin_texture # TODO clean up status icon stuff
-	new_unit.icon2.texture = RomReader.frame_bin_texture
+	new_unit.icon.texture = GameData.textures["misc"] # TODO clean up status icon stuff
+	new_unit.icon2.texture = GameData.textures["misc"]
 	
 	new_unit.ability_slots = unit_data.ability_slots
 	new_unit.primary_weapon_assigned.connect(func(_weapon_unique_name: String) -> void: new_unit.update_actions(self))

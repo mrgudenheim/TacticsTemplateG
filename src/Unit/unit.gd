@@ -98,6 +98,7 @@ var is_defeated: bool:
 
 @export var unit_nickname: String = "Unit Nickname"
 @export var job_nickname: String = "Job Nickname"
+@export var job_name: String = ""
 
 var character_id: int = 0
 var unit_index_formation: int = 0
@@ -310,8 +311,8 @@ func _ready() -> void:
 	
 	add_to_group("Units")
 
-	if not RomReader.is_ready:
-		RomReader.rom_loaded.connect(initialize_unit)
+	if not GameData.is_ready:
+		GameData.data_imported.connect(initialize_unit)
 	else:
 		initialize_unit()
 
@@ -375,8 +376,8 @@ func initialize_unit() -> void:
 	
 	update_unit_facing(FacingVectors[Facings.SOUTH])
 	
-	var random_name_idx: int = randi_range(0, RomReader.fft_text.unit_names_list_filtered.size() - 1)
-	unit_nickname = RomReader.fft_text.unit_names_list_filtered[random_name_idx]
+	var random_name_idx: int = randi_range(0, GameData.names["all_no_empty"].size() - 1)
+	unit_nickname = GameData.names["all_no_empty"][random_name_idx]
 
 	initialized.emit()
 
@@ -399,7 +400,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(_delta: float) -> void:
-	if not RomReader.is_ready:
+	if not GameData.is_ready:
 		return
 	
 	if char_body.velocity.y != 0 and is_in_air == false:
@@ -430,17 +431,19 @@ static func generate_leveled_raw_stats(stat_basis_to_use: StatBasis, final_level
 
 
 static func generate_level_zero_raw_stats(stat_basis_to_use: StatBasis, new_stats_raw: Dictionary[Unit.StatType, float]) -> void:
-	new_stats_raw[StatType.HP_MAX] = generate_level_zero_raw_stat(0, stat_basis_to_use)
-	new_stats_raw[StatType.MP_MAX] = generate_level_zero_raw_stat(1, stat_basis_to_use)
-	new_stats_raw[StatType.SPEED] = generate_level_zero_raw_stat(2, stat_basis_to_use)
-	new_stats_raw[StatType.PHYSICAL_ATTACK] = generate_level_zero_raw_stat(3, stat_basis_to_use)
-	new_stats_raw[StatType.MAGIC_ATTACK] = generate_level_zero_raw_stat(4, stat_basis_to_use)
+	new_stats_raw[StatType.HP_MAX] = generate_level_zero_raw_stat("HP_MAX", stat_basis_to_use)
+	new_stats_raw[StatType.MP_MAX] = generate_level_zero_raw_stat("MP_MAX", stat_basis_to_use)
+	new_stats_raw[StatType.SPEED] = generate_level_zero_raw_stat("SPEED", stat_basis_to_use)
+	new_stats_raw[StatType.PHYSICAL_ATTACK] = generate_level_zero_raw_stat("PHYSICAL_ATTACK", stat_basis_to_use)
+	new_stats_raw[StatType.MAGIC_ATTACK] = generate_level_zero_raw_stat("MAGIC_ATTACK", stat_basis_to_use)
 
 
 # TODO is this correct for MONSTERs and LUCAVI?
-static func generate_level_zero_raw_stat(stat_idx: int, stat_basis_to_use: StatBasis) -> int:
-	var raw_stat: int = RomReader.scus_data.unit_base_datas[stat_basis_to_use][stat_idx] * 16384
-	raw_stat += randi_range(0, RomReader.scus_data.unit_base_stats_mods[stat_basis_to_use][stat_idx] * 16384)
+static func generate_level_zero_raw_stat(stat_name: String, stat_basis_to_use: StatBasis) -> int:
+	#var raw_stat: int = RomReader.scus_data.unit_base_datas[stat_basis_to_use][stat_idx] * 16384
+	#raw_stat += randi_range(0, RomReader.scus_data.unit_base_stats_mods[stat_basis_to_use][stat_idx] * 16384)
+	var stat_range: Vector2i = GameData.initial_unit_data.initial_unit_raw_stats[stat_basis_to_use][stat_name]
+	var raw_stat: int = randi_range(stat_range.x , stat_range.y)
 	return raw_stat
 
 
@@ -501,9 +504,9 @@ static func calc_battle_stats(
 
 
 func generate_random_abilities() -> void:
-	var random_reaction: Ability = RomReader.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.REACTION).pick_random()
-	var random_support: Ability = RomReader.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.SUPPORT).pick_random()
-	var random_movement: Ability = RomReader.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.MOVEMENT).pick_random()
+	var random_reaction: Ability = GameData.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.REACTION).pick_random()
+	var random_support: Ability = GameData.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.SUPPORT).pick_random()
+	var random_movement: Ability = GameData.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.MOVEMENT).pick_random()
 
 	ability_slots[2].ability_unique_name = random_reaction.unique_name
 	ability_slots[3].ability_unique_name =  random_support.unique_name
@@ -560,7 +563,7 @@ func update_stat_modifiers(all_passive_effects: Array[PassiveEffect]) -> void:
 
 func get_item_unique_name_for_slot(slot_type: ItemData.SlotType, item_level: int, random: bool = false) -> String:
 	var valid_items: Array[ItemData] = []
-	valid_items.assign(RomReader.items.values().filter(func(item: ItemData) -> bool: 
+	valid_items.assign(GameData.items.values().filter(func(item: ItemData) -> bool: 
 		var slot_type_is_valid: bool = item.slot_type == slot_type
 		var level_is_valid: bool = item.min_level <= item_level
 		var type_is_valid: bool = equipable_item_types.has(item.item_type) # TODO allow forcing specifc type based on ability requirements
@@ -589,7 +592,7 @@ func update_triggered_actions(all_passive_effects: Array[PassiveEffect]) -> void
 				triggered_action.connect_trigger(self)
 	
 	for ability_slot: AbilitySlot in ability_slots:
-		for triggered_action: TriggeredAction in ability_slot.ability.triggered_actions:
+		for triggered_action: TriggeredAction in ability_slot.get_ability().triggered_actions:
 				triggered_action.connect_trigger(self)
 
 	for passive_effect: PassiveEffect in all_passive_effects:
@@ -626,7 +629,7 @@ func start_turn(battle_manager: BattleManager) -> void:
 
 	for status_effect: StatusEffect in current_statuses:
 		if status_effect.action_on_turn_start != "":
-			var action_instance: ActionInstance = ActionInstance.new(RomReader.actions[status_effect.action_on_turn_start], self, battle_manager)
+			var action_instance: ActionInstance = ActionInstance.new(GameData.actions[status_effect.action_on_turn_start], self, battle_manager)
 			action_instance.submitted_targets = [tile_position] # TODO allow other targeting for status actions on turn start
 			await action_instance.use()
 
@@ -747,14 +750,14 @@ func end_turn() -> void:
 	
 	for status_effect: StatusEffect in current_statuses:
 		if status_effect.action_on_turn_end != "":
-			var action_instance: ActionInstance = ActionInstance.new(RomReader.actions[status_effect.action_on_turn_end], self, global_battle_manager)
+			var action_instance: ActionInstance = ActionInstance.new(GameData.actions[status_effect.action_on_turn_end], self, global_battle_manager)
 			action_instance.submitted_targets = [tile_position] # TODO allow other targeting for status actions on turn end
 			await action_instance.use()
 		
 		if status_effect.duration_type == StatusEffect.DurationType.TURNS:
 			status_effect.duration -= 1
 			if status_effect.duration < 0 and status_effect.action_on_complete != "":
-				var status_action_instance: ActionInstance = ActionInstance.new(RomReader.actions[status_effect.action_on_complete], self, global_battle_manager)
+				var status_action_instance: ActionInstance = ActionInstance.new(GameData.actions[status_effect.action_on_complete], self, global_battle_manager)
 				status_action_instance.submitted_targets.append(tile_position) # TODO get targets for status action
 				global_battle_manager.game_state_label.text = job_nickname + "-" + unit_nickname + " processing " + status_effect.status_effect_name + " completing"
 				await status_action_instance.use()
@@ -783,10 +786,10 @@ func hp_changed(clamped_value: StatValue) -> void:
 	var critical_hp_threshold: int = clamped_value.max_value / 5
 
 	if clamped_value.current_value == 0:
-		await add_status(RomReader.status_effects["dead"].duplicate(), true) # add dead
+		await add_status(GameData.status_effects["dead"].duplicate(), true) # add dead
 	elif clamped_value.current_value < critical_hp_threshold: # critical
 		if not current_status_ids.has("critical"):
-			await add_status(RomReader.status_effects["critical"].duplicate()) # add critical
+			await add_status(GameData.status_effects["critical"].duplicate()) # add critical
 	elif clamped_value.current_value >= critical_hp_threshold: # not critical
 		remove_status_id("critical") # remove critical
 
@@ -810,7 +813,7 @@ func add_status(new_status: StatusEffect, ignore_immunity: bool = false) -> void
 	current_statuses.append(new_status)
 	# use action_on_apply
 	if new_status.action_on_apply != "":
-		var action_instance: ActionInstance = ActionInstance.new(RomReader.actions[new_status.action_on_apply], self, global_battle_manager)
+		var action_instance: ActionInstance = ActionInstance.new(GameData.actions[new_status.action_on_apply], self, global_battle_manager)
 		action_instance.submitted_targets = [tile_position] # TODO allow other targeting for status actions on turn end
 		await action_instance.use()
 	
@@ -850,7 +853,7 @@ func update_permanent_statuses(all_passive_effects: Array[PassiveEffect]) -> voi
 	for passive_effect: PassiveEffect in all_passive_effects:
 		always_statuses.append_array(passive_effect.status_always)
 	
-	for status_unique_name: String in RomReader.status_effects.keys():
+	for status_unique_name: String in GameData.status_effects.keys():
 		if immune_statuses.has(status_unique_name):
 			continue
 		
@@ -868,7 +871,7 @@ func update_permanent_statuses(all_passive_effects: Array[PassiveEffect]) -> voi
 			continue
 		elif change > 0:
 			for counter: int in change:
-				var new_status: StatusEffect = RomReader.status_effects[status_unique_name].duplicate()
+				var new_status: StatusEffect = GameData.status_effects[status_unique_name].duplicate()
 				new_status.duration_type = StatusEffect.DurationType.PERMANENT
 				await add_status(new_status)
 		elif change < 0:
@@ -915,7 +918,7 @@ func update_status_visuals() -> void:
 		icon2.region_rect = Rect2i(Vector2i.ZERO, Vector2i.ONE)
 		animation_manager.unit_sprites_manager.sprite_primary.modulate = Color.WHITE
 		animation_manager.other_type_index = 0
-		set_sprite_by_job_id(job_id)
+		set_sprite_by_job(job_name)
 	else:
 		for status: StatusEffect in current_statuses:
 			if status.order >= anim_priority and status.idle_animation_id != -1:
@@ -951,7 +954,7 @@ func update_status_visuals() -> void:
 		# if spritesheet is changing
 		if spritesheet_priority == 0 and sprite_file_name != RomReader.sprs[RomReader.spr_id_file_idxs[job_data.sprite_id]].file_name:
 			set_base_animation_ptr_id(0) # prevent out of bounds error in case SEQ is also changing
-			set_sprite_by_job_id(job_id)
+			set_sprite_by_job(job_name)
 		elif spritesheet_priority != 0:
 			set_base_animation_ptr_id(0) # prevent out of bounds error in case SEQ is also changing
 			set_sprite_by_file_name(spritesheet_status.spritesheet_file_name)
@@ -1035,7 +1038,7 @@ func use_ability(pos: Vector3) -> void:
 		set_base_animation_ptr_id(current_animation_id_fwd)
 	else:
 		var ability_animation_executing_id: int = action_data.animation_executing_id
-		if ["RUKA.SEQ", "ARUTE.SEQ", "KANZEN.SEQ"].has(RomReader.sprs[sprite_file_idx].seq_name):
+		if ["ruka", "arute", "kanzen"].has(GameData.unit_spritesheets_data[sprite_file_name].seq_name):
 			ability_animation_executing_id = 0x2c * 2 # https://ffhacktics.com/wiki/Set_attack_animation_flags_and_facing_3
 		#debug_menu.anim_id_spin.value = ability_animation_executing_id + int(is_back_facing)
 		current_animation_id_fwd = ability_animation_executing_id
@@ -1114,7 +1117,7 @@ func animate_execute_action(animation_executing_id: int, vfx: VisualEffectData =
 		return
 	
 	var ability_animation_executing_id: int = animation_executing_id
-	if ["RUKA.SEQ", "ARUTE.SEQ", "KANZEN.SEQ"].has(RomReader.sprs[sprite_file_idx].seq_name):
+	if ["ruka", "arute", "kanzen"].has(GameData.unit_spritesheets_data[sprite_file_name].seq_name):
 		ability_animation_executing_id = 0x2c * 2 # https://ffhacktics.com/wiki/Set_attack_animation_flags_and_facing_3
 	#debug_menu.anim_id_spin.value = ability_animation_executing_id + int(is_back_facing)
 	set_base_animation_ptr_id(ability_animation_executing_id)
@@ -1277,17 +1280,41 @@ func hide_debug_menu() -> void:
 	debug_menu.visible = false
 
 
-func set_job_id(new_job_id: int) -> void:
-	job_id = new_job_id
-	job_data = RomReader.scus_data.jobs_data[job_id]
-	set_sprite_by_job_id(new_job_id)
+# func set_job_id(new_job_id: int) -> void:
+# 	job_id = new_job_id
+# 	job_data = RomReader.scus_data.jobs_data[job_id]
+# 	set_sprite_by_job_id(new_job_id)
+	
+# 	skillsets.clear()
+# 	skillsets.append(RomReader.scus_data.skillsets_data[job_data.skillset_id])
+	
+# 	job_nickname = job_data.display_name
+	
+# 	if animation_manager.global_spr.flying_flag:
+# 		idle_walk_animation_id = 0x0c
+# 		walk_to_animation_id = 0x1e
+# 		current_idle_animation_id = idle_walk_animation_id
+# 		set_base_animation_ptr_id(idle_walk_animation_id)
+# 	else:
+# 		idle_walk_animation_id = 0x06
+# 		walk_to_animation_id = 0x18
+# 		current_idle_animation_id = idle_walk_animation_id
+# 		set_base_animation_ptr_id(idle_walk_animation_id)
+	
+# 	update_passive_effects()
+
+
+func set_job(new_job_name: String) -> void:
+	job_name = new_job_name
+	job_data = GameData.jobs_data[new_job_name]
+	set_sprite_by_job(new_job_name)
 	
 	skillsets.clear()
-	skillsets.append(RomReader.scus_data.skillsets_data[job_data.skillset_id])
+	# skillsets.append(RomReader.scus_data.skillsets_data[job_data.skillset_id])
 	
 	job_nickname = job_data.display_name
 	
-	if animation_manager.global_spr.flying_flag:
+	if animation_manager.global_spritesheet_data.is_flying:
 		idle_walk_animation_id = 0x0c
 		walk_to_animation_id = 0x1e
 		current_idle_animation_id = idle_walk_animation_id
@@ -1381,7 +1408,7 @@ func get_evade(evade_source: EvadeData.EvadeSource, evade_type: EvadeData.EvadeT
 			evade += evade_data.value
 	
 	for equip_slot: EquipmentSlot in equip_slots:
-		for evade_data: EvadeData in equip_slot.item.evade_datas:
+		for evade_data: EvadeData in equip_slot.get_item().evade_datas:
 			if (evade_data.source == evade_source 
 					and evade_data.type == evade_type
 					and evade_data.directions.has(evade_direction)):
@@ -1451,10 +1478,10 @@ func get_native_passive_effects(exclude_passives: PackedStringArray = []) -> Arr
 			native_passive_effects.append(ability.passive_effect)
 	
 	for ability_slot: AbilitySlot in ability_slots:
-		native_passive_effects.append(ability_slot.ability.passive_effect)
+		native_passive_effects.append(ability_slot.get_ability().passive_effect)
 	
 	for equipment_slot: EquipmentSlot in equip_slots:
-		native_passive_effects.append(equipment_slot.item.passive_effect)
+		native_passive_effects.append(equipment_slot.get_item().passive_effect)
 	
 	for status: StatusEffect in current_statuses:
 		native_passive_effects.append(status.passive_effect)
@@ -1550,13 +1577,26 @@ func set_sprite_by_id(new_sprite_id: int) -> void:
 	set_sprite_by_file_idx(new_sprite_file_idx)
 
 
-func set_sprite_by_job_id(new_job_id: int) -> void:
-	var job_id_data: JobData = RomReader.scus_data.jobs_data[job_id]
-	var new_sprite_id: int = job_id_data.sprite_id
-	if new_job_id >= 0x4a and new_job_id <= 0x5d and stat_basis == StatBasis.FEMALE:
-		new_sprite_id += 1
-	set_sprite_by_id(new_sprite_id)
-	if new_job_id >= 0x5e: # monster
+# func set_sprite_by_job_id(new_job_id: int) -> void:
+# 	var job_id_data: JobData = RomReader.scus_data.jobs_data[job_id]
+# 	var new_sprite_id: int = job_id_data.sprite_id
+# 	if new_job_id >= 0x4a and new_job_id <= 0x5d and stat_basis == StatBasis.FEMALE:
+# 		new_sprite_id += 1
+# 	set_sprite_by_id(new_sprite_id)
+# 	if new_job_id >= 0x5e: # monster
+# 		set_sprite_palette(job_data.monster_palette_id)
+
+
+func set_sprite_by_job(new_job_name: String) -> void:
+	var new_job_data: JobData = GameData.jobs_data[new_job_name]
+	var new_sprite_id: int = new_job_data.sprite_id
+	
+	#if new_job_data.job_id >= 0x4a and new_job_data.job_id <= 0x5d and stat_basis == StatBasis.FEMALE:
+		#new_sprite_id += 1
+	#set_sprite_by_id(new_sprite_id)
+	# TODO get different sprite_name for female generic jobs
+	set_sprite_by_file_name(new_job_data.sprite_name)
+	if new_job_data.job_id >= 0x5e: # monster
 		set_sprite_palette(job_data.monster_palette_id)
 
 
@@ -1594,11 +1634,14 @@ func set_submerged_depth(new_depth: int) -> void:
 
 
 func update_spritesheet_grid_texture() -> void:
-	var new_spr: Spr = RomReader.sprs[sprite_file_idx]
+	#var new_spr: Spr = RomReader.sprs[sprite_file_idx]
+	var new_spritesheet_data: UnitSpritesheetData = GameData.unit_spritesheets_data[sprite_file_name]
 	var palette_idx_final: int = sprite_palette_id_override
 	if sprite_palette_id_override < 0:
 		palette_idx_final = sprite_palette_id
-	animation_manager.unit_sprites_manager.set_primary_texture(new_spr.create_frame_grid_texture(palette_idx_final, 0, animation_manager.other_type_index, 0, submerged_depth))
+	animation_manager.unit_sprites_manager.set_primary_texture(new_spritesheet_data.create_frame_grid_texture(
+		palette_idx_final, 0, animation_manager.other_type_index, 0, submerged_depth)
+	)
 
 
 func on_sprite_selected(new_spritesheet_name: String) -> void:
@@ -1620,7 +1663,7 @@ func on_sprite_selected(new_spritesheet_name: String) -> void:
 	# if not seq.is_initialized:
 	# 	seq.set_data_from_seq_bytes(RomReader.get_file_data(seq.file_name))
 	
-	var shp: Shp = GameData.unit_spritesheets_data[new_spritesheet_name].shp
+	var shp: Shp = GameData.unit_spritesheets_data[new_spritesheet_name].get_shp()
 	var animation_changed: bool = false
 	if shp.file_name == "type2":
 		if animation_manager.wep_shp.file_name != "wep2":
@@ -1629,11 +1672,12 @@ func on_sprite_selected(new_spritesheet_name: String) -> void:
 			animation_changed = true
 		animation_manager.wep_seq = GameData.seqs["wep2"]
 	
-	var seq: Seq = GameData.unit_spritesheets_data[new_spritesheet_name].seq
+	var seq: Seq = GameData.unit_spritesheets_data[new_spritesheet_name].get_seq()
 	if shp != animation_manager.global_shp or seq != animation_manager.global_seq:
 		animation_changed = true
 	
 	# animation_manager.global_spr = spr
+	animation_manager.global_spritesheet_data = GameData.unit_spritesheets_data[new_spritesheet_name]
 	animation_manager.global_shp = shp
 	animation_manager.global_seq = seq
 	

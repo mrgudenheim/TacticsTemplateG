@@ -63,7 +63,7 @@ func setup(new_unit: Unit) -> void:
 	
 	palette_option_button.clear()
 	@warning_ignore("integer_division")
-	for palette_idx: int in RomReader.sprs[new_unit.sprite_file_idx].color_palette.size() / 16:
+	for palette_idx: int in GameData.unit_spritesheets_data[new_unit.sprite_file_name].color_palette.size() / 16:
 		palette_option_button.add_item(str(palette_idx))
 	palette_option_button.select(new_unit.sprite_palette_id)
 
@@ -179,7 +179,7 @@ func update_ui(new_unit: Unit) -> void:
 		equipment_grid.add_child(new_slot_label)
 
 		var new_item_button: Button = Button.new()
-		new_item_button.text = equip_slot.item.display_name
+		new_item_button.text = equip_slot.get_item().display_name
 		new_item_button.pressed.connect(func() -> void: item_select_pressed.emit(new_unit, equip_slot))
 		new_item_button.custom_minimum_size = Vector2(60, 0)
 		equipment_grid.add_child(new_item_button)
@@ -195,7 +195,7 @@ func update_ui(new_unit: Unit) -> void:
 		ability_grid.add_child(new_slot_label)
 
 		var new_ability_button: Button = Button.new()
-		new_ability_button.text = ability_slot.ability.display_name
+		new_ability_button.text = ability_slot.get_ability().display_name
 		new_ability_button.pressed.connect(func() -> void: ability_select_pressed.emit(new_unit, ability_slot))
 		# TODO implement ability select buttons
 		ability_grid.add_child(new_ability_button)

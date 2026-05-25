@@ -4,8 +4,6 @@ extends Resource
 @export var equipment_slot_name: String = "[Equipment Slot]"
 @export var slot_types: Array[ItemData.SlotType] = []
 @export var item_unique_name: String
-var item: ItemData:
-	get: return GameData.items.get(item_unique_name, ItemData.new())
 
 
 static func create_from_dictionary(property_dict: Dictionary) -> EquipmentSlot:
@@ -31,7 +29,15 @@ func _init(new_name: String = "", new_slot_types: Array[ItemData.SlotType] = [],
 
 
 func _to_string() -> String:
-	return equipment_slot_name + ": " + item.display_name
+	return equipment_slot_name + ": " + get_item().display_name
+
+
+func get_item() -> ItemData:
+	if GameData.items.has(item_unique_name):
+		return GameData.items[item_unique_name]
+	
+	push_warning("can't find item in GameData: " + item_unique_name)
+	return ItemData.new()
 
 
 func to_dictionary() -> Dictionary:

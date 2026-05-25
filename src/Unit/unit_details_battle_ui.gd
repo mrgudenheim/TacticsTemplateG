@@ -146,7 +146,7 @@ func update_ui(unit: Unit) -> void:
 		equipment_grid.add_child(new_slot_label)
 
 		var new_item_label: Label = Label.new()
-		new_item_label.text = equip_slot.item.display_name
+		new_item_label.text = equip_slot.get_item().display_name
 		equipment_grid.add_child(new_item_label)
 
 	# update abilities
@@ -160,7 +160,7 @@ func update_ui(unit: Unit) -> void:
 		ability_grid.add_child(new_slot_label)
 
 		var new_ability_label: Label = Label.new()
-		new_ability_label.text = ability_slot.ability.display_name
+		new_ability_label.text = ability_slot.get_ability().display_name
 		ability_grid.add_child(new_ability_label)
 
 	# update innate abilities
