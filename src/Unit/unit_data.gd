@@ -95,7 +95,7 @@ func init_from_unit(unit: Unit) -> void:
 	job_unique_name = unit.job_data.unique_name
 	team_idx = unit.team_id
 	controller = 0 if unit.is_ai_controlled else 1 # 0 = AI, 1 = Player 1, etc.
-	spritesheeet_file_name = unit.sprite_file_name
+	spritesheeet_file_name = unit.sprite_file_name.to_lower().trim_suffix(".spr")
 	palette_id = unit.sprite_palette_id
 	facing_direction = unit.facing # NORTH, SOUTH, EAST, WEST
 

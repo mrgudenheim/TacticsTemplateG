@@ -169,7 +169,7 @@ func get_unit_data() -> UnitData:
 	if sprite_set_id == 0x81:
 		new_sprite_id += 1
 	var new_sprite_file_name_idx: int = RomReader.spr_file_name_to_id.values().find(new_sprite_id)
-	unit_data.spritesheeet_file_name = RomReader.spr_file_name_to_id.keys()[new_sprite_file_name_idx] # TODO better way to get sprite file name?
+	unit_data.spritesheeet_file_name = RomReader.spr_file_name_to_id.keys()[new_sprite_file_name_idx].to_lower().trim_suffix(".spr")
 	unit_data.palette_id = palette
 	if sprite_set_id < 0x80:
 		unit_data.palette_id = 0

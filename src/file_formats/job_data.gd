@@ -38,7 +38,8 @@ var passive_effects: Array[PassiveEffect] = [] # TODO job_data move stat modifie
 @export var monster_portrait_id: int = 0
 @export var monster_palette_id: int = 0
 @export var monster_type: int = 0 # monster type sprite? sprite_id = 0x85 + this
-@export var sprite_id: int = 0
+var sprite_id: int = 0
+@export var sprite_name: String = ""
 
 func _init(new_job_id: int = -1, job_bytes: PackedByteArray = []) -> void:
 	if new_job_id == -1 or job_bytes.is_empty():
@@ -64,7 +65,7 @@ func _init(new_job_id: int = -1, job_bytes: PackedByteArray = []) -> void:
 	for innate_slot: int in 4:
 		var innate_id: int = job_bytes.decode_u16(0x01 + (2 * innate_slot))
 		if innate_id != 0:
-			innate_abilities_ids.append(innate_id) # TODO define non-action abilities
+			innate_abilities_ids.append(innate_id)
 	
 	# equippable item types
 	var equipable_bytes: PackedByteArray = job_bytes.slice(0x09, 0x0d)

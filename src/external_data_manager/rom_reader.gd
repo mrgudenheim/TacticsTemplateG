@@ -1331,6 +1331,7 @@ func export_data_tables(save_path: String) -> void:
 	for status_effect: StatusEffect in status_effects.values():
 		Utilities.save_json(status_effect, save_path)
 	for job_data: JobData in jobs_data.values():
+		job_data.sprite_name = sprs[spr_id_file_idxs[job_data.sprite_id]].file_name.to_lower().trim_suffix(".spr")
 		Utilities.save_json(job_data, save_path)
 	for action: Action in actions.values():
 		Utilities.save_json(action, save_path)
