@@ -423,27 +423,38 @@ func _process(_delta: float) -> void:
 	set_base_animation_ptr_id(current_animation_id_fwd)
 
 
-static func generate_leveled_raw_stats(stat_basis_to_use: StatBasis, final_level: int, job: JobData, new_stats_raw: Dictionary[Unit.StatType, float]) -> void:
-	generate_level_zero_raw_stats(stat_basis_to_use, new_stats_raw)
+static func generate_leveled_raw_stats(stat_basis_to_use: StatBasis, final_level: int, job: JobData, new_stats_raw: Dictionary[Unit.StatType, float], use_rom: bool = false) -> void:
+	generate_level_zero_raw_stats(stat_basis_to_use, new_stats_raw, use_rom)
 	
 	for curent_level: int in range(1, final_level + 1):
 		grow_raw_stats(curent_level, job, new_stats_raw)
 
 
-static func generate_level_zero_raw_stats(stat_basis_to_use: StatBasis, new_stats_raw: Dictionary[Unit.StatType, float]) -> void:
-	new_stats_raw[StatType.HP_MAX] = generate_level_zero_raw_stat("HP_MAX", stat_basis_to_use)
-	new_stats_raw[StatType.MP_MAX] = generate_level_zero_raw_stat("MP_MAX", stat_basis_to_use)
-	new_stats_raw[StatType.SPEED] = generate_level_zero_raw_stat("SPEED", stat_basis_to_use)
-	new_stats_raw[StatType.PHYSICAL_ATTACK] = generate_level_zero_raw_stat("PHYSICAL_ATTACK", stat_basis_to_use)
-	new_stats_raw[StatType.MAGIC_ATTACK] = generate_level_zero_raw_stat("MAGIC_ATTACK", stat_basis_to_use)
+static func generate_level_zero_raw_stats(stat_basis_to_use: StatBasis, new_stats_raw: Dictionary[Unit.StatType, float], use_rom: bool = false) -> void:
+	new_stats_raw[StatType.HP_MAX] = generate_level_zero_raw_stat("HP_MAX", stat_basis_to_use, use_rom)
+	new_stats_raw[StatType.MP_MAX] = generate_level_zero_raw_stat("MP_MAX", stat_basis_to_use, use_rom)
+	new_stats_raw[StatType.SPEED] = generate_level_zero_raw_stat("SPEED", stat_basis_to_use, use_rom)
+	new_stats_raw[StatType.PHYSICAL_ATTACK] = generate_level_zero_raw_stat("PHYSICAL_ATTACK", stat_basis_to_use, use_rom)
+	new_stats_raw[StatType.MAGIC_ATTACK] = generate_level_zero_raw_stat("MAGIC_ATTACK", stat_basis_to_use, use_rom)
 
 
 # TODO is this correct for MONSTERs and LUCAVI?
-static func generate_level_zero_raw_stat(stat_name: String, stat_basis_to_use: StatBasis) -> int:
-	#var raw_stat: int = RomReader.scus_data.unit_base_datas[stat_basis_to_use][stat_idx] * 16384
-	#raw_stat += randi_range(0, RomReader.scus_data.unit_base_stats_mods[stat_basis_to_use][stat_idx] * 16384)
-	var stat_range: Vector2i = GameData.initial_unit_data.initial_unit_raw_stats[stat_basis_to_use][stat_name]
-	var raw_stat: int = randi_range(stat_range.x , stat_range.y)
+static func generate_level_zero_raw_stat(stat_name: String, stat_basis_to_use: StatBasis, use_rom: bool = false) -> int:
+	var raw_stat: int = -1
+	if not use_rom:
+		var stat_range: Vector2i = GameData.initial_unit_data.initial_unit_raw_stats[stat_basis_to_use][stat_name]
+		raw_stat = randi_range(stat_range.x , stat_range.y)
+		return raw_stat
+	
+	var stat_idx: int = -1
+	if stat_name == "HP_MAX": stat_idx = 0
+	elif stat_name == "MP_MAX": stat_idx = 1
+	elif stat_name == "SPEED": stat_idx = 2
+	elif stat_name == "PHYSICAL_ATTACK": stat_idx = 3
+	elif stat_name == "MAGIC_ATTACK": stat_idx = 4
+	
+	raw_stat = RomReader.scus_data.unit_base_datas[stat_basis_to_use][stat_idx] * 16384
+	raw_stat += randi_range(0, RomReader.scus_data.unit_base_stats_mods[stat_basis_to_use][stat_idx] * 16384)
 	return raw_stat
 
 

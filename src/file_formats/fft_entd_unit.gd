@@ -221,7 +221,7 @@ func get_unit_data() -> UnitData:
 	# TODO connect stat bars?
 
 	unit_data.stats[Unit.StatType.LEVEL].set_value(unit_data.level)
-	Unit.generate_leveled_raw_stats(unit_data.gender as Unit.StatBasis, unit_data.level, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw)
+	Unit.generate_leveled_raw_stats(unit_data.gender as Unit.StatBasis, unit_data.level, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
 	var use_higher_stat_values: bool = false
 	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(unit_data.spritesheeet_file_name): # lucavi
 		use_higher_stat_values = true
