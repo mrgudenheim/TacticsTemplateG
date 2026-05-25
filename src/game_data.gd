@@ -32,6 +32,7 @@ var palettes: Dictionary[String, PackedColorArray] = {}
 var textures: Dictionary[String, Texture2D] = {}
 var unit_spritesheets_data: Dictionary[String, UnitSpritesheetData] = {}
 
+var initial_unit_data: InitialUnitData
 
 func _ready() -> void:
 	external_data_paths = _get_saved_data_paths()
@@ -85,6 +86,7 @@ func clear_data() -> void:
 	palettes = {}
 	textures = {}
 	unit_spritesheets_data = {}
+	initial_unit_data = null
 
 
 func import_data(directory_path: String) -> void:
@@ -182,6 +184,9 @@ func import_data(directory_path: String) -> void:
 			vfx[file_path.get_file().trim_suffix(".vfx_data.tres")] = new_vfx
 		elif file_path.ends_with(".projectile.glb"):
 			projectiles_gltf[file_path.get_file().trim_suffix(".projectile.glb")] = GltfManager.import_gltf(file_path)
+		elif file_path.ends_with("initial_unit_data.tres"):
+			initial_unit_data = ResourceLoader.load(file_path, "InitialUnitData")
+			
 	
 	for map_data: MapData in maps_data.values():
 		var mesh_instance: MeshInstance3D = maps_gltf[map_data.unique_name].get_child(1)

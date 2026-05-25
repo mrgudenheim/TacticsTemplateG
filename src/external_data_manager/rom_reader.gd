@@ -1342,6 +1342,54 @@ func export_data_tables(save_path: String) -> void:
 		Utilities.save_json(ability, save_path)
 	for scenario: Scenario in scenarios.values():
 		Utilities.save_json(scenario, save_path)
+	
+	var initial_unit_data: InitialUnitData = InitialUnitData.new()
+	var initial_unit_raw_stats: Array[Dictionary] = []
+	var stat_name_lookup: Dictionary[String, int] = {
+		"HP_MAX" : 0,
+		"MP_MAX" : 1,
+		"SPEED" : 2,
+		"PHYSICAL_ATTACK" : 3,
+		"MAGIC_ATTACK" : 4,
+	}
+	for stat_basis_name: String in Unit.StatBasis.keys():
+		var initial_stats: Dictionary[String, Vector2i] = {}
+		for stat_name: String in stat_name_lookup.keys():
+			var stat_idx: int = stat_name_lookup[stat_name]
+			
+			var stat_range: Vector2i = Vector2i.ZERO
+			stat_range.x = RomReader.scus_data.unit_base_datas[Unit.StatBasis[stat_basis_name]][stat_idx] * 16384
+			stat_range.y = stat_range.x + (RomReader.scus_data.unit_base_stats_mods[Unit.StatBasis[stat_basis_name]][stat_idx] * 16384)
+			initial_stats[stat_name] = stat_range
+		initial_unit_raw_stats.append(initial_stats)
+	initial_unit_data.initial_unit_raw_stats = initial_unit_raw_stats
+
+	var initial_unit_equipment: Array[Dictionary] = []
+	var equipment_slot_name_lookup: Dictionary[String, int] = {
+		"Head" : 5,
+		"Body" : 6,
+		"Accessory" : 7,
+		"RH_weapon" : 8,
+		"RH_shield" : 9,
+		"LH_weapon" : 10,
+		"LH_shield" : 11,
+	}
+	for stat_basis_name: String in Unit.StatBasis.keys():
+		var initial_equipment: Dictionary[String, String] = {}
+		for slot_name: String in equipment_slot_name_lookup.keys():
+			var slot_idx: int = equipment_slot_name_lookup[slot_name]
+			var item_idx: int = RomReader.scus_data.unit_base_datas[Unit.StatBasis[stat_basis_name]][slot_idx]
+			var item_name: String = RomReader.items_array[0].unique_name
+			if item_idx != 255:
+				item_name = RomReader.items_array[item_idx].unique_name
+			initial_equipment[slot_name] = item_name
+		initial_unit_equipment.append(initial_equipment)
+	initial_unit_data.initial_unit_equipment = initial_unit_equipment
+
+	var initial_unit_data_file_path: String = save_path.path_join("initial_unit_data.tres")
+	var error: Error = ResourceSaver.save(initial_unit_data, initial_unit_data_file_path)
+	if error != Error.OK:
+		push_warning("error saving unit initial_unit_data: " + str(error))
 
 	generate_passive_effects(save_path)
 
