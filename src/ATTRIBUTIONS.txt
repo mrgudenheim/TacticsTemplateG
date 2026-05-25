@@ -1,0 +1,9 @@
+Files: res://src/godot_license/*
+Author: Godot Engine contributors
+License: MIT License https://github.com/godotengine/godot/blob/master/LICENSE.txt
+Source: https://github.com/godotengine/godot
+
+Files: res://src/audio/select_002.ogg
+Author: kenny.nl
+License: Creative Commons CC0 https://creativecommons.org/publicdomain/zero/1.0/
+Source: https://kenney.nl/assets/interface-sounds
