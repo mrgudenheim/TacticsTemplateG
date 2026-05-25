@@ -315,6 +315,7 @@ func _create_mesh() -> void:
 			st.set_custom(0, centroid_color)
 			st.add_vertex(quad_vertices[vert_index] * SCALE)
 
+	st.generate_tangents()
 	mesh = st.commit()
 
 
@@ -571,11 +572,19 @@ func get_texture_indexed_all(texture_bytes: PackedByteArray) -> ImageTexture:
 	var image_width: int = TEXTURE_SIZE.x * num_palettes
 	var image_indexed: Image = Image.create_empty(image_width, TEXTURE_SIZE.y, false, Image.FORMAT_RGBA8)
 	texture_color_indices = get_texture_color_indices(texture_bytes)
+	
+	#var num_texture_color_indices: int = texture_color_indices.size()
+	#
+	#var num_non_zero_color_indicies: int = 0
+	#for index: int in texture_color_indices:
+		#if index != 0:
+			#num_non_zero_color_indicies += 1
 
 	for x: int in TEXTURE_SIZE.x:
 		for y: int in TEXTURE_SIZE.y:
 			for palette_id: int in num_palettes:
-				var new_color: Color = Color.from_rgba8(texture_color_indices[(TEXTURE_SIZE.x * y) + x] + (palette_id * colors_per_palette), 0, 0, 1)
+				var pixel_index: int = (TEXTURE_SIZE.x * y) + x
+				var new_color: Color = Color.from_rgba8(texture_color_indices[pixel_index] + (palette_id * colors_per_palette), 0, 0, 255)
 				image_indexed.set_pixel(x + (palette_id * TEXTURE_SIZE.x), y, new_color)
 
 	return ImageTexture.create_from_image(image_indexed)
