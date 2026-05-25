@@ -181,7 +181,7 @@ func get_file_list_recursive(directory_path: String, ignore_hidden: bool = true)
 		all_file_paths.append(directory_path.path_join(file_name))
 	
 	for sub_directory: String in new_sub_directories:
-		var sub_directory_file_paths: PackedStringArray = get_file_list_recursive(directory_path.path_join(sub_directory))
+		var sub_directory_file_paths: PackedStringArray = get_file_list_recursive(directory_path.path_join(sub_directory), ignore_hidden)
 		all_file_paths.append_array(sub_directory_file_paths)
 
 	return all_file_paths

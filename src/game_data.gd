@@ -92,7 +92,7 @@ func import_data(directory_path: String) -> void:
 	
 	var start_time: int = Time.get_ticks_msec()
 
-	var file_paths: PackedStringArray = Utilities.get_file_list_recursive(directory_path)
+	var file_paths: PackedStringArray = Utilities.get_file_list_recursive(directory_path, false)
 
 	push_warning("Time to find import files (ms): " + str(Time.get_ticks_msec() - start_time))
 	start_time = Time.get_ticks_msec()
