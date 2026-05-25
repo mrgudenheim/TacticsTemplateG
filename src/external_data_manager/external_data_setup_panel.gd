@@ -20,6 +20,8 @@ extends PanelContainer
 
 @export var export_data_button: Button
 
+@export var finished_sound: AudioStream
+
 var _default_export_button_text: String
 
 func _ready() -> void:
@@ -114,6 +116,8 @@ func export_data() -> void:
 	destination_find_button.disabled = false
 	rom_path_line_edit.editable = true
 	destination_path_line_edit.editable = true
+	
+	Utilities.play_audio_one_shot(finished_sound)
 
 
 func show_export_message(message: String) -> void:
@@ -126,5 +130,6 @@ func update_import_progress(current_value: int, max_value: int) -> void:
 
 	if current_value >= max_value:
 		import_progress_ui.visible = false
+		Utilities.play_audio_one_shot(finished_sound)
 	else:
 		import_progress_ui.visible = true

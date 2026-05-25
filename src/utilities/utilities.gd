@@ -185,3 +185,11 @@ func get_file_list_recursive(directory_path: String, ignore_hidden: bool = true)
 		all_file_paths.append_array(sub_directory_file_paths)
 
 	return all_file_paths
+
+
+func play_audio_one_shot(audio: AudioStream) -> void:
+	var audio_player: AudioStreamPlayer = AudioStreamPlayer.new()
+	audio_player.stream = audio
+	add_child(audio_player)
+	audio_player.finished.connect(func() -> void: audio_player.queue_free())
+	audio_player.play()

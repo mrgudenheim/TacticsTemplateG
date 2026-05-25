@@ -8,6 +8,7 @@
 [ext_resource type="Material" path="res://src/content_scripts/map/tile_highlight_white.tres" id="8_kb1q2"]
 [ext_resource type="Script" uid="uid://daxiihrijoonn" path="res://src/external_data_manager/external_data_setup_panel.gd" id="8_we1pw"]
 [ext_resource type="PackedScene" uid="uid://26tg32417lfm" path="res://src/external_data_manager/load_rom.tscn" id="9_pbg35"]
+[ext_resource type="AudioStream" uid="uid://dg7fjryqq6ovk" path="res://src/audio/select_002.ogg" id="9_we1pw"]
 [ext_resource type="Script" uid="uid://cl143w048iago" path="res://src/Unit/character_controller_realtime.gd" id="10_d5yoq"]
 [ext_resource type="Texture2D" uid="uid://boj84aajpk67b" path="res://src/godot_license/FileBrowse_godot.svg" id="10_we1pw"]
 [ext_resource type="Material" path="res://src/content_scripts/map/tile_highlight_blue.tres" id="11_1os5c"]
@@ -138,6 +139,7 @@ destination_path_line_edit = NodePath("MarginContainer/VBoxContainer/GridContain
 destination_find_button = NodePath("MarginContainer/VBoxContainer/GridContainer/ExportLocationButton")
 destination_file_dialog = NodePath("MarginContainer/VBoxContainer/GridContainer/ExportLocationButton/DestinationFileDialog")
 export_data_button = NodePath("MarginContainer/VBoxContainer/ExportRomData")
+finished_sound = ExtResource("9_we1pw")
 
 [node name="MarginContainer" type="MarginContainer" parent="ExternalDataSetupPanel" unique_id=1317102780]
 layout_mode = 2
