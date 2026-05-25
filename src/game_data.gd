@@ -157,6 +157,11 @@ func import_data(directory_path: String) -> void:
 						jobs_data[new_content.unique_name] = new_content
 				"text":
 					names["all"] = JSON.parse_string(file_text) as PackedStringArray
+					names["all_no_empty"] = names["all"].duplicate()
+					for idx: int in range(names["all_no_empty"].size() -1, -1, -1):
+						if names["all_no_empty"][idx] == "":
+							names["all_no_empty"].remove_at(idx)
+
 
 		elif file_path.ends_with(".palette.tres"):
 			var new_palette: ColorPalette = ResourceLoader.load(file_path, "ColorPalette")
