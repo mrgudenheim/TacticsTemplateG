@@ -132,7 +132,7 @@ func toggle_debug_ui() -> void:
 
 
 func on_data_ready() -> void:
-	push_warning("on rom loaded")
+	push_warning("on data ready")
 	load_rom_button.visible = false
 
 	if trap_instance != null:
@@ -860,37 +860,6 @@ func start_units_turn(unit: Unit) -> void:
 	#phantom_camera.follow_target = new_unit.char_body
 	#
 	#new_unit.start_turn(self)
-
-
-func get_map(new_map_data: MapData, map_position: Vector3, map_scale: Vector3, gltf_map_mesh: MeshInstance3D = null) -> MapChunkNodes:
-	map_scale.y = -1 # vanilla used -y as up
-	var new_map_instance: MapChunkNodes = MapChunkNodes.instantiate()
-	new_map_instance.map_data = new_map_data
-	
-	if gltf_map_mesh != null:
-		new_map_instance.mesh_instance.queue_free()
-		var new_gltf_mesh: MeshInstance3D = gltf_map_mesh.duplicate()
-		new_map_instance.add_child(new_gltf_mesh)
-		new_map_instance.mesh_instance = new_gltf_mesh
-		new_map_instance.mesh_instance.rotation_degrees = Vector3.ZERO
-	else:
-		new_map_instance.mesh_instance.mesh = new_map_data.mesh
-	new_map_instance.mesh_instance.scale = map_scale
-	new_map_instance.position = map_position
-	#new_map_instance.global_rotation_degrees = Vector3(0, 0, 0)
-	
-	new_map_instance.set_mesh_shader(new_map_data.albedo_texture_indexed, new_map_data.texture_palettes)
-	
-	#var shape_mesh: ConcavePolygonShape3D = new_map_data.mesh.create_trimesh_shape()
-	if map_scale == Vector3.ONE:
-		new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
-	else:
-		new_map_instance.collision_shape.shape = get_scaled_collision_shape(new_map_instance.mesh_instance.mesh, map_scale)
-	
-	new_map_instance.play_animations(new_map_data)
-	new_map_instance.input_event.connect(on_map_input_event)
-	
-	return new_map_instance
 
 
 func get_scaled_collision_shape(mesh: Mesh, collision_scale: Vector3) -> ConcavePolygonShape3D:

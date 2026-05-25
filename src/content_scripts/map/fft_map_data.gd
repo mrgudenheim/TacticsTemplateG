@@ -572,13 +572,6 @@ func get_texture_indexed_all(texture_bytes: PackedByteArray) -> ImageTexture:
 	var image_width: int = TEXTURE_SIZE.x * num_palettes
 	var image_indexed: Image = Image.create_empty(image_width, TEXTURE_SIZE.y, false, Image.FORMAT_RGBA8)
 	texture_color_indices = get_texture_color_indices(texture_bytes)
-	
-	#var num_texture_color_indices: int = texture_color_indices.size()
-	#
-	#var num_non_zero_color_indicies: int = 0
-	#for index: int in texture_color_indices:
-		#if index != 0:
-			#num_non_zero_color_indicies += 1
 
 	for x: int in TEXTURE_SIZE.x:
 		for y: int in TEXTURE_SIZE.y:
