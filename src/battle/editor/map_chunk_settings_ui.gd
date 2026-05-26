@@ -100,20 +100,10 @@ func on_mirror_changed(_toggled_on: bool) -> void:
 
 func get_map_chunk_nodes(map_chunk_unique_name: String) -> MapChunkNodes:
 	var map_chunk_data: MapData = GameData.maps_data[map_chunk_unique_name]
-	#if not map_chunk_data.is_initialized:
-		#map_chunk_data.init_map()
 
 	var new_map_instance: MapChunkNodes = MapChunkNodes.instantiate()
 	new_map_instance.map_data = map_chunk_data
 	new_map_instance.name = map_chunk_data.unique_name
-	
-	# if gltf_map_mesh != null:
-	# 	new_map_instance.mesh.queue_free()
-	# 	var new_gltf_mesh: MeshInstance3D = gltf_map_mesh.duplicate()
-	# 	new_map_instance.add_child(new_gltf_mesh)
-	# 	new_map_instance.mesh = new_gltf_mesh
-	# 	new_map_instance.mesh.rotation_degrees = Vector3.ZERO
-	# else:
 
 	var mesh_aabb: AABB = map_chunk_data.mesh.get_aabb()
 	if map_chunk.mirror_scale != Vector3i.ONE or mesh_aabb.position != Vector3.ZERO:
