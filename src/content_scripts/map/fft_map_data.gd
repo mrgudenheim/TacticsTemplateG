@@ -66,18 +66,19 @@ var texture_animations: Array[TextureAnimationData] = []
 static func mirror_custom0(surface_arrays: Array, center: Vector3, mirror_scale: Vector3, half_size: Vector3) -> int:
 	if surface_arrays.size() <= Mesh.ARRAY_CUSTOM0 or surface_arrays[Mesh.ARRAY_CUSTOM0] == null:
 		return 0
-	var floats: PackedFloat32Array = surface_arrays[Mesh.ARRAY_CUSTOM0]
-	for vi: int in range(floats.size() / 3):
-		var base: int = vi * 3
-		var c: Vector3 = Vector3(floats[base], floats[base + 1], floats[base + 2])
+	var mesh_custom0: PackedFloat32Array = surface_arrays[Mesh.ARRAY_CUSTOM0]
+	for vector_idx: int in range(mesh_custom0.size() / 4):
+		var base: int = vector_idx * 4
+		var c: Vector3 = Vector3(mesh_custom0[base], mesh_custom0[base + 1], mesh_custom0[base + 2])
 		c = (c - center) * mirror_scale + half_size
-		floats[base] = c.x
-		floats[base + 1] = c.y
-		floats[base + 2] = c.z
-	surface_arrays[Mesh.ARRAY_CUSTOM0] = floats
+		mesh_custom0[base] = c.x
+		mesh_custom0[base + 1] = c.y
+		mesh_custom0[base + 2] = c.z
+		mesh_custom0[base + 3] = 0
+	surface_arrays[Mesh.ARRAY_CUSTOM0] = mesh_custom0
 	# Godot needs explicit format flags for CUSTOM0 in add_surface_from_arrays()
 	# RGB_FLOAT = 6, CUSTOM0 format shift = 13
-	return (6 << 13)
+	return (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT)
 
 
 func _init(map_file_name: String) -> void:
@@ -243,7 +244,8 @@ func clear_map_data() -> void:
 func _create_mesh() -> void:
 	st.clear()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	st.set_custom_format(0, SurfaceTool.CUSTOM_RGB_FLOAT)
+	# use RGBA format for custom0 even though centroid is Vector3 because data will be in RGBA format when exported/imported as GLTF
+	st.set_custom_format(0, SurfaceTool.CUSTOM_RGBA_FLOAT)
 
 	# add textured tris
 	for i: int in num_text_tris:
