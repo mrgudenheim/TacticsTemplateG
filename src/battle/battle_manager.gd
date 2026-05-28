@@ -265,7 +265,7 @@ func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
 			total_tile.location = total_location
 			total_tile.tile_scale.x = map_chunk.mirror_scale.x
 			total_tile.tile_scale.z = map_chunk.mirror_scale.z
-			total_tile.height_bottom += map_chunk.corner_position.y + roundi(mesh_aabb.end.y / FftMapData.HEIGHT_SCALE)
+			# total_tile.height_bottom += map_chunk.corner_position.y + roundi(mesh_aabb.end.y / FftMapData.HEIGHT_SCALE)
 			total_tile.height_mid = total_tile.height_bottom + (total_tile.slope_height / 2.0)
 			
 			# sort tiles by ascending height

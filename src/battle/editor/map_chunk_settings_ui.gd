@@ -35,12 +35,12 @@ func _ready() -> void:
 		chunk_name_dropdown.add_item(map_data.unique_name)
 
 	var map_index: int = range(1, chunk_name_dropdown.item_count).pick_random() # don't include map 0 that causes error
-	if map_chunk.unique_name == "map_unique_name":
+	# if map_chunk.unique_name == "map_unique_name":
 		# vanilla maps need to be mirrored along y
 		# mirror along x to get the un-mirrored look after mirroring along y	
-		map_chunk.set_mirror_xyz([true, true, false])
-	else:
-		map_index = GameData.maps_data.keys().find(map_chunk.unique_name)
+		# map_chunk.set_mirror_xyz([true, true, false])
+	# else:
+	map_index = GameData.maps_data.keys().find(map_chunk.unique_name)
 	
 	for idx: int in mirror_checkboxes.size():
 		mirror_checkboxes[idx].button_pressed = map_chunk.mirror_xyz[idx]

@@ -87,6 +87,43 @@ func animate_uv(texture_anim: TextureAnimation, map: MapChunkNodes, anim_idx: in
 			frame_id += dir
 
 
+func get_mirrored_tiles(mirror_scale: Vector3i) -> Array[TerrainTile]:
+	var mirrored_tiles: Array[TerrainTile] = []
+	var max_tile_location: Vector2i = Vector2i.ZERO
+	for tile: TerrainTile in terrain_tiles:
+		if tile.location.x > max_tile_location.x:
+			max_tile_location.x = tile.location.x
+		if tile.location.y > max_tile_location.y:
+			max_tile_location.y = tile.location.y
+	
+	for tile: TerrainTile in terrain_tiles:
+		if tile.no_cursor == 1:
+			continue
+		
+		var mirrored_location: Vector2i = Vector2i(tile.location.x * mirror_scale.x, tile.location.y * mirror_scale.z)
+		var mirror_shift: Vector2i = Vector2i.ZERO # ex. (0,0) should be (-1, -1) when mirrored across x and y
+		if mirror_scale.x == -1:
+			mirror_shift.x = -1
+			mirror_shift.x += max_tile_location.x + 1
+		if mirror_scale.z == -1:
+			mirror_shift.y = -1
+			mirror_shift.y += max_tile_location.y + 1
+		
+		#var quadrant_shift: Vector2i = Vector2i(roundi(mesh_aabb.position.x), roundi(mesh_aabb.position.z))
+		#mirrored_location = mirrored_location + mirror_shift - quadrant_shift
+		mirrored_location = mirrored_location + mirror_shift
+
+		var mirrored_tile: TerrainTile = tile.duplicate()
+		mirrored_tile.location = mirrored_location
+		mirrored_tile.tile_scale.x = mirror_scale.x
+		mirrored_tile.tile_scale.z = mirror_scale.z
+		# mirrored_tile.height_bottom += roundi(mesh_aabb.end.y)
+		mirrored_tile.height_mid = mirrored_tile.height_bottom + (mirrored_tile.slope_height / 2.0)
+		mirrored_tiles.append(mirrored_tile)
+	
+	return mirrored_tiles
+
+
 class TextureAnimationData:
 	var texture_anim_instruction_bytes: PackedByteArray = []
 	var animation_type: int = -1 # error
