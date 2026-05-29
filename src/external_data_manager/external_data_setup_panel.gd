@@ -39,6 +39,7 @@ func _ready() -> void:
 	_default_export_button_text = export_data_button.text
 
 	GameData.import_progress.connect(update_import_progress)
+	GameData.data_imported.connect(func() -> void: visible = false)
 
 	await get_tree().process_frame
 
