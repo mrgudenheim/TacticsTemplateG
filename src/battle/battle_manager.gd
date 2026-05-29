@@ -235,44 +235,22 @@ func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
 		var map_chunk_data: MapData = GameData.maps_data[map_chunk.unique_name]
 		#if not map_chunk_data.is_initialized:
 			#continue
-		
-		var mesh_aabb: AABB = map_chunk_data.mesh.get_aabb()
-		
-		var map_tile_offset: Vector2i = Vector2i(map_chunk.corner_position.x, map_chunk.corner_position.z)
-		for tile: TerrainTile in map_chunk_data.terrain_tiles:
-			if tile.no_cursor == 1:
-				continue
-			
-			var total_location: Vector2i = tile.location
-			var map_scale: Vector2i = Vector2i(map_chunk.mirror_scale.x, map_chunk.mirror_scale.z)
-			total_location = total_location * map_scale
-			
-			var mirror_shift: Vector2i = Vector2i.ZERO # ex. (0,0) should be (-1, -1) when mirrored across x and y
-			if map_scale.x == -1:
-				mirror_shift.x = -1
-				mirror_shift.x += roundi(mesh_aabb.size.x)
-			if map_scale.y == -1:
-				mirror_shift.y = -1
-				mirror_shift.y += roundi(mesh_aabb.size.z)
-			
-			var quadrant_shift: Vector2i = Vector2i(roundi(mesh_aabb.position.x) * map_scale.x, roundi(mesh_aabb.position.z) * map_scale.y)
-			total_location = total_location + mirror_shift + map_tile_offset - quadrant_shift
 
-			# total_location = total_location + Vector2i(map_chunk.position.x, map_chunk.position.z)
-			if not total_map_tiles.has(total_location):
-				total_map_tiles[total_location] = []
-			var total_tile: TerrainTile = tile.duplicate()
-			total_tile.location = total_location
-			total_tile.tile_scale.x = map_chunk.mirror_scale.x
-			total_tile.tile_scale.z = map_chunk.mirror_scale.z
-			# total_tile.height_bottom += map_chunk.corner_position.y + roundi(mesh_aabb.end.y / FftMapData.HEIGHT_SCALE)
-			total_tile.height_mid = total_tile.height_bottom + (total_tile.slope_height / 2.0)
+		var map_tile_scale: Vector2 = Vector2(map_chunk.mirror_scale.x, map_chunk.mirror_scale.z)
+		var map_tile_offset: Vector2 = Vector2(map_chunk.corner_position.x, map_chunk.corner_position.z)
+		var transformed_tiles: Array[TerrainTile] = map_chunk_data.get_transformed_tiles(map_tile_offset, map_tile_scale, 0)
+
+		for tile: TerrainTile in transformed_tiles:
+			tile.height_bottom += map_chunk.corner_position.y
+			tile.height_mid = tile.height_bottom + (tile.slope_height / 2.0)
 			
+			if not total_map_tiles.has(tile.location):
+				total_map_tiles[tile.location] = []
 			# sort tiles by ascending height
-			var tile_level: int = total_map_tiles[total_location].bsearch_custom(total_tile, 
+			var tile_level: int = total_map_tiles[tile.location].bsearch_custom(tile, 
 				func(tile_a: TerrainTile, tile_b: TerrainTile) -> bool: return tile_a.height_mid > tile_b.height_mid
-				)
-			total_map_tiles[total_location].insert(tile_level, total_tile)
+			)
+			total_map_tiles[tile.location].insert(tile_level, tile)
 
 
 func update_units_data_tile_location(units_data: Array[UnitData], map_chunk: Scenario.MapChunk) -> Array[UnitData]:

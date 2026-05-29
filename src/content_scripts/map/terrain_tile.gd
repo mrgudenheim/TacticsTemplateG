@@ -18,7 +18,8 @@ extends Resource
 @export var default_camera_position_id: int = 0 # Controls which angles the camera will auto-rotate to when a unit enters this tile. 
 
 @export var height_mid: float = height_bottom + (slope_height / 2.0)
-var tile_scale: Vector3 = Vector3.ONE
+@export var tile_scale: Vector3 = Vector3.ONE
+@export var rotation_degrees: float = 0.0
 
 
 func get_world_position(use_bottom_height: bool = false) -> Vector3:
@@ -27,7 +28,7 @@ func get_world_position(use_bottom_height: bool = false) -> Vector3:
 		height_position = height_bottom + depth
 	var tile_position: Vector3 = Vector3(location.x, height_position, location.y)
 	var tile_world_position: Vector3 = tile_position * Vector3(1, FftMapData.HEIGHT_SCALE, 1)
-	tile_world_position += Vector3(0.5, FftMapData.HEIGHT_SCALE, 0.5)
+	tile_world_position += Vector3(0.5, FftMapData.HEIGHT_SCALE, 0.5) # TODO instead of adding HEIGHT_SCALE to tile, lower map mesh by HEIGHT_SCALE when exporting
 	
 	return tile_world_position
 
@@ -102,4 +103,5 @@ func get_tile_mesh() -> MeshInstance3D:
 	var tile_mesh: ArrayMesh = st_tile.commit()
 	new_tile_mesh_instance.mesh = tile_mesh
 	new_tile_mesh_instance.scale = tile_scale
+	new_tile_mesh_instance.rotate_y(deg_to_rad(rotation_degrees))
 	return new_tile_mesh_instance
