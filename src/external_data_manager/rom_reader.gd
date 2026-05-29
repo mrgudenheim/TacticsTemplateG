@@ -1456,7 +1456,7 @@ func export_maps(save_path: String) -> void:
 		#fft_map_data.albedo_texture.get_image().save_webp(map_texture_webp_file_path2)
 		
 		var new_map_data: MapData = MapData.init_from_fft_map_data(fft_map_data)
-		new_map_data.terrain_tiles = new_map_data.get_mirrored_tiles(Vector3i(-1, 1, 1))
+		new_map_data.terrain_tiles = new_map_data.get_transformed_tiles(Vector2.ZERO, Vector2(-1, 1), 0)
 		var map_data_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".map_data.tres")
 		var error: Error = ResourceSaver.save(new_map_data, map_data_file_path)
 		if error != Error.OK:

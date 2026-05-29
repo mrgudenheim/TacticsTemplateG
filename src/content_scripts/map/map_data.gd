@@ -87,39 +87,39 @@ func animate_uv(texture_anim: TextureAnimation, map: MapChunkNodes, anim_idx: in
 			frame_id += dir
 
 
-func get_mirrored_tiles(mirror_scale: Vector3i) -> Array[TerrainTile]:
+func get_transformed_tiles(translation: Vector2 = Vector2.ZERO, scale: Vector2 = Vector2.ONE, rotation_degrees: float = 0.0) -> Array[TerrainTile]:
 	var mirrored_tiles: Array[TerrainTile] = []
+	var min_tile_location: Vector2i = Vector2i.ZERO
 	var max_tile_location: Vector2i = Vector2i.ZERO
 	for tile: TerrainTile in terrain_tiles:
 		if tile.location.x > max_tile_location.x:
 			max_tile_location.x = tile.location.x
 		if tile.location.y > max_tile_location.y:
 			max_tile_location.y = tile.location.y
+		
+		if tile.location.x < min_tile_location.x:
+			min_tile_location.x = tile.location.x
+		if tile.location.y < min_tile_location.y:
+			min_tile_location.y = tile.location.y
+	
+	var tiles_center: Vector2 = (max_tile_location -  min_tile_location) / 2.0
+	
+	var tile_transform: Transform2D = Transform2D.IDENTITY
+	tile_transform = tile_transform.translated(-tiles_center)
+	tile_transform = tile_transform.rotated(deg_to_rad(rotation_degrees))
+	tile_transform = tile_transform.scaled(scale)
+	tile_transform = tile_transform.translated(tiles_center + translation)
 	
 	for tile: TerrainTile in terrain_tiles:
 		if tile.no_cursor == 1:
 			continue
-		
-		var mirrored_location: Vector2i = Vector2i(tile.location.x * mirror_scale.x, tile.location.y * mirror_scale.z)
-		var mirror_shift: Vector2i = Vector2i.ZERO # ex. (0,0) should be (-1, -1) when mirrored across x and y
-		if mirror_scale.x == -1:
-			mirror_shift.x = -1
-			mirror_shift.x += max_tile_location.x + 1
-		if mirror_scale.z == -1:
-			mirror_shift.y = -1
-			mirror_shift.y += max_tile_location.y + 1
-		
-		#var quadrant_shift: Vector2i = Vector2i(roundi(mesh_aabb.position.x), roundi(mesh_aabb.position.z))
-		#mirrored_location = mirrored_location + mirror_shift - quadrant_shift
-		mirrored_location = mirrored_location + mirror_shift
 
-		var mirrored_tile: TerrainTile = tile.duplicate()
-		mirrored_tile.location = mirrored_location
-		mirrored_tile.tile_scale.x = mirror_scale.x
-		mirrored_tile.tile_scale.z = mirror_scale.z
-		# mirrored_tile.height_bottom += roundi(mesh_aabb.end.y)
-		mirrored_tile.height_mid = mirrored_tile.height_bottom + (mirrored_tile.slope_height / 2.0)
-		mirrored_tiles.append(mirrored_tile)
+		var transformed_tile: TerrainTile = tile.duplicate()
+		transformed_tile.location = Vector2i((tile_transform * Vector2(tile.location)).round())
+		transformed_tile.tile_scale.x *= scale.x
+		transformed_tile.tile_scale.z *= scale.y
+		# transformed_tile.height_mid = transformed_tile.height_bottom + (transformed_tile.slope_height / 2.0)
+		mirrored_tiles.append(transformed_tile)
 	
 	return mirrored_tiles
 
