@@ -1438,12 +1438,19 @@ func export_unit_animations(save_path: String) -> void:
 
 
 func export_maps(save_path: String) -> void:
-	message.emit("Exporting maps...")
-	await get_tree().process_frame
+	# message.emit("Exporting maps...")
+	# await get_tree().process_frame
 	
 	var maps_path: String = save_path + "/maps/"
 	DirAccess.make_dir_recursive_absolute(maps_path)
+	var last_frame_time: int = Time.get_ticks_msec()
 	for fft_map_data: FftMapData in maps.values():
+		var elapsed_time: float = (Time.get_ticks_msec() - last_frame_time) / 1000.0
+		if elapsed_time > (1 / 60.0):
+			message.emit("Exporting map: " + fft_map_data.unique_name)
+			await get_tree().process_frame
+			last_frame_time = Time.get_ticks_msec()
+
 		if fft_map_data.unique_name == "map_000":
 			continue # skip map 0 - causes crash
 		var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3i(-1, -1, 1))
