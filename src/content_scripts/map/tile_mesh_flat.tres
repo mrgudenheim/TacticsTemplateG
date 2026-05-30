@@ -2,11 +2,11 @@
 
 [resource]
 _surfaces = [{
-"aabb": AABB(-0.5, 0, -0.5, 1, 1, 1),
-"attribute_data": PackedByteArray("/////wAAAAAAAIA//////wAAgD8AAIA//////wAAgD8AAAAA/////wAAAAAAAIA//////wAAgD8AAAAA/////wAAAAAAAAAA"),
+"aabb": AABB(-0.5, 0, -0.5, 1, 1e-05, 1),
+"attribute_data": PackedByteArray("/////wAAAAAAAAAA/////wAAAAAAAIA//////wAAgD8AAIA//////wAAAAAAAAAA/////wAAgD8AAIA//////wAAgD8AAAAA"),
 "format": 34359738399,
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
 "vertex_count": 6,
-"vertex_data": PackedByteArray("AAAAPwAAAAAAAAA/AAAAvwAAgD8AAAA/AAAAvwAAgD8AAAC/AAAAPwAAAAAAAAA/AAAAvwAAgD8AAAC/AAAAPwAAAAAAAAC//7//v1RVVNX/v/+/VFVU1f+//79UVVTV/7//v1RVVNX/v/+/VFVU1f+//79UVVTV")
+"vertex_data": PackedByteArray("AAAAPwAAAAAAAAC/AAAAPwAAAAAAAAA/AAAAvwAAAAAAAAA/AAAAPwAAAAAAAAC/AAAAvwAAAAAAAAA/AAAAvwAAAAAAAAC//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+/")
 }]

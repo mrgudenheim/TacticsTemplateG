@@ -55,7 +55,8 @@ func get_tile_mesh() -> MeshInstance3D:
 	var mesh: ArrayMesh = GameData.map_tile_meshes[slope_type]
 	new_tile_mesh_instance.mesh = mesh
 	new_tile_mesh_instance.scale = tile_scale
-	new_tile_mesh_instance.scale.y *= slope_height * FftMapData.HEIGHT_SCALE
+	if slope_height != 0:
+		new_tile_mesh_instance.scale.y *= slope_height * FftMapData.HEIGHT_SCALE
 	new_tile_mesh_instance.rotate_y(deg_to_rad(rotation_degrees))
 	return new_tile_mesh_instance
 
@@ -75,19 +76,21 @@ static func get_normalized_slope_mesh(new_slope_type: int, scale: Vector3 = Vect
 	var tri_seam_offset: int = 0
 	var vertex_heights: PackedInt32Array = []
 	vertex_heights.resize(4)
-	for side_index: int in side_types.size():
-		if side_types[side_index] == 2: # high edges
-			vertex_heights[(side_index + 1) % 4] = 1
-			vertex_heights[(side_index + 2) % 4] = 1
-			if side_types[(side_index + 1) % 4] == 2: # high corner
-				vertex_heights[side_index] = 0 # opposite corner is low
-				tri_seam_offset = (side_index + 1) % 2
-		elif side_types[side_index] == 0: # low edges
-			vertex_heights[(side_index + 1) % 4] = 0
-			vertex_heights[(side_index + 2) % 4] = 0
-			if side_types[(side_index + 1) % 4] == 0: # low corner
-				vertex_heights[side_index] = 1 # opposite corner is high
-				tri_seam_offset = side_index % 2	
+	vertex_heights.fill(0)
+	if new_slope_type != 0:
+		for side_index: int in side_types.size():
+			if side_types[side_index] == 2: # high edges
+				vertex_heights[(side_index + 1) % 4] = 1
+				vertex_heights[(side_index + 2) % 4] = 1
+				if side_types[(side_index + 1) % 4] == 2: # high corner
+					vertex_heights[side_index] = 0 # opposite corner is low
+					tri_seam_offset = (side_index + 1) % 2
+			elif side_types[side_index] == 0: # low edges
+				vertex_heights[(side_index + 1) % 4] = 0
+				vertex_heights[(side_index + 2) % 4] = 0
+				if side_types[(side_index + 1) % 4] == 0: # low corner
+					vertex_heights[side_index] = 1 # opposite corner is high
+					tri_seam_offset = side_index % 2	
 	
 	var tile_side_length: float = 1.0
 	var quad_vertices: PackedVector3Array = [
