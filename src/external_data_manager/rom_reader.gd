@@ -1518,9 +1518,9 @@ func export_vfx(save_path: String) -> void:
 		new_mesh_instance.queue_free()
 
 
-static func export_tile_meshes(path: String) -> void:
+static func export_tile_meshes(path: String, scale: Vector3 = Vector3.ONE) -> void:
 	for slope_type: TerrainTile.SlopeType in TerrainTile.SlopeType.values():
-		var mesh: ArrayMesh = TerrainTile.get_normalized_slope_mesh(TerrainTile.SLOPE_TYPE_CODE[slope_type])
+		var mesh: ArrayMesh = TerrainTile.get_normalized_slope_mesh(TerrainTile.SLOPE_TYPE_CODE[slope_type], scale)
 		var mesh_name: String = TerrainTile.SlopeType.keys()[slope_type].to_lower()
 
 		var mesh_file_path: String = path.path_join("tile_mesh_" + mesh_name + ".tres")

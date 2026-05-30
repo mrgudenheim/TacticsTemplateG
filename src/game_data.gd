@@ -39,6 +39,7 @@ func _ready() -> void:
 	external_data_paths = _get_saved_data_paths()
 	await get_tree().process_frame
 	await get_tree().process_frame
+	# RomReader.export_tile_meshes("res://src/content_scripts/map/", Vector3(-1.0, 1.0, 1.0))
 	if not external_data_paths["IMPORT_PATH"].is_empty() and DirAccess.dir_exists_absolute(external_data_paths["IMPORT_PATH"]):
 		call_deferred("import_data", external_data_paths["IMPORT_PATH"])
 

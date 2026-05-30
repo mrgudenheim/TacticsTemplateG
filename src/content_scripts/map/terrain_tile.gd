@@ -52,71 +52,6 @@ func get_world_position(use_bottom_height: bool = false) -> Vector3:
 # https://ffhacktics.com/wiki/Slope_Type
 func get_tile_mesh() -> MeshInstance3D:
 	var new_tile_mesh_instance: MeshInstance3D = MeshInstance3D.new()
-	# var st_tile: SurfaceTool = SurfaceTool.new()
-	# st_tile.begin(Mesh.PRIMITIVE_TRIANGLES)
-	
-	# # side types: 0 = low, 1 = sloped, 2 = high
-	# var side_types: PackedInt32Array = []
-	# side_types.resize(4)
-	# side_types[0] = (slope_type_id >> 6) & 0x03	# north
-	# side_types[1] = slope_type_id & 0x03 			# east
-	# side_types[2] = (slope_type_id >> 4) & 0x03	# south
-	# side_types[3] = (slope_type_id >> 2) & 0x03	# west
-	
-	# var tri_seam_offset: int = 0
-	# var vertex_heights: PackedInt32Array = []
-	# vertex_heights.resize(4)
-	# for side_index: int in side_types.size():
-	# 	if side_types[side_index] == 2: # high edges
-	# 		vertex_heights[(side_index + 1) % 4] = 1
-	# 		vertex_heights[(side_index + 2) % 4] = 1
-	# 		if side_types[(side_index + 1) % 4] == 2: # high corner
-	# 			vertex_heights[side_index] = 0 # opposite corner is low
-	# 			tri_seam_offset = (side_index + 1) % 2
-	# 	elif side_types[side_index] == 0: # low edges
-	# 		vertex_heights[(side_index + 1) % 4] = 0
-	# 		vertex_heights[(side_index + 2) % 4] = 0
-	# 		if side_types[(side_index + 1) % 4] == 0: # low corner
-	# 			vertex_heights[side_index] = 1 # opposite corner is high
-	# 			tri_seam_offset = side_index % 2	
-	
-	# var tile_side_length: float = 1.0
-	# var quad_vertices: PackedVector3Array = [
-	# 	Vector3(-tile_side_length / 2, 0, -tile_side_length / 2),
-	# 	Vector3(-tile_side_length / 2, 0, tile_side_length / 2),
-	# 	Vector3(tile_side_length / 2, 0, tile_side_length / 2),
-	# 	Vector3(tile_side_length / 2, 0, -tile_side_length / 2),
-	# ]
-	# for vertex_index: int in quad_vertices.size():
-	# 	quad_vertices[vertex_index] += Vector3.UP * slope_height * FftMapData.HEIGHT_SCALE * vertex_heights[vertex_index]
-	
-	# var quad_uvs: PackedVector2Array = [
-	# 	Vector2(0, 0),
-	# 	Vector2(0, 1),
-	# 	Vector2(1, 1),
-	# 	Vector2(1, 0),
-	# ]
-	# var quad_colors: PackedColorArray
-	# quad_colors.resize(4)
-	# quad_colors.fill(Color.WHITE)
-	
-	# for vert_index: int in [0, 1, 2]:
-	# 	#st_tile.set_normal(quad_normals[vert_index]) # TODO why is there error on MAP105 "terminate"
-	# 	var offset_index: int = (vert_index + tri_seam_offset) % 4
-	# 	st_tile.set_uv(quad_uvs[offset_index])
-	# 	st_tile.set_color(Color.WHITE)
-	# 	st_tile.add_vertex(quad_vertices[offset_index])
-	
-	# for vert_index: int in [0, 2, 3]:
-	# 	#st_tile.set_normal(quad_normals[vert_index])
-	# 	var offset_index: int = (vert_index + tri_seam_offset) % 4
-	# 	st_tile.set_uv(quad_uvs[offset_index])
-	# 	st_tile.set_color(Color.WHITE)
-	# 	st_tile.add_vertex(quad_vertices[offset_index])
-	
-	# st_tile.generate_normals()
-	# var tile_mesh: ArrayMesh = st_tile.commit()
-
 	var mesh: ArrayMesh = GameData.map_tile_meshes[slope_type]
 	new_tile_mesh_instance.mesh = mesh
 	new_tile_mesh_instance.scale = tile_scale
@@ -125,7 +60,7 @@ func get_tile_mesh() -> MeshInstance3D:
 	return new_tile_mesh_instance
 
 
-static func get_normalized_slope_mesh(new_slope_type: int) -> ArrayMesh:
+static func get_normalized_slope_mesh(new_slope_type: int, scale: Vector3 = Vector3.ONE) -> ArrayMesh:
 	var st_tile: SurfaceTool = SurfaceTool.new()
 	st_tile.begin(Mesh.PRIMITIVE_TRIANGLES)
 	
@@ -163,6 +98,7 @@ static func get_normalized_slope_mesh(new_slope_type: int) -> ArrayMesh:
 	]
 	for vertex_index: int in quad_vertices.size():
 		quad_vertices[vertex_index] += Vector3.UP * vertex_heights[vertex_index]
+		quad_vertices[vertex_index] *= scale
 	
 	var quad_uvs: PackedVector2Array = [
 		Vector2(0, 0),

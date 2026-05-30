@@ -8,5 +8,5 @@ _surfaces = [{
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
 "vertex_count": 6,
-"vertex_data": PackedByteArray("AAAAvwAAgD8AAAA/AAAAPwAAAAAAAAA/AAAAPwAAAAAAAAC/AAAAvwAAgD8AAAA/AAAAPwAAAAAAAAC/AAAAvwAAAAAAAAC//1//P5kZmNn/P/8/VFVU1f9f/z+ZGZjZ/1//P5kZmNn/X/8/mRmY2f9//z+qKlSV")
+"vertex_data": PackedByteArray("AAAAPwAAgD8AAAA/AAAAvwAAAAAAAAA/AAAAvwAAAAAAAAC/AAAAPwAAgD8AAAA/AAAAvwAAAAAAAAC/AAAAPwAAAAAAAAC//z//36oqjaP/P/+/VFWpqv8//9+qKo2j/z//36oqjaP/P//fqiqNo/+///+qKlSV")
 }]
