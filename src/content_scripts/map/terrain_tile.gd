@@ -50,7 +50,6 @@ func get_world_position(use_bottom_height: bool = false) -> Vector3:
 
 
 # https://ffhacktics.com/wiki/Slope_Type
-# TODO optimize by storing the 12 potential meshes as resources in a dictionary, do a lookup based on slope_type and apply y scale based on slope_height
 func get_tile_mesh() -> MeshInstance3D:
 	var new_tile_mesh_instance: MeshInstance3D = MeshInstance3D.new()
 	# var st_tile: SurfaceTool = SurfaceTool.new()

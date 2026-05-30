@@ -1529,8 +1529,6 @@ static func export_tile_meshes(path: String) -> void:
 			push_warning("error saving tile mesh " + mesh_name + ": " + str(error))
 
 
-
-
 class SpritesheetRegionData:
 	var shp_type: String
 	var region_id: int

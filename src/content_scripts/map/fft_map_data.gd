@@ -760,6 +760,30 @@ func get_terrain(terrain_bytes: PackedByteArray) -> Array[TerrainTile]:
 
 				tile.height_mid = tile.height_bottom + (tile.slope_height / 2.0)
 
+				# slope type
+				match tile.slope_type_id:
+					0:
+						tile.slope_type = TerrainTile.SlopeType.FLAT
+					0x52, 0x58, 0x25, 0x85:
+						tile.slope_type = TerrainTile.SlopeType.RAMP
+					0x41, 0x11, 0x14, 0x44:
+						tile.slope_type = TerrainTile.SlopeType.LOW_CORNERS
+					0x96, 0x66, 0x69, 0x99:
+						tile.slope_type = TerrainTile.SlopeType.HIGH_CORNERS
+					_:
+						push_warning("error determining slope type id: " + str(tile.location))
+				
+				# slope rotation
+				match tile.slope_type_id:
+					0, 0x85, 0x44, 0x99:
+						tile.rotation_degrees = 0.0
+					0x58, 0x14, 0x69:
+						tile.rotation_degrees = 90.0
+					0x25, 0x11, 0x66:
+						tile.rotation_degrees = 180.0
+					0x52, 0x41, 0x96:
+						tile.rotation_degrees = 270.0
+
 				new_terrain_tiles.append(tile)
 
 	return new_terrain_tiles
