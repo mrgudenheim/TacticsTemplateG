@@ -17,6 +17,7 @@ var shps: Dictionary[String, Shp] = {} # [unique_name (eg. filename without exte
 var seqs: Dictionary[String, Seq] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
 var maps_gltf: Dictionary[String, Node] = {}
 var maps_data: Dictionary[String, MapData] = {} # var map_tiles: Dictionary[Vector2i, Array] = {} # Array[TerrainTile], palettes, animations
+var map_tile_meshes: Dictionary[TerrainTile.SlopeType, ArrayMesh] = {}
 var vfx: Dictionary[String, VisualEffectData] = {}
 var projectiles_gltf: Dictionary[String, Node] = {}
 var items: Dictionary[String, ItemData] = {} # [unique_name, ItemData]
@@ -87,10 +88,17 @@ func clear_data() -> void:
 	textures = {}
 	unit_spritesheets_data = {}
 	initial_unit_data = null
+	map_tile_meshes = {}
 
 
 func import_data(directory_path: String) -> void:
 	clear_data()
+
+	for slope_type: TerrainTile.SlopeType in TerrainTile.SlopeType.values():
+		var mesh_name: String = TerrainTile.SlopeType.keys()[slope_type].to_lower()
+		var mesh_file_path: String = "res://src/content_scripts/map/tile_mesh_" + mesh_name + ".tres"
+		var mesh: ArrayMesh = ResourceLoader.load(mesh_file_path, "ArrayMesh")
+		map_tile_meshes[slope_type] = mesh
 	
 	var start_time: int = Time.get_ticks_msec()
 

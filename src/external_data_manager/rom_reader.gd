@@ -1518,6 +1518,19 @@ func export_vfx(save_path: String) -> void:
 		new_mesh_instance.queue_free()
 
 
+static func export_tile_meshes(path: String) -> void:
+	for slope_type: TerrainTile.SlopeType in TerrainTile.SlopeType.values():
+		var mesh: ArrayMesh = TerrainTile.get_normalized_slope_mesh(TerrainTile.SLOPE_TYPE_CODE[slope_type])
+		var mesh_name: String = TerrainTile.SlopeType.keys()[slope_type].to_lower()
+
+		var mesh_file_path: String = path.path_join("tile_mesh_" + mesh_name + ".tres")
+		var error: Error = ResourceSaver.save(mesh, mesh_file_path)
+		if error != Error.OK:
+			push_warning("error saving tile mesh " + mesh_name + ": " + str(error))
+
+
+
+
 class SpritesheetRegionData:
 	var shp_type: String
 	var region_id: int
