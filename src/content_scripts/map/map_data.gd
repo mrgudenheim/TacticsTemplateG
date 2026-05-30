@@ -116,9 +116,15 @@ func get_transformed_tiles(translation: Vector2 = Vector2.ZERO, scale: Vector2 =
 
 		var transformed_tile: TerrainTile = tile.duplicate()
 		transformed_tile.location = Vector2i((tile_transform * Vector2(tile.location)).round())
-		transformed_tile.tile_scale.x *= scale.x
-		transformed_tile.tile_scale.z *= scale.y
 		transformed_tile.rotation_degrees += rotation_degrees
+		
+		if transformed_tile.rotation_degrees == 90.0 or transformed_tile.rotation_degrees == 270.0:
+			transformed_tile.tile_scale.x *= scale.y
+			transformed_tile.tile_scale.z *= scale.x
+		else:
+			transformed_tile.tile_scale.x *= scale.x
+			transformed_tile.tile_scale.z *= scale.y
+		
 		# transformed_tile.height_mid = transformed_tile.height_bottom + (transformed_tile.slope_height / 2.0)
 		mirrored_tiles.append(transformed_tile)
 	

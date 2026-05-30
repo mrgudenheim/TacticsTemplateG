@@ -852,40 +852,6 @@ func get_scaled_collision_shape(mesh: Mesh, collision_scale: Vector3) -> Concave
 	return new_collision_shape
 
 
-func initialize_map_tiles() -> void:
-	total_map_tiles.clear()
-	var map_chunks: Array[MapChunkNodes] = []
-	
-	for map_holder: Node3D in maps.get_children():
-		for map_chunk: MapChunkNodes in map_holder.get_children() as Array[MapChunkNodes]:
-			map_chunks.append(map_chunk)
-	
-	for map_chunk: MapChunkNodes in map_chunks:
-		for tile: TerrainTile in map_chunk.map_data.terrain_tiles:
-			if tile.no_cursor == 1:
-				continue
-			
-			var total_location: Vector2i = tile.location
-			var map_scale: Vector2i = Vector2i(roundi(map_chunk.mesh_instance.scale.x), roundi(map_chunk.mesh_instance.scale.z))
-			total_location = total_location * map_scale
-			var mirror_shift: Vector2i = map_scale # ex. (0,0) should be (-1, -1) when mirrored across x and y
-			if map_scale.x == 1:
-				mirror_shift.x = 0
-			if map_scale.y == 1:
-				mirror_shift.y = 0
-			total_location = total_location + mirror_shift
-			total_location = total_location + Vector2i(roundi(map_chunk.position.x), roundi(map_chunk.position.z))
-			if not total_map_tiles.has(total_location):
-				total_map_tiles[total_location] = []
-			var total_tile: TerrainTile = tile.duplicate()
-			total_tile.location = total_location
-			total_tile.tile_scale.x = map_chunk.mesh_instance.scale.x
-			total_tile.tile_scale.z = map_chunk.mesh_instance.scale.z
-			total_tile.height_bottom += roundi(map_chunk.position.y / FftMapData.HEIGHT_SCALE)
-			total_tile.height_mid = total_tile.height_bottom + (total_tile.slope_height / 2.0)
-			total_map_tiles[total_location].append(total_tile)
-
-
 func get_random_terrain_tile() -> TerrainTile:
 	if total_map_tiles.size() == 0:
 		push_warning("No map tiles")

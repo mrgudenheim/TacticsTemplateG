@@ -57,7 +57,7 @@ func get_tile_mesh() -> MeshInstance3D:
 	new_tile_mesh_instance.scale = tile_scale
 	if slope_height != 0:
 		new_tile_mesh_instance.scale.y *= slope_height * FftMapData.HEIGHT_SCALE
-	new_tile_mesh_instance.rotate_y(deg_to_rad(rotation_degrees))
+	new_tile_mesh_instance.rotation_degrees.y += rotation_degrees
 	return new_tile_mesh_instance
 
 
