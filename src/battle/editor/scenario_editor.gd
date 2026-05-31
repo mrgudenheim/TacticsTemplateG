@@ -108,7 +108,7 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 	
 	load_scenario_button.clear()
 	load_scenario_button.add_separator("Load Scenario")
-	for scenario_unique_name: String in RomReader.get_all_scenario_names():
+	for scenario_unique_name: String in GameData.scenarios.keys():
 		load_scenario_button.add_item(scenario_unique_name)
 	load_scenario_button.select(0)
 	

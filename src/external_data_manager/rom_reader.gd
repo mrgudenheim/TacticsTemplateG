@@ -1255,6 +1255,9 @@ func generate_passive_effects(save_path: String) -> void:
 func export_data(save_path: String) -> void:
 	DirAccess.make_dir_recursive_absolute(save_path)
 
+	# var maps_path: String = save_path + "/maps/"
+	# export_map(maps_path, maps["map_032_slums_in_dorter"])
+
 	await export_unit_spritesheets(save_path)
 	await export_other_images(save_path)
 	await export_data_tables(save_path)
@@ -1450,24 +1453,30 @@ func export_maps(save_path: String) -> void:
 			message.emit("Exporting map: " + fft_map_data.unique_name)
 			await get_tree().process_frame
 			last_frame_time = Time.get_ticks_msec()
-
+		
 		if fft_map_data.unique_name == "map_000":
 			continue # skip map 0 - causes crash
-		var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3i(-1, -1, 1))
-		GltfManager.save_node(new_map_node, maps_path, fft_map_data.unique_name + ".map.glb")
-		
-		var map_texture_webp_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".texture.webp")
-		fft_map_data.albedo_texture_indexed.get_image().save_webp(map_texture_webp_file_path)
 
-		#var map_texture_webp_file_path2: String = maps_path.path_join(fft_map_data.unique_name + "_full_color.texture.webp")
-		#fft_map_data.albedo_texture.get_image().save_webp(map_texture_webp_file_path2)
-		
-		var new_map_data: MapData = MapData.init_from_fft_map_data(fft_map_data)
-		new_map_data.terrain_tiles = new_map_data.get_transformed_tiles(Vector2.ZERO, Vector2(-1, 1), 0)
-		var map_data_file_path: String = maps_path.path_join(fft_map_data.unique_name + ".map_data.tres")
-		var error: Error = ResourceSaver.save(new_map_data, map_data_file_path)
-		if error != Error.OK:
-			push_warning("error saving map data " + fft_map_data.unique_name + ": " + str(error))
+		export_map(maps_path, fft_map_data)
+
+
+func export_map(save_path: String, fft_map_data: FftMapData) -> void:
+	# var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3(-1.0, -1.0, 1.0), Vector3(0, -FftMapData.HEIGHT_SCALE, 0))
+	var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3(-1.0, -1.0, 1.0))
+	GltfManager.save_node(new_map_node, save_path, fft_map_data.unique_name + ".map.glb")
+	
+	var map_texture_webp_file_path: String = save_path.path_join(fft_map_data.unique_name + ".texture.webp")
+	fft_map_data.albedo_texture_indexed.get_image().save_webp(map_texture_webp_file_path)
+
+	#var map_texture_webp_file_path2: String = maps_path.path_join(fft_map_data.unique_name + "_full_color.texture.webp")
+	#fft_map_data.albedo_texture.get_image().save_webp(map_texture_webp_file_path2)
+	
+	var new_map_data: MapData = MapData.init_from_fft_map_data(fft_map_data)
+	new_map_data.terrain_tiles = new_map_data.get_transformed_tiles(Vector2.ZERO, Vector2(-1, 1), 0)
+	var map_data_file_path: String = save_path.path_join(fft_map_data.unique_name + ".map_data.tres")
+	var error: Error = ResourceSaver.save(new_map_data, map_data_file_path)
+	if error != Error.OK:
+		push_warning("error saving map data " + fft_map_data.unique_name + ": " + str(error))
 
 
 func export_vfx(save_path: String) -> void:

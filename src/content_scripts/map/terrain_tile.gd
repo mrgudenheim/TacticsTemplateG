@@ -44,7 +44,7 @@ func get_world_position(use_bottom_height: bool = false) -> Vector3:
 		height_position = height_bottom + depth
 	var tile_position: Vector3 = Vector3(location.x, height_position, location.y)
 	var tile_world_position: Vector3 = tile_position * Vector3(1, FftMapData.HEIGHT_SCALE, 1)
-	tile_world_position += Vector3(0.5, FftMapData.HEIGHT_SCALE, 0.5) # TODO instead of adding HEIGHT_SCALE to tile, lower map mesh by HEIGHT_SCALE when exporting
+	tile_world_position += Vector3(0.5, 0, 0.5)
 	
 	return tile_world_position
 

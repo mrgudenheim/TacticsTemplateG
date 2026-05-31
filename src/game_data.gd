@@ -200,7 +200,6 @@ func import_data(directory_path: String) -> void:
 			projectiles_gltf[file_path.get_file().trim_suffix(".projectile.glb")] = GltfManager.import_gltf(file_path)
 		elif file_path.ends_with("initial_unit_data.tres"):
 			initial_unit_data = ResourceLoader.load(file_path, "InitialUnitData")
-			
 	
 	for map_data: MapData in maps_data.values():
 		var mesh_instance: MeshInstance3D = maps_gltf[map_data.unique_name].get_child(1)

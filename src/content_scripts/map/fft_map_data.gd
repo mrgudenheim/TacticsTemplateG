@@ -63,14 +63,14 @@ var texture_animations: Array[TextureAnimationData] = []
 
 ## Mirror CUSTOM0 centroid data in surface arrays.
 ## Returns the CUSTOM0 format flags to pass to add_surface_from_arrays().
-static func mirror_custom0(surface_arrays: Array, center: Vector3, mirror_scale: Vector3, half_size: Vector3) -> int:
+static func mirror_custom0(surface_arrays: Array, center: Vector3, mirror_scale: Vector3, translation: Vector3 = Vector3.ZERO) -> int:
 	if surface_arrays.size() <= Mesh.ARRAY_CUSTOM0 or surface_arrays[Mesh.ARRAY_CUSTOM0] == null:
 		return 0
 	var mesh_custom0: PackedFloat32Array = surface_arrays[Mesh.ARRAY_CUSTOM0]
 	for vector_idx: int in range(mesh_custom0.size() / 4):
 		var base: int = vector_idx * 4
 		var c: Vector3 = Vector3(mesh_custom0[base], mesh_custom0[base + 1], mesh_custom0[base + 2])
-		c = (c - center) * mirror_scale + half_size
+		c = (c - center) * mirror_scale + center + translation
 		mesh_custom0[base] = c.x
 		mesh_custom0[base + 1] = c.y
 		mesh_custom0[base + 2] = c.z
@@ -866,7 +866,7 @@ func handle_map053(gns_bytes: PackedByteArray) -> Array[MapFileRecord]:
 	return new_map_records
 
 
-func get_map_scene(mirror_scale: Vector3i) -> MapChunkNodes:
+func get_map_scene(scale: Vector3 = Vector3.ONE, translation: Vector3 = Vector3.ZERO, rotation_degrees: float = 0.0) -> MapChunkNodes:
 	# map_scale.y = -1 # vanilla used -y as up
 	if not is_initialized:
 		init_map()
@@ -876,54 +876,46 @@ func get_map_scene(mirror_scale: Vector3i) -> MapChunkNodes:
 	new_map_instance.name = unique_name
 
 	var mesh_aabb: AABB = mesh.get_aabb()
-	if mirror_scale != Vector3i.ONE or mesh_aabb.position != Vector3.ZERO:
-		var surface_arrays: Array = mesh.surface_get_arrays(0)
-		var original_mesh_center: Vector3 = mesh_aabb.get_center()
-		var mirror_vec: Vector3 = Vector3(mirror_scale)
-		for vertex_idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size():
-			var vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx]
-			vertex = (vertex - original_mesh_center) * mirror_vec + (mesh_aabb.size / 2.0)
-			surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx] = vertex
+	var mesh_center: Vector3 = mesh_aabb.get_center()
+	
+	var mesh_transform: Transform3D = Transform3D.IDENTITY
+	mesh_transform = mesh_transform.translated(-mesh_center)
+	mesh_transform = mesh_transform.rotated(Vector3.UP, deg_to_rad(rotation_degrees))
+	mesh_transform = mesh_transform.scaled(scale)
+	# mesh_transform = mesh_transform.translated(mesh_center)
+	mesh_transform = mesh_transform.translated(mesh_center.abs() + translation)
 
-		var custom0_flags: int = FftMapData.mirror_custom0(surface_arrays, original_mesh_center, mirror_vec, mesh_aabb.size / 2.0)
+	var surface_arrays: Array = mesh.surface_get_arrays(0)
+	for vertex_idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size():
+		var vertex: Vector3 = mesh_transform * surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx]
+		surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx] = vertex
 
-		# reorder verticies so polygon will have correct facing
-		var sum_scale: int = mirror_scale.x + mirror_scale.y + mirror_scale.z
-		if sum_scale == 1 or sum_scale == -3:
-			for idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size() / 3:
-				var tri_idx: int = idx * 3
-				var temp_vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][tri_idx]
-				surface_arrays[Mesh.ARRAY_VERTEX][tri_idx] = surface_arrays[Mesh.ARRAY_VERTEX][tri_idx + 2]
-				surface_arrays[Mesh.ARRAY_VERTEX][tri_idx + 2] = temp_vertex
+	var custom0_flags: int = FftMapData.mirror_custom0(surface_arrays, mesh_center, scale)
 
-				var temp_uv: Vector2 = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx]
-				surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx] = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2]
-				surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2] = temp_uv
+	# reorder verticies so polygon will have correct facing
+	var sum_scale: int = roundi(scale.x) + roundi(scale.y) + roundi(scale.z)
+	if sum_scale == 1 or sum_scale == -3:
+		for idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size() / 3:
+			var tri_idx: int = idx * 3
+			var temp_vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][tri_idx]
+			surface_arrays[Mesh.ARRAY_VERTEX][tri_idx] = surface_arrays[Mesh.ARRAY_VERTEX][tri_idx + 2]
+			surface_arrays[Mesh.ARRAY_VERTEX][tri_idx + 2] = temp_vertex
 
-		var modified_mesh: ArrayMesh = ArrayMesh.new()
-		modified_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays, [], {}, custom0_flags)
-		new_map_instance.mesh_instance.mesh = modified_mesh
-	else:
-		new_map_instance.mesh_instance.mesh = mesh
+			var temp_uv: Vector2 = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx]
+			surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx] = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2]
+			surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2] = temp_uv
+
+	var modified_mesh: ArrayMesh = ArrayMesh.new()
+	modified_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays, [], {}, custom0_flags)
+	new_map_instance.mesh_instance.mesh = modified_mesh
 
 	new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes)
 	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
 
-
-
-	
-	# new_map_instance.mesh_instance.mesh = mesh
-	# new_map_instance.mesh_instance.scale = map_scale
 	# # new_map_instance.position = map_position
 	# #new_map_instance.global_rotation_degrees = Vector3(0, 0, 0)
 	
 	# new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes)
-	
-	# #var shape_mesh: ConcavePolygonShape3D = new_map_data.mesh.create_trimesh_shape()
-	# if map_scale == Vector3.ONE:
-	# 	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
-	# else:
-	# 	new_map_instance.collision_shape.shape = get_scaled_collision_shape(map_scale)
 	
 	# # new_map_instance.play_animations(new_map_data)
 	# # new_map_instance.input_event.connect(on_map_input_event)

@@ -193,3 +193,10 @@ func play_audio_one_shot(audio: AudioStream) -> void:
 	add_child(audio_player)
 	audio_player.finished.connect(func() -> void: audio_player.queue_free())
 	audio_player.play()
+
+
+func get_option_button_index_by_string(option_button: OptionButton, search_text: String) -> int:
+	for idx: int in range(option_button.item_count):
+		if option_button.get_item_text(idx) == search_text:
+			return idx
+	return -1 # text not found
