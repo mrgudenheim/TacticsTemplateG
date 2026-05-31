@@ -95,37 +95,8 @@ func get_map_chunk_nodes(map_chunk_unique_name: String) -> MapChunkNodes:
 	new_map_instance.map_data = map_chunk_data
 	new_map_instance.name = map_chunk_data.unique_name
 
-	var mesh_aabb: AABB = map_chunk_data.mesh.get_aabb()
-	var mesh_center: Vector3 = mesh_aabb.get_center()
-	
-	var mesh_transform: Transform3D = Transform3D.IDENTITY
-	mesh_transform = mesh_transform.translated(-mesh_center)
-	mesh_transform = mesh_transform.scaled(map_chunk.mirror_scale)
-	mesh_transform = mesh_transform.translated(mesh_center)
-	# rotation and translation is applied to the Node, not the mesh
-
-	var surface_arrays: Array = map_chunk_data.mesh.surface_get_arrays(0)
-	for vertex_idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size():
-		var vertex: Vector3 = mesh_transform * surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx]
-		surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx] = vertex
-
-	var custom0_flags: int = FftMapData.mirror_custom0(surface_arrays, mesh_center, Vector3(map_chunk.mirror_scale))
-
-	var sum_scale: int = map_chunk.mirror_scale.x + map_chunk.mirror_scale.y + map_chunk.mirror_scale.z
-	if sum_scale == 1 or sum_scale == -3:
-		for idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size() / 3:
-			var tri_idx: int = idx * 3
-			var temp_vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][tri_idx]
-			surface_arrays[Mesh.ARRAY_VERTEX][tri_idx] = surface_arrays[Mesh.ARRAY_VERTEX][tri_idx + 2]
-			surface_arrays[Mesh.ARRAY_VERTEX][tri_idx + 2] = temp_vertex
-
-			var temp_uv: Vector2 = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx]
-			surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx] = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2]
-			surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2] = temp_uv
-
-	var modified_mesh: ArrayMesh = ArrayMesh.new()
-	modified_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays, [], {}, custom0_flags)
-	new_map_instance.mesh_instance.mesh = modified_mesh
+	var transformed_mesh: ArrayMesh = FftMapData.get_transformed_mesh(map_chunk_data.mesh, map_chunk.mirror_scale)
+	new_map_instance.mesh_instance.mesh = transformed_mesh
 
 	new_map_instance.set_mesh_shader(GameData.textures[map_chunk_data.unique_name], map_chunk_data.palettes)
 	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()

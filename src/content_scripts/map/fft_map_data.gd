@@ -63,18 +63,18 @@ var texture_animations: Array[TextureAnimationData] = []
 
 ## Mirror CUSTOM0 centroid data in surface arrays.
 ## Returns the CUSTOM0 format flags to pass to add_surface_from_arrays().
-static func mirror_custom0(surface_arrays: Array, center: Vector3, mirror_scale: Vector3, translation: Vector3 = Vector3.ZERO) -> int:
+static func transform_custom0(surface_arrays: Array, transform: Transform3D) -> int:
 	if surface_arrays.size() <= Mesh.ARRAY_CUSTOM0 or surface_arrays[Mesh.ARRAY_CUSTOM0] == null:
 		return 0
 	var mesh_custom0: PackedFloat32Array = surface_arrays[Mesh.ARRAY_CUSTOM0]
-	for vector_idx: int in range(mesh_custom0.size() / 4):
-		var base: int = vector_idx * 4
-		var c: Vector3 = Vector3(mesh_custom0[base], mesh_custom0[base + 1], mesh_custom0[base + 2])
-		c = (c - center) * mirror_scale + center + translation
-		mesh_custom0[base] = c.x
-		mesh_custom0[base + 1] = c.y
-		mesh_custom0[base + 2] = c.z
-		mesh_custom0[base + 3] = 0
+	for vertex_idx: int in range(mesh_custom0.size() / 4):
+		var x_index: int = vertex_idx * 4
+		var centroid: Vector3 = Vector3(mesh_custom0[x_index], mesh_custom0[x_index + 1], mesh_custom0[x_index + 2])
+		centroid = transform * centroid
+		mesh_custom0[x_index] = centroid.x
+		mesh_custom0[x_index + 1] = centroid.y
+		mesh_custom0[x_index + 2] = centroid.z
+		mesh_custom0[x_index + 3] = 0
 	surface_arrays[Mesh.ARRAY_CUSTOM0] = mesh_custom0
 	# Godot needs explicit format flags for CUSTOM0 in add_surface_from_arrays()
 	# RGB_FLOAT = 6, CUSTOM0 format shift = 13
@@ -120,7 +120,6 @@ func create_map(mesh_bytes: PackedByteArray, texture_bytes: PackedByteArray = []
 
 	if texture_palettes_data_start == 0:
 		push_warning("No palette data found")
-		pass
 	else:
 		var texture_palettes_data_end: int = texture_palettes_data_start + 512
 		var texture_palettes_data: PackedByteArray = other_bytes.slice(texture_palettes_data_start, texture_palettes_data_end)
@@ -128,7 +127,6 @@ func create_map(mesh_bytes: PackedByteArray, texture_bytes: PackedByteArray = []
 
 	if lighting_data_start == 0:
 		push_warning("No lighting data found")
-		pass
 	else:
 		# 6 bytes for each directional light color, position, 3 bytes for ambient light color, 6 bytes for gradient colors
 		var lighting_data_length: int = 18 + 18 + 3 + 6
@@ -138,7 +136,6 @@ func create_map(mesh_bytes: PackedByteArray, texture_bytes: PackedByteArray = []
 
 	if terrain_data_start == 0:
 		push_warning("No terrain data found")
-		pass
 	else:
 		var terrain_data_length: int = 2 + (256 * 8 * 2)
 		var terrain_data_end: int = terrain_data_start + terrain_data_length
@@ -875,7 +872,31 @@ func get_map_scene(scale: Vector3 = Vector3.ONE, translation: Vector3 = Vector3.
 	new_map_instance.map_data = MapData.init_from_fft_map_data(self)
 	new_map_instance.name = unique_name
 
-	var mesh_aabb: AABB = mesh.get_aabb()
+	var transformed_mesh: ArrayMesh = get_transformed_mesh(mesh, scale, translation, rotation_degrees, true)
+	new_map_instance.mesh_instance.mesh = transformed_mesh
+
+	new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes)
+	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
+
+	# # new_map_instance.position = map_position
+	# #new_map_instance.global_rotation_degrees = Vector3(0, 0, 0)
+	
+	# new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes)
+	
+	# # new_map_instance.play_animations(new_map_data)
+	# # new_map_instance.input_event.connect(on_map_input_event)
+	
+	return new_map_instance
+
+
+static func get_transformed_mesh(
+	original_mesh: ArrayMesh, 
+	scale: Vector3 = Vector3.ONE, 
+	translation: Vector3 = Vector3.ZERO, 
+	rotation_degrees: float = 0.0,
+	move_to_positive_quadrant: bool = false,
+) -> ArrayMesh:
+	var mesh_aabb: AABB = original_mesh.get_aabb()
 	var mesh_center: Vector3 = mesh_aabb.get_center()
 	
 	var mesh_transform: Transform3D = Transform3D.IDENTITY
@@ -883,14 +904,17 @@ func get_map_scene(scale: Vector3 = Vector3.ONE, translation: Vector3 = Vector3.
 	mesh_transform = mesh_transform.rotated(Vector3.UP, deg_to_rad(rotation_degrees))
 	mesh_transform = mesh_transform.scaled(scale)
 	# mesh_transform = mesh_transform.translated(mesh_center)
-	mesh_transform = mesh_transform.translated(mesh_center.abs() + translation)
+	if move_to_positive_quadrant:
+		mesh_transform = mesh_transform.translated(mesh_center.abs() + translation)
+	else:
+		mesh_transform = mesh_transform.translated(mesh_center + translation)
 
-	var surface_arrays: Array = mesh.surface_get_arrays(0)
+	var surface_arrays: Array = original_mesh.surface_get_arrays(0)
 	for vertex_idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size():
 		var vertex: Vector3 = mesh_transform * surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx]
 		surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx] = vertex
 
-	var custom0_flags: int = FftMapData.mirror_custom0(surface_arrays, mesh_center, scale)
+	var custom0_flags: int = FftMapData.transform_custom0(surface_arrays, mesh_transform)
 
 	# reorder verticies so polygon will have correct facing
 	var sum_scale: int = roundi(scale.x) + roundi(scale.y) + roundi(scale.z)
@@ -905,22 +929,10 @@ func get_map_scene(scale: Vector3 = Vector3.ONE, translation: Vector3 = Vector3.
 			surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx] = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2]
 			surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2] = temp_uv
 
-	var modified_mesh: ArrayMesh = ArrayMesh.new()
-	modified_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays, [], {}, custom0_flags)
-	new_map_instance.mesh_instance.mesh = modified_mesh
-
-	new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes)
-	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
-
-	# # new_map_instance.position = map_position
-	# #new_map_instance.global_rotation_degrees = Vector3(0, 0, 0)
+	var transformed_mesh: ArrayMesh = ArrayMesh.new()
+	transformed_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays, [], {}, custom0_flags)
 	
-	# new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes)
-	
-	# # new_map_instance.play_animations(new_map_data)
-	# # new_map_instance.input_event.connect(on_map_input_event)
-	
-	return new_map_instance
+	return transformed_mesh
 
 
 func get_scaled_collision_shape(collision_scale: Vector3) -> ConcavePolygonShape3D:
