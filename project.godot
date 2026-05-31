@@ -23,6 +23,9 @@ RomReader="*res://src/external_data_manager/rom_reader.gd"
 Raycaster="*res://src/utilities/raycaster.gd"
 Utilities="*res://src/utilities/utilities.gd"
 GameData="*uid://dswmqkavcf0yp"
+AudioEngine="*res://src/audio/audio_engine.gd"
+MusicPlayer="*res://src/audio/music_player.gd"
+EffectSfxEngine="*res://src/audio/effect_sfx_engine.gd"
 
 [debug]
 

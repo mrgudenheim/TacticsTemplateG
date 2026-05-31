@@ -7,3 +7,7 @@
 addons/script-ide/
 addons/Todo_Manager/
 overrides/MAP
+
+# Godot GDExtension DLL shadow copies (Windows hot-reload artifacts)
+addons/exmateria_sound/bin/~*
+*.TMP

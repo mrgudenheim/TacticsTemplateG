@@ -33,6 +33,13 @@ var palettes: Dictionary[String, PackedColorArray] = {}
 var textures: Dictionary[String, Texture2D] = {}
 var unit_spritesheets_data: Dictionary[String, UnitSpritesheetData] = {}
 
+# Sound cache: raw bytes imported from the export, consumed by the
+# exmateria_sound addon parsers (see AudioEngine byte accessors).
+var sound_waveset_bytes: PackedByteArray = PackedByteArray() # WAVESET.WD
+var sound_smd_bytes: Dictionary[String, PackedByteArray] = {} # [file name (MUSIC_##.SMD), bytes]
+var sound_sfx_bank_bytes: Dictionary[String, PackedByteArray] = {} # [file name (SYSTEM.SED / ENV.SED), bytes]
+var sound_feds_bytes: Dictionary[String, PackedByteArray] = {} # [effect unique_name (E###), feds blob bytes]
+
 var initial_unit_data: InitialUnitData
 
 func _ready() -> void:
@@ -88,6 +95,10 @@ func clear_data() -> void:
 	palettes = {}
 	textures = {}
 	unit_spritesheets_data = {}
+	sound_waveset_bytes = PackedByteArray()
+	sound_smd_bytes = {}
+	sound_sfx_bank_bytes = {}
+	sound_feds_bytes = {}
 	initial_unit_data = null
 	map_tile_meshes = {}
 
@@ -200,7 +211,15 @@ func import_data(directory_path: String) -> void:
 			projectiles_gltf[file_path.get_file().trim_suffix(".projectile.glb")] = GltfManager.import_gltf(file_path)
 		elif file_path.ends_with("initial_unit_data.tres"):
 			initial_unit_data = ResourceLoader.load(file_path, "InitialUnitData")
-	
+		elif file_path.get_extension() == "WD": # WAVESET.WD instrument bank
+			sound_waveset_bytes = FileAccess.get_file_as_bytes(file_path)
+		elif file_path.get_extension() == "SMD": # MUSIC_##.SMD music sequence
+			sound_smd_bytes[file_path.get_file()] = FileAccess.get_file_as_bytes(file_path)
+		elif file_path.get_extension() == "SED": # SYSTEM.SED / ENV.SED sfx bank
+			sound_sfx_bank_bytes[file_path.get_file()] = FileAccess.get_file_as_bytes(file_path)
+		elif file_path.get_extension() == "feds": # per-effect FEDS section (E###.feds)
+			sound_feds_bytes[file_path.get_file().trim_suffix(".feds")] = FileAccess.get_file_as_bytes(file_path)
+
 	for map_data: MapData in maps_data.values():
 		var mesh_instance: MeshInstance3D = maps_gltf[map_data.unique_name].get_child(1)
 		map_data.mesh = mesh_instance.mesh
