@@ -63,7 +63,7 @@ func _load_map() -> void:
 	if map_node == null:
 		return
 
-	var map_data: FftMapData = map_node.map_data
+	var map_data: MapData = map_node.map_data
 
 	# Find tile for placement
 	for tile: TerrainTile in map_data.terrain_tiles:

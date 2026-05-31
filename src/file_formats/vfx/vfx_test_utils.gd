@@ -14,7 +14,10 @@ static func load_mirrored_map(map_index: int, container: Node3D) -> MapChunkNode
 		map_data.init_map()
 
 	var new_map_instance: MapChunkNodes = MapChunkNodes.instantiate()
-	new_map_instance.map_data = map_data
+	# MapChunkNodes.map_data is the runtime MapData resource (built from the raw
+	# FftMapData parser). The mesh/texture/mirror logic below still reads from the
+	# FftMapData (`map_data`), which carries the raw mesh + indexed texture.
+	new_map_instance.map_data = MapData.init_from_fft_map_data(map_data)
 	new_map_instance.name = map_data.unique_name
 	
 	var transformed_mesh: ArrayMesh = FftMapData.get_transformed_mesh(map_data.mesh, Vector3(1, -1, 1))
@@ -22,7 +25,7 @@ static func load_mirrored_map(map_index: int, container: Node3D) -> MapChunkNode
 
 	new_map_instance.set_mesh_shader(map_data.albedo_texture_indexed, map_data.texture_palettes)
 	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
-	new_map_instance.play_animations(map_data)
+	new_map_instance.play_animations(new_map_instance.map_data)
 	container.add_child(new_map_instance)
 
 	return new_map_instance
