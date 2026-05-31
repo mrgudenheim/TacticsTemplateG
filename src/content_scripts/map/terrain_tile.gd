@@ -49,7 +49,6 @@ func get_world_position(use_bottom_height: bool = false) -> Vector3:
 	return tile_world_position
 
 
-# https://ffhacktics.com/wiki/Slope_Type
 func get_tile_mesh() -> MeshInstance3D:
 	var new_tile_mesh_instance: MeshInstance3D = MeshInstance3D.new()
 	var mesh: ArrayMesh = GameData.map_tile_meshes[slope_type]
@@ -61,6 +60,7 @@ func get_tile_mesh() -> MeshInstance3D:
 	return new_tile_mesh_instance
 
 
+# https://ffhacktics.com/wiki/Slope_Type
 static func get_normalized_slope_mesh(new_slope_type: int, scale: Vector3 = Vector3.ONE) -> ArrayMesh:
 	var st_tile: SurfaceTool = SurfaceTool.new()
 	st_tile.begin(Mesh.PRIMITIVE_TRIANGLES)

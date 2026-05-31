@@ -54,12 +54,14 @@ func _process(_delta: float) -> void:
 				and not unit_dragged.prohibited_terrain.has(cursor_tile.surface_type_id)) # lava, etc.
 		if can_end_on_tile:
 			highlight_color = Color.BLUE
-			
+		
+		var highlight_offset: Vector3 = Vector3(0, 0.025, 0)
 		var new_tile_highlight: MeshInstance3D = cursor_tile.get_tile_mesh()
 		new_tile_highlight.material_override = battle_manager.tile_highlights[highlight_color] # use pre-existing materials
+		new_tile_highlight.set_instance_shader_parameter("depth_position", cursor_tile.get_world_position() + highlight_offset)
 		add_child(new_tile_highlight)
 		tile_highlight = new_tile_highlight
-		new_tile_highlight.position = cursor_tile.get_world_position(true) + Vector3(0, 0.025, 0)
+		new_tile_highlight.position = cursor_tile.get_world_position(true) + highlight_offset
 
 
 func _ready() -> void:
@@ -377,10 +379,12 @@ func show_all_tiles(show_tiles: bool = true, highlight_color: Color = Color.WHIT
 
 
 func get_new_tile_highlight(new_tile: TerrainTile, highlight_color: Color) -> MeshInstance3D:
+	var highlight_offset: Vector3 = Vector3(0, 0.025, 0)
 	var new_tile_highlight: MeshInstance3D = new_tile.get_tile_mesh()
 	new_tile_highlight.material_override = battle_manager.tile_highlights[highlight_color] # use pre-existing materials
 	add_child(new_tile_highlight) # defer the call for when this function is called from _on_exit_tree
-	new_tile_highlight.position = new_tile.get_world_position(true) + Vector3(0, 0.025, 0)
+	new_tile_highlight.position = new_tile.get_world_position(true) + highlight_offset
+	new_tile_highlight.set_instance_shader_parameter("depth_position", new_tile.get_world_position() + highlight_offset)
 
 	return new_tile_highlight
 

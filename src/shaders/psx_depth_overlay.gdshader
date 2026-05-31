@@ -6,11 +6,13 @@ render_mode blend_add, unshaded, cull_disabled, depth_draw_never;
 
 uniform vec4 overlay_color : source_color = vec4(0.0, 0.0, 1.0, 1.0);
 uniform float overlay_opacity : hint_range(0.0, 1.0) = 0.4;
+instance uniform vec3 depth_position = vec3(0.0, 0.0, 0.0);
 
 #include "res://src/shaders/psx_depth_common.gdshaderinc"
 
 void vertex() {
-	vec3 world_pos = MODEL_MATRIX[3].xyz;
+	//vec3 world_pos = MODEL_MATRIX[3].xyz;
+	vec3 world_pos = depth_position;
 	vec3 cam_dir = normalize(INV_VIEW_MATRIX[3].xyz - world_pos);
 	float bias = depth_bias_custom;
 	if (depth_mode == 1) bias = bias_pull_8;
