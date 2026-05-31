@@ -50,11 +50,11 @@ func animate_palette(texture_anim: TextureAnimation, map: MapChunkNodes, anim_fp
 		map_shader_material.set_shader_parameter("palettes_colors", new_texture_palette)
 
 		#map.mesh.mesh = mesh
-		await Engine.get_main_loop().create_timer(texture_anim.frame_duration / anim_fps).timeout
-		if texture_anim.anim_technique == 0x3: # loop forward
+		await Engine.get_main_loop().create_timer(texture_anim.frame_duration * 30 / anim_fps).timeout
+		if texture_anim.anim_technique == TextureAnimation.AnimTechnique.LOOP_FORWARD:
 			frame_id += dir
 			frame_id = frame_id % texture_anim.num_frames
-		elif texture_anim.anim_technique == 0x4: # loop back and forth
+		elif texture_anim.anim_technique == TextureAnimation.AnimTechnique.LOOP_PING_PONG: # loop back and forth
 			if frame_id == texture_anim.num_frames - 1:
 				dir = -1
 			elif frame_id == 0:
@@ -75,11 +75,11 @@ func animate_uv(texture_anim: TextureAnimation, map: MapChunkNodes, anim_idx: in
 		frame_idxs[anim_idx] = float(frame_id)
 		map_shader_material.set_shader_parameter("frame_idx", frame_idxs)
 
-		await Engine.get_main_loop().create_timer(texture_anim.frame_duration / anim_fps).timeout
-		if texture_anim.anim_technique == 0x1: # loop forward
+		await Engine.get_main_loop().create_timer(texture_anim.frame_duration * 30 / anim_fps).timeout
+		if texture_anim.anim_technique == TextureAnimation.AnimTechnique.LOOP_FORWARD: # loop forward
 			frame_id += dir
 			frame_id = frame_id % texture_anim.num_frames
-		elif texture_anim.anim_technique == 0x2: # loop back and forth
+		elif texture_anim.anim_technique == TextureAnimation.AnimTechnique.LOOP_PING_PONG: # loop back and forth
 			if frame_id == texture_anim.num_frames - 1:
 				dir = -1
 			elif frame_id == 0:
