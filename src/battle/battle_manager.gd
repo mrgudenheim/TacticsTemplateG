@@ -546,7 +546,7 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> Unit:
 	new_unit.set_job(unit_data.job_unique_name)
 	new_unit.set_sprite_by_file_name(unit_data.spritesheeet_file_name)
 	new_unit.set_sprite_palette(unit_data.palette_id)
-	new_unit.update_unit_facing(Unit.FacingVectors[unit_data.facing_direction])
+	new_unit.update_unit_facing(Unit.FACING_VECTORS[unit_data.facing_direction])
 	# new_unit.gender = Unit.Gender[unit_data.gender]
 	new_unit.gender = unit_data.gender
 	new_unit.level = unit_data.level

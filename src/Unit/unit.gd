@@ -62,7 +62,7 @@ enum Facings {
 
 static var unit_scene: PackedScene = load("res://src/Unit/unit.tscn")
 
-const FacingVectors: Dictionary[Facings, Vector3] = {
+const FACING_VECTORS: Dictionary[Facings, Vector3] = {
 	Facings.NORTH: Vector3.BACK,
 	Facings.EAST: Vector3.RIGHT,
 	Facings.SOUTH: Vector3.FORWARD,
@@ -250,7 +250,7 @@ var facing: Facings = Facings.NORTH
 var is_back_facing: bool = false
 var facing_vector: Vector3 = Vector3.FORWARD:
 	get:
-		return FacingVectors[facing]
+		return FACING_VECTORS[facing]
 
 var is_in_air: bool = false
 var is_traveling_path: bool = false
@@ -374,7 +374,7 @@ func initialize_unit() -> void:
 	set_sprite_by_file_name("ramuza")
 	#set_sprite_by_file_name("RAMUZA.SPR")
 	
-	update_unit_facing(FacingVectors[Facings.SOUTH])
+	update_unit_facing(FACING_VECTORS[Facings.SOUTH])
 	
 	var random_name_idx: int = randi_range(0, GameData.names["all_no_empty"].size() - 1)
 	unit_nickname = GameData.names["all_no_empty"][random_name_idx]
@@ -1237,7 +1237,7 @@ func update_unit_facing(dir: Vector3) -> void:
 
 
 func update_animation_facing(camera_facing_vector: Vector3) -> void:
-	var unit_facing_vector: Vector3 = FacingVectors[facing]
+	var unit_facing_vector: Vector3 = FACING_VECTORS[facing]
 	#var camera_facing_vector: Vector3 = UnitControllerRT.CameraFacingVectors[controller.camera_facing]
 	#var facing_difference: Vector3 = camera_facing_vector - unt_facing_vectorwad
 	

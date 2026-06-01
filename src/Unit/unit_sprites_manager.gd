@@ -44,7 +44,6 @@ func set_tint(tint: Vector3) -> void:
 	_weapon_material.set_shader_parameter("unit_tint", tint)
 
 
-
 func reset_sprites() -> void:
 	# reset position
 	self.position = Vector3.ZERO
