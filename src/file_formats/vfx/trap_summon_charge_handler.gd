@@ -59,7 +59,7 @@ func _extra_theta_offset() -> int:
 
 func _compute_spawn_position(theta: float) -> Vector3:
 	# Local spawn on XZ ring, then rotate by axis basis for 3D orientation
-	var local_spawn := Vector3(cos(theta) * SPAWN_RADIUS, 0.0, sin(theta) * SPAWN_RADIUS)
+	var local_spawn: Vector3 = Vector3(cos(theta) * SPAWN_RADIUS, 0.0, sin(theta) * SPAWN_RADIUS)
 	var rotated_spawn: Vector3 = _axis_basis * local_spawn
 	return Vector3(rotated_spawn.x, rotated_spawn.y + convergence_y, rotated_spawn.z)
 

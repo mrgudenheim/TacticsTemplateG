@@ -33,5 +33,5 @@ func set_vector_ui(new_vector: Vector3i) -> void:
 	z_spinbox.value = new_vector.z
 
 
-func changed(_value) -> void:
+func changed(_value: Vector3i) -> void:
 	vector_changed.emit(vector)

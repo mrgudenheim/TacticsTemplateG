@@ -43,11 +43,11 @@ func check_end_conditions(battle_manager: BattleManager) -> State:
 	for end_condition: EndCondition in end_conditions.keys():
 		end_conditions[end_condition] = end_condition.check_condition(battle_manager, self)
 	
-	if end_conditions.keys().any(func(end_condition: EndCondition): 
+	if end_conditions.keys().any(func(end_condition: EndCondition) -> bool: 
 			return end_conditions[end_condition] and end_condition.end_type == EndCondition.EndType.LOSE):
 		state = State.LOST
 		return State.LOST
-	elif end_conditions.keys().any(func(end_condition: EndCondition): 
+	elif end_conditions.keys().any(func(end_condition: EndCondition) -> bool: 
 			return end_conditions[end_condition] and end_condition.end_type == EndCondition.EndType.WIN):
 		state = State.WON
 		return State.WON

@@ -132,7 +132,7 @@ func toggle_debug_ui() -> void:
 
 
 func on_data_ready() -> void:
-	push_warning("on data ready")
+	#push_warning("on data ready")
 	load_rom_button.visible = false
 
 	if trap_instance != null:

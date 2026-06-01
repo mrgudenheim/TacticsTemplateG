@@ -86,7 +86,7 @@ func play(handler_id: int, element_id: int, direction: Vector3 = Vector3.ZERO, t
 	# Handler 4: spell charge lines
 	if handler_id == TrapEffectData.HANDLER_SPELL_CHARGE:
 		var sprite_height: float = _get_sprite_height(target_unit)
-		var handler := TrapSpellChargeHandler.new()
+		var handler: TrapSpellChargeHandler = TrapSpellChargeHandler.new()
 		handler.start(element_id, sprite_height)
 		_active_handler = handler
 		_renderer.setup_line_mesh(self)
@@ -102,7 +102,7 @@ func play(handler_id: int, element_id: int, direction: Vector3 = Vector3.ZERO, t
 	# Handler 18: plain charge lines
 	if handler_id == TrapEffectData.HANDLER_PLAIN_CHARGE:
 		var sprite_height: float = _get_sprite_height(target_unit)
-		var handler := TrapSummonChargeHandler.new()
+		var handler: TrapSummonChargeHandler = TrapSummonChargeHandler.new()
 		handler.start(element_id, sprite_height, direction)
 		_active_handler = handler
 		_renderer.setup_line_mesh(self)
@@ -113,7 +113,7 @@ func play(handler_id: int, element_id: int, direction: Vector3 = Vector3.ZERO, t
 
 	# Handler 22: orbital summon charge orbs
 	if handler_id == TrapEffectData.HANDLER_ORBITAL:
-		var handler := TrapOrbitalHandler.new()
+		var handler: TrapOrbitalHandler = TrapOrbitalHandler.new()
 		handler.start(Vector3.ZERO)  # Local space — instance node is already at unit position
 		_active_handler = handler
 		_particles = handler.particles
@@ -328,7 +328,7 @@ func _spawn_particles_for_tick(trap_data: TrapEffectData) -> void:
 
 
 func _create_particle(emitter_idx: int, emitter: TrapEffectData.TrapEmitter, trap_data: TrapEffectData) -> VfxParticleData:
-	var p := VfxParticleData.new()
+	var p: VfxParticleData = VfxParticleData.new()
 	var has_direction: bool = _impact_direction.length_squared() > 0.001
 
 	var ellipsoid_offset: Vector3 = _calc_ellipsoid_offset(emitter)
@@ -410,9 +410,9 @@ static func _random_unit_sphere() -> Vector3:
 # ============================================================
 
 static func _rotate_by_direction(local_vec: Vector3, direction: Vector3) -> Vector3:
-	var base_rotated := Vector3(local_vec.y, -local_vec.x, local_vec.z)
+	var base_rotated: Vector3 = Vector3(local_vec.y, -local_vec.x, local_vec.z)
 
-	var dir_xz := Vector3(direction.x, 0.0, direction.z)
+	var dir_xz: Vector3 = Vector3(direction.x, 0.0, direction.z)
 	if dir_xz.length_squared() < 0.001:
 		return base_rotated
 

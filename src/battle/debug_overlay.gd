@@ -49,17 +49,17 @@ func _build_ui() -> void:
 	_panel.offset_top = 10
 	add_child(_panel)
 
-	var margin := MarginContainer.new()
+	var margin: MarginContainer = MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 8)
 	margin.add_theme_constant_override("margin_top", 8)
 	margin.add_theme_constant_override("margin_right", 8)
 	margin.add_theme_constant_override("margin_bottom", 8)
 	_panel.add_child(margin)
 
-	var vbox := VBoxContainer.new()
+	var vbox: VBoxContainer = VBoxContainer.new()
 	margin.add_child(vbox)
 
-	var title := Label.new()
+	var title: Label = Label.new()
 	title.text = "Debug (F3)"
 	vbox.add_child(title)
 
@@ -71,14 +71,14 @@ func _build_ui() -> void:
 
 
 func _build_tiles_tab() -> void:
-	var tab := VBoxContainer.new()
+	var tab: VBoxContainer = VBoxContainer.new()
 	tab.name = "Tiles"
 	_tabs.add_child(tab)
 
 	# Opacity
-	var opacity_row := HBoxContainer.new()
+	var opacity_row: HBoxContainer = HBoxContainer.new()
 	tab.add_child(opacity_row)
-	var opacity_title := Label.new()
+	var opacity_title: Label = Label.new()
 	opacity_title.text = "Opacity:"
 	opacity_row.add_child(opacity_title)
 	_opacity_slider = HSlider.new()
@@ -95,12 +95,12 @@ func _build_tiles_tab() -> void:
 	opacity_row.add_child(_opacity_label)
 
 	# Depth mode
-	var depth_row := HBoxContainer.new()
+	var depth_row: HBoxContainer = HBoxContainer.new()
 	tab.add_child(depth_row)
-	var depth_title := Label.new()
+	var depth_title: Label = Label.new()
 	depth_title.text = "Depth Mode:"
 	depth_row.add_child(depth_title)
-	var depth_option := OptionButton.new()
+	var depth_option: OptionButton = OptionButton.new()
 	depth_option.add_item("Standard", 0)
 	depth_option.add_item("Pull Forward 8", 1)
 	depth_option.add_item("Fixed Front", 2)
@@ -115,9 +115,9 @@ func _build_tiles_tab() -> void:
 	depth_row.add_child(depth_option)
 
 	# Tile overlay depth bias
-	var bias_row := HBoxContainer.new()
+	var bias_row: HBoxContainer = HBoxContainer.new()
 	tab.add_child(bias_row)
-	var bias_title := Label.new()
+	var bias_title: Label = Label.new()
 	bias_title.text = "Depth Bias:"
 	bias_row.add_child(bias_title)
 	_bias_slider = HSlider.new()

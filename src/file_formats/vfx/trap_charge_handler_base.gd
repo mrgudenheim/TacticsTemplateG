@@ -44,11 +44,11 @@ func is_done() -> bool:
 func restart() -> void:
 	if line_slots.size() != MAX_LINE_SLOTS:
 		line_slots.resize(MAX_LINE_SLOTS)
-		for i in range(MAX_LINE_SLOTS):
-			var slot := LineSlot.new()
+		for i: int in range(MAX_LINE_SLOTS):
+			var slot: LineSlot = LineSlot.new()
 			slot.history.resize(HISTORY_SIZE)
 			line_slots[i] = slot
-	for slot in line_slots:
+	for slot: LineSlot in line_slots:
 		slot.alive = false
 		slot.age = 0
 		slot.spawn_position = Vector3.ZERO
@@ -93,7 +93,7 @@ func _try_spawn_line() -> void:
 
 	# Find first dead slot
 	var slot_idx: int = -1
-	for i in range(MAX_LINE_SLOTS):
+	for i: int in range(MAX_LINE_SLOTS):
 		if not line_slots[i].alive:
 			slot_idx = i
 			break
@@ -111,14 +111,14 @@ func _try_spawn_line() -> void:
 	slot.alive = true
 	slot.age = 0
 	slot.spawn_position = spawn_pos
-	for i in range(HISTORY_SIZE):
+	for i: int in range(HISTORY_SIZE):
 		slot.history[i] = spawn_pos
 
 	active_line_count += 1
 
 
 func _update_lines() -> void:
-	for slot in line_slots:
+	for slot: LineSlot in line_slots:
 		if not slot.alive:
 			continue
 

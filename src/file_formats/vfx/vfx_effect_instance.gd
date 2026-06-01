@@ -58,12 +58,12 @@ func _create_debug_markers(vfx_data: VisualEffectData) -> void:
 		Color.MAGENTA,     # target
 	]
 
-	for i in range(anchor_positions.size()):
-		var base_pos: Vector3 = anchor_positions[i]
+	for anchor_idx: int in range(anchor_positions.size()):
+		var base_pos: Vector3 = anchor_positions[anchor_idx]
 		var display_pos: Vector3 = _stack_position(base_pos, placed_positions, STACK_OFFSET)
 		placed_positions.append(base_pos)
-		var marker: MeshInstance3D = _make_sphere_marker(display_pos, anchor_colors[i], 0.08)
-		marker.name = "Anchor_%s" % anchor_names[i]
+		var marker: MeshInstance3D = _make_sphere_marker(display_pos, anchor_colors[anchor_idx], 0.08)
+		marker.name = "Anchor_%s" % anchor_names[anchor_idx]
 		add_child(marker)
 		_debug_anchor_markers.append(marker)
 
@@ -80,17 +80,17 @@ func _create_debug_markers(vfx_data: VisualEffectData) -> void:
 		Color.MEDIUM_PURPLE, Color.CORAL, Color.SPRING_GREEN, Color.DODGER_BLUE,
 		Color.TOMATO, Color.CHARTREUSE, Color.STEEL_BLUE, Color.SALMON,
 	]
-	for ei in range(vfx_data.emitters.size()):
-		var em: VfxEmitter = vfx_data.emitters[ei]
+	for emitter_idx: int in range(vfx_data.emitters.size()):
+		var em: VfxEmitter = vfx_data.emitters[emitter_idx]
 		var anchor_offset: Vector3 = VfxConstants.resolve_anchor(em.emitter_anchor_mode,
 			manager.anchor_world, manager.anchor_cursor, manager.anchor_origin,
 			manager.anchor_target, manager.anchor_world)
 		var base_pos: Vector3 = anchor_offset + em.conv_position_start
 		var display_pos: Vector3 = _stack_position(base_pos, placed_positions, STACK_OFFSET)
 		placed_positions.append(base_pos)
-		var col: Color = emitter_colors[ei % emitter_colors.size()]
+		var col: Color = emitter_colors[emitter_idx % emitter_colors.size()]
 		var marker: MeshInstance3D = _make_sphere_marker(display_pos, col, 0.05)
-		marker.name = "Emitter_%d" % ei
+		marker.name = "Emitter_%d" % emitter_idx
 		add_child(marker)
 		_debug_emitter_markers.append(marker)
 
@@ -104,15 +104,15 @@ func _stack_position(base: Vector3, existing: Array[Vector3], offset: float) -> 
 
 
 func _make_sphere_marker(pos: Vector3, color: Color, radius: float = 0.08) -> MeshInstance3D:
-	var mesh_instance := MeshInstance3D.new()
-	var sphere := SphereMesh.new()
+	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
+	var sphere: SphereMesh = SphereMesh.new()
 	sphere.radius = radius
 	sphere.height = radius * 2.0
 	sphere.radial_segments = 8
 	sphere.rings = 4
 	mesh_instance.mesh = sphere
 
-	var mat := StandardMaterial3D.new()
+	var mat: StandardMaterial3D = StandardMaterial3D.new()
 	mat.albedo_color = color
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.no_depth_test = true
@@ -133,8 +133,8 @@ func _process(delta: float) -> void:
 
 	# Update emitter marker visibility based on debug mask and master toggle
 	var mask: Array[bool] = manager.debug_emitter_mask
-	for ei in range(_debug_emitter_markers.size()):
-		_debug_emitter_markers[ei].visible = debug_markers_visible and (mask.is_empty() or (ei < mask.size() and mask[ei]))
+	for emitter_marker_idx: int in range(_debug_emitter_markers.size()):
+		_debug_emitter_markers[emitter_marker_idx].visible = debug_markers_visible and (mask.is_empty() or (emitter_marker_idx < mask.size() and mask[emitter_marker_idx]))
 
 	if renderer:
 		renderer.render(active_particles, manager.vfx_data)

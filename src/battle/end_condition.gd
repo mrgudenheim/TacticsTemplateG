@@ -51,21 +51,21 @@ func all_enemies_defeated(battle_manager: BattleManager, this_team: Team) -> boo
 
 
 func all_teams_defeated(teams: Array[Team]) -> bool:
-	return teams.all(func(team: Team): return all_units_defeated(team.units)) # returns true if teams is empty
+	return teams.all(func(team: Team) -> bool: return all_units_defeated(team.units)) # returns true if teams is empty
 
 
 func any_teams_defeated(teams: Array[Team]) -> bool:
-	return teams.any(func(team: Team): return all_units_defeated(team.units)) # returns false if teams is empty
+	return teams.any(func(team: Team) -> bool: return all_units_defeated(team.units)) # returns false if teams is empty
 
 
 func all_units_defeated(units: Array[Unit]) -> bool:
-	return units.all(func(unit: Unit): return unit.is_defeated) # returns true if units is empty
+	return units.all(func(unit: Unit) -> bool: return unit.is_defeated) # returns true if units is empty
 
 
 func any_units_defeated(units: Array[Unit]) -> bool:
-	return units.any(func(unit: Unit): return unit.is_defeated) # returns false if units is empty
+	return units.any(func(unit: Unit) -> bool: return unit.is_defeated) # returns false if units is empty
 
 
 # TODO check if all units (from all teams) are permanently frozen to prevent infinite loop
 func all_units_frozen(units: Array[Unit]) -> bool:
-	return units.all(func(unit: Unit): return unit.current_statuses.any(func(status: StatusEffect): return status.freezes_ct and status.duration_type == StatusEffect.DurationType.INDEFINITE)) # returns true if units is empty
+	return units.all(func(unit: Unit) -> bool: return unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.freezes_ct and status.duration_type == StatusEffect.DurationType.INDEFINITE)) # returns true if units is empty

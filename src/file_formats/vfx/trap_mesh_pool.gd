@@ -41,7 +41,7 @@ func initialize() -> void:
 
 	_grow_pool(POOL_INITIAL_SIZE)
 	_free_mesh_indices.clear()
-	for i in range(_pool_size):
+	for i: int in range(_pool_size):
 		_free_mesh_indices.append(i)
 
 	is_initialized = true
@@ -60,7 +60,7 @@ func borrow_mesh_index() -> int:
 	if _free_mesh_indices.is_empty():
 		var old_size: int = _pool_size
 		_grow_pool(_pool_size + POOL_GROWTH)
-		for i in range(old_size, _pool_size):
+		for i: int in range(old_size, _pool_size):
 			_free_mesh_indices.append(i)
 	return _free_mesh_indices.pop_back()
 
@@ -74,7 +74,7 @@ func return_mesh(mi: int) -> void:
 func release_all_meshes() -> void:
 	for uid: int in particle_mesh_map:
 		var mesh_indices: PackedInt32Array = particle_mesh_map[uid]
-		for mi in mesh_indices:
+		for mi: int in mesh_indices:
 			return_mesh(mi)
 	particle_mesh_map.clear()
 
@@ -82,13 +82,13 @@ func release_all_meshes() -> void:
 func _grow_pool(new_size: int) -> void:
 	if new_size <= _pool_size:
 		return
-	for _i in range(new_size - _pool_size):
-		var mesh_instance := MeshInstance3D.new()
+	for _i: int in range(new_size - _pool_size):
+		var mesh_instance: MeshInstance3D = MeshInstance3D.new()
 		mesh_instance.mesh = _shared_quad
 		mesh_instance.visible = false
 		mesh_instance.position = OFFSCREEN_POS
 
-		var mat := ShaderMaterial.new()
+		var mat: ShaderMaterial = ShaderMaterial.new()
 		mat.shader = opaque_shader
 		mat.render_priority = 1
 		mat.set_shader_parameter("depth_mode", VfxConstants.DepthMode.PULL_FORWARD_8)

@@ -2,14 +2,14 @@ class_name FftText
 
 class FftTextFile:
 	var offsets_start: int = 0
-	var num_offsets = 0
-	var offsets_end = 0
+	var num_offsets: int = 0
+	var offsets_end: int = 0
 	var offsets: PackedInt32Array = []
 	var text_arrays: Dictionary[int, PackedStringArray] = {}
 	var text_end: int = 0
 	var sections: Dictionary = {}
 	
-	func _init(new_offsets_start = 0, new_num_offsets = 0, new_text_end = 0, new_sections: Dictionary = {}) -> void:
+	func _init(new_offsets_start: int = 0, new_num_offsets: int = 0, new_text_end: int = 0, new_sections: Dictionary = {}) -> void:
 		offsets_start = new_offsets_start
 		num_offsets = new_num_offsets
 		text_end = 2147483647 if new_text_end == 0 else new_text_end
@@ -162,7 +162,7 @@ func init_text() -> void:
 func init_text_from_file(file_name: String) -> void:
 	var text_layout: FftTextFile = file_layouts[file_name]
 	
-	var offsets_bytes = RomReader.get_file_data(file_name).slice(text_layout.offsets_start, text_layout.offsets_end)
+	var offsets_bytes: PackedByteArray = RomReader.get_file_data(file_name).slice(text_layout.offsets_start, text_layout.offsets_end)
 	for idx: int in text_layout.num_offsets:
 		text_layout.offsets[idx] = offsets_bytes.decode_u32(idx * 4) + text_layout.offsets_end
 	
@@ -193,7 +193,7 @@ static func text_to_string(bytes_text: PackedByteArray) -> PackedStringArray:
 	
 	
 	var byte_index: int = 0
-	var text_element = ""
+	var text_element: String = ""
 	while byte_index < bytes_text.size():
 		var char_code: int = bytes_text[byte_index]
 		

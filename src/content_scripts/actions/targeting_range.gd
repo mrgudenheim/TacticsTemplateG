@@ -31,11 +31,11 @@ func get_potential_targets(action_instance: ActionInstance) -> Array[TerrainTile
 				if action_instance.action.targeting_top_down:
 					var map_tiles_at_pos: Array[TileData] = action_instance.battle_manager.total_map_tiles[map_pos].duplicate()
 					if map_tiles_at_pos.size() > 1:
-						map_tiles_at_pos.sort_custom(func(a: TileData, b: TileData): return a.height_mid > b.height_mid)
+						map_tiles_at_pos.sort_custom(func(a: TileData, b: TileData) -> bool: return a.height_mid > b.height_mid)
 						min_height = map_tiles_at_pos[0].height_mid
 						
 				
-				for tile in action_instance.battle_manager.total_map_tiles[map_pos]:
+				for tile: TerrainTile in action_instance.battle_manager.total_map_tiles[map_pos]:
 					if action_instance.action.targeting_top_down and tile.height_mid < min_height:
 						continue
 					
@@ -72,7 +72,7 @@ func start_targeting(action_instance: ActionInstance) -> void:
 		if not action_instance.battle_manager.map_input_event.is_connected(action_instance.on_map_input_event):
 			action_instance.battle_manager.map_input_event.connect(action_instance.on_map_input_event)
 		
-		for unit in action_instance.battle_manager.units:
+		for unit: Unit in action_instance.battle_manager.units:
 			if not unit.unit_input_event.is_connected(action_instance.on_unit_hovered):
 				unit.unit_input_event.connect(action_instance.on_unit_hovered)
 		
@@ -94,7 +94,7 @@ func stop_targeting(action_instance: ActionInstance) -> void:
 	if action_instance.battle_manager.map_input_event.is_connected(action_instance.on_map_input_event):
 		action_instance.battle_manager.map_input_event.disconnect(action_instance.on_map_input_event)
 	
-	for unit in action_instance.battle_manager.units:
+	for unit: Unit in action_instance.battle_manager.units:
 		if unit.unit_input_event.is_connected(action_instance.on_unit_hovered):
 			unit.unit_input_event.disconnect(action_instance.on_unit_hovered)
 	
@@ -133,7 +133,7 @@ func target_tile(tile: TerrainTile, action_instance: ActionInstance, event: Inpu
 		for preview_tile: TerrainTile in action_instance.preview_targets:
 			for unit: Unit in action_instance.battle_manager.units:
 				if unit.tile_position == preview_tile and (unit.get_nullify_statuses().is_empty() or unit.get_nullify_statuses().any(
-						func(status: StatusEffect): return action_instance.action.will_remove_target_status and action_instance.action.target_status_list.has(status.unique_name))): # ignore action unless it would remove nullify
+						func(status: StatusEffect) -> bool: return action_instance.action.will_remove_target_status and action_instance.action.target_status_list.has(status.unique_name))): # ignore action unless it would remove nullify
 					action_instance.show_result_preview(unit)
 					break
 	
@@ -185,7 +185,7 @@ func get_aoe_targets(action_instance: ActionInstance, tile_target: TerrainTile) 
 				if action_instance.action.targeting_top_down:
 					var map_tiles_at_pos: Array[TileData] = action_instance.battle_manager.total_map_tiles[map_pos].duplicate()
 					if map_tiles_at_pos.size() > 1:
-						map_tiles_at_pos.sort_custom(func(a: TileData, b: TileData): return a.height_mid > b.height_mid)
+						map_tiles_at_pos.sort_custom(func(a: TileData, b: TileData) -> bool: return a.height_mid > b.height_mid)
 						min_height = map_tiles_at_pos[0].height_mid
 						
 				

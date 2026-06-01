@@ -62,7 +62,7 @@ func render(particles: Array[VfxParticleData],
 
 func _collect_renderable(particles: Array[VfxParticleData], trap_data: TrapEffectData) -> Dictionary:
 	var result: Dictionary = {} # uid -> particle_index
-	for pi in range(particles.size()):
+	for pi: int in range(particles.size()):
 		var p: VfxParticleData = particles[pi]
 		if p.age == 0 or not p.active or p.is_dead():
 			continue
@@ -83,7 +83,7 @@ func _release_stale_meshes(renderable: Dictionary) -> void:
 	for uid: int in _pool.particle_mesh_map.keys():
 		if not renderable.has(uid):
 			var mesh_indices: PackedInt32Array = _pool.particle_mesh_map[uid]
-			for mi in mesh_indices:
+			for mi: int in mesh_indices:
 				_pool.return_mesh(mi)
 			_pool.particle_mesh_map.erase(uid)
 
@@ -98,12 +98,12 @@ func _resize_particle_meshes(renderable: Dictionary, particles: Array[VfxParticl
 		var have: int = current.size()
 
 		if have < needed:
-			for _j in range(needed - have):
+			for _j: int in range(needed - have):
 				current.append(_pool.borrow_mesh_index())
 			_pool.particle_mesh_map[uid] = current
 		elif have > needed:
 			# Hide excess but keep assigned (never shrink — prevents cross-particle flicker)
-			for i in range(needed, have):
+			for i: int in range(needed, have):
 				_pool.meshes[current[i]].visible = false
 				_pool.meshes[current[i]].position = TrapMeshPool.OFFSCREEN_POS
 
@@ -119,7 +119,7 @@ func _draw_particles(renderable: Dictionary, particles: Array[VfxParticleData],
 		var mesh_indices: PackedInt32Array = _pool.particle_mesh_map[uid]
 		var local_slot: int = 0
 
-		for fi in range(frameset.frameset.size()):
+		for fi: int in range(frameset.frameset.size()):
 			var vfx_frame: VfxFrame = frameset.frameset[fi]
 			if vfx_frame == null:
 				local_slot += 2
@@ -142,11 +142,11 @@ func _draw_particles(renderable: Dictionary, particles: Array[VfxParticleData],
 func _render_frame(mesh_inst: MeshInstance3D, mat: ShaderMaterial, p: VfxParticleData,
 		vfx_frame: VfxFrame, is_opaque_pass: bool, draw_order: int,
 		emitter_palette: Dictionary[int, int]) -> void:
-	var t := Transform3D.IDENTITY
+	var t: Transform3D = Transform3D.IDENTITY
 	t.origin = p.position
 	mesh_inst.transform = t
 
-	var uv_rect_data := Vector4(
+	var uv_rect_data: Vector4 = Vector4(
 		(float(vfx_frame.top_left_uv.x) + 0.5) / _pool.texture_size.x,
 		(float(vfx_frame.top_left_uv.y) + 0.5) / _pool.texture_size.y,
 		(float(vfx_frame.uv_width) - signf(vfx_frame.uv_width)) / _pool.texture_size.x,
@@ -190,7 +190,7 @@ func _render_charge_lines_for(handler: TrapChargeHandlerBase) -> void:
 
 	_line_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
 
-	for slot in handler.line_slots:
+	for slot: TrapChargeHandlerBase.LineSlot in handler.line_slots:
 		if not slot.alive:
 			continue
 
@@ -201,7 +201,7 @@ func _render_charge_lines_for(handler: TrapChargeHandlerBase) -> void:
 		var write_index: int = slot.age % hist_size
 
 		# Walk backwards through history: newest (write_index) to oldest
-		for seg in range(brightness_segs):
+		for seg: int in range(brightness_segs):
 			var idx_end: int = (write_index - seg + hist_size) % hist_size
 			var idx_start: int = (idx_end - 1 + hist_size) % hist_size
 
@@ -222,8 +222,8 @@ func _render_charge_lines_for(handler: TrapChargeHandlerBase) -> void:
 
 			var alpha_end: float = float(fade_curve[head_idx]) / 255.0
 			var alpha_start: float = float(fade_curve[tail_idx]) / 255.0
-			var color_end := Color(elem_color.r * alpha_end, elem_color.g * alpha_end, elem_color.b * alpha_end, 1.0)
-			var color_start := Color(elem_color.r * alpha_start, elem_color.g * alpha_start, elem_color.b * alpha_start, 1.0)
+			var color_end: Color = Color(elem_color.r * alpha_end, elem_color.g * alpha_end, elem_color.b * alpha_end, 1.0)
+			var color_start: Color = Color(elem_color.r * alpha_start, elem_color.g * alpha_start, elem_color.b * alpha_start, 1.0)
 
 			# Camera-facing quad (billboard strip)
 			var seg_dir: Vector3 = (p_end - p_start).normalized()

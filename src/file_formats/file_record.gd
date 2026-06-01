@@ -63,5 +63,5 @@ func get_file_data(rom: PackedByteArray) -> PackedByteArray:
 
 func export_file(directory_path: String = "user://") -> void:
 	DirAccess.make_dir_recursive_absolute(directory_path)
-	var save_file := FileAccess.open(directory_path + name, FileAccess.WRITE)
+	var save_file: FileAccess = FileAccess.open(directory_path + name, FileAccess.WRITE)
 	save_file.store_buffer(get_file_data(RomReader.rom))
