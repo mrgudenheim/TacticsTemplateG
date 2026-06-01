@@ -1,9 +1,18 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://cid35mcqfy575"]
 
-[ext_resource type="Shader" path="res://src/shaders/psx_depth_overlay.gdshader" id="1"]
+[ext_resource type="Shader" uid="uid://dv0yrdx7ae1ig" path="res://src/shaders/psx_depth_overlay.gdshader" id="1"]
 
 [resource]
+render_priority = 0
 shader = ExtResource("1")
 shader_parameter/overlay_color = Color(0, 0, 1, 1)
 shader_parameter/overlay_opacity = 0.4
 shader_parameter/depth_mode = 7
+shader_parameter/depth_bias_custom = 0.0
+shader_parameter/bias_pull_8 = 3.0
+shader_parameter/bias_pull_16 = 6.0
+shader_parameter/bias_fixed_front = 100.0
+shader_parameter/bias_fixed_back = -100.0
+shader_parameter/bias_fixed_16 = 80.0
+shader_parameter/bias_unit = 0.1
+shader_parameter/bias_tile_overlay = 0.05

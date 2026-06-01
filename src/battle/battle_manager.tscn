@@ -11,7 +11,7 @@
 [ext_resource type="AudioStream" uid="uid://dg7fjryqq6ovk" path="res://src/audio/select_002.ogg" id="9_we1pw"]
 [ext_resource type="Script" uid="uid://cl143w048iago" path="res://src/Unit/character_controller_realtime.gd" id="10_d5yoq"]
 [ext_resource type="Texture2D" uid="uid://boj84aajpk67b" path="res://src/godot_license/FileBrowse_godot.svg" id="10_we1pw"]
-[ext_resource type="Material" path="res://src/content_scripts/map/tile_highlight_blue.tres" id="11_1os5c"]
+[ext_resource type="Material" uid="uid://cid35mcqfy575" path="res://src/content_scripts/map/tile_highlight_blue.tres" id="11_1os5c"]
 [ext_resource type="PackedScene" uid="uid://7tn6b6eup5na" path="res://src/camera_controller.tscn" id="12_l2dig"]
 [ext_resource type="PackedScene" uid="uid://djqalqt20isme" path="res://src/battle/editor/job_select_button.tscn" id="14_f2r6p"]
 [ext_resource type="PackedScene" uid="uid://h7281h60pnbl" path="res://src/battle/editor/team_setup.tscn" id="14_kb1q2"]
