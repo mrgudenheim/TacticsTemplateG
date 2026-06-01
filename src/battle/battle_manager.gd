@@ -182,31 +182,6 @@ func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
 			total_map_tiles[tile.location].insert(tile_level, tile)
 
 
-func update_units_data_tile_location(units_data: Array[UnitData], map_chunk: Scenario.MapChunk) -> Array[UnitData]:
-	var map_chunk_data: MapData = GameData.maps_data[map_chunk.unique_name]
-	var map_tile_offset: Vector2i = Vector2i(map_chunk.corner_position.x, map_chunk.corner_position.z)
-	var mesh_aabb: AABB = map_chunk_data.mesh.get_aabb()
-	for unit_data: UnitData in units_data:
-		var total_location: Vector2i = Vector2i(unit_data.tile_position.x, unit_data.tile_position.z)
-		var map_scale: Vector2i = Vector2i(map_chunk.mirror_scale.x, map_chunk.mirror_scale.z)
-		total_location = total_location * map_scale
-		
-		var mirror_shift: Vector2i = Vector2i.ZERO # ex. (0,0) should be (-1, -1) when mirrored across x and y
-		if map_scale.x == -1:
-			mirror_shift.x = -1
-			mirror_shift.x += roundi(mesh_aabb.size.x)
-		if map_scale.y == -1:
-			mirror_shift.y = -1
-			mirror_shift.y += roundi(mesh_aabb.size.z)
-		
-		var quadrant_shift: Vector2i = Vector2i(roundi(mesh_aabb.position.x) * map_scale.x, roundi(mesh_aabb.position.z) * map_scale.y)
-		total_location = total_location + mirror_shift + map_tile_offset - quadrant_shift
-
-		unit_data.tile_position = Vector3i(total_location.x, unit_data.tile_position.y, total_location.y)
-	
-	return units_data
-
-
 func start_battle() -> void:
 	scenario_editor.visible = false
 	if scenario_editor.tile_highlight != null:

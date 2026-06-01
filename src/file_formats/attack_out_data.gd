@@ -113,7 +113,6 @@ func get_unique_scenarios() -> Array[Scenario]:
 		checked_scenarios.append(fft_scenario)
 
 		var new_scenario: Scenario = Scenario.new()
-		new_scenario.is_fft_scenario = true
 
 		var map_unique_name_num: String = "map_%03d" % fft_scenario.map_id
 		var map_name_idx: int = RomReader.maps.keys().find_custom(func(map_name: String) -> bool: return map_name.begins_with(map_unique_name_num))

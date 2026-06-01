@@ -54,7 +54,6 @@ static func get_scenarios_from_random_battle(fft_random_battle: Variant) -> Arra
 
 	var new_scenarios: Array[Scenario] = []
 	var new_scenario_base: Scenario = Scenario.new()
-	new_scenario_base.is_fft_scenario = true
 
 	var map_unique_name_num: String = "map_%03d" % fft_random_battle.map_id
 	var map_name_idx: int = RomReader.maps.keys().find_custom(func(map_name: String) -> bool: return map_name.begins_with(map_unique_name_num))

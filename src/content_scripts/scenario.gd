@@ -19,9 +19,6 @@ var is_loaded: bool = false
 # TODO scenario victory conditions
 
 
-@export var is_fft_scenario: bool = false
-
-
 static func lazy_init(new_unique_name: String) -> Scenario:
 	var new_scenario: Scenario = Scenario.new()
 	new_scenario.unique_name = new_unique_name
@@ -111,6 +108,29 @@ func to_json() -> String:
 		"script",
 	]
 	return Utilities.object_properties_to_json(self, properties_to_exclude)
+
+
+static func transform_units_data_tile_location(
+	local_units_data: Array[UnitData], 
+	terrain_tiles: Array[TerrainTile],
+	scale: Vector2 = Vector2.ONE, 
+	translation: Vector2 = Vector2.ZERO, 
+	rotation_degrees: float = 0.0
+) -> Array[UnitData]:
+	var transformed_units_data: Array[UnitData] = local_units_data.duplicate_deep()
+
+	var tile_transform: Transform2D = MapData.get_transform2d(
+		terrain_tiles, 
+		scale,
+		translation,
+		rotation_degrees,
+	)
+
+	for unit_data: UnitData in transformed_units_data:
+		var total_location: Vector2 = tile_transform * Vector2(unit_data.tile_position.x, unit_data.tile_position.z)
+		unit_data.tile_position = Vector3i(roundi(total_location.x), unit_data.tile_position.y, roundi(total_location.y))
+	
+	return transformed_units_data
 
 
 class MapChunk extends Resource:

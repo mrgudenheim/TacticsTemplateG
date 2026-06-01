@@ -1260,10 +1260,10 @@ func export_data(save_path: String) -> void:
 
 	await export_unit_spritesheets(save_path)
 	await export_other_images(save_path)
-	await export_data_tables(save_path)
 	await export_text(save_path)
 	await export_unit_animations(save_path)
-	await export_maps(save_path)
+	await export_maps(save_path) # needs to be before data tables so maps will be initialized
+	await export_data_tables(save_path)
 	await export_vfx(save_path)
 
 
@@ -1345,6 +1345,10 @@ func export_data_tables(save_path: String) -> void:
 	for ability: Ability in abilities.values():
 		Utilities.save_json(ability, save_path)
 	for scenario: Scenario in scenarios.values():
+		# mirror unit placement in scenarios to align with mirrored maps
+		var map_chunk: Scenario.MapChunk = scenario.map_chunks[0]
+		var map_chunk_data: FftMapData = maps[map_chunk.unique_name]
+		scenario.units_data = Scenario.transform_units_data_tile_location(scenario.units_data, map_chunk_data.terrain_tiles, Vector2(-1, 1))
 		Utilities.save_json(scenario, save_path)
 	
 	var initial_unit_data: InitialUnitData = InitialUnitData.new()
@@ -1462,6 +1466,7 @@ func export_maps(save_path: String) -> void:
 
 func export_map(save_path: String, fft_map_data: FftMapData) -> void:
 	# var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3(-1.0, -1.0, 1.0), Vector3(0, -FftMapData.HEIGHT_SCALE, 0))
+	# mirror map so positive y is up, mirror x so it ends up looking un-mirrored
 	var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3(-1.0, -1.0, 1.0))
 	GltfManager.save_node(new_map_node, save_path, fft_map_data.unique_name + ".map.glb")
 	

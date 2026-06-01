@@ -125,10 +125,6 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 			add_map_chunk_settings(map_chunk)
 		battle_manager.update_total_map_tiles(scenario.map_chunks)
 
-		if scenario.is_fft_scenario:
-			battle_manager.update_units_data_tile_location(scenario.units_data, scenario.map_chunks[0])
-			scenario.is_fft_scenario = false
-
 		for unit_data: UnitData in scenario.units_data:
 			battle_manager.spawn_unit_from_unit_data(unit_data)
 		

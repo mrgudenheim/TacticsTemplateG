@@ -89,26 +89,7 @@ func animate_uv(texture_anim: TextureAnimation, map: MapChunkNodes, anim_idx: in
 
 func get_transformed_tiles(translation: Vector2 = Vector2.ZERO, scale: Vector2 = Vector2.ONE, rotation_degrees: float = 0.0) -> Array[TerrainTile]:
 	var mirrored_tiles: Array[TerrainTile] = []
-	var min_tile_location: Vector2i = Vector2i.ZERO
-	var max_tile_location: Vector2i = Vector2i.ZERO
-	for tile: TerrainTile in terrain_tiles:
-		if tile.location.x > max_tile_location.x:
-			max_tile_location.x = tile.location.x
-		if tile.location.y > max_tile_location.y:
-			max_tile_location.y = tile.location.y
-		
-		if tile.location.x < min_tile_location.x:
-			min_tile_location.x = tile.location.x
-		if tile.location.y < min_tile_location.y:
-			min_tile_location.y = tile.location.y
-	
-	var tiles_center: Vector2 = (max_tile_location -  min_tile_location) / 2.0
-	
-	var tile_transform: Transform2D = Transform2D.IDENTITY
-	tile_transform = tile_transform.translated(-tiles_center)
-	tile_transform = tile_transform.rotated(deg_to_rad(rotation_degrees))
-	tile_transform = tile_transform.scaled(scale)
-	tile_transform = tile_transform.translated(tiles_center + translation)
+	var tile_transform: Transform2D = get_transform2d(terrain_tiles, scale, translation, rotation_degrees)
 	
 	for tile: TerrainTile in terrain_tiles:
 		if tile.no_cursor == 1:
@@ -129,6 +110,36 @@ func get_transformed_tiles(translation: Vector2 = Vector2.ZERO, scale: Vector2 =
 		mirrored_tiles.append(transformed_tile)
 	
 	return mirrored_tiles
+
+
+static func get_transform2d(
+	local_terrain_tiles: Array[TerrainTile], 
+	scale: Vector2 = Vector2.ONE, 
+	translation: Vector2 = Vector2.ZERO, 
+	rotation_degrees: float = 0.0
+) -> Transform2D:
+	var min_tile_location: Vector2i = Vector2i.ZERO
+	var max_tile_location: Vector2i = Vector2i.ZERO
+	for tile: TerrainTile in local_terrain_tiles:
+		if tile.location.x > max_tile_location.x:
+			max_tile_location.x = tile.location.x
+		if tile.location.y > max_tile_location.y:
+			max_tile_location.y = tile.location.y
+		
+		if tile.location.x < min_tile_location.x:
+			min_tile_location.x = tile.location.x
+		if tile.location.y < min_tile_location.y:
+			min_tile_location.y = tile.location.y
+	
+	var tiles_center: Vector2 = (max_tile_location -  min_tile_location) / 2.0
+	
+	var transform: Transform2D = Transform2D.IDENTITY
+	transform = transform.translated(-tiles_center)
+	transform = transform.rotated(deg_to_rad(rotation_degrees))
+	transform = transform.scaled(scale)
+	transform = transform.translated(tiles_center + translation)
+
+	return transform
 
 
 class TextureAnimationData:
