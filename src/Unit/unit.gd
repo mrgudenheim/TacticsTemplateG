@@ -1645,14 +1645,15 @@ func set_submerged_depth(new_depth: int) -> void:
 
 
 func update_spritesheet_grid_texture() -> void:
-	#var new_spr: Spr = RomReader.sprs[sprite_file_idx]
 	var new_spritesheet_data: UnitSpritesheetData = GameData.unit_spritesheets_data[sprite_file_name]
 	var palette_idx_final: int = sprite_palette_id_override
 	if sprite_palette_id_override < 0:
 		palette_idx_final = sprite_palette_id
-	animation_manager.unit_sprites_manager.set_primary_texture(new_spritesheet_data.create_frame_grid_texture(
-		palette_idx_final, 0, animation_manager.other_type_index, 0, submerged_depth)
+	var new_grid_texture: Texture2D = new_spritesheet_data.create_frame_grid_texture(
+		palette_idx_final, 0, animation_manager.other_type_index, 0, submerged_depth
 	)
+	animation_manager.unit_sprites_manager.set_primary_texture(new_grid_texture)
+	animation_manager.unit_sprites_manager.sprite_primary.material_override.set_shader_parameter("palette_colors", new_spritesheet_data.color_palette.slice(palette_idx_final * 16, (palette_idx_final + 1) * 16))
 
 
 func on_sprite_selected(new_spritesheet_name: String) -> void:

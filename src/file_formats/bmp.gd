@@ -155,7 +155,7 @@ func get_rgba8_image() -> Image:
 	return image
 
 
-func get_index_image() -> Image:
+func get_index_image(index_zero_as_transparent: bool = false) -> Image:
 	@warning_ignore("integer_division")
 	height = color_indices.size() / width
 	var image: Image = Image.create_empty(width, height, false, Image.FORMAT_RGBA8)
@@ -164,6 +164,8 @@ func get_index_image() -> Image:
 			var color_index: int = color_indices[x + (y * width)]
 			var color: Color = Color.BLACK
 			color.r8 = color_index
+			if index_zero_as_transparent and color == Color.BLACK:
+				color.a8 = 0
 			image.set_pixel(x, y, color) # spr stores pixel data left to right, top to bottm
 	
 	return image

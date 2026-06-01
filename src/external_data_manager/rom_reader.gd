@@ -1288,7 +1288,7 @@ func export_unit_spritesheets(save_path: String) -> void:
 		if error != Error.OK:
 			push_warning("error saving unit spritesheet data " + spritesheet_data.unique_name + ": " + str(error))
 
-		var index_image: Image = unit_spr.get_index_image()
+		var index_image: Image = unit_spr.get_index_image(true)
 		var unit_spritesheet_texture_webp_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name.to_lower() + ".texture.webp")
 		index_image.save_webp(unit_spritesheet_texture_webp_file_path)
 
@@ -1300,7 +1300,7 @@ func export_other_images(save_path: String) -> void:
 	var other_images_path: String = save_path + "/other_images/"
 	DirAccess.make_dir_recursive_absolute(other_images_path)
 	# frame.bin
-	var misc_index_image: Image = frame_bin.get_index_image()
+	var misc_index_image: Image = frame_bin.get_index_image(true)
 	var misc_texture_webp_file_path: String = other_images_path.path_join("misc.texture.webp")
 	misc_index_image.save_webp(misc_texture_webp_file_path)
 
@@ -1313,7 +1313,7 @@ func export_other_images(save_path: String) -> void:
 
 	# item_bin
 	var item_spr: Spr = spritesheets["ITEM.BIN"]
-	var items_index_image: Image = item_spr.get_index_image()
+	var items_index_image: Image = item_spr.get_index_image(true)
 	var items_texture_webp_file_path: String = other_images_path.path_join("items.texture.webp")
 	items_index_image.save_webp(items_texture_webp_file_path)
 	

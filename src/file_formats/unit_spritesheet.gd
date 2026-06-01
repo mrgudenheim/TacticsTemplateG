@@ -48,6 +48,7 @@ func create_frame_grid(anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: 
 	var cell_height: int = get_shp().frame_size.y
 	
 	var frame_grid: Image = Image.create_empty(cell_width * num_cells_wide, cell_height * num_cells_tall, false, Image.FORMAT_RGBA8)
+	var index_image: Image = get_texture().get_image()
 	
 	for sp2_id: int in num_sp2s + 1:
 		if num_sp2s == 4: # handle hardcoded offsets for STEEL GIANT (aka TETSU.SPR)
@@ -71,7 +72,7 @@ func create_frame_grid(anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: 
 			@warning_ignore("integer_division")
 			var cell_y: int = (frame_idx / num_cells_wide) + (16 * sp2_id)
 			
-			var frame_image: Image = get_shp().get_assembled_frame(frame_idx, get_texture().get_image(), anim_ptr_idx, other_idx, wep_v_offset, submerged_depth)
+			var frame_image: Image = get_shp().get_assembled_frame(frame_idx, index_image, anim_ptr_idx, other_idx, wep_v_offset, submerged_depth)
 			frame_grid.blit_rect(frame_image, Rect2i(0, 0, frame_image.get_size().x, frame_image.get_size().y), Vector2i(cell_x * cell_width, cell_y * cell_height))
 	
 	return frame_grid
