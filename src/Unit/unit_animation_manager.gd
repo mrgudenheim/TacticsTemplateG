@@ -58,6 +58,7 @@ var opcode_frame_offset: int = 0
 		return global_animation_id
 	set(value):
 		if (value != global_animation_id):
+			@warning_ignore("integer_division")
 			var facing_switch: bool = value / 2 == global_animation_id / 2
 			
 			global_animation_id = value
@@ -320,6 +321,7 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 					#item_frame_id, item_image, global_animation_ptr_id, unit_data.debug_menu.other_type_options.selected, unit_data.primary_weapon.wep_frame_v_offset, unit_data.submerged_depth)
 			var target_sprite: Sprite3D = unit_sprites_manager.sprite_item
 			# item graphics start on 3rd row of ITEM.BIN, item graphic id does not count the blank 16th column, so need to add extra based on the row
+			@warning_ignore("integer_division")
 			target_sprite.frame = 32 + RomReader.items_array[item_frame_id].item_graphic_id + (RomReader.items_array[item_frame_id].item_graphic_id / 15) 
 		elif seq_part.opcode_name == "Wait":
 			var loop_length: int = seq_part.parameters[0]
@@ -572,6 +574,7 @@ func set_item(new_item_index: int) -> void:
 	item_spr.set_pixel_colors(RomReader.items_array[item_index].item_palette_id)
 	unit_sprites_manager.sprite_item.texture = ImageTexture.create_from_image(item_spr.get_rgba8_image())
 	if unit_sprites_manager.sprite_item.frame != 32:
+		@warning_ignore("integer_division")
 		unit_sprites_manager.sprite_item.frame = 32 + RomReader.items_array[new_item_index].item_graphic_id + (RomReader.items_array[new_item_index].item_graphic_id / 15) 
 
 

@@ -297,6 +297,7 @@ func populate_animation_list(animations_list_parent: VBoxContainer, seq_local: S
 		
 		row_ui.button.pressed.connect(
 			func() -> void: 
+				@warning_ignore("integer_division")
 				ui_manager.pointer_index_spinbox.value = row_ui.get_index() / 2 # ignore HSepators
 				ui_manager.animation_id_spinbox.value = row_ui.anim_id
 				)
@@ -467,6 +468,7 @@ func _on_seq_file_options_item_selected(index: int, select_shp: bool = true) -> 
 	ui_manager.patch_name_edit.placeholder_text = type + "_animation_edit"
 	
 	ui_manager.current_animation_slots = seq.sequence_pointers.size()
+	@warning_ignore("integer_division")
 	ui_manager.max_animation_slots = seq.section2_length / 4
 	ui_manager.current_bytes = seq.toal_length
 	

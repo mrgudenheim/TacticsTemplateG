@@ -17,7 +17,7 @@ var ability_data: Ability:
 
 @export var action_list: Container
 
-func _ready():
+func _ready() -> void:
 	button.pressed.connect(on_selected)
 
 

@@ -147,7 +147,7 @@ func init_from_battle_bin() -> void:
 	var ability_animation_charging_sets_bytes: PackedByteArray = battle_bytes.slice(ability_animation_charging_sets_start, ability_animation_charging_sets_start + (num_entries * entry_size))
 	ability_animation_start_ids.resize(num_entries)
 	ability_animation_charging_ids.resize(num_entries)
-	for set_id: int in ability_animation_charging_sets_bytes.size() / entry_size:
+	for set_id: int in num_entries:
 		ability_animation_start_ids[set_id] = ability_animation_charging_sets_bytes.decode_u8(set_id * entry_size)
 		ability_animation_charging_ids[set_id] = ability_animation_charging_sets_bytes.decode_u8((set_id * entry_size) + 1)
 	
@@ -157,7 +157,7 @@ func init_from_battle_bin() -> void:
 	ability_animation_charging_set_ids.resize(RomReader.NUM_ACTIVE_ABILITIES)
 	ability_animation_executing_ids.resize(RomReader.NUM_ACTIVE_ABILITIES)
 	ability_animation_text_ids.resize(RomReader.NUM_ACTIVE_ABILITIES)
-	for ability_id: int in ability_animation_id_bytes.size() / entry_size:
+	for ability_id: int in RomReader.NUM_ACTIVE_ABILITIES:
 		ability_animation_charging_set_ids[ability_id] = ability_animation_id_bytes.decode_u8(ability_id * entry_size)
 		ability_animation_executing_ids[ability_id] = ability_animation_id_bytes.decode_u8((ability_id * entry_size) + 1)
 		ability_animation_text_ids[ability_id] = ability_animation_id_bytes.decode_u8((ability_id * entry_size) + 2)
@@ -174,7 +174,7 @@ func init_from_battle_bin() -> void:
 	num_entries = ItemData.ItemType.CLOTH + 1
 	weapon_animation_ids.resize(num_entries)
 	var data_bytes: PackedByteArray = battle_bytes.slice(weapon_animation_ids_start, weapon_animation_ids_start + (num_entries * entry_size))
-	for id: int in data_bytes.size() / entry_size:
+	for id: int in num_entries:
 		weapon_animation_ids[id] = Vector3(data_bytes.decode_u8(id * entry_size), data_bytes.decode_u8(id * entry_size) + 1, data_bytes.decode_u8(id * entry_size) + 2)
 	
 	# ability vfx header offsets
@@ -182,14 +182,14 @@ func init_from_battle_bin() -> void:
 	num_entries = RomReader.NUM_VFX
 	data_bytes = battle_bytes.slice(ability_vfx_header_offsets_start, ability_vfx_header_offsets_start + (num_entries * entry_size))
 	ability_vfx_header_offsets.resize(RomReader.NUM_VFX)
-	for id: int in data_bytes.size() / entry_size:
+	for id: int in num_entries:
 		ability_vfx_header_offsets[id] = data_bytes.decode_u32(id * entry_size) - 0x801c2500
 	
 	# ability vfx
 	entry_size = 2
 	var ability_vfx_id_bytes: PackedByteArray = battle_bytes.slice(ability_vfx_ids_start, ability_vfx_ids_start + (RomReader.NUM_ACTIVE_ABILITIES * entry_size))
 	ability_vfx_ids.resize(RomReader.NUM_ACTIVE_ABILITIES)
-	for ability_id: int in ability_vfx_id_bytes.size() / entry_size:
+	for ability_id: int in RomReader.NUM_ACTIVE_ABILITIES:
 		ability_vfx_ids[ability_id] = ability_vfx_id_bytes.decode_u16(ability_id * entry_size)
 	
 	# TODO get vfx_ids for items, reactions (support and movement don't have vfx)

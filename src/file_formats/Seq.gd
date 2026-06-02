@@ -150,7 +150,9 @@ func set_data_from_seq_bytes(bytes: PackedByteArray) -> void:
 	
 	# get pointers
 	sequence_pointers.clear()
-	for seq_index: int in (section2_length / 4):
+	@warning_ignore("integer_division")
+	var num_seq_pointers: int = (section2_length / 4)
+	for seq_index: int in num_seq_pointers:
 		var seq_pointer: int = bytes.decode_u32(section1_length + (seq_index * 4))
 		if seq_index > 0 and seq_pointer == 0xFFFFFFFF:
 			break # skip to section 3 if no more pointers in section 2

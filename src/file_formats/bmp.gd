@@ -36,6 +36,7 @@ func _init(bmp_file: PackedByteArray = [], new_name: String = "file_name") -> vo
 	num_pixels = width * height
 	bits_per_pixel = bmp_file.decode_u16(0x001C)
 	compression = bmp_file.decode_u16(0x001E)
+	@warning_ignore("integer_division")
 	num_colors = (pixel_data_start - palette_data_start)/4
 	
 	
@@ -59,7 +60,8 @@ func _init(bmp_file: PackedByteArray = [], new_name: String = "file_name") -> vo
 	else:
 		color_indices.resize(num_pixels)
 		for i: int in num_pixels:
-			var pixel_offset: int = (i * bits_per_pixel)/8
+			@warning_ignore("integer_division")
+			var pixel_offset: int = (i * bits_per_pixel) / 8
 			var byte: int = bmp_file.decode_u8(pixel_data_start + pixel_offset)
 			
 			if bits_per_pixel == 1:
@@ -254,8 +256,11 @@ static func create_paletted_bmp(image: Image, palette: Array[Color], local_bits_
 				color_index = 0
 				
 			if local_bits_per_pixel <= 8:
+				@warning_ignore("integer_division")
 				var color_index_shifted: int = color_index << (8 - local_bits_per_pixel) - (local_bits_per_pixel * (x % (8 / local_bits_per_pixel))) # shift to sub-byte position
+				@warning_ignore("integer_division")
 				color_index_shifted = color_index_shifted | bmp_file.decode_u8(new_pixel_data_start + floor(pixel_index / (8 / local_bits_per_pixel))) # keep all bits
+				@warning_ignore("integer_division")
 				bmp_file.encode_u8(new_pixel_data_start + floor(pixel_index / (8 / local_bits_per_pixel)), color_index_shifted)
 			elif local_bits_per_pixel == 16:
 				var word: int = bmp_file.decode_u16(new_pixel_data_start + (pixel_index * 2))

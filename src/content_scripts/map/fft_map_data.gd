@@ -67,7 +67,9 @@ static func transform_custom0(surface_arrays: Array, transform: Transform3D) -> 
 	if surface_arrays.size() <= Mesh.ARRAY_CUSTOM0 or surface_arrays[Mesh.ARRAY_CUSTOM0] == null:
 		return 0
 	var mesh_custom0: PackedFloat32Array = surface_arrays[Mesh.ARRAY_CUSTOM0]
-	for vertex_idx: int in range(mesh_custom0.size() / 4):
+	@warning_ignore("integer_division")
+	var num_verticies: int = mesh_custom0.size() / 4
+	for vertex_idx: int in range(num_verticies):
 		var x_index: int = vertex_idx * 4
 		var centroid: Vector3 = Vector3(mesh_custom0[x_index], mesh_custom0[x_index + 1], mesh_custom0[x_index + 2])
 		centroid = transform * centroid
@@ -181,8 +183,10 @@ func create_map(mesh_bytes: PackedByteArray, texture_bytes: PackedByteArray = []
 
 			if texture_anim_instruction_bytes.decode_u8(1) == 0x03 and texture_anim_instruction_bytes.decode_u8(9) == 0x03:
 				texture_animation.animation_type = 0 # UV animation
+				@warning_ignore("integer_division")
 				texture_animation.texture_page = texture_anim_instruction_bytes.decode_u8(0) * 4 / 256
 				texture_animation.canvas_x = texture_anim_instruction_bytes.decode_u8(0) * 4 % 256
+				@warning_ignore("integer_division")
 				texture_animation.frame1_texture_page = texture_anim_instruction_bytes.decode_u8(8) * 4 / 256
 				texture_animation.frame1_x = texture_anim_instruction_bytes.decode_u8(8) * 4 % 256
 			elif (texture_anim_instruction_bytes.decode_u8(1) == 0x00
@@ -513,6 +517,7 @@ func get_texture_color_indices(texture_bytes: PackedByteArray) -> PackedInt32Arr
 	new_color_indicies.resize(texture_bytes.size() * 2)
 
 	for i: int in new_color_indicies.size():
+		@warning_ignore("integer_division")
 		var pixel_offset: int = (i * bits_per_pixel) / 8
 		var byte: int = texture_bytes.decode_u8(pixel_offset)
 
@@ -586,8 +591,10 @@ func get_texture_color_indices_all(color_indices: PackedInt32Array) -> PackedInt
 	var new_color_indicies: PackedInt32Array = []
 	var num_palettes: int = 16
 	var colors_per_palette: int = 16
-
-	for row_index: int in (color_indices.size() / TEXTURE_SIZE.x):
+	
+	@warning_ignore("integer_division")
+	var num_rows: int = color_indices.size() / TEXTURE_SIZE.x
+	for row_index: int in num_rows:
 		var row_start_index: int = row_index * TEXTURE_SIZE.x
 		var row_end_index: int = row_start_index + TEXTURE_SIZE.x
 		var row_indices: PackedInt32Array = color_indices.slice(row_start_index, row_end_index)

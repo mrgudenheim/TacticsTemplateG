@@ -208,12 +208,15 @@ func set_data_from_shp_bytes(bytes: PackedByteArray) -> void:
 		attack_start_index = 9999; # these types do not have a second (lower) half
 		
 		var initial_offset: int = 4 # skip first bytes
-		for index: int in ((section1_length - initial_offset) / 2):
-			var zero_frame: int = bytes.decode_u16(initial_offset + (index*2))
+		@warning_ignore("integer_division")
+		var num_zero_frames: int = (section1_length - initial_offset) / 2
+		for index: int in num_zero_frames:
+			var zero_frame: int = bytes.decode_u16(initial_offset + (index * 2))
 			zero_frames.append(zero_frame)
 		
-	
-	for frame_index: int in (section2_length / 4):
+	@warning_ignore("integer_division")
+	var num_frame_pointers: int = (section2_length / 4)
+	for frame_index: int in num_frame_pointers:
 		var frame_pointer: int = bytes.decode_u32(section1_length + (frame_index * 4))
 		if frame_index > 0 and frame_pointer == 0:
 			break # skip to section 3 if no more pointers in section 2
@@ -347,7 +350,9 @@ func _write_sections23_bytes(bytes: PackedByteArray,  data_start_pointer: int, p
 		
 		for subframe_index: int in frame_data.subframes.size():
 			var subframe: SubFrameData = frame_data.subframes[subframe_index]
+			@warning_ignore("integer_division")
 			var b56: int = (subframe.load_location_x / PIXELS_PER_TILE)
+			@warning_ignore("integer_division")
 			var b56_2: int = (subframe.load_location_y / PIXELS_PER_TILE) << 5
 			var b56_3: int = RomReader.battle_bin_data.shp_subframe_sizes.find(subframe.rect_size) << 10
 			var b56_4: int = (subframe.flip_x as int) << 14
@@ -693,7 +698,7 @@ func get_assembled_frame(frame_index: int, source_image: Image, animation_ptr_in
 
 func get_v_offset(frame_index:int, subframe_index:int, animation_ptr_index: int, other_type_index: int, weapon_v_offset: int, submerged_depth: int) -> int:
 	var v_offset: int = 0
-	var y_top: int = get_frame(frame_index, submerged_depth).subframes[subframe_index].load_location_y
+	#var y_top: int = get_frame(frame_index, submerged_depth).subframes[subframe_index].load_location_y
 	if frame_index >= attack_start_index:
 		v_offset += 256
 	
@@ -713,6 +718,7 @@ func get_v_offset(frame_index:int, subframe_index:int, animation_ptr_index: int,
 func add_subframe(subframe: SubFrameData, source_image: Image, assembled_image: Image, v_offset: int, new_frame_size: Vector2i = frame_size, y_offset: int = 40) -> Image:
 	var y_top_left: int = subframe.load_location_y + v_offset
 	
+	@warning_ignore("integer_division")
 	var destination_pos: Vector2i = Vector2i(subframe.shift_x + (new_frame_size.x / 2), subframe.shift_y + new_frame_size.y - y_offset) # adjust by 40 (for full 120px size frame) to prevent frame from spilling over bottom
 	var source_rect: Rect2i = Rect2i(subframe.load_location_x, y_top_left, subframe.rect_size.x, subframe.rect_size.y)
 	
