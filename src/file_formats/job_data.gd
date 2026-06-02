@@ -61,6 +61,10 @@ func _init(new_job_id: int = -1, job_bytes: PackedByteArray = []) -> void:
 		sprite_id = job_id
 	elif job_id >= 0x4a and job_id < 0x5e: # generic humans
 		sprite_id = 0x60 + ((job_id - 0x4a) * 2) # +1 for female sprite
+		if job_id == 0x5c: # dancer is only 1 above bard since there is no female bard
+			sprite_id = 0x83
+		if job_id == 0x5d: # mime is only 1 above dancer since there is no male dancer
+			sprite_id = 0x84
 		default_palette_idx = -1
 	elif job_id >= 0x5e: # generic and special monsters
 		sprite_id = monster_portrait_id
