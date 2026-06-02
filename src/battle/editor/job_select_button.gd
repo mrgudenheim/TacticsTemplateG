@@ -173,16 +173,6 @@ func update_ui(new_job_data: JobData) -> void:
 		action_labels[child_idx].queue_free()
 	
 	for ability_name: String in GameData.skillsets[job_data.skillset_unique_name].ability_names:
-		# TODO fix custom ability names
-		if ability_name == "counter": ability_name = "counter_tackle"
-		elif ability_name == "face_up": ability_name = "faith_up"
-		elif ability_name == "a_save": ability_name = "pa_save"
-		elif ability_name == "counter_flood": ability_name = "counter_geomancy"
-		elif ability_name == "any_ground": ability_name = "ignore_terrain"
-		elif ability_name == "move_on_lava": ability_name = "walk_on_lava"
-		elif ability_name == "move_hp_up": ability_name = "move_get_hp"
-		elif ability_name == "equip_knife": ability_name = "equip_katana"
-		
 		var new_action_name: Label = Label.new()
 		new_action_name.text = GameData.abilities[ability_name].display_name
 		action_list.add_child(new_action_name)

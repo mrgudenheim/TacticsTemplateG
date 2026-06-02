@@ -1362,6 +1362,16 @@ func export_data_tables(save_path: String) -> void:
 			if ability_id != 0:
 				skillset.ability_names.append(RomReader.fft_abilities[ability_id].display_name.to_snake_case())
 
+		for ability_name_idx: int in skillset.ability_names.size():
+			if skillset.ability_names[ability_name_idx] == "counter": skillset.ability_names[ability_name_idx] = "counter_tackle"
+			elif skillset.ability_names[ability_name_idx] == "face_up": skillset.ability_names[ability_name_idx] = "faith_up"
+			elif skillset.ability_names[ability_name_idx] == "a_save": skillset.ability_names[ability_name_idx] = "pa_save"
+			elif skillset.ability_names[ability_name_idx] == "counter_flood": skillset.ability_names[ability_name_idx] = "counter_geomancy"
+			elif skillset.ability_names[ability_name_idx] == "any_ground": skillset.ability_names[ability_name_idx] = "ignore_terrain"
+			elif skillset.ability_names[ability_name_idx] == "move_on_lava": skillset.ability_names[ability_name_idx] = "walk_on_lava"
+			elif skillset.ability_names[ability_name_idx] == "move_hp_up": skillset.ability_names[ability_name_idx] = "move_get_hp"
+			elif skillset.ability_names[ability_name_idx] == "equip_knife": skillset.ability_names[ability_name_idx] = "equip_katana"
+
 		var skillset_file_path: String = skillset_path.path_join(skillset.unique_name + ".skillset.tres")
 		var error: Error = ResourceSaver.save(skillset, skillset_file_path)
 	
