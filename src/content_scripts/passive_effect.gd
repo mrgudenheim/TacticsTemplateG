@@ -139,6 +139,12 @@ static func create_from_dictionary(property_dict: Dictionary) -> PassiveEffect:
 		elif property_name.contains("modifier"):
 			var new_modifier: Modifier = Modifier.create_from_dictionary(property_dict[property_name])
 			new_passive_effect.set(property_name, new_modifier)
+		elif ["element_absorb", "element_cancel", "element_half", "element_strengthen", "element_weakness"].has(property_name):
+			var array = property_dict[property_name]
+			var new_element_types: Array[Action.ElementTypes] = []
+			for type in array:
+				new_element_types.append(Action.ElementTypes[type])
+			new_passive_effect.set(property_name, new_element_types)
 		else:
 			new_passive_effect.set(property_name, property_dict[property_name])
 
