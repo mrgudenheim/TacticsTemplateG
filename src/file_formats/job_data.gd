@@ -48,6 +48,7 @@ var sprite_id: int = 0
 @export var sprite_name: String = ""
 @export var default_palette_idx: int = 0 # -1 means to use the team idx
 
+
 func _init(new_job_id: int = -1, job_bytes: PackedByteArray = []) -> void:
 	if new_job_id == -1 or job_bytes.is_empty():
 		#push_warning("creating empty job data")
@@ -184,6 +185,13 @@ static func create_from_dictonary(property_dict: Dictionary) -> JobData:
 			for type in array:
 				new_equipable_item_types.append(ItemData.ItemType[type])
 			new_job_data.set(property_name, new_equipable_item_types)
+		elif property_name == "evade_datas":
+			var new_evade_datas: Array[EvadeData] = []
+			var new_evade_datas_array: Array = property_dict[property_name]
+			for evade_data_dictionary: Dictionary in new_evade_datas_array:
+				var new_evade_data: EvadeData = EvadeData.create_from_dictionary(evade_data_dictionary)
+				new_evade_datas.append(new_evade_data)
+			new_job_data.set(property_name, new_evade_datas)
 		else:
 			new_job_data.set(property_name, property_dict[property_name])
 
