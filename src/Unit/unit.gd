@@ -1321,7 +1321,7 @@ func set_job(new_job_name: String) -> void:
 	set_sprite_by_job(new_job_name)
 	
 	skillsets.clear()
-	# skillsets.append(RomReader.scus_data.skillsets_data[job_data.skillset_id])
+	skillsets.append(GameData.skillsets[job_data.skillset_unique_name])
 	
 	job_nickname = job_data.display_name
 	
