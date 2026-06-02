@@ -963,7 +963,7 @@ func update_status_visuals() -> void:
 			animation_manager.other_type_index = other_type_status.other_type_index
 		
 		# if spritesheet is changing
-		if spritesheet_priority == 0 and sprite_file_name != RomReader.sprs[RomReader.spr_id_file_idxs[job_data.sprite_id]].file_name:
+		if spritesheet_priority == 0 and sprite_file_name != job_data.sprite_name:
 			set_base_animation_ptr_id(0) # prevent out of bounds error in case SEQ is also changing
 			set_sprite_by_job(job_name)
 		elif spritesheet_priority != 0:
