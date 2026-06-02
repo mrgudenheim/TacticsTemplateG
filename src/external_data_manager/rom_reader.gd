@@ -1335,6 +1335,7 @@ func export_data_tables(save_path: String) -> void:
 		Utilities.save_json(status_effect, save_path)
 	for job_data: JobData in jobs_data.values():
 		job_data.sprite_name = sprs[spr_id_file_idxs[job_data.sprite_id]].file_name.to_lower().trim_suffix(".spr")
+		job_data.skillset_unique_name = scus_data.skillsets_data[job_data.skillset_id].unique_name
 		Utilities.save_json(job_data, save_path)
 	for action: Action in actions.values():
 		Utilities.save_json(action, save_path)
@@ -1350,6 +1351,19 @@ func export_data_tables(save_path: String) -> void:
 		var map_chunk_data: FftMapData = maps[map_chunk.unique_name]
 		scenario.units_data = Scenario.transform_units_data_tile_location(scenario.units_data, map_chunk_data.terrain_tiles, Vector2(-1, 1))
 		Utilities.save_json(scenario, save_path)
+	for skillset: Skillset in scus_data.skillsets_data:
+		var skillset_path: String = save_path.path_join("/skillsets/")
+		DirAccess.make_dir_recursive_absolute(skillset_path)
+
+		for ability_id: int in skillset.action_ability_ids:
+			if ability_id != 0:
+				skillset.ability_names.append(RomReader.fft_abilities[ability_id].display_name.to_snake_case())
+		for ability_id: int in skillset.rsm_ability_ids:
+			if ability_id != 0:
+				skillset.ability_names.append(RomReader.fft_abilities[ability_id].display_name.to_snake_case())
+
+		var skillset_file_path: String = skillset_path.path_join(skillset.unique_name + ".skillset.tres")
+		var error: Error = ResourceSaver.save(skillset, skillset_file_path)
 	
 	var initial_unit_data: InitialUnitData = InitialUnitData.new()
 	var initial_unit_raw_stats: Array[Dictionary] = []

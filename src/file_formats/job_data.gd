@@ -10,6 +10,7 @@ const FILE_SUFFIX: String = "job"
 @export var display_name: String = "Job Name"
 @export var description: String = "[job description]"
 @export var skillset_id: int = 0
+@export var skillset_unique_name: String = "[skillset unique name]"
 @export var innate_abilities_ids: PackedInt32Array = []
 @export var innate_ability_names: PackedStringArray = []
 var innate_abilities: Array[Ability] = []

@@ -23,6 +23,7 @@ var projectiles_gltf: Dictionary[String, Node] = {}
 var items: Dictionary[String, ItemData] = {} # [unique_name, ItemData]
 var status_effects: Dictionary[String, StatusEffect] = {} # [unique_name, StatusEffect]
 var jobs_data: Dictionary[String, JobData] = {} # [unique_name, JobData]
+var skillsets: Dictionary[String, Skillset] = {}
 var actions: Dictionary[String, Action] = {} # [unique_name, Action]
 var triggered_actions: Dictionary[String, TriggeredAction] = {} # [unique_name, TriggeredAction]
 var passive_effects: Dictionary[String, PassiveEffect] = {} # [unique_name, TriggeredAction]
@@ -170,8 +171,10 @@ func import_data(directory_path: String) -> void:
 					for idx: int in range(names["all_no_empty"].size() -1, -1, -1):
 						if names["all_no_empty"][idx] == "":
 							names["all_no_empty"].remove_at(idx)
-
-
+		
+		elif file_path.ends_with("skillset.tres"):
+			var new_skillset: Skillset = ResourceLoader.load(file_path, "Skillset")
+			skillsets[new_skillset.unique_name] = new_skillset
 		elif file_path.ends_with(".palette.tres"):
 			var new_palette: ColorPalette = ResourceLoader.load(file_path, "ColorPalette")
 			palettes[file_path.get_file().trim_suffix(".palette.tres")] = new_palette.colors

@@ -119,7 +119,7 @@ var death_counter: int = 3
 var zodiac: String = "Ares"
 
 var innate_ability_ids: PackedInt32Array = []
-var skillsets: Array[ScusData.SkillsetData] = []
+var skillsets: Array[Skillset] = []
 
 var equipable_item_types: Array[ItemData.ItemType] = []
 var primary_weapon: ItemData
@@ -702,7 +702,7 @@ func set_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
 
 func get_skillset_actions() -> Array[Action]:
 	var action_list: Array[Action] = []
-	for skillset: ScusData.SkillsetData in skillsets:
+	for skillset: Skillset in skillsets:
 		for ability_id: int in skillset.action_ability_ids:
 			if ability_id != 0:
 				var new_action: Action = RomReader.fft_abilities[ability_id].ability_action

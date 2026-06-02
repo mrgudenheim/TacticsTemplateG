@@ -2,17 +2,11 @@ class_name ScusData
 
 # https://ffhacktics.com/wiki/SCUS_942.21_Data_Tables#MURATA_Main_Program_Data
 
-class SkillsetData:
-	var skillset_name: String = ""
-	var action_ability_ids: PackedInt32Array = []
-	var rsm_ability_ids: PackedInt32Array = []
-
-
 var jobs_start: int = 0x518b8 # 0x30 byte long entries
 var jobs_data: Array[JobData] = [] # special jobs 0x01 - 0x49, generics are 0x4a - 0x5d, generic monsters 0x5e - 0x8d, special monsters 0x8e+
 
 var skillsets_start: int = 0x55294 # 0x55311 start of 05 Basic Skill, 0x19 bytes long
-var skillsets_data: Array[SkillsetData] = []
+var skillsets_data: Array[Skillset] = []
 
 # https://ffhacktics.com/wiki/Ability_Data
 var ability_data_all_start: int = 0x4f3f0 # 0x200 entries, 0x08 bytes each
@@ -246,8 +240,9 @@ func init_from_scus() -> void:
 	num_entries = RomReader.NUM_UNIT_SKILLSETS
 	var unit_skillsets_bytes: PackedByteArray = scus_bytes.slice(skillsets_start, skillsets_start + (num_entries * entry_size))
 	for skillset_id: int in num_entries:
-		var skillset_data: SkillsetData = SkillsetData.new()
-		skillset_data.skillset_name = RomReader.fft_text.skillset_names[skillset_id]
+		var skillset_data: Skillset = Skillset.new()
+		skillset_data.display_name = RomReader.fft_text.skillset_names[skillset_id]
+		skillset_data.unique_name = skillset_data.display_name.to_snake_case() # TODO fix for skillsets with duplicate names
 		skillset_data.action_ability_ids.resize(16)
 		skillset_data.rsm_ability_ids.resize(6)
 		for skill_slot: int in 16: # action abilities
@@ -274,7 +269,7 @@ func init_from_scus() -> void:
 	num_entries = RomReader.NUM_MONSTER_SKILLSETS
 	var monster_skillsets_bytes: PackedByteArray = scus_bytes.slice(monster_skillsets_start, monster_skillsets_start + (num_entries * entry_size))
 	for skillset_id: int in num_entries:
-		var skillset_data: SkillsetData = SkillsetData.new()
+		var skillset_data: Skillset = Skillset.new()
 		skillset_data.action_ability_ids.resize(4)
 		for skill_slot: int in 4: # action abilities
 			var ability_id: int = monster_skillsets_bytes.decode_u8((skillset_id * entry_size) + 1 + skill_slot)
