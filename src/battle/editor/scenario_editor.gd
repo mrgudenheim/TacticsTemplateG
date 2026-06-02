@@ -404,6 +404,10 @@ func update_unit_dragging(unit: Unit, event: InputEvent) -> void:
 	elif event.is_action_released("primary_action") and unit_dragged != null: # snap unit to tile when released
 		# check if unit can end movement on tile
 		var tile: TerrainTile = battle_manager.current_tile_hover
+		if not is_instance_valid(tile):
+			unit.char_body.global_position = unit.tile_position.get_world_position()
+			unit_dragged = null
+			return
 		var can_end_on_tile: bool = tile.no_walk == 0 and tile.no_stand_select == 0 and tile.no_cursor == 0
 		if can_end_on_tile and not unit.prohibited_terrain.has(tile.surface_type_id): # lava, etc.
 			unit.tile_position = battle_manager.get_tile(battle_manager.current_cursor_map_position)
