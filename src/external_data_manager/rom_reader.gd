@@ -1336,6 +1336,13 @@ func export_data_tables(save_path: String) -> void:
 	for job_data: JobData in jobs_data.values():
 		job_data.sprite_name = sprs[spr_id_file_idxs[job_data.sprite_id]].file_name.to_lower().trim_suffix(".spr")
 		job_data.skillset_unique_name = scus_data.skillsets_data[job_data.skillset_id].unique_name
+
+		for innate_ability_id: int in job_data.innate_abilities_ids:
+			# var ability_uname: String = fft_abilities[innate_ability_id].display_name.to_snake_case()
+			var ability_uname: String = abilities.keys()[innate_ability_id]
+			if not job_data.innate_ability_names.has(ability_uname):
+				job_data.innate_ability_names.append(ability_uname)
+
 		Utilities.save_json(job_data, save_path)
 	for action: Action in actions.values():
 		Utilities.save_json(action, save_path)
@@ -1357,20 +1364,10 @@ func export_data_tables(save_path: String) -> void:
 
 		for ability_id: int in skillset.action_ability_ids:
 			if ability_id != 0:
-				skillset.ability_names.append(RomReader.fft_abilities[ability_id].display_name.to_snake_case())
+				skillset.ability_names.append(abilities.keys()[ability_id])
 		for ability_id: int in skillset.rsm_ability_ids:
 			if ability_id != 0:
-				skillset.ability_names.append(RomReader.fft_abilities[ability_id].display_name.to_snake_case())
-
-		for ability_name_idx: int in skillset.ability_names.size():
-			if skillset.ability_names[ability_name_idx] == "counter": skillset.ability_names[ability_name_idx] = "counter_tackle"
-			elif skillset.ability_names[ability_name_idx] == "face_up": skillset.ability_names[ability_name_idx] = "faith_up"
-			elif skillset.ability_names[ability_name_idx] == "a_save": skillset.ability_names[ability_name_idx] = "pa_save"
-			elif skillset.ability_names[ability_name_idx] == "counter_flood": skillset.ability_names[ability_name_idx] = "counter_geomancy"
-			elif skillset.ability_names[ability_name_idx] == "any_ground": skillset.ability_names[ability_name_idx] = "ignore_terrain"
-			elif skillset.ability_names[ability_name_idx] == "move_on_lava": skillset.ability_names[ability_name_idx] = "walk_on_lava"
-			elif skillset.ability_names[ability_name_idx] == "move_hp_up": skillset.ability_names[ability_name_idx] = "move_get_hp"
-			elif skillset.ability_names[ability_name_idx] == "equip_knife": skillset.ability_names[ability_name_idx] = "equip_katana"
+				skillset.ability_names.append(abilities.keys()[ability_id])
 
 		var skillset_file_path: String = skillset_path.path_join(skillset.unique_name + ".skillset.tres")
 		var error: Error = ResourceSaver.save(skillset, skillset_file_path)
