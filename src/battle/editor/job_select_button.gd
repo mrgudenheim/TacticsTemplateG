@@ -118,9 +118,9 @@ func update_ui(new_job_data: JobData) -> void:
 	for child_idx: int in range(1, innate_ability_labels.size()):
 		innate_ability_labels[child_idx].queue_free()
 
-	for ability: Ability in job_data.innate_abilities:
+	for ability_name: String in job_data.innate_ability_names:
 		var new_ability_label: Label = Label.new()
-		new_ability_label.text = ability.display_name
+		new_ability_label.text = ability_name
 		innate_abilities_list.add_child(new_ability_label)
 
 	# update statuses	
