@@ -173,7 +173,14 @@ static func create_from_json(json_string: String) -> JobData:
 static func create_from_dictonary(property_dict: Dictionary) -> JobData:
 	var new_job_data: JobData = JobData.new()
 	for property_name: String in property_dict.keys():
-		new_job_data.set(property_name, property_dict[property_name])
+		if property_name == "equippable_item_types":
+			var array = property_dict[property_name]
+			var new_equipable_item_types: Array[ItemData.ItemType] = []
+			for type in array:
+				new_equipable_item_types.append(ItemData.ItemType[type])
+			new_job_data.set(property_name, new_equipable_item_types)
+		else:
+			new_job_data.set(property_name, property_dict[property_name])
 
 	new_job_data.emit_changed()
 	return new_job_data
