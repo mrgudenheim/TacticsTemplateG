@@ -34,12 +34,7 @@ var innate_abilities: Array[Ability] = []
 @export var evade_datas: Array[EvadeData] = []
 
 @export var passive_effect_names: PackedStringArray = []
-var passive_effects: Array[PassiveEffect] = []: # TODO job_data move stat modifiers, innate abilities to passive_effects
-	get:
-		if passive_effects.is_empty():
-			for name: String in passive_effect_names:
-				passive_effects.append(GameData.passive_effects[name])
-		return passive_effects
+var passive_effects: Array[PassiveEffect] = [] # TODO job_data move stat modifiers, innate abilities to passive_effects
 
 @export var monster_portrait_id: int = 0
 @export var monster_palette_id: int = 0
@@ -131,6 +126,13 @@ func _init(new_job_id: int = -1, job_bytes: PackedByteArray = []) -> void:
 	new_passive_effect.unique_name = unique_name
 	new_passive_effect.add_to_global_list()
 	passive_effect_names.append(new_passive_effect.unique_name)
+
+
+func get_passive_effects() -> Array[PassiveEffect]:
+	if passive_effects.is_empty():
+		for name: String in passive_effect_names:
+			passive_effects.append(GameData.passive_effects[name])
+	return passive_effects
 
 
 func add_to_global_list(will_overwrite: bool = false) -> void:

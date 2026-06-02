@@ -128,7 +128,7 @@ func update_ui(new_job_data: JobData) -> void:
 	var statuses_start: PackedStringArray = []
 	var statuses_immune: PackedStringArray = []
 
-	for passive_effect: PassiveEffect in new_job_data.passive_effects:
+	for passive_effect: PassiveEffect in new_job_data.get_passive_effects():
 		statuses_always.append_array(passive_effect.status_always)
 		statuses_start.append_array(passive_effect.status_start)
 		statuses_immune.append_array(passive_effect.status_immune)
@@ -148,7 +148,7 @@ func update_ui(new_job_data: JobData) -> void:
 	var element_absorb_list: Array[Action.ElementTypes] = []
 	var element_strengthen_list: Array[Action.ElementTypes] = []
 	
-	for passive_effect: PassiveEffect in new_job_data.passive_effects:
+	for passive_effect: PassiveEffect in new_job_data.get_passive_effects():
 		element_weak_list.append_array(passive_effect.element_weakness)
 		element_resist_list.append_array(passive_effect.element_half)
 		element_immune_list.append_array(passive_effect.element_cancel)
