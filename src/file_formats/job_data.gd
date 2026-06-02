@@ -41,6 +41,7 @@ var passive_effects: Array[PassiveEffect] = [] # TODO job_data move stat modifie
 @export var monster_type: int = 0 # monster type sprite? sprite_id = 0x85 + this
 var sprite_id: int = 0
 @export var sprite_name: String = ""
+@export var default_palette_idx: int = 0 # -1 means to use the team idx
 
 func _init(new_job_id: int = -1, job_bytes: PackedByteArray = []) -> void:
 	if new_job_id == -1 or job_bytes.is_empty():
@@ -60,8 +61,11 @@ func _init(new_job_id: int = -1, job_bytes: PackedByteArray = []) -> void:
 		sprite_id = job_id
 	elif job_id >= 0x4a and job_id < 0x5e: # generic humans
 		sprite_id = 0x60 + ((job_id - 0x4a) * 2) # +1 for female sprite
+		default_palette_idx = -1
 	elif job_id >= 0x5e: # generic and special monsters
 		sprite_id = monster_portrait_id
+		if monster_type != 0:
+			default_palette_idx = monster_palette_id
 	
 	for innate_slot: int in 4:
 		var innate_id: int = job_bytes.decode_u16(0x01 + (2 * innate_slot))
