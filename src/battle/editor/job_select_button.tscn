@@ -1,6 +1,11 @@
 [gd_scene format=3 uid="uid://djqalqt20isme"]
 
 [ext_resource type="Script" uid="uid://cpvculriomav7" path="res://src/battle/editor/job_select_button.gd" id="1_dxfb3"]
+[ext_resource type="Shader" uid="uid://cp6kt2paa88bq" path="res://src/battle/editor/ui_palette.gdshader" id="2_tisr8"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_uksfq"]
+shader = ExtResource("2_tisr8")
+shader_parameter/palette_colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_06nsw"]
 resource_local_to_scene = true
@@ -73,6 +78,7 @@ color = Color(0.7724798, 0.5703566, 0.2862759, 1)
 
 [node name="Sprite" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/SpriteAndStats/PanelContainer" unique_id=1039546996]
 texture_filter = 1
+material = SubResource("ShaderMaterial_uksfq")
 layout_mode = 2
 texture = SubResource("AtlasTexture_06nsw")
 expand_mode = 3

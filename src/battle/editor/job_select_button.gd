@@ -185,8 +185,14 @@ func set_sprite() -> void:
 	var spritesheet_data: UnitSpritesheetData = GameData.unit_spritesheets_data[job_data.sprite_name]
 	
 	var atlas_texture: AtlasTexture = sprite_rect.texture
-	atlas_texture.atlas = spritesheet_data.create_frame_grid_texture()
-	# atlas_texture.atlas = job_spr.create_frame_grid_texture(0)
+	atlas_texture.atlas = spritesheet_data.create_frame_grid_texture() # TODO cache frame grid in GameData?
+
+	var palette_idx: int = job_data.default_palette_idx
+	if palette_idx == -1:
+		palette_idx = 0 # TODO set based on team_idx or team_color
+
+	sprite_rect.material = sprite_rect.material.duplicate() # duplicate becaues each sprite needs its own unique shader parameter for color palette
+	sprite_rect.material.set_shader_parameter("palette_colors", spritesheet_data.color_palette.slice(palette_idx * 16, (palette_idx + 1) * 16))
 
 
 func get_evade_values(evade_datas: Array[EvadeData], evade_type: EvadeData.EvadeType, direction: EvadeData.Directions) -> Dictionary[EvadeData.EvadeSource, int]:
