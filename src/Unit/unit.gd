@@ -1355,7 +1355,7 @@ func set_primary_weapon(new_weapon_unique_name: String) -> void:
 	equip_slots[0].item_unique_name = new_weapon_unique_name
 	primary_weapon = GameData.items[new_weapon_unique_name]
 	#animation_manager.weapon_id = new_weapon_id
-	var weapon_palette_id = primary_weapon.wep_frame_palette
+	var weapon_palette_id: int = primary_weapon.wep_frame_palette
 	animation_manager.unit_sprites_manager.set_weapon_texture(animation_manager.wep_spritesheet_data.create_frame_grid_texture(
 		0, 0, primary_weapon.wep_frame_v_offset, 0, animation_manager.wep_shp.file_name))
 	animation_manager.unit_sprites_manager.sprite_weapon.material_override.set_shader_parameter("palette_colors", GameData.unit_spritesheets_data["wep"].color_palette.slice(weapon_palette_id * 16, (weapon_palette_id + 1) * 16))
