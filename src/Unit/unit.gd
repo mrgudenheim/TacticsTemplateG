@@ -354,7 +354,7 @@ func initialize_unit() -> void:
 	animation_manager.eff_seq = GameData.seqs["eff1"]
 	
 	#animation_manager.unit_sprites_manager.sprite_effect.texture = animation_manager.eff_spr.create_frame_grid_texture(0, 0, 0, 0, 0)
-	animation_manager.unit_sprites_manager.sprite_effect.texture = GameData.unit_spritesheets_data["eff"].create_frame_grid_texture(0, 0, 0, 0, 0)
+	animation_manager.unit_sprites_manager.sprite_effect.texture = GameData.unit_spritesheets_data["eff"].create_frame_grid_texture(0, 0, 0, 0)
 	
 	#animation_manager.item_spr = RomReader.sprs[RomReader.file_records["ITEM.BIN"].type_index]
 	
@@ -1355,9 +1355,10 @@ func set_primary_weapon(new_weapon_unique_name: String) -> void:
 	equip_slots[0].item_unique_name = new_weapon_unique_name
 	primary_weapon = GameData.items[new_weapon_unique_name]
 	#animation_manager.weapon_id = new_weapon_id
-	#var weapon_palette_id = RomReader.battle_bin_data.weapon_graphic_palettes_1[primary_weapon.id]
+	var weapon_palette_id = primary_weapon.wep_frame_palette
 	animation_manager.unit_sprites_manager.set_weapon_texture(animation_manager.wep_spritesheet_data.create_frame_grid_texture(
-		primary_weapon.wep_frame_palette, 0, 0, primary_weapon.wep_frame_v_offset, 0, animation_manager.wep_shp.file_name))
+		0, 0, primary_weapon.wep_frame_v_offset, 0, animation_manager.wep_shp.file_name))
+	animation_manager.unit_sprites_manager.sprite_weapon.material_override.set_shader_parameter("palette_colors", GameData.unit_spritesheets_data["wep"].color_palette.slice(weapon_palette_id * 16, (weapon_palette_id + 1) * 16))
 	
 	attack_action = primary_weapon.weapon_attack_action
 	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
@@ -1650,7 +1651,7 @@ func update_spritesheet_grid_texture() -> void:
 	if sprite_palette_id_override < 0:
 		palette_idx_final = sprite_palette_id
 	var new_grid_texture: Texture2D = new_spritesheet_data.create_frame_grid_texture(
-		palette_idx_final, 0, animation_manager.other_type_index, 0, submerged_depth
+		0, animation_manager.other_type_index, 0, submerged_depth
 	)
 	animation_manager.unit_sprites_manager.set_primary_texture(new_grid_texture)
 	animation_manager.unit_sprites_manager.sprite_primary.material_override.set_shader_parameter("palette_colors", new_spritesheet_data.color_palette.slice(palette_idx_final * 16, (palette_idx_final + 1) * 16))
