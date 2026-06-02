@@ -7,7 +7,7 @@ var job_select_buttons: Array[JobSelectButton]
 
 
 func populate_list() -> void:
-	for job_data: JobData in RomReader.jobs_data.values():
+	for job_data: JobData in GameData.jobs_data.values():
 		var job_select_button: JobSelectButton = job_select_button_scene.instantiate()
 		job_select_button.job_data = job_data
 		job_select_button_container.add_child(job_select_button)
