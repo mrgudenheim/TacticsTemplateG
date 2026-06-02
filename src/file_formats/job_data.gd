@@ -34,7 +34,12 @@ var innate_abilities: Array[Ability] = []
 @export var evade_datas: Array[EvadeData] = []
 
 @export var passive_effect_names: PackedStringArray = []
-var passive_effects: Array[PassiveEffect] = [] # TODO job_data move stat modifiers, innate abilities to passive_effects
+var passive_effects: Array[PassiveEffect] = []: # TODO job_data move stat modifiers, innate abilities to passive_effects
+	get:
+		if passive_effects.is_empty():
+			for name: String in passive_effect_names:
+				passive_effects.append(GameData.passive_effects[name])
+		return passive_effects
 
 @export var monster_portrait_id: int = 0
 @export var monster_palette_id: int = 0
