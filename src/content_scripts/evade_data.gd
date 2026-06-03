@@ -85,6 +85,9 @@ static func create_from_dictionary(property_dict: Dictionary) -> EvadeData:
 		if property_name == "type":
 			var new_type: EvadeType = EvadeType[property_dict[property_name]]
 			new_evade_data.set(property_name, new_type)
+		elif property_name == "source":
+			var new_source: EvadeSource = EvadeSource[property_dict[property_name]]
+			new_evade_data.set(property_name, new_source)
 		elif property_name == "directions":
 			var new_directions: Array[Directions] = []
 			for string: String in property_dict[property_name]:
