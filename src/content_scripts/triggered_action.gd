@@ -213,11 +213,11 @@ func get_action_instance(triggered_action_data: TriggeredActionInstance) -> Acti
 
 
 func get_action(triggered_action_data: TriggeredActionInstance) -> Action:
-	var new_action: Action = triggered_action_data.user.attack_action
+	var new_action: Action = triggered_action_data.user.get_attack_action()
 	if RomReader.actions.keys().has(action_unique_name):
 		new_action = RomReader.actions[action_unique_name]
 	elif action_unique_name == "ATTACK": # special case to use weapon attack
-		new_action = triggered_action_data.user.attack_action
+		new_action = triggered_action_data.user.get_attack_action()
 	elif action_unique_name == "COPY": # special case to use initiator action
 		new_action = triggered_action_data.initiating_action_instance.action
 	else:

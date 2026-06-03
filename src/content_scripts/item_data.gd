@@ -415,6 +415,10 @@ func set_item_attributes(item_attribute: ScusData.ItemAttribute) -> void:
 	emit_changed()
 
 
+func get_attack_action() -> Action:
+	return GameData.actions[weapon_attack_action_name]
+
+
 func get_passive_effect() -> PassiveEffect:
 	return GameData.passive_effects[passive_effect_name]
 

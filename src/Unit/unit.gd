@@ -261,7 +261,7 @@ var action_data: Action
 var active_action: ActionInstance
 #@export var action_instance: ActionInstance
 @export var move_action: Action
-@export var attack_action: Action
+# @export var attack_action: Action
 @export var wait_action: Action
 @export var actions: Array[Action] = []
 var actions_data: Dictionary[String, ActionInstance] = {}
@@ -688,7 +688,7 @@ func update_actions(battle_manager: BattleManager) -> void:
 func set_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
 	actions.clear()
 	actions.append(move_action)
-	actions.append(attack_action)
+	actions.append(get_attack_action())
 	
 	actions.append_array(get_skillset_actions()) # TODO move to skillset ability
 
@@ -1360,10 +1360,15 @@ func set_primary_weapon(new_weapon_unique_name: String) -> void:
 		0, 0, primary_weapon.wep_frame_v_offset, 0, animation_manager.wep_shp.file_name))
 	animation_manager.unit_sprites_manager.sprite_weapon.material_override.set_shader_parameter("palette_colors", GameData.unit_spritesheets_data["wep"].color_palette.slice(weapon_palette_id * 16, (weapon_palette_id + 1) * 16))
 	
-	attack_action = primary_weapon.weapon_attack_action
+	# attack_action = primary_weapon.weapon_attack_action
 	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
 	set_available_actions(all_passive_effects)
 	primary_weapon_assigned.emit(new_weapon_unique_name)
+
+
+func get_attack_action() -> Action:
+	# TODO handle two swords? other abilities?
+	return primary_weapon.get_attack_action()
 
 
 # https://ffhacktics.com/wiki/Determine_Status_Bubble_Parameters
