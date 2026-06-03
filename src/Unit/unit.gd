@@ -703,9 +703,10 @@ func set_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
 func get_skillset_actions() -> Array[Action]:
 	var action_list: Array[Action] = []
 	for skillset: Skillset in skillsets:
-		for ability_id: int in skillset.action_ability_ids:
-			if ability_id != 0:
-				var new_action: Action = RomReader.fft_abilities[ability_id].ability_action
+		for ability_name: String in skillset.ability_names:
+			var ability_is_action: bool = not [Ability.SlotType.REACTION, Ability.SlotType.SUPPORT, Ability.SlotType.MOVEMENT].has(GameData.abilities[ability_name].slot_type)
+			if ability_is_action and GameData.actions.has(ability_name):
+				var new_action: Action = GameData.actions[ability_name]
 				action_list.append(new_action)
 	return action_list
 
