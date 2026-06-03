@@ -49,6 +49,10 @@ signal ability_select_pressed(unit: Unit, slot: AbilitySlot)
 var unit: Unit
 
 
+func _ready() -> void:
+	sprite_button.material = sprite_button.material.duplicate() # duplicate becaues each sprite needs its own unique shader parameter for color palette
+
+
 func setup(new_unit: Unit) -> void:
 	if unit != null:
 		if unit.data_updated.is_connected(update_ui):
@@ -128,6 +132,9 @@ func update_ui(new_unit: Unit) -> void:
 	var atlas_texture: AtlasTexture = sprite_button.texture_normal
 	var unit_sprite: Sprite3D = new_unit.animation_manager.unit_sprites_manager.sprite_primary
 	atlas_texture.atlas = unit_sprite.texture
+	var spritesheet_data: UnitSpritesheetData = GameData.unit_spritesheets_data[new_unit.sprite_file_name]
+
+	sprite_button.material.set_shader_parameter("palette_colors", spritesheet_data.color_palette.slice(new_unit.sprite_palette_id * 16, (new_unit.sprite_palette_id + 1) * 16))
 
 	job_button.text = new_unit.job_data.display_name
 	level_spinbox.value = new_unit.stats[Unit.StatType.LEVEL].get_modified_value()
