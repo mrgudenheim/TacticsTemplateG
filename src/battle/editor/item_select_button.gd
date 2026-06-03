@@ -27,7 +27,7 @@ func update_ui(new_item_data: ItemData) -> void:
 	display_name.text = new_item_data.display_name + " (Item ID: " + str(new_item_data.item_idx) + ")"
 	name = new_item_data.unique_name
 	
-	var passive_effect: PassiveEffect = new_item_data.passive_effect
+	var passive_effect: PassiveEffect = new_item_data.get_passive_effect()
 	
 	var wp_label: Label = Label.new()
 	wp_label.text = "WP: " + str(new_item_data.weapon_power)

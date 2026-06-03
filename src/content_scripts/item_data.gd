@@ -27,7 +27,7 @@ var wep_frame_v_offset: int = 0
 # ROM data for debug mostly, equivalent data is stored in weapon_attack_action
 var max_range: int = 1
 var weapon_formula_id: int = 1
-var weapon_power: int = 1
+@export var weapon_power: int = 1
 var weapon_evade: int = 0
 var weapon_element: Action.ElementTypes = Action.ElementTypes.NONE
 var weapon_inflict_status_spell_id: int = 0
@@ -78,7 +78,7 @@ var consumable_inflict_status_id: int = 0
 @export var evade_datas: Array[EvadeData] = []
 
 @export var passive_effect_name: String = ""
-var passive_effect: PassiveEffect = PassiveEffect.new() # TODO item move element affinities, stat modifiers, and status arrays to passive_effect
+var passive_effect: PassiveEffect
 
 enum SlotType {
 	WEAPON = 0x80,
@@ -394,6 +394,8 @@ func set_item_attributes(item_attribute: ScusData.ItemAttribute) -> void:
 	sp_modifier = item_attribute.sp_modifier
 	move_modifier = item_attribute.move_modifier
 	jump_modifier = item_attribute.jump_modifier
+
+	passive_effect = PassiveEffect.new()
 	
 	passive_effect.stat_modifiers[Unit.StatType.PHYSICAL_ATTACK] = Modifier.new("value + " + str(item_attribute.pa_modifier), Modifier.ModifierType.ADD)
 	passive_effect.stat_modifiers[Unit.StatType.MAGIC_ATTACK] = Modifier.new("value + " + str(item_attribute.ma_modifier), Modifier.ModifierType.ADD)
@@ -411,6 +413,10 @@ func set_item_attributes(item_attribute: ScusData.ItemAttribute) -> void:
 	passive_effect.element_strengthen = Action.get_element_types_array([item_attribute.elemental_strengthen])
 
 	emit_changed()
+
+
+func get_passive_effect() -> PassiveEffect:
+	return GameData.passive_effects[passive_effect_name]
 
 
 func add_to_global_list(will_overwrite: bool = false) -> void:

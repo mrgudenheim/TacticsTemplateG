@@ -62,6 +62,10 @@ func to_json() -> String:
 	return Utilities.object_properties_to_json(self, properties_to_exclude)
 
 
+func get_passive_effect() -> PassiveEffect:
+	return GameData.passive_effects[passive_effect_name]
+
+
 static func create_from_json(json_string: String) -> Ability:
 	var property_dict: Dictionary = JSON.parse_string(json_string)
 	var new_ability: Ability = create_from_dictonary(property_dict)

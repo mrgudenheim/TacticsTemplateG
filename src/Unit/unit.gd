@@ -1487,13 +1487,13 @@ func get_native_passive_effects(exclude_passives: PackedStringArray = []) -> Arr
 	if job_data != null:
 		native_passive_effects.append_array(job_data.get_passive_effects())
 		for ability: Ability in job_data.innate_abilities:
-			native_passive_effects.append(ability.passive_effect)
+			native_passive_effects.append(ability.get_passive_effect())
 	
 	for ability_slot: AbilitySlot in ability_slots:
-		native_passive_effects.append(ability_slot.get_ability().passive_effect)
+		native_passive_effects.append(ability_slot.get_ability().get_passive_effect())
 	
 	for equipment_slot: EquipmentSlot in equip_slots:
-		native_passive_effects.append(equipment_slot.get_item().passive_effect)
+		native_passive_effects.append(equipment_slot.get_item().get_passive_effect())
 	
 	for status: StatusEffect in current_statuses:
 		native_passive_effects.append(status.passive_effect)
