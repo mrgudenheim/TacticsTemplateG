@@ -552,6 +552,9 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> Unit:
 	new_unit.level = unit_data.level
 	new_unit.stats_raw = unit_data.stats_raw
 	new_unit.stats = unit_data.stats
+	new_unit.stats[Unit.StatType.HP_MAX].value_changed.connect(new_unit.stats[Unit.StatType.HP].update_max_from_clamped_value)
+	new_unit.stats[Unit.StatType.MP_MAX].value_changed.connect(new_unit.stats[Unit.StatType.MP].update_max_from_clamped_value)
+	new_unit.stats[Unit.StatType.HP].value_changed.connect(new_unit.hp_changed)
 
 	new_unit.stats[Unit.StatType.HP].value_changed.connect(new_unit.hp_changed)
 	var stat_bars: Array[StatBar] = []

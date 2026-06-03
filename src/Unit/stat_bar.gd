@@ -1,7 +1,7 @@
 class_name StatBar
 extends TextureProgressBar
 
-const stat_bar_tscn: PackedScene = preload("res://src/Unit/stat_bar.tscn")
+const STAT_BAR_TSCN: PackedScene = preload("res://src/Unit/stat_bar.tscn")
 
 @export var name_label: Label
 @export var value_label: Label
@@ -27,7 +27,7 @@ const stat_bar_tscn: PackedScene = preload("res://src/Unit/stat_bar.tscn")
 
 
 static func instantiate() -> StatBar:
-	return stat_bar_tscn.instantiate()
+	return STAT_BAR_TSCN.instantiate()
 
 
 func set_stat(stat_name: String, stat: StatValue) -> void:
