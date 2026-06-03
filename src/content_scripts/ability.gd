@@ -77,7 +77,7 @@ static func create_from_dictonary(property_dict: Dictionary) -> Ability:
 	var new_ability: Ability = Ability.new()
 	for property_name in property_dict.keys():
 		if property_name == "slot_type":
-			var type = property_dict[property_name]
+			var type: String = property_dict[property_name]
 			var new_slot_type: SlotType = SlotType[type]
 			new_ability.set(property_name, new_slot_type)
 		else:

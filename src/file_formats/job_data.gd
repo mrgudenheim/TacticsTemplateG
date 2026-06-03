@@ -182,9 +182,9 @@ static func create_from_dictonary(property_dict: Dictionary) -> JobData:
 	var new_job_data: JobData = JobData.new()
 	for property_name: String in property_dict.keys():
 		if property_name == "equippable_item_types":
-			var array = property_dict[property_name]
+			var array: Array = property_dict[property_name]
 			var new_equipable_item_types: Array[ItemData.ItemType] = []
-			for type in array:
+			for type: String in array:
 				new_equipable_item_types.append(ItemData.ItemType[type])
 			new_job_data.set(property_name, new_equipable_item_types)
 		elif property_name == "evade_datas":

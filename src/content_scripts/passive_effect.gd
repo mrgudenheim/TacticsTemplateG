@@ -140,25 +140,25 @@ static func create_from_dictionary(property_dict: Dictionary) -> PassiveEffect:
 			var new_modifier: Modifier = Modifier.create_from_dictionary(property_dict[property_name])
 			new_passive_effect.set(property_name, new_modifier)
 		elif ["element_absorb", "element_cancel", "element_half", "element_strengthen", "element_weakness"].has(property_name):
-			var array = property_dict[property_name]
+			var array: Array = property_dict[property_name]
 			var new_element_types: Array[Action.ElementTypes] = []
-			for type in array:
+			for type: String in array:
 				new_element_types.append(Action.ElementTypes[type])
 			new_passive_effect.set(property_name, new_element_types)
 		elif property_name == "ai_strategy":
-			var type = property_dict[property_name]
+			var type: String = property_dict[property_name]
 			var new_ai_type: UnitAi.Strategy = UnitAi.Strategy[type]
 			new_passive_effect.set(property_name, new_ai_type)
 		elif property_name == "unit_team_filter":
-			var array = property_dict[property_name]
+			var array: Array = property_dict[property_name]
 			var new_team_filter_types: Array[FilterTeam] = []
-			for type in array:
+			for type: String in array:
 				new_team_filter_types.append(FilterTeam[type])
 			new_passive_effect.set(property_name, new_team_filter_types)
 		elif property_name == "unit_basis_filter":
-			var array = property_dict[property_name]
+			var array: Array = property_dict[property_name]
 			var new_unit_basis_filter_types: Array[Unit.StatBasis] = []
-			for type in array:
+			for type: String in array:
 				new_unit_basis_filter_types.append(Unit.StatBasis[type])
 			new_passive_effect.set(property_name, new_unit_basis_filter_types)
 		else:
