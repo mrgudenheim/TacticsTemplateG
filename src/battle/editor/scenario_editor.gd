@@ -198,7 +198,7 @@ func setup_item_select(unit: Unit, slot: EquipmentSlot) -> void:
 	item_select_control.visible = true
 	for item_select_button: ItemSelectButton in item_select_control.item_select_buttons:
 		if item_select_button.sprite_rect.texture.atlas == null:
-			item_select_button.sprite_rect.texture.atlas = RomReader.item_bin_texture
+			item_select_button.sprite_rect.texture.atlas = GameData.textures["items"]
 			var item_graphic_id: int = item_select_button.item_data.item_graphic_id
 			@warning_ignore("integer_division")
 			var row: int = item_graphic_id / 15 # 15 columns of icons

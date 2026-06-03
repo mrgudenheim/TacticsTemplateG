@@ -1,6 +1,11 @@
 [gd_scene format=3 uid="uid://b24ja5gvetaqq"]
 
 [ext_resource type="Script" uid="uid://duuei2g36ebnx" path="res://src/battle/editor/item_select_button.gd" id="1_pduxf"]
+[ext_resource type="Shader" uid="uid://cp6kt2paa88bq" path="res://src/battle/editor/ui_palette.gdshader" id="2_82o32"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_o2poa"]
+shader = ExtResource("2_82o32")
+shader_parameter/palette_colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_o3x16"]
 resource_local_to_scene = true
@@ -34,6 +39,7 @@ layout_mode = 2
 color = Color(0.7724798, 0.5703566, 0.2862759, 1)
 
 [node name="Sprite" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer" unique_id=1333961665]
+material = SubResource("ShaderMaterial_o2poa")
 layout_mode = 2
 texture = SubResource("AtlasTexture_o3x16")
 expand_mode = 3

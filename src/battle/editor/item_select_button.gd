@@ -16,6 +16,7 @@ var item_data: ItemData:
 @export var list: Container
 
 func _ready() -> void:
+	sprite_rect.material = sprite_rect.material.duplicate() # duplicate becaues each sprite needs its own unique shader parameter for color palette
 	button.pressed.connect(on_selected)
 
 
@@ -26,6 +27,8 @@ func on_selected() -> void:
 func update_ui(new_item_data: ItemData) -> void:
 	display_name.text = new_item_data.display_name + " (Item ID: " + str(new_item_data.item_idx) + ")"
 	name = new_item_data.unique_name
+	var item_palettes: PackedColorArray = GameData.palettes["items"]
+	sprite_rect.material.set_shader_parameter("palette_colors", item_palettes.slice(new_item_data.item_palette_id * 16, (new_item_data.item_palette_id + 1) * 16))
 	
 	var passive_effect: PassiveEffect = new_item_data.get_passive_effect()
 	
