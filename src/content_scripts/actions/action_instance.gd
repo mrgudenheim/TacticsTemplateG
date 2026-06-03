@@ -193,7 +193,7 @@ func get_ai_score() -> int:
 		# status scores
 		var total_status_score: float = 0.0
 		for status_id: String in action.target_status_list:
-			var status: StatusEffect = RomReader.status_effects[status_id]
+			var status: StatusEffect = GameData.status_effects[status_id]
 			var status_score: float = status.get_ai_score(user, target, action.will_remove_target_status)
 			if action.target_status_list_type == Action.StatusListType.ALL:
 				status_score = status_score * action.target_status_chance
@@ -270,7 +270,7 @@ func get_statuses_text(target: Unit) -> String:
 	var status_names: PackedStringArray = []
 	for status_id: String in action.target_status_list:
 		if not action.will_remove_target_status or target.current_status_ids.has(status_id): # don't show removing status the target does not have TODO don't show remove Always statuses
-			status_names.append(RomReader.status_effects[status_id].status_effect_name)
+			status_names.append(GameData.status_effects[status_id].status_effect_name)
 	
 	if status_names.is_empty() and action.will_remove_target_status:
 		status_names = ["[No status to remove]"]
@@ -327,7 +327,7 @@ func queue_use() -> void:
 	
 	# TODO check for passive_effects that modify charge time? Or Maybe charge time should be modified earlier than this so AI can consider the modified value
 	if action.ticks_charge_time > 0:
-		var charging_status: StatusEffect = RomReader.status_effects["charging"].duplicate() # charging
+		var charging_status: StatusEffect = GameData.status_effects["charging"].duplicate() # charging
 		charging_status.delayed_action = self.duplicate()
 		charging_status.duration = action.ticks_charge_time
 		charging_status.duration_type = StatusEffect.DurationType.TICKS

@@ -209,7 +209,7 @@ func choose_action(unit: Unit) -> void:
 
 func action_targeted(unit: Unit, chosen_action: ActionInstance, target: TerrainTile = null, hover_target: TerrainTile = null) -> void:
 	#chosen_action.show_potential_targets() # TODO fix move targeting when updating paths/pathfinding is takes longer than delay (large maps with 10+ units)
-	chosen_action.potential_targets = chosen_action.action.targeting_strategy.get_potential_targets(chosen_action)
+	chosen_action.potential_targets = await chosen_action.action.targeting_strategy.get_potential_targets(chosen_action)
 	chosen_action.start_targeting()
 	if chosen_action.action.auto_target:
 		await chosen_action.action_completed

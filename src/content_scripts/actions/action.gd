@@ -544,20 +544,20 @@ func apply_status(unit: Unit, status_list: Array[String], status_list_type: Stat
 			for status_id: String in status_list:
 				if will_remove_status and unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_id):
 					unit.remove_status_id(status_id)
-					unit.show_popup_text(RomReader.status_effects[status_id].status_effect_name) # TODO different text for removing status
+					unit.show_popup_text(GameData.status_effects[status_id].status_effect_name) # TODO different text for removing status
 				elif not will_remove_status:
-					unit.show_popup_text(RomReader.status_effects[status_id].status_effect_name)
-					await unit.add_status(RomReader.status_effects[status_id].duplicate())
+					unit.show_popup_text(GameData.status_effects[status_id].status_effect_name)
+					await unit.add_status(GameData.status_effects[status_id].duplicate())
 	elif status_list_type == StatusListType.EACH:
 		for status_id: String in status_list:
 			var status_success: bool = randi_range(0, 99) < status_list_chance
 			if status_success:
 				if will_remove_status and unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_id):
 					unit.remove_status_id(status_id)
-					unit.show_popup_text(RomReader.status_effects[status_id].status_effect_name) # TODO different text for removing status
+					unit.show_popup_text(GameData.status_effects[status_id].status_effect_name) # TODO different text for removing status
 				elif not will_remove_status:
-					unit.show_popup_text(RomReader.status_effects[status_id].status_effect_name)
-					await unit.add_status(RomReader.status_effects[status_id].duplicate())
+					unit.show_popup_text(GameData.status_effects[status_id].status_effect_name)
+					await unit.add_status(GameData.status_effects[status_id].duplicate())
 	elif status_list_type == StatusListType.RANDOM:
 		var status_success: bool = randi_range(0, 99) < status_list_chance
 		if status_success:
