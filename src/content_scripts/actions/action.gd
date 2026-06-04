@@ -110,6 +110,7 @@ var separate_status: bool = false
 @export var animation_start_id: int = 0
 @export var animation_charging_id: int = 0
 @export var animation_executing_id: int = 0
+@export var animation_executing_ids_alternate: PackedInt32Array = []
 
 @export var vfx_id: int = 0
 var vfx_data: VisualEffectData
@@ -418,14 +419,14 @@ func apply_standard(action_instance: ActionInstance) -> void:
 	# look up animation based on weapon type and vertical angle to target
 	var mod_animation_executing_id: int = animation_executing_id
 	if not action_instance.submitted_targets.is_empty():
-		if animation_executing_id == 0 and use_weapon_animation:
-			mod_animation_executing_id = roundi(RomReader.battle_bin_data.weapon_animation_ids[action_instance.user.primary_weapon.item_type].y) * 2
+		if animation_executing_ids_alternate.size() != 0 and use_weapon_animation:
+			mod_animation_executing_id = animation_executing_id
 			var angle_to_target: float = ((action_instance.submitted_targets[0].height_mid - action_instance.user.tile_position.height_mid) 
 					/ (action_instance.submitted_targets[0].location - action_instance.user.tile_position.location).length())
 			if angle_to_target > 0.51:
-				mod_animation_executing_id += -2
+				mod_animation_executing_id = animation_executing_ids_alternate[0]
 			elif angle_to_target < -0.51:
-				mod_animation_executing_id += 2
+				mod_animation_executing_id = animation_executing_ids_alternate[1]
 	
 	await action_instance.user.animate_start_action(animation_start_id, animation_charging_id)
 	

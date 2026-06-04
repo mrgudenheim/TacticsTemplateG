@@ -343,8 +343,12 @@ func _init(idx: int = -1) -> void:
 		else:
 			weapon_attack_action.trap_hit_handler_id = TrapEffectData.HANDLER_HIT_MELEE
 
-		#weapon_attack_action.animation_executing_id = RomReader.battle_bin_data.weapon_animation_ids[item_type].y * 2
-		
+		if idx < 0x7a:
+			weapon_attack_action.animation_executing_id = RomReader.battle_bin_data.weapon_animation_ids[item_type].y * 2
+			weapon_attack_action.animation_executing_ids_alternate = [
+				RomReader.battle_bin_data.weapon_animation_ids[item_type].x * 2,
+				RomReader.battle_bin_data.weapon_animation_ids[item_type].z * 2,
+			]
 		
 	elif idx < 0x90: # shield data
 		sub_index = idx - 0x80
@@ -378,7 +382,7 @@ func _init(idx: int = -1) -> void:
 		# if passive_effect.stat_modifiers[key].value_formula.values[0] == 0:
 		if passive_effect.stat_modifiers[key].formula_text == "value + 0":
 			passive_effect.stat_modifiers.erase(key)
-	
+
 	add_to_global_list()
 
 	passive_effect_name = unique_name

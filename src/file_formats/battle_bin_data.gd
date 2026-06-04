@@ -169,7 +169,7 @@ func init_from_battle_bin() -> void:
 	for idx: int in num_charge_entries:
 		charging_vfx_ids[idx] = charge_data.decode_u8(idx)
 
-	# ability vfx header offsets
+	# weapon animation ids - low, mid, high
 	entry_size = 3
 	num_entries = ItemData.ItemType.CLOTH + 1
 	weapon_animation_ids.resize(num_entries)

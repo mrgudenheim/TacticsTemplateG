@@ -1441,25 +1441,23 @@ func export_unit_animations(save_path: String) -> void:
 	message.emit("Exporting SHPs and SEQs...")
 	await get_tree().process_frame
 	
-	var shp_dir_path: String = save_path + "/shps/"
-	DirAccess.make_dir_recursive_absolute(shp_dir_path)
+	var animation_dir_path: String = save_path.path_join("animations/")
+	DirAccess.make_dir_recursive_absolute(animation_dir_path)
 
 	for shp: Shp in shps.values():
 		if not shp.is_initialized:
 			shp.set_data_from_shp_bytes(get_file_data(shp.file_name))
 
-		var shp_file_path: String = shp_dir_path.path_join(shp.file_name.to_lower().trim_suffix(".shp") + ".shp.tres")
+		var shp_file_path: String = animation_dir_path.path_join(shp.file_name.to_lower().trim_suffix(".shp") + ".shp.tres")
 		var error: Error = ResourceSaver.save(shp, shp_file_path)
 		if error != Error.OK:
 			push_warning("error saving shp " + shp.file_name + ": " + str(error))
 
-	var seq_dir_path: String = save_path + "/seqs/"
-	DirAccess.make_dir_recursive_absolute(seq_dir_path)
 	for seq: Seq in seqs.values():
 		if not seq.is_initialized:
 			seq.set_data_from_seq_bytes(get_file_data(seq.file_name))
 
-		var seq_file_path: String = seq_dir_path.path_join(seq.file_name.to_lower().trim_suffix(".seq") + ".seq.tres")
+		var seq_file_path: String = animation_dir_path.path_join(seq.file_name.to_lower().trim_suffix(".seq") + ".seq.tres")
 		var error: Error = ResourceSaver.save(seq, seq_file_path)
 		if error != Error.OK:
 			push_warning("error saving shp " + seq.file_name + ": " + str(error))
