@@ -17,16 +17,17 @@ static var seq_aliases: Dictionary[String, String] = {
 	"TYPE3.SEQ":"type3",
 	"TYPE4.SEQ":"type4 (Unused)",
 	"WEP1.SEQ":"wep1",
-	"WEP2.SEQ":"wep2"}
+	"WEP2.SEQ":"wep2",
+}
 
 # LoadFrameAndWait with 0 delay is also an animation end
-const ending_opcodes: PackedStringArray = [
+const ENDING_OPCODES: PackedStringArray = [
 	"IncrementLoop",
 	"PauseAnimation",
 	"EndAnimation",
 	"HoldWeapon",
 	"ffc2",
-	]
+]
 
 
 var shp_name: String:
@@ -172,7 +173,7 @@ func set_data_from_seq_bytes(bytes: PackedByteArray) -> void:
 		var potential_opcode: String = "%02x%02x" % [bytes.decode_u8(byte_index), bytes.decode_u8(byte_index + 1)]
 		if opcode_parameters.has(potential_opcode):
 			byte_index += 2 + opcode_parameters[potential_opcode] # move past the opcode and its parameters
-			if ending_opcodes.has(opcode_names[potential_opcode]):
+			if ENDING_OPCODES.has(opcode_names[potential_opcode]):
 				sequence_end_index = byte_index
 				sequence_bytes = bytes.slice(sequence_start_index, sequence_end_index)
 				sequences.append(get_sequence_data(sequence_bytes))
