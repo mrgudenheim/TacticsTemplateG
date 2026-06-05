@@ -18,7 +18,7 @@ var byte_01: int = 0
 @export_flags("Freeze CT", "(Crystal/Treasure)", "(Defend/Perform)", "(Poison/Regen)", "(Confusion/Transparent/Charm/Sleep)", "(Checks 3)", "(Checks 2)", "Counts as KO") var checks_01: int = 0
 @export_flags("Cant React", "Unknown", "Ignore Attcks", "(Checks 10)", "(Checks 9)", "(Checks 8)", "(Checks 7 - Cancelled by Immortal?)", "(Checks 6)") var checks_02: int = 0
 var status_cancels_flags: PackedByteArray = [] # 5 bytes of bitflags for up to 40 statuses 
-@export var status_cant_stack_flags: PackedByteArray = [] # 5 bytes of bitflags for up to 40 statuses
+var status_cant_stack_flags: PackedByteArray = [] # 5 bytes of bitflags for up to 40 statuses
 
 @export var status_cancels: PackedStringArray = [] 
 @export var status_cant_stack: PackedStringArray = [] # TODO use bit index as index into StatusEffect array
@@ -30,9 +30,9 @@ enum DurationType {
 	PERMANENT,
 }
 @export var duration_type: DurationType = DurationType.TICKS
-@export var action_on_turn_start: String = "" # Action.unique_name;
-@export var action_on_turn_end: String = "" # Action.unique_name;
-@export var action_on_x_ticks: String = "" # Action.unique_name; performing
+@export var action_on_turn_start: String = "" # Action.unique_name
+@export var action_on_turn_end: String = "" # Action.unique_name
+@export var action_on_x_ticks: String = "" # Action.unique_name; used for things like performing status
 @export var x_ticks: int = -1
 @export var action_on_apply: String = "" # Action.unique_name; dead sets current_hp = 0
 # @export var action_on_complete: int = -1 # dead -> crystal/treasure, death sentence, charging?

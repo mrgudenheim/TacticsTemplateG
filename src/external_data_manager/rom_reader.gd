@@ -1333,6 +1333,8 @@ func export_data_tables(save_path: String) -> void:
 		Utilities.save_json(item, save_path)
 	for status_effect: StatusEffect in status_effects.values():
 		Utilities.save_json(status_effect, save_path)
+		var status_file_path: String = save_path.path_join(StatusEffect.SAVE_FOLDER).path_join(".".join([status_effect.unique_name, status_effect.FILE_SUFFIX, "tres"]))
+		var error: Error = ResourceSaver.save(status_effect, status_file_path)
 	for job_data: JobData in jobs_data.values():
 		job_data.sprite_name = sprs[spr_id_file_idxs[job_data.sprite_id]].file_name.to_lower().trim_suffix(".spr")
 		job_data.skillset_unique_name = scus_data.skillsets_data[job_data.skillset_id].unique_name

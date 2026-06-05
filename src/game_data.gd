@@ -150,10 +150,10 @@ func import_data(directory_path: String) -> void:
 					var new_content: PassiveEffect = PassiveEffect.create_from_json(file_text)
 					if not passive_effects.keys().has(new_content.unique_name):
 						passive_effects[new_content.unique_name] = new_content
-				"status_effect":
-					var new_content: StatusEffect = StatusEffect.create_from_json(file_text)
-					if not status_effects.keys().has(new_content.unique_name):
-						status_effects[new_content.unique_name] = new_content
+				# "status_effect":
+				# 	var new_content: StatusEffect = StatusEffect.create_from_json(file_text)
+				# 	if not status_effects.keys().has(new_content.unique_name):
+				# 		status_effects[new_content.unique_name] = new_content
 				"item":
 					var new_content: ItemData = ItemData.create_from_json(file_text)
 					if not items.keys().has(new_content.unique_name):
@@ -173,6 +173,9 @@ func import_data(directory_path: String) -> void:
 						if names["all_no_empty"][idx] == "":
 							names["all_no_empty"].remove_at(idx)
 		
+		elif file_path.ends_with(".status_effect.tres"):
+			var new_status_effect: StatusEffect = ResourceLoader.load(file_path, "StatusEffect")
+			status_effects[new_status_effect.unique_name] = new_status_effect
 		elif file_path.ends_with("skillset.tres"):
 			var new_skillset: Skillset = ResourceLoader.load(file_path, "Skillset")
 			skillsets[new_skillset.unique_name] = new_skillset
