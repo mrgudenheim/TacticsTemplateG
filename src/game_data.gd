@@ -33,6 +33,7 @@ var names: Dictionary[String, PackedStringArray] = {} # [name_category, possible
 var palettes: Dictionary[String, PackedColorArray] = {}
 var textures: Dictionary[String, Texture2D] = {}
 var unit_spritesheets_data: Dictionary[String, UnitSpritesheetData] = {}
+var animation_layer_priorities: PackedVector4Array = []
 
 var initial_unit_data: InitialUnitData
 
@@ -196,6 +197,9 @@ func import_data(directory_path: String) -> void:
 			var new_seq: Seq = ResourceLoader.load(file_path, "Seq")
 			new_seq.is_initialized = true
 			seqs[file_path.get_file().trim_suffix(".seq.tres")] = new_seq
+		elif file_path.ends_with("animation_data.tres"):
+			var new_animation_data: AnimationData = ResourceLoader.load(file_path, "AnimationData")
+			animation_layer_priorities = new_animation_data.animation_layer_priorities.duplicate()
 		elif file_path.to_lower().ends_with(".vfx_data.tres"):
 			var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")
 			vfx[file_path.get_file().trim_suffix(".vfx_data.tres")] = new_vfx

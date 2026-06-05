@@ -1461,6 +1461,11 @@ func export_unit_animations(save_path: String) -> void:
 		var error: Error = ResourceSaver.save(seq, seq_file_path)
 		if error != Error.OK:
 			push_warning("error saving shp " + seq.file_name + ": " + str(error))
+	
+	var animation_data: AnimationData = AnimationData.new()
+	animation_data.animation_layer_priorities = battle_bin_data.animation_layer_priorities
+	var animation_data_file_path: String = animation_dir_path.path_join("animation_data.tres")
+	var error: Error = ResourceSaver.save(animation_data, animation_data_file_path)
 
 
 func export_maps(save_path: String) -> void:

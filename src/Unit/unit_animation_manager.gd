@@ -271,7 +271,7 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 				
 			unit_sprites_manager.global_position += position_offset * BattleManager.SCALE
 		elif seq_part.opcode_name == "SetLayerPriority":
-			var layer_priority_order: Vector4 = RomReader.battle_bin_data.animation_layer_priorities[seq_part.parameters[0]]
+			var layer_priority_order: Vector4 = GameData.animation_layer_priorities[seq_part.parameters[0]]
 			# push_warning(layer_priority_order)
 			
 			get_layer_sprite3d(layer_priority_order.w).position.z = 0 * UnitSpritesManager.LAYERING_OFFSET
