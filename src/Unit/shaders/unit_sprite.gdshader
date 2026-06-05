@@ -4,10 +4,23 @@ render_mode unshaded, cull_disabled, depth_draw_opaque;
 uniform sampler2D sprite_texture : source_color, filter_nearest;
 uniform vec4[16] palette_colors : source_color; // palette of 16 colors each
 uniform vec3 unit_tint = vec3(0.0, 0.0, 0.0);
+uniform bool billboard_enabled = false;
 
 #include "res://src/shaders/psx_depth_common.gdshaderinc"
 
 void vertex() {
+	if (billboard_enabled) {
+		mat4 modified_model_view = VIEW_MATRIX * mat4(
+			INV_VIEW_MATRIX[0], // Camera X (Right vector)
+			INV_VIEW_MATRIX[1], // Camera Y (Up vector)
+			INV_VIEW_MATRIX[2], // Camera Z (Forward vector)
+			MODEL_MATRIX[3]     // Keeps the object's original 3D position
+		);
+		MODELVIEW_MATRIX = modified_model_view;
+		// Fix normals so lighting doesn't break
+		MODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);
+	}
+	
 	vec3 world_pos = MODEL_MATRIX[3].xyz;
 	vec3 cam_dir = normalize(INV_VIEW_MATRIX[3].xyz - world_pos);
 	float bias = depth_bias_custom;

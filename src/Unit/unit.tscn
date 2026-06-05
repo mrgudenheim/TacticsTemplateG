@@ -8,10 +8,11 @@
 [ext_resource type="Script" uid="uid://x1o6jl12c6sh" path="res://src/Unit/unit_debug_menu.gd" id="5_aqiwa"]
 [ext_resource type="Script" uid="uid://baavg15lka8r7" path="res://src/Unit/unit_ui.gd" id="7_wg4to"]
 [ext_resource type="Script" uid="uid://cpd53xavqhs88" path="res://src/Unit/popup_text_container.gd" id="8_a44xk"]
-[ext_resource type="Script" path="res://src/Unit/unit_shadow.gd" id="9_shadow_script"]
 [ext_resource type="PackedScene" uid="uid://dfhvsm7ynvj76" path="res://src/Unit/popup_text.tscn" id="8_rp3cl"]
 [ext_resource type="Script" uid="uid://lnojayxpawho" path="res://src/Unit/unit_icon.gd" id="9_0prau"]
+[ext_resource type="Script" uid="uid://cdr2mri0l24sa" path="res://src/Unit/unit_shadow.gd" id="9_shadow_script"]
 [ext_resource type="PackedScene" uid="uid://demtoqlp3aicl" path="res://src/Unit/unit_details_panel.tscn" id="12_gngdm"]
+[ext_resource type="Shader" uid="uid://cdcosdsn4y30b" path="res://src/Unit/shaders/unit_sprite.gdshader" id="12_v0g1v"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_omsuf"]
 radius = 0.25
@@ -36,6 +37,22 @@ fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 metadata/_snap_enabled = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dj13m"]
+render_priority = 0
+shader = ExtResource("12_v0g1v")
+shader_parameter/palette_colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+shader_parameter/unit_tint = Vector3(0, 0, 0)
+shader_parameter/billboard_enabled = false
+shader_parameter/depth_mode = 0
+shader_parameter/depth_bias_custom = 0.0
+shader_parameter/bias_pull_8 = 3.0
+shader_parameter/bias_pull_16 = 6.0
+shader_parameter/bias_fixed_front = 100.0
+shader_parameter/bias_fixed_back = -100.0
+shader_parameter/bias_fixed_16 = 80.0
+shader_parameter/bias_unit = 0.1
+shader_parameter/bias_tile_overlay = 0.05
 
 [node name="Unit" type="Node3D" unique_id=668783031 node_paths=PackedStringArray("char_body", "animation_manager", "popup_texts", "stat_bars_position", "stat_bars_container", "unit_battle_details_ui", "icon", "icon2", "debug_menu", "tile_highlights")]
 script = ExtResource("1_lcmw7")
@@ -78,8 +95,8 @@ transform = Transform3D(0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 0, 1, 
 pixel_size = 0.0357
 texture_filter = 0
 render_priority = 1
-script = ExtResource("9_shadow_script")
 texture = SubResource("GradientTexture2D_6vwfi")
+script = ExtResource("9_shadow_script")
 
 [node name="UnitAnimationManager" type="Node3D" parent="CharacterBody3D" unique_id=1134309126 node_paths=PackedStringArray("unit_data", "unit_sprites_manager")]
 transform = Transform3D(1, 0, 0, 0, 0.894934, 0.446198, 0, -0.446198, 0.894934, 0, 0.643, 0)
@@ -253,6 +270,7 @@ script = ExtResource("9_0prau")
 
 [node name="StatusIcon" type="Sprite3D" parent="CharacterBody3D" unique_id=1430136188]
 transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0.25, 1.05, 0)
+material_override = SubResource("ShaderMaterial_dj13m")
 pixel_size = 0.0357
 billboard = 1
 texture_filter = 0
