@@ -791,7 +791,7 @@ func end_turn() -> void:
 	action_points_remaining = action_points_start
 	
 	is_ending_turn = true
-	if global_battle_manager.active_unit != self: # prevent accidentally ending a different units turn TODO what if the next turn is also this unit?
+	if is_instance_valid(global_battle_manager.active_unit) and global_battle_manager.active_unit != self: # prevent accidentally ending a different units turn TODO what if the next turn is also this unit?
 		push_error(job_nickname + "-" + unit_nickname + " trying to end turn, but active unit is: " + global_battle_manager.active_unit.name)
 	else:
 		clear_action_buttons(global_battle_manager)
