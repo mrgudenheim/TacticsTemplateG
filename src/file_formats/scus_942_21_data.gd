@@ -242,7 +242,18 @@ func init_from_scus() -> void:
 	for skillset_id: int in num_entries:
 		var skillset_data: Skillset = Skillset.new()
 		skillset_data.display_name = RomReader.fft_text.skillset_names[skillset_id]
-		skillset_data.unique_name = skillset_data.display_name.to_snake_case() # TODO fix for skillsets with duplicate names
+		var new_unique_name: String = skillset_data.display_name.to_snake_case()
+		var num: int = 1
+		var modified_unique_name: String = new_unique_name
+		while skillsets_data.any(func(skillset: Skillset) -> bool: 
+			if is_instance_valid(skillset):
+				return skillset.unique_name == modified_unique_name
+			return false
+		):
+			num += 1
+			var formatted_num: String = "%02d" % num
+			modified_unique_name = new_unique_name + "_" + formatted_num
+		skillset_data.unique_name = modified_unique_name
 		skillset_data.action_ability_ids.resize(16)
 		skillset_data.rsm_ability_ids.resize(6)
 		for skill_slot: int in 16: # action abilities
