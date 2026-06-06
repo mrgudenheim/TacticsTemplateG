@@ -20,7 +20,7 @@ var item_attribute_id: int = 0 # https://ffhacktics.com/wiki/Item_Attribute stat
 @export var price: int = 100
 @export var shop_availability_start: int = 0
 
-var wep_frame_v_offset: int = 0
+@export var wep_frame_v_offset: int = 0
 @export var wep_frame_palette: int = 0
 
 # weapon data
