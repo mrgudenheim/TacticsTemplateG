@@ -2,10 +2,11 @@ class_name Ability
 extends Resource
 
 enum SlotType {
-	SKILLSET,
+	# SKILLSET,
 	REACTION,
 	SUPPORT,
 	MOVEMENT,
+	ACTION,
 }
 
 const SAVE_FOLDER: String = "abilities/"
@@ -13,7 +14,7 @@ const FILE_SUFFIX: String = "ability"
 
 @export var unique_name: String = "unique_name"
 @export var display_name: String = "[Ability Name]"
-@export var slot_type: SlotType = SlotType.SKILLSET
+@export var slot_type: SlotType = SlotType.ACTION
 @export var description: String = "[ability description]"
 
 @export var jp_cost: int = 0

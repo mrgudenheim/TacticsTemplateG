@@ -4,6 +4,7 @@ extends Container
 signal job_select_pressed(unit: Unit)
 signal item_select_pressed(unit: Unit, slot: EquipmentSlot)
 signal ability_select_pressed(unit: Unit, slot: AbilitySlot)
+signal skillset_select_pressed(unit: Unit, skillset_slot_idx: int)
 
 @export var sprite_rect: TextureRect
 @export var sprite_button: TextureButton
@@ -191,10 +192,29 @@ func update_ui(new_unit: Unit) -> void:
 		new_item_button.custom_minimum_size = Vector2(60, 0)
 		equipment_grid.add_child(new_item_button)
 
-	# update abilities
+	
+	
+
+
+	# update abilities and skillsets
 	var ability_labels: Array[Node] = ability_grid.get_children()
 	for child_idx: int in range(0, ability_labels.size()):
 		ability_labels[child_idx].queue_free()
+
+	# update skillsets
+	for skillset_slot_idx: int in new_unit.skillsets_names.size():
+		var new_slot_label: Label = Label.new()
+		new_slot_label.text = "Skillset " + str(skillset_slot_idx)
+		ability_grid.add_child(new_slot_label)
+
+		var skillset_display_name: String = ""
+		if not new_unit.skillsets_names[skillset_slot_idx].is_empty():
+			skillset_display_name = GameData.skillsets[new_unit.skillsets_names[skillset_slot_idx]].display_name
+
+		var new_skillset_button: Button = Button.new()
+		new_skillset_button.text = skillset_display_name
+		new_skillset_button.pressed.connect(func() -> void: skillset_select_pressed.emit(new_unit, skillset_slot_idx))
+		ability_grid.add_child(new_skillset_button)
 
 	for ability_slot: AbilitySlot in new_unit.ability_slots:
 		var new_slot_label: Label = Label.new()

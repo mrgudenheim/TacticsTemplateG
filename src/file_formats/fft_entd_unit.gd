@@ -246,25 +246,26 @@ func get_unit_data() -> UnitData:
 	unit_data.equip_slots[3].item_unique_name = get_item_name(unit_data, 3, equipment_body)
 	unit_data.equip_slots[4].item_unique_name = get_item_name(unit_data, 4, equipment_accessory)
 
+	# TODO create skillset abilities, set random if secondary_skillset == 0xFE
+	# if primary_skillset == 0xFF, ability_slots[0] set by main job
+	unit_data.skillsets_names = ["", ""]
+	unit_data.skillsets_names[0] = RomReader.jobs_data.values()[main_job].skillset_unique_name
+
 	# abilities
 	unit_data.ability_slots = [
-		AbilitySlot.new("Skillset 1", [Ability.SlotType.SKILLSET]),
-		AbilitySlot.new("Skillset 2", [Ability.SlotType.SKILLSET]),
+		#AbilitySlot.new("Skillset 1", [Ability.SlotType.SKILLSET]),
+		#AbilitySlot.new("Skillset 2", [Ability.SlotType.SKILLSET]),
 		AbilitySlot.new("Reaction", [Ability.SlotType.REACTION]),
 		AbilitySlot.new("Support", [Ability.SlotType.SUPPORT]),
 		AbilitySlot.new("Movement", [Ability.SlotType.MOVEMENT]),
 	]
 
-	# TODO if ability value == 0x01FE, get random leveled equipment
-	# TODO create skillset abilities, set random if secondary_skillset == 0xFE
-	# if primary_skillset == 0xFF, ability_slots[0] set by main job
-	# unit_data.ability_slots[1] 
-	unit_data.ability_slots[2].ability_unique_name = get_ability_name(unit_data, 2, reaction)
-	unit_data.ability_slots[3].ability_unique_name = get_ability_name(unit_data, 3, support)
-	unit_data.ability_slots[4].ability_unique_name = get_ability_name(unit_data, 4, movement)
+	# TODO if ability value == 0x01FE, get random ability
+	unit_data.ability_slots[0].ability_unique_name = get_ability_name(unit_data, 0, reaction)
+	unit_data.ability_slots[1].ability_unique_name = get_ability_name(unit_data, 1, support)
+	unit_data.ability_slots[2].ability_unique_name = get_ability_name(unit_data, 2, movement)
 
 	# position
-	# TODO account for map being shifted or mirrored?
 	unit_data.tile_position = Vector3i(position_x, upper_level, position_y)
 
 	return unit_data

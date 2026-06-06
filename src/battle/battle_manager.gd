@@ -572,6 +572,7 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> Unit:
 	new_unit.icon.texture = GameData.textures["misc"] # TODO clean up status icon stuff
 	new_unit.icon2.texture = GameData.textures["misc"]
 	
+	new_unit.skillsets_names = unit_data.skillsets_names
 	new_unit.ability_slots = unit_data.ability_slots
 	new_unit.primary_weapon_assigned.connect(func(_weapon_unique_name: String) -> void: new_unit.update_actions(self))
 	new_unit.equip_slots = unit_data.equip_slots

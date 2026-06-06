@@ -24,6 +24,7 @@ extends Resource
 @export var equip_slots: Array[EquipmentSlot] = []
 
 # abilities
+@export var skillsets_names: PackedStringArray = []
 @export var ability_slots: Array[AbilitySlot] = []
 
 # position
@@ -106,6 +107,7 @@ func init_from_unit(unit: Unit) -> void:
 	stats = unit.stats
 	stats_raw = unit.stats_raw
 	equip_slots = unit.equip_slots
+	skillsets_names = unit.skillsets_names
 	ability_slots = unit.ability_slots
 	
 	var tile_xz_index: int = unit.global_battle_manager.total_map_tiles.keys().find(unit.tile_position.location)

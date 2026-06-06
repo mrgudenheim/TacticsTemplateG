@@ -119,7 +119,8 @@ var death_counter: int = 3
 var zodiac: String = "Ares"
 
 var innate_ability_ids: PackedInt32Array = []
-var skillsets: Array[Skillset] = []
+var skillsets_names: PackedStringArray = []
+# var skillsets: Array[Skillset] = []
 
 var equipable_item_types: Array[ItemData.ItemType] = []
 var primary_weapon: ItemData
@@ -132,8 +133,8 @@ var equip_slots: Array[EquipmentSlot] = [
 ]
 
 var ability_slots: Array[AbilitySlot] = [
-	AbilitySlot.new("Skillset 1", [Ability.SlotType.SKILLSET]),
-	AbilitySlot.new("Skillset 2", [Ability.SlotType.SKILLSET]),
+	# AbilitySlot.new("Skillset 1", [Ability.SlotType.SKILLSET]),
+	# AbilitySlot.new("Skillset 2", [Ability.SlotType.SKILLSET]),
 	AbilitySlot.new("Reaction", [Ability.SlotType.REACTION]),
 	AbilitySlot.new("Support", [Ability.SlotType.SUPPORT]),
 	AbilitySlot.new("Movement", [Ability.SlotType.MOVEMENT]),
@@ -373,6 +374,9 @@ func initialize_unit() -> void:
 	#animation_manager.other_spr = RomReader.sprs[RomReader.file_records["OTHER.SPR"].type_index]
 	animation_manager.other_texture = GameData.textures["other"]
 	animation_manager.other_shp = GameData.shps["other"]
+
+	skillsets_names.resize(2)
+	skillsets_names.fill("")
 	
 	# 1 cure
 	# 0xc8 blood suck
@@ -529,9 +533,9 @@ func generate_random_abilities() -> void:
 	var random_support: Ability = GameData.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.SUPPORT).pick_random()
 	var random_movement: Ability = GameData.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.MOVEMENT).pick_random()
 
-	ability_slots[2].ability_unique_name = random_reaction.unique_name
-	ability_slots[3].ability_unique_name =  random_support.unique_name
-	ability_slots[4].ability_unique_name =  random_movement.unique_name
+	ability_slots[0].ability_unique_name = random_reaction.unique_name
+	ability_slots[1].ability_unique_name =  random_support.unique_name
+	ability_slots[2].ability_unique_name =  random_movement.unique_name
 
 	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
 	update_passive_effects()
@@ -710,9 +714,18 @@ func set_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
 	actions.append(wait_action)
 
 
+func get_skillsets() -> Array[Skillset]:
+	var skillsets: Array[Skillset] = []
+	for skillset_name: String in skillsets_names:
+		if is_instance_valid(name) and not name.is_empty():
+			skillsets.append(GameData.skillsets[name])
+	
+	return skillsets
+
+
 func get_skillset_actions() -> Array[Action]:
 	var action_list: Array[Action] = []
-	for skillset: Skillset in skillsets:
+	for skillset: Skillset in get_skillsets():
 		for ability_name: String in skillset.ability_names:
 			var ability_is_action: bool = not [Ability.SlotType.REACTION, Ability.SlotType.SUPPORT, Ability.SlotType.MOVEMENT].has(GameData.abilities[ability_name].slot_type)
 			if ability_is_action and GameData.actions.has(ability_name):
@@ -1331,8 +1344,8 @@ func set_job(new_job_name: String) -> void:
 	job_data = GameData.jobs_data[new_job_name]
 	set_sprite_by_job(new_job_name)
 	
-	skillsets.clear()
-	skillsets.append(GameData.skillsets[job_data.skillset_unique_name])
+	skillsets_names.fill("")
+	skillsets_names[0] = job_data.skillset_unique_name
 	
 	job_nickname = job_data.display_name
 	
@@ -1380,7 +1393,7 @@ func set_primary_weapon(new_weapon_unique_name: String) -> void:
 
 func get_attack_action() -> Action:
 	# TODO handle two swords? other abilities?
-	return primary_weapon.get_attack_action()
+	return equip_slots[0].get_item().get_attack_action()
 
 
 # https://ffhacktics.com/wiki/Determine_Status_Bubble_Parameters
