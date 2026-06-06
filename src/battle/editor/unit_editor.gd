@@ -192,10 +192,6 @@ func update_ui(new_unit: Unit) -> void:
 		new_item_button.custom_minimum_size = Vector2(60, 0)
 		equipment_grid.add_child(new_item_button)
 
-	
-	
-
-
 	# update abilities and skillsets
 	var ability_labels: Array[Node] = ability_grid.get_children()
 	for child_idx: int in range(0, ability_labels.size()):
@@ -204,12 +200,16 @@ func update_ui(new_unit: Unit) -> void:
 	# update skillsets
 	for skillset_slot_idx: int in new_unit.skillsets_names.size():
 		var new_slot_label: Label = Label.new()
-		new_slot_label.text = "Skillset " + str(skillset_slot_idx)
+		new_slot_label.text = "Skillset " + str(skillset_slot_idx + 1)
 		ability_grid.add_child(new_slot_label)
 
 		var skillset_display_name: String = ""
-		if not new_unit.skillsets_names[skillset_slot_idx].is_empty():
-			skillset_display_name = GameData.skillsets[new_unit.skillsets_names[skillset_slot_idx]].display_name
+		var skillset_uname: String = new_unit.skillsets_names[skillset_slot_idx]
+		if not skillset_uname.is_empty():
+			if GameData.skillsets.has(skillset_uname):
+				skillset_display_name = GameData.skillsets[skillset_uname].display_name
+			else:
+				push_warning("GameData does not have skillset: " + skillset_uname)
 
 		var new_skillset_button: Button = Button.new()
 		new_skillset_button.text = skillset_display_name

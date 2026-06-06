@@ -234,6 +234,16 @@ func process_rom() -> void:
 	scus_data.init_statuses()
 	section_start = _profile_section("scus_data.init_statuses", section_start)
 
+	for job_data: JobData in jobs_data.values():
+		job_data.sprite_name = sprs[spr_id_file_idxs[job_data.sprite_id]].file_name.to_lower().trim_suffix(".spr")
+		job_data.skillset_unique_name = scus_data.skillsets_data[job_data.skillset_id].unique_name
+
+		for innate_ability_id: int in job_data.innate_abilities_ids:
+			# var ability_uname: String = fft_abilities[innate_ability_id].display_name.to_snake_case()
+			var ability_uname: String = abilities.keys()[innate_ability_id]
+			if not job_data.innate_ability_names.has(ability_uname):
+				job_data.innate_ability_names.append(ability_uname)
+
 	if not fft_scenarios_pre_extracted:
 		add_entds("ENTD1.ENT")
 		add_entds("ENTD2.ENT")
@@ -1337,15 +1347,6 @@ func export_data_tables(save_path: String) -> void:
 		var status_file_path: String = save_path.path_join(StatusEffect.SAVE_FOLDER).path_join(".".join([status_effect.unique_name, status_effect.FILE_SUFFIX, "tres"]))
 		var error: Error = ResourceSaver.save(status_effect, status_file_path)
 	for job_data: JobData in jobs_data.values():
-		job_data.sprite_name = sprs[spr_id_file_idxs[job_data.sprite_id]].file_name.to_lower().trim_suffix(".spr")
-		job_data.skillset_unique_name = scus_data.skillsets_data[job_data.skillset_id].unique_name
-
-		for innate_ability_id: int in job_data.innate_abilities_ids:
-			# var ability_uname: String = fft_abilities[innate_ability_id].display_name.to_snake_case()
-			var ability_uname: String = abilities.keys()[innate_ability_id]
-			if not job_data.innate_ability_names.has(ability_uname):
-				job_data.innate_ability_names.append(ability_uname)
-
 		Utilities.save_json(job_data, save_path)
 	for action: Action in actions.values():
 		Utilities.save_json(action, save_path)
