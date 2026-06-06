@@ -1,6 +1,6 @@
 {
 	"action_on_apply": "dead_damage",
-	"action_on_complete": "dead_to_crystal",
+	"action_on_complete": "dead_to_crystal_treasure",
 	"action_on_turn_end": "",
 	"action_on_turn_start": "",
 	"action_on_x_ticks": "",

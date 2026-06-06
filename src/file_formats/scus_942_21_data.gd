@@ -570,7 +570,7 @@ func init_statuses() -> void:
 	
 	# dead actions
 	status_effects[2].action_on_apply = "dead_damage" # dead damage
-	status_effects[2].action_on_complete = "dead_to_crystal" # dead to crystal/treasure
+	status_effects[2].action_on_complete = "dead_to_crystal_treasure" # dead to crystal/treasure
 
 	# poison action
 	status_effects[24].action_on_turn_end = "poison_damage"
