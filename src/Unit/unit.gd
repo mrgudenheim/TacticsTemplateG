@@ -358,8 +358,14 @@ func initialize_unit() -> void:
 	animation_manager.eff_seq = GameData.seqs["eff1"]
 	
 	#animation_manager.unit_sprites_manager.sprite_effect.texture = animation_manager.eff_spr.create_frame_grid_texture(0, 0, 0, 0, 0)
-	animation_manager.unit_sprites_manager.sprite_effect.texture = GameData.unit_spritesheets_data["eff"].create_frame_grid_texture(0, 0, 0, 0)
-	
+	var eff_frame_grid: ImageTexture = GameData.unit_spritesheets_data["eff"].create_frame_grid_texture(0, 0, 0, 0)
+	animation_manager.unit_sprites_manager.sprite_effect.texture = eff_frame_grid
+	var eff_material: ShaderMaterial = animation_manager.unit_sprites_manager.sprite_effect.material_override.duplicate()
+	eff_material.set_shader_parameter("sprite_texture", eff_frame_grid)
+	eff_material.set_shader_parameter("palette_colors", GameData.unit_spritesheets_data["eff"].color_palette.slice(0 * 16, 1 * 16))
+	eff_material.set_shader_parameter("depth_mode", VfxConstants.DepthMode.UNIT)
+	animation_manager.unit_sprites_manager.sprite_effect.material_override = eff_material
+
 	#animation_manager.item_spr = RomReader.sprs[RomReader.file_records["ITEM.BIN"].type_index]
 	
 	animation_manager.unit_sprites_manager.sprite_item.texture = GameData.textures["items"]

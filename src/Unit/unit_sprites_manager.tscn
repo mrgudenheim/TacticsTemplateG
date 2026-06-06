@@ -1,6 +1,23 @@
 [gd_scene format=3 uid="uid://cw8mvbkue4ibk"]
 
 [ext_resource type="Script" uid="uid://cd7gejdmtbx5v" path="res://src/Unit/unit_sprites_manager.gd" id="1_brshp"]
+[ext_resource type="Shader" uid="uid://88xwh32nwmdl" path="res://src/Unit/shaders/unit_sprite_additive.gdshader" id="2_2apm4"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_evlq0"]
+render_priority = 0
+shader = ExtResource("2_2apm4")
+shader_parameter/palette_colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+shader_parameter/unit_tint = Vector3(0, 0, 0)
+shader_parameter/billboard_enabled = false
+shader_parameter/depth_mode = 0
+shader_parameter/depth_bias_custom = 0.0
+shader_parameter/bias_pull_8 = 3.0
+shader_parameter/bias_pull_16 = 6.0
+shader_parameter/bias_fixed_front = 100.0
+shader_parameter/bias_fixed_back = -100.0
+shader_parameter/bias_fixed_16 = 80.0
+shader_parameter/bias_unit = 0.1
+shader_parameter/bias_tile_overlay = 0.05
 
 [node name="UnitSpritesManager" type="Node3D" unique_id=197575275 node_paths=PackedStringArray("sprite_primary", "sprite_weapon", "sprite_effect", "sprite_text", "sprite_item", "sprite_background")]
 script = ExtResource("1_brshp")
@@ -34,6 +51,7 @@ vframes = 32
 [node name="EffSprite3D" type="Sprite3D" parent="." unique_id=112098802]
 physics_interpolation_mode = 2
 transform = Transform3D(1, 0, 0, 0, 1, -2.98023e-08, 0, -2.98023e-08, 1, 0, -0.714, 0)
+material_override = SubResource("ShaderMaterial_evlq0")
 offset = Vector2(0, 20)
 modulate = Color(1, 1, 1, 0.74902)
 pixel_size = 0.0357
