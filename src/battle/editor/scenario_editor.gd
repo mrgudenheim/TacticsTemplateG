@@ -80,7 +80,7 @@ func _ready() -> void:
 
 
 func load_scenario(dropdown_idx: int) -> void:
-	var scenario_to_load: Scenario = RomReader.get_scenario(load_scenario_button.get_item_text(dropdown_idx)).duplicate_deep(Resource.DEEP_DUPLICATE_ALL)
+	var scenario_to_load: Scenario = GameData.scenarios[load_scenario_button.get_item_text(dropdown_idx)].duplicate_deep(Resource.DEEP_DUPLICATE_ALL)
 	scenario_to_load.unique_name = scenario_to_load.unique_name + "_new"
 	# update mirror_scale for duplicated map chunks
 	for map_chunk: Scenario.MapChunk in scenario_to_load.map_chunks:
