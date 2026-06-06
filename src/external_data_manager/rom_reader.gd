@@ -439,8 +439,9 @@ func cache_associated_files() -> void:
 	var wep_spr: Spr = sprs[wep_spr_index].get_sub_spr("WEP.SPR", wep_spr_start, wep_spr_end)
 	wep_spr.shp_name = "WEP1.SHP"
 	wep_spr.seq_name = "WEP1.SEQ"
+	wep_spr.is_initialized = true
 	sprs[wep_spr_index] = wep_spr
-	spritesheets["WEP"] = wep_spr
+	spritesheets["WEP.SPR"] = wep_spr
 	
 	# get item graphics
 	var item_record: FileRecord = FileRecord.new()

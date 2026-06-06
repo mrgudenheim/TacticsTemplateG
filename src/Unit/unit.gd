@@ -1050,7 +1050,7 @@ func use_ability(pos: Vector3) -> void:
 		#animation_executing_id = 0x3e * 2 # TODO look up based on equiped weapon and target relative height
 		#animation_manager.unit_debug_menu.anim_id_spin.value = 0x3e * 2 # TODO look up based on equiped weapon and target relative height
 		#debug_menu.anim_id_spin.value = (RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) + int(is_back_facing) # TODO lookup based on target relative height
-		current_animation_id_fwd = roundi(RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) # TODO lookup based on target relative height
+		current_animation_id_fwd = get_attack_action().animation_executing_id # TODO lookup based on target relative height
 		set_base_animation_ptr_id(current_animation_id_fwd)
 	else:
 		var ability_animation_executing_id: int = action_data.animation_executing_id
@@ -1361,8 +1361,9 @@ func set_primary_weapon(new_weapon_unique_name: String) -> void:
 	primary_weapon = GameData.items[new_weapon_unique_name]
 	#animation_manager.weapon_id = new_weapon_id
 	var weapon_palette_id: int = primary_weapon.wep_frame_palette
-	animation_manager.unit_sprites_manager.set_weapon_texture(animation_manager.wep_spritesheet_data.create_frame_grid_texture(
-		0, 0, primary_weapon.wep_frame_v_offset, 0, animation_manager.wep_shp.file_name))
+	var weapon_grid_texture: ImageTexture = animation_manager.wep_spritesheet_data.create_frame_grid_texture(
+		0, 0, primary_weapon.wep_frame_v_offset, 0, animation_manager.wep_shp.file_name)
+	animation_manager.unit_sprites_manager.set_weapon_texture(weapon_grid_texture)
 	animation_manager.unit_sprites_manager.sprite_weapon.material_override.set_shader_parameter("palette_colors", GameData.unit_spritesheets_data["wep"].color_palette.slice(weapon_palette_id * 16, (weapon_palette_id + 1) * 16))
 	
 	# attack_action = primary_weapon.weapon_attack_action
