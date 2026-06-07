@@ -242,6 +242,7 @@ func init_from_scus() -> void:
 	for skillset_id: int in num_entries:
 		var skillset_data: Skillset = Skillset.new()
 		skillset_data.display_name = RomReader.fft_text.skillset_names[skillset_id]
+		skillset_data.description = RomReader.fft_text.skillset_descriptions[skillset_id]
 		var new_unique_name: String = skillset_data.display_name.to_snake_case()
 		var num: int = 1
 		var modified_unique_name: String = new_unique_name
@@ -282,6 +283,7 @@ func init_from_scus() -> void:
 	for skillset_id: int in num_entries:
 		var skillset_data: Skillset = Skillset.new()
 		skillset_data.display_name = RomReader.jobs_data.values()[skillset_id + 0x5e].display_name # set skillset name to monster job name
+		skillset_data.description = "Used by " + skillset_data.display_name + " monster"
 		var new_unique_name: String = skillset_data.display_name.to_snake_case()
 		var num: int = 1
 		var modified_unique_name: String = new_unique_name

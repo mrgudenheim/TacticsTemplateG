@@ -100,6 +100,7 @@ var file_layouts: Dictionary[String, FftTextFile] = {
 var job_names: PackedStringArray = []
 var job_desriptions: PackedStringArray = []
 var skillset_names: PackedStringArray = []
+var skillset_descriptions: PackedStringArray = []
 var ability_names: PackedStringArray = []
 var ability_descriptions: PackedStringArray = []
 var spell_quotes: PackedStringArray = []
@@ -124,6 +125,7 @@ func init_text() -> void:
 	job_names = battle_text.text_arrays[BattleBinTextSections.JOB_NAMES]
 	job_desriptions = attack_help_text.text_arrays[AttackHelpLzwSections.JOB_DESCRIPTIONS]
 	skillset_names = battle_text.text_arrays[BattleBinTextSections.SKILLSET_NAMES]
+	skillset_descriptions = attack_help_text.text_arrays[HelpLzwSections.SKILLSET_DESCRIPTIONS]
 	ability_names = battle_text.text_arrays[BattleBinTextSections.ABILITY_NAMES]
 	ability_descriptions = attack_help_text.text_arrays[AttackHelpLzwSections.ABILITY_DESCRIPTIONS]
 	spell_quotes = text_to_string(RomReader.get_file_data("SPELL.MES"))
