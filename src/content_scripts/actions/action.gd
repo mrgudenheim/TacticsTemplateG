@@ -583,14 +583,14 @@ func show_vfx(action_instance: ActionInstance, position: Vector3) -> Node3D:
 
 	var parent_node: Node = action_instance.user.get_parent()
 
-	var instance: VfxEffectInstance = VfxEffectInstance.new()
-	instance.name = "VfxEffectInstance"
-	instance.position = position
-	parent_node.add_child(instance)
+	var vfx_instance: VfxEffectInstance = VfxEffectInstance.new()
+	vfx_instance.name = "VfxEffectInstance"
+	vfx_instance.position = position
+	parent_node.add_child(vfx_instance)
 
 	var origin_pos: Vector3 = action_instance.user.tile_position.get_world_position()
-	instance.initialize(vfx_data, position, origin_pos)
-	return instance
+	vfx_instance.initialize(vfx_data, position, origin_pos)
+	return vfx_instance
 
 
 func show_trap_hit(action_instance: ActionInstance, target_unit: Unit) -> void:
