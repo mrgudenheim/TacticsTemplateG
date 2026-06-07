@@ -273,7 +273,7 @@ func update_unit_ability(unit: Unit, slot: AbilitySlot, new_ability: Ability) ->
 
 
 func update_unit_skillset(unit: Unit, skillset_idx: int, new_skillset: Skillset) -> void:
-	unit.skillsets_names[skillset_idx] = new_skillset.unique_name
+	unit.equip_skillset(skillset_idx, new_skillset)
 	desetup_skillset_select()
 
 

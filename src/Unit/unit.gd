@@ -610,6 +610,11 @@ func equip_ability(slot: AbilitySlot, ability: Ability) -> void:
 	update_passive_effects()
 
 
+func equip_skillset(skillset_idx: int, new_skillset: Skillset) -> void:
+	skillsets_names[skillset_idx] = new_skillset.unique_name
+	data_updated.emit(self)
+
+
 func update_triggered_actions(all_passive_effects: Array[PassiveEffect]) -> void:
 	if job_data != null:
 		for ability: Ability in job_data.innate_abilities:
