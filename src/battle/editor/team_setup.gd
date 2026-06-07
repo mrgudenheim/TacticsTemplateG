@@ -6,6 +6,7 @@ signal need_new_unit(team: Team)
 signal unit_job_select_pressed(unit: Unit)
 signal unit_item_select_pressed(unit: Unit, slot: EquipmentSlot)
 signal unit_ability_select_pressed(unit: Unit, slot: AbilitySlot)
+signal unit_skillset_select_pressed(unit: Unit, skillset_idx: int)
 
 @export var team: Team
 @export var unit_list: Container
@@ -58,3 +59,4 @@ func add_unit_editor(new_unit: Unit) -> void:
 	unit_editor.job_select_pressed.connect(unit_job_select_pressed.emit)
 	unit_editor.item_select_pressed.connect(unit_item_select_pressed.emit)
 	unit_editor.ability_select_pressed.connect(unit_ability_select_pressed.emit)
+	unit_editor.skillset_select_pressed.connect(unit_skillset_select_pressed.emit)

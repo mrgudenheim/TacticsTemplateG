@@ -14,8 +14,8 @@ var ability_data: Ability:
 @export var sprite_rect: TextureRect
 @export var descrption: Label
 
-
 @export var action_list: Container
+
 
 func _ready() -> void:
 	button.pressed.connect(on_selected)

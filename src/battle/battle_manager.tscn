@@ -23,6 +23,8 @@
 [ext_resource type="PackedScene" uid="uid://b24ja5gvetaqq" path="res://src/battle/editor/item_select_button.tscn" id="18_d5yoq"]
 [ext_resource type="Script" uid="uid://bsflrccy2sry" path="res://src/battle/editor/ability_select_control.gd" id="18_pbg35"]
 [ext_resource type="PackedScene" uid="uid://ckvy5kybckxkh" path="res://src/battle/editor/ability_select_button.tscn" id="20_ok2a6"]
+[ext_resource type="Script" uid="uid://dexgwf7yyfugb" path="res://src/battle/editor/skillset_select_control.gd" id="24_4y57l"]
+[ext_resource type="PackedScene" uid="uid://b5vkgg46x06pf" path="res://src/battle/editor/skillset_select_button.tscn" id="25_envfv"]
 [ext_resource type="PackedScene" path="res://src/battle/debug_overlay.tscn" id="debug_overlay"]
 
 [sub_resource type="Environment" id="Environment_njvnp"]
@@ -375,7 +377,7 @@ layout_mode = 2
 text = "Game State"
 horizontal_alignment = 1
 
-[node name="ScenarioEditor" type="Control" parent="." unique_id=535534392 node_paths=PackedStringArray("battle_manager", "start_button", "load_scenario_button", "export_scenario_button", "import_scenario_button", "import_file_dialog", "new_scenario_button", "background_gradient_color_pickers", "battle_subviewport", "battle_setup_container", "job_select_control", "item_select_control", "ability_select_control", "unit_editor", "add_map_chunk_button", "map_chunk_settings_container", "show_map_tiles_check")]
+[node name="ScenarioEditor" type="Control" parent="." unique_id=535534392 node_paths=PackedStringArray("battle_manager", "start_button", "load_scenario_button", "export_scenario_button", "import_scenario_button", "import_file_dialog", "new_scenario_button", "background_gradient_color_pickers", "battle_subviewport", "battle_setup_container", "job_select_control", "item_select_control", "ability_select_control", "skillset_select_control", "unit_editor", "add_map_chunk_button", "map_chunk_settings_container", "show_map_tiles_check")]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -398,6 +400,7 @@ team_setup_scene = ExtResource("14_kb1q2")
 job_select_control = NodePath("JobSelectContainer")
 item_select_control = NodePath("ItemSelectContainer")
 ability_select_control = NodePath("AbilitySelectContainer")
+skillset_select_control = NodePath("SkillsetSelectContainer")
 unit_editor = NodePath("BattleSetupTabContainer/Map/VBoxContainer/FoldableContainer/UnitSetupPanel")
 add_map_chunk_button = NodePath("BattleSetupTabContainer/Map/FloatingUi/HBoxContainer/AddMapChunkButton")
 map_chunk_settings_container = NodePath("BattleSetupTabContainer/Map/FloatingUi/MapChunkSettings")
@@ -586,6 +589,31 @@ layout_mode = 2
 horizontal_scroll_mode = 0
 
 [node name="AbilitySelectList" type="GridContainer" parent="ScenarioEditor/AbilitySelectContainer/AbilitySelectScrollArea" unique_id=1356332529]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 3
+
+[node name="SkillsetSelectContainer" type="HBoxContainer" parent="ScenarioEditor" unique_id=666047259 node_paths=PackedStringArray("skillset_select_button_container")]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("24_4y57l")
+skillset_select_button_container = NodePath("SkillsetSelectScrollArea/SkillsetSelectList")
+skillset_select_button_scene = ExtResource("25_envfv")
+
+[node name="Spacer" type="Control" parent="ScenarioEditor/SkillsetSelectContainer" unique_id=780956507]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SkillsetSelectScrollArea" type="ScrollContainer" parent="ScenarioEditor/SkillsetSelectContainer" unique_id=1753763999]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="SkillsetSelectList" type="GridContainer" parent="ScenarioEditor/SkillsetSelectContainer/SkillsetSelectScrollArea" unique_id=1971357057]
 layout_mode = 2
 size_flags_horizontal = 3
 columns = 3

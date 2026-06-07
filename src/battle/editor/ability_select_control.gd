@@ -17,7 +17,7 @@ func populate_list() -> void:
 
 func filter_list(abilities_to_show: Array[Ability]) -> void:
 	for ability_select_button: AbilitySelectButton in ability_select_buttons:
-		if abilities_to_show.has(ability_select_button.item_data):
+		if abilities_to_show.has(ability_select_button.ability_data):
 			ability_select_button.visible = true
 		else:
 			ability_select_button.visible = false

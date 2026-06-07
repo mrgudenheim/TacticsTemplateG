@@ -22,6 +22,7 @@ extends Control
 @export var job_select_control: JobSelectControl
 @export var item_select_control: ItemSelectControl
 @export var ability_select_control: AbilitySelectControl
+@export var skillset_select_control: SkillsetSelectControl
 
 @export var unit_dragged: Unit
 @export var tile_highlight: Node3D
@@ -180,6 +181,7 @@ func populate_option_lists() -> void:
 	job_select_control.populate_list()
 	item_select_control.populate_list()
 	ability_select_control.populate_list()
+	skillset_select_control.populate_list()
 
 
 func setup_job_select(unit: Unit) -> void:
@@ -235,23 +237,44 @@ func desetup_ability_select() -> void:
 		Utilities.disconnect_all_connections(ability_select_button.selected)
 
 
+func setup_skillset_select(unit: Unit, skillset_idx: int) -> void:
+	skillset_select_control.visible = true
+	for skillset_select_button: SkillsetSelectButton in skillset_select_control.skillset_select_buttons:
+		skillset_select_button.visible = true
+		skillset_select_button.selected.connect(func(new_skillset: Skillset) -> void: update_unit_skillset(unit, skillset_idx, new_skillset))
+		
+		# if slot.slot_types.has(skillset_select_button.skillset.slot_type):
+		# 	skillset_select_button.visible = true
+		# 	skillset_select_button.selected.connect(func(new_skillset: Skillset) -> void: update_unit_skillset(unit, idx, new_skillset))
+		# else:
+		# 	skillset_select_button.visible = false
+
+
+func desetup_skillset_select() -> void:
+	skillset_select_control.visible = false
+	for skillset_select_button: SkillsetSelectButton in skillset_select_control.skillset_select_buttons:
+		Utilities.disconnect_all_connections(skillset_select_button.selected)
+
+
 func update_unit_job(unit: Unit, new_job: JobData) -> void:
 	unit.set_job(new_job.unique_name)
 	# TODO update stats (apply multipliers, redo growths, etc.)
-	
 	desetup_job_select()
 
 
 func update_unit_equipment(unit: Unit, slot: EquipmentSlot, new_item: ItemData) -> void:
 	unit.set_equipment_slot(slot, new_item)
-	
 	desetup_item_select()
 
 
 func update_unit_ability(unit: Unit, slot: AbilitySlot, new_ability: Ability) -> void:
 	unit.equip_ability(slot, new_ability)
-	
 	desetup_ability_select()
+
+
+func update_unit_skillset(unit: Unit, skillset_idx: int, new_skillset: Skillset) -> void:
+	unit.skillsets_names[skillset_idx] = new_skillset.unique_name
+	desetup_skillset_select()
 
 
 func add_map_chunk_settings(new_map_chunk: Scenario.MapChunk = null) -> void:
@@ -336,6 +359,7 @@ func add_team(new_team: Team, is_random: bool = false) -> Team:
 	new_team_setup.unit_job_select_pressed.connect(setup_job_select)
 	new_team_setup.unit_item_select_pressed.connect(setup_item_select)
 	new_team_setup.unit_ability_select_pressed.connect(setup_ability_select)
+	new_team_setup.unit_skillset_select_pressed.connect(setup_skillset_select)
 	new_team_setup.need_new_unit.connect(battle_manager.spawn_random_unit)
 	battle_manager.unit_created.connect(new_team_setup.add_unit_editor)
 	
