@@ -281,6 +281,20 @@ func init_from_scus() -> void:
 	var monster_skillsets_bytes: PackedByteArray = scus_bytes.slice(monster_skillsets_start, monster_skillsets_start + (num_entries * entry_size))
 	for skillset_id: int in num_entries:
 		var skillset_data: Skillset = Skillset.new()
+		skillset_data.display_name = RomReader.jobs_data.values()[skillset_id + 0x5e].display_name # set skillset name to monster job name
+		var new_unique_name: String = skillset_data.display_name.to_snake_case()
+		var num: int = 1
+		var modified_unique_name: String = new_unique_name
+		while skillsets_data.any(func(skillset: Skillset) -> bool: 
+			if is_instance_valid(skillset):
+				return skillset.unique_name == modified_unique_name
+			return false
+		):
+			num += 1
+			var formatted_num: String = "%02d" % num
+			modified_unique_name = new_unique_name + "_" + formatted_num
+		skillset_data.unique_name = modified_unique_name
+		
 		skillset_data.action_ability_ids.resize(4)
 		for skill_slot: int in 4: # action abilities
 			var ability_id: int = monster_skillsets_bytes.decode_u8((skillset_id * entry_size) + 1 + skill_slot)
