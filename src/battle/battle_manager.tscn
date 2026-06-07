@@ -686,7 +686,3 @@ button_pressed = true
 text = "Orthographic"
 
 [node name="DebugOverlay" parent="." unique_id=895413566 instance=ExtResource("debug_overlay")]
-
-[connection signal="ability_select_pressed" from="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/FoldableContainer/UnitSetupPanel" to="ScenarioEditor" method="setup_ability_select"]
-[connection signal="item_select_pressed" from="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/FoldableContainer/UnitSetupPanel" to="ScenarioEditor" method="setup_item_select"]
-[connection signal="job_select_pressed" from="ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/FoldableContainer/UnitSetupPanel" to="ScenarioEditor" method="setup_job_select"]

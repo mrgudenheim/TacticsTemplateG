@@ -216,6 +216,7 @@ func update_ui(new_unit: Unit) -> void:
 		new_skillset_button.pressed.connect(func() -> void: skillset_select_pressed.emit(new_unit, skillset_slot_idx))
 		ability_grid.add_child(new_skillset_button)
 
+	# update abilities
 	for ability_slot: AbilitySlot in new_unit.ability_slots:
 		var new_slot_label: Label = Label.new()
 		new_slot_label.text = ability_slot.ability_slot_name

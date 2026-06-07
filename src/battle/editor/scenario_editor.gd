@@ -77,7 +77,12 @@ func _ready() -> void:
 	import_scenario_button.pressed.connect(open_import_dialong)
 	import_file_dialog.file_selected.connect(import_scenario)
 	new_scenario_button.pressed.connect(queue_new_scenario)
-	load_scenario_button.item_selected.connect(load_scenario) 
+	load_scenario_button.item_selected.connect(load_scenario)
+
+	unit_editor.job_select_pressed.connect(setup_job_select)
+	unit_editor.item_select_pressed.connect(setup_item_select)
+	unit_editor.ability_select_pressed.connect(setup_ability_select)
+	unit_editor.skillset_select_pressed.connect(setup_skillset_select)
 
 
 func load_scenario(dropdown_idx: int) -> void:
