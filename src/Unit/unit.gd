@@ -612,6 +612,8 @@ func equip_ability(slot: AbilitySlot, ability: Ability) -> void:
 
 func equip_skillset(skillset_idx: int, new_skillset: Skillset) -> void:
 	skillsets_names[skillset_idx] = new_skillset.unique_name
+	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
+	set_available_actions(all_passive_effects)
 	data_updated.emit(self)
 
 
@@ -690,6 +692,7 @@ func update_actions(battle_manager: BattleManager) -> void:
 	actions_data.clear()
 	
 	# show list UI for selecting an action TODO should action list be toggle/button group?
+	# set_available_actions(get_all_passive_effects())
 	for action: Action in actions:
 		var modified_action: Action = Action.get_modified_action(action, self)
 		var new_action_instance: ActionInstance = ActionInstance.new(modified_action, self, battle_manager)
@@ -708,7 +711,6 @@ func set_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
 	actions.clear()
 	actions.append(move_action)
 	actions.append(get_attack_action())
-	
 	actions.append_array(get_skillset_actions()) # TODO move to skillset ability
 
 	for passive_effect: PassiveEffect in all_passive_effects:
@@ -722,8 +724,8 @@ func set_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
 func get_skillsets() -> Array[Skillset]:
 	var skillsets: Array[Skillset] = []
 	for skillset_name: String in skillsets_names:
-		if is_instance_valid(name) and not name.is_empty():
-			skillsets.append(GameData.skillsets[name])
+		if skillset_name != null and not skillset_name.is_empty():
+			skillsets.append(GameData.skillsets[skillset_name])
 	
 	return skillsets
 
@@ -1349,8 +1351,8 @@ func set_job(new_job_name: String) -> void:
 	job_data = GameData.jobs_data[new_job_name]
 	set_sprite_by_job(new_job_name)
 	
-	skillsets_names.fill("")
-	skillsets_names[0] = job_data.skillset_unique_name
+	# skillsets_names.fill("")
+	equip_skillset(0, GameData.skillsets[job_data.skillset_unique_name])
 	
 	job_nickname = job_data.display_name
 	
