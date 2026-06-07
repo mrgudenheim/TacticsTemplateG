@@ -447,18 +447,18 @@ func add_test_teams_to_map() -> void:
 
 
 func spawn_random_unit(team: Team) -> Unit:
-	var rand_job: int = range(1, RomReader.jobs_data.size()).pick_random()
-	while [0x2c, 0x31].has(rand_job): # prevent jobs without idle frames - 0x2c (Alma2) and 0x31 (Ajora) do not have walking frames
-		rand_job = randi_range(0x01, 0x8d)
+	var rand_job: JobData = GameData.jobs_data.values().pick_random()
+	while [0x2c, 0x31].has(rand_job.job_id): # prevent jobs without idle frames - 0x2c (Alma2) and 0x31 (Ajora) do not have walking frames
+		rand_job = GameData.jobs_data.values().pick_random()
 	var tile_location: TerrainTile = get_random_stand_terrain_tile()
-	var new_unit: Unit = spawn_unit(tile_location, rand_job, team)
+	var new_unit: Unit = spawn_unit(tile_location, rand_job.unique_name, team)
 	new_unit.is_ai_controlled = false
 	
 	unit_created.emit(new_unit)
 	return new_unit
 
 
-func spawn_unit(tile_position: TerrainTile, job_id: int, team: Team, level: int = 40) -> Unit:
+func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level: int = 40) -> Unit:
 	var new_unit: Unit = Unit.instantiate()
 	units_container.add_child(new_unit)
 	new_unit.global_battle_manager = self
@@ -467,11 +467,12 @@ func spawn_unit(tile_position: TerrainTile, job_id: int, team: Team, level: int 
 	new_unit.tile_position = tile_position
 	#new_unit.char_body.global_position = Vector3(tile_position.location.x + 0.5, randi_range(15, 20), tile_position.location.y + 0.5)
 	new_unit.char_body.global_position = Vector3(tile_position.location.x + 0.5, tile_position.get_world_position().y + 0.25, tile_position.location.y + 0.5)
+	var job_id: int = GameData.jobs_data[job_name].job_id
 	if job_id < 0x5e: # non-monster
 		new_unit.stat_basis = [Unit.StatBasis.MALE, Unit.StatBasis.FEMALE].pick_random()
 	else:
 		new_unit.stat_basis = Unit.StatBasis.MONSTER
-	new_unit.set_job_id(job_id)
+	new_unit.set_job(job_name)
 	if range(0x4a, 0x5e).has(job_id):
 		new_unit.set_sprite_palette(range(0,5).pick_random())
 	new_unit.update_unit_facing([Vector3.FORWARD, Vector3.BACK, Vector3.LEFT, Vector3.RIGHT].pick_random())
