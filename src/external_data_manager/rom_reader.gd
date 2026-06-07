@@ -1556,7 +1556,7 @@ func export_vfx(save_path: String) -> void:
 		var new_mesh_instance: MeshInstance3D = MeshInstance3D.new()
 		new_mesh_instance.mesh = ProjectileEffectInstance.build_mesh(verts, faces)
 		new_mesh_instance.name = "projectile_" + ProjectileEffectInstance.ProjectileType.keys()[model_id]
-		GltfManager.save_node(new_mesh_instance, vfx_path, ".projectile.glb")
+		GltfManager.save_node(new_mesh_instance, vfx_path, new_mesh_instance.name + ".projectile.glb")
 		new_mesh_instance.queue_free()
 
 
