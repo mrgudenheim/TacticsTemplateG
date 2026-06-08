@@ -112,6 +112,7 @@ var separate_status: bool = false
 @export var animation_executing_id: int = 0
 @export var animation_executing_ids_alternate: PackedInt32Array = []
 
+@export var vfx_name: String
 @export var vfx_id: int = 0
 var vfx_data: VisualEffectData
 

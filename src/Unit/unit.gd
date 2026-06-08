@@ -1377,7 +1377,7 @@ func set_ability(new_action_name: String) -> void:
 	# if not action_data.vfx_data.is_initialized:
 	# 	action_data.vfx_data.init_from_file()
 	
-	image_changed.emit(GameData.textures["E" + str(action_data.vfx_id)])
+	image_changed.emit(GameData.textures[action_data.vfx_name])
 	#debug_menu.sprite_viewer.texture = ImageTexture.create_from_image(action_data.vfx_data.vfx_spr.spritesheet)
 	ability_assigned.emit(new_action_name)
 

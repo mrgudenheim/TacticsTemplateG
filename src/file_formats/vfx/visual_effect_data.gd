@@ -76,7 +76,7 @@ func _init(new_file_name: String = "") -> void:
 
 	file_name = new_file_name
 	vfx_id = new_file_name.trim_suffix(".BIN").trim_prefix("E").to_int()
-	unique_name = new_file_name.trim_suffix(".BIN")
+	unique_name = new_file_name.trim_suffix(".BIN").to_snake_case()
 
 
 func get_curve(index: int) -> VfxCurve:

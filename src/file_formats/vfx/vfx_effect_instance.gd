@@ -12,8 +12,8 @@ var debug_markers_visible: bool = true
 
 
 func initialize(vfx_data: VisualEffectData, target_position: Vector3, origin_position: Vector3 = Vector3.ZERO, debug_markers: bool = false) -> void:
-	if not vfx_data.is_initialized:
-		vfx_data.init_from_file()
+	#if not vfx_data.is_initialized:
+		#vfx_data.init_from_file()
 
 	manager = VfxEffectManager.new()
 	manager.initialize(vfx_data)

@@ -214,6 +214,13 @@ func import_data(directory_path: String) -> void:
 	for map_data: MapData in maps_data.values():
 		var mesh_instance: MeshInstance3D = maps_gltf[map_data.unique_name].get_child(1)
 		map_data.mesh = mesh_instance.mesh
+	
+	for new_vfx: VisualEffectData in vfx.values():
+		new_vfx.texture = textures[new_vfx.unique_name]
+	
+	for new_action: Action in actions.values():
+		if new_action.vfx_name != "":
+			new_action.vfx_data = vfx[new_action.vfx_name]
 
 	push_warning("Time to import files (ms): " + str(Time.get_ticks_msec() - start_time))
 	is_ready = true

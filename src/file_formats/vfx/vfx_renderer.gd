@@ -40,7 +40,7 @@ func initialize(vfx_data: VisualEffectData) -> void:
 	]
 
 	if vfx_data.texture:
-		_texture_size = Vector2(vfx_data.vfx_spr.width, vfx_data.vfx_spr.height)
+		_texture_size = vfx_data.texture.get_size()
 
 	_emitter_align_flags.clear()
 	for emitter: VfxEmitter in vfx_data.emitters:
