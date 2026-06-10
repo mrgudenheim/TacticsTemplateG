@@ -19,8 +19,8 @@ var weapon_animation_ids_start: int = 0x2d364 # 3 bytes per entry, 1 entry per i
 var weapon_animation_ids: PackedVector3Array = [] # attack high, mid, low - multiplied by 2 (+1 if unit is backfacing) to get true animation, Fists/Unarmed used by MON
 
 var weapon_graphic_data_start: int = 0x2d3e4
-var weapon_graphic_palettes_1: PackedInt32Array = [] # 0xF0 - WEP1 Palette, 0x0F - WEP2 Palette
-var weapon_graphic_palettes_2: PackedInt32Array = [] # 0xF0 - WEP1 Palette, 0x0F - WEP2 Palette
+var weapon_graphic_palettes: PackedInt32Array = [] # 0xF0 - WEP1 Palette, 0x0F - EFF Palette
+var weapon_eff_palettes: PackedInt32Array = [] # 0xF0 - WEP1 Palette, 0x0F - EFF Palette
 var weapon_frames_vertical_offsets: PackedInt32Array = [] # WEP.SHP vertical offsets
 
 var animation_layer_priorities_start: int = 0x2d548 # 4 uint32 per entry, 0x1b entries? maybe only 0x17?
@@ -197,13 +197,13 @@ func init_from_battle_bin() -> void:
 	# weapon/shield shp frame vertical offsets and palettes
 	entry_size = 2
 	num_entries = 0x90
-	weapon_graphic_palettes_1.resize(num_entries) # 0xF0 - WEP1 Palette, 0x0F - WEP2 Palette
-	weapon_graphic_palettes_2.resize(num_entries) # 0xF0 - WEP1 Palette, 0x0F - WEP2 Palette
+	weapon_graphic_palettes.resize(num_entries) # 0xF0 - WEP1 Palette, 0x0F - WEP2 Palette
+	weapon_eff_palettes.resize(num_entries) # 0xF0 - WEP1 Palette, 0x0F - WEP2 Palette
 	weapon_frames_vertical_offsets.resize(num_entries)
 	data_bytes = battle_bytes.slice(weapon_graphic_data_start, weapon_graphic_data_start + (num_entries * entry_size))
 	for id: int in num_entries:
-		weapon_graphic_palettes_1[id] = (data_bytes.decode_u8(id * entry_size) & 0xf0) >> 4
-		weapon_graphic_palettes_2[id] = data_bytes.decode_u8(id * entry_size) & 0x0f
+		weapon_graphic_palettes[id] = (data_bytes.decode_u8(id * entry_size) & 0xf0) >> 4
+		weapon_eff_palettes[id] = data_bytes.decode_u8(id * entry_size) & 0x0f
 		weapon_frames_vertical_offsets[id] = data_bytes.decode_u8((id * entry_size) + 1) * 8
 	
 	# WEP and EFF subframe sizes

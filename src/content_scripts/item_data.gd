@@ -22,6 +22,7 @@ var item_attribute_id: int = 0 # https://ffhacktics.com/wiki/Item_Attribute stat
 
 @export var wep_frame_v_offset: int = 0
 @export var wep_frame_palette: int = 0
+@export var wep_eff_palette: int = 0
 
 # weapon data
 # ROM data for debug mostly, equivalent data is stored in weapon_attack_action
@@ -148,7 +149,8 @@ func _init(idx: int = -1) -> void:
 	shop_availability_start = RomReader.scus_data.item_shop_availability[idx]
 	
 	if idx < 0x90: # weapons and shields
-		wep_frame_palette = RomReader.battle_bin_data.weapon_graphic_palettes_1[idx] # TODO handle different palettes for wep1.shp and wep2.shp
+		wep_frame_palette = RomReader.battle_bin_data.weapon_graphic_palettes[idx]
+		wep_eff_palette = RomReader.battle_bin_data.weapon_eff_palettes[idx]
 		wep_frame_v_offset = RomReader.battle_bin_data.weapon_frames_vertical_offsets[idx]
 	
 	#if idx >= 1:

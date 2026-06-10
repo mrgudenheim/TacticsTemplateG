@@ -1387,11 +1387,13 @@ func set_primary_weapon(new_weapon_unique_name: String) -> void:
 	primary_weapon = GameData.items[new_weapon_unique_name]
 	#animation_manager.weapon_id = new_weapon_id
 	var weapon_palette_id: int = primary_weapon.wep_frame_palette
+	var weapon_eff_id: int = primary_weapon.wep_eff_palette
 	var weapon_grid_texture: ImageTexture = animation_manager.wep_spritesheet_data.create_frame_grid_texture(
 		0, 0, primary_weapon.wep_frame_v_offset, 0, animation_manager.wep_shp.file_name)
 	animation_manager.unit_sprites_manager.set_weapon_texture(weapon_grid_texture)
 	animation_manager.unit_sprites_manager.sprite_weapon.material_override.set_shader_parameter("palette_colors", GameData.unit_spritesheets_data["wep"].color_palette.slice(weapon_palette_id * 16, (weapon_palette_id + 1) * 16))
-	
+	animation_manager.unit_sprites_manager.sprite_effect.material_override.set_shader_parameter("palette_colors", GameData.unit_spritesheets_data["eff"].color_palette.slice(weapon_eff_id * 16, (weapon_eff_id + 1) * 16))
+
 	# attack_action = primary_weapon.weapon_attack_action
 	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
 	set_available_actions(all_passive_effects)
