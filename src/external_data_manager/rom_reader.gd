@@ -25,6 +25,8 @@ const NUM_VFX: int = 511
 const NUM_ITEMS: int = 254 # 256?
 const NUM_WEAPONS: int = 122
 
+const DEBUG_PRINT_SOUND_SUMMARY: bool = false # set true to console-dump + verify sound parsing on ROM load (scans all E### files)
+
 var is_ready: bool = false
 
 var rom: PackedByteArray = []
@@ -64,6 +66,14 @@ var scus_data: ScusData = ScusData.new() # SCUS.942.41 tables
 var wldcore_data: WldcoreData = WldcoreData.new() # WLDCORE.BIN tables
 var attack_out_data: AttackOutData = AttackOutData.new() # ATTACK.OUT tables
 var trap_effect_data: TrapEffectData = TrapEffectData.new() # TRAP particle effects from BATTLE.BIN
+
+# Sound (SOUND/ files + per-effect FEDS banks sliced from E###.BIN section 8)
+var smds_array: Array[SmdData] = [] # MUSIC_##.SMD music sequences
+var smds: Dictionary[String, SmdData] = {} # [unique_name, SmdData]
+var waveset_data: WavesetData = WavesetData.new() # WAVESET.WD instrument bank (shared by music + sfx)
+var sfx_banks_array: Array[FedsBankData] = [] # SYSTEM.SED / ENV.SED global sfx banks
+var sfx_banks: Dictionary[String, FedsBankData] = {} # [unique_name (eg. SYSTEM), FedsBankData]
+var feds_banks: Dictionary[String, FedsBankData] = {} # [E### unique_name, per-effect FEDS bank] lazily extracted
 
 # Images
 # https://github.com/Glain/FFTPatcher/blob/master/ShishiSpriteEditor/PSXImages.xml#L148
@@ -159,6 +169,12 @@ func clear_data() -> void:
 	abilities.clear()
 	scenarios.clear()
 	scenario_paths.clear()
+	smds_array.clear()
+	smds.clear()
+	waveset_data = WavesetData.new()
+	sfx_banks_array.clear()
+	sfx_banks.clear()
+	feds_banks.clear()
 
 
 func process_rom() -> void:
@@ -315,6 +331,9 @@ func process_rom() -> void:
 		print("  %6d ms (%5.1f%%) — %s" % [entry.time_ms, pct, entry.name])
 	print("  %6d ms (TOTAL)" % total_ms)
 
+	if DEBUG_PRINT_SOUND_SUMMARY:
+		print_sound_summary()
+
 	# var new_scenario: Scenario = Scenario.new()
 	# new_scenario.unique_name = "test1"
 
@@ -344,7 +363,7 @@ func process_rom() -> void:
 	# generate_passive_effects()
 
 	is_ready = true
-	# rom_loaded.emit()
+	rom_loaded.emit()
 
 
 func process_file_records(sectors: PackedInt32Array, folder_name: String = "") -> void:
@@ -375,6 +394,19 @@ func process_file_records(sectors: PackedInt32Array, folder_name: String = "") -
 			elif folder_name == "EFFECT":
 				record.type_index = vfx.size()
 				vfx.append(VisualEffectData.new(record.name))
+			elif folder_name == "SOUND":
+				if file_extension == "SMD":
+					record.type_index = smds_array.size()
+					var new_smd: SmdData = SmdData.new(record.name)
+					smds_array.append(new_smd)
+					smds[new_smd.unique_name] = new_smd
+				elif file_extension == "WD":
+					waveset_data = WavesetData.new(record.name)
+				elif file_extension == "SED":
+					record.type_index = sfx_banks_array.size()
+					var new_sfx_bank: FedsBankData = FedsBankData.new(record.name)
+					sfx_banks_array.append(new_sfx_bank)
+					sfx_banks[new_sfx_bank.unique_name] = new_sfx_bank
 			elif file_extension == "SPR":
 				record.type_index = sprs.size()
 				var new_spr: Spr = Spr.new(record.name)
@@ -495,6 +527,76 @@ func get_file_data(file_name: String) -> PackedByteArray:
 	file_data.append_array(last_sector_data)
 	
 	return file_data
+
+
+## Slices the raw per-effect FEDS sound section (section 8) out of an E###.BIN.
+## Returns an empty array if the effect file has no FEDS section. This is the
+## raw "feds" blob, suitable for the playback path (addon FedsBank.parse).
+func get_feds_bytes(vfx_data: VisualEffectData) -> PackedByteArray:
+	var vfx_bytes: PackedByteArray = get_file_data(vfx_data.file_name)
+	if vfx_bytes.is_empty():
+		return PackedByteArray()
+	var header_start: int = battle_bin_data.ability_vfx_header_offsets[vfx_data.vfx_id]
+	return FedsBankData.extract_effect_feds_bytes(vfx_bytes, header_start)
+
+
+## Lazily extracts and caches the per-effect FEDS sound bank (section 8) from
+## an E###.BIN as a project-native FedsBankData. Returns null if the effect file
+## has no FEDS section.
+func get_feds_bank(vfx_data: VisualEffectData) -> FedsBankData:
+	if feds_banks.has(vfx_data.unique_name):
+		return feds_banks[vfx_data.unique_name]
+
+	var feds_bytes: PackedByteArray = get_feds_bytes(vfx_data)
+	if feds_bytes.is_empty():
+		return null
+
+	var feds_bank: FedsBankData = FedsBankData.new()
+	feds_bank.file_name = vfx_data.file_name
+	feds_bank.unique_name = vfx_data.unique_name
+	if not feds_bank.parse_effect_feds(feds_bytes):
+		return null
+	feds_banks[vfx_data.unique_name] = feds_bank
+	return feds_bank
+
+
+## Parses all sound data and prints a summary, to verify the SMD / WAVESET /
+## FEDS / SFX-bank parsers against expected counts before the SPU core is added.
+func print_sound_summary() -> void:
+	print("=== Sound Parsing Summary ===")
+
+	# WAVESET.WD instrument bank
+	if waveset_data.file_name != "" and file_records.has(waveset_data.file_name):
+		waveset_data.init_from_file()
+		print("  %s: %d instruments (%d active)" % [
+			waveset_data.file_name, waveset_data.instruments.size(), waveset_data.active_instrument_count()])
+	else:
+		print("  WAVESET.WD: not found in ROM")
+
+	# SMD music sequences
+	print("  SMD music files: %d" % smds_array.size())
+	for smd: SmdData in smds_array:
+		smd.init_from_file()
+		print("    %s: \"%s\"  tracks=%d  tempo=%d (%.1f bpm)  waveset=%d" % [
+			smd.file_name, smd.song_title, smd.track_count, smd.initial_tempo, smd.initial_bpm, smd.associated_waveset_id])
+
+	# Global SFX banks (SYSTEM.SED / ENV.SED)
+	print("  SFX banks: %d" % sfx_banks_array.size())
+	for sfx_bank: FedsBankData in sfx_banks_array:
+		sfx_bank.init_from_file()
+		print("    %s: %d sounds  category=0x%04X" % [
+			sfx_bank.file_name, sfx_bank.sounds.size(), sfx_bank.category_key])
+
+	# Per-effect FEDS banks (section 8 of each E###.BIN)
+	var effects_with_feds: int = 0
+	var total_pairs: int = 0
+	for vfx_data: VisualEffectData in vfx:
+		var feds_bank: FedsBankData = get_feds_bank(vfx_data)
+		if feds_bank != null:
+			effects_with_feds += 1
+			total_pairs += feds_bank.sounds.size()
+	print("  Per-effect FEDS banks: %d / %d effects have a FEDS section (%d pairs total)" % [
+		effects_with_feds, vfx.size(), total_pairs])
 
 
 func get_spr_file_idx(sprite_id: int) -> int:
@@ -1276,6 +1378,7 @@ func export_data(save_path: String) -> void:
 	await export_maps(save_path) # needs to be before data tables so maps will be initialized
 	await export_data_tables(save_path)
 	await export_vfx(save_path)
+	await export_sound(save_path)
 
 
 func export_unit_spritesheets(save_path: String) -> void:
@@ -1569,6 +1672,47 @@ static func export_tile_meshes(path: String, scale: Vector3 = Vector3.ONE) -> vo
 		var error: Error = ResourceSaver.save(mesh, mesh_file_path)
 		if error != Error.OK:
 			push_warning("error saving tile mesh " + mesh_name + ": " + str(error))
+
+
+## Exports the raw sound bytes to the cache so the game can play sound without
+## re-reading the ISO. The exmateria_sound addon parses these bytes directly
+## (WAVESET/SMD/feds blobs), so the cache stores the raw bytes rather than the
+## project-native parsed resources (which hold non-serializable event objects).
+func export_sound(save_path: String) -> void:
+	message.emit("Exporting sound...")
+	await get_tree().process_frame
+
+	var sound_path: String = save_path + "/sound/"
+	DirAccess.make_dir_recursive_absolute(sound_path)
+
+	# Instrument bank (WAVESET.WD), shared by music + effect sounds.
+	if file_records.has(waveset_data.file_name):
+		_save_raw_bytes(sound_path.path_join(waveset_data.file_name), get_file_data(waveset_data.file_name))
+
+	# Music sequences (MUSIC_##.SMD).
+	for smd: SmdData in smds_array:
+		_save_raw_bytes(sound_path.path_join(smd.file_name), get_file_data(smd.file_name))
+
+	# Global SFX banks (SYSTEM.SED / ENV.SED).
+	for sfx_bank: FedsBankData in sfx_banks_array:
+		_save_raw_bytes(sound_path.path_join(sfx_bank.file_name), get_file_data(sfx_bank.file_name))
+
+	# Per-effect FEDS sections sliced from each E###.BIN (saved as E###.feds).
+	var feds_path: String = sound_path + "feds/"
+	DirAccess.make_dir_recursive_absolute(feds_path)
+	for vfx_data: VisualEffectData in vfx:
+		var feds_bytes: PackedByteArray = get_feds_bytes(vfx_data)
+		if not feds_bytes.is_empty():
+			_save_raw_bytes(feds_path.path_join(vfx_data.unique_name + ".feds"), feds_bytes)
+
+
+func _save_raw_bytes(file_path: String, bytes: PackedByteArray) -> void:
+	var file: FileAccess = FileAccess.open(file_path, FileAccess.WRITE)
+	if file == null:
+		push_warning("error saving sound file " + file_path + ": " + str(FileAccess.get_open_error()))
+		return
+	file.store_buffer(bytes)
+	file.close()
 
 
 class SpritesheetRegionData:

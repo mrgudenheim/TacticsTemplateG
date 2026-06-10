@@ -1,6 +1,6 @@
 extends Control
 
-const SAVE_DIR: String = Scenario.SAVE_DIRECTORY_PATH
+const SAVE_DIR: String = "user://overrides/" + Scenario.SAVE_FOLDER
 
 @export var load_rom_button: LoadRomButton
 @export var rom_path_label: Label

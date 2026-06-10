@@ -73,7 +73,7 @@ func _load_map() -> void:
 	if map_node == null:
 		return
 
-	var map_data: FftMapData = map_node.map_data
+	var map_data: MapData = map_node.map_data
 
 	# Store terrain data for tile lookups
 	_terrain_tiles.assign(map_data.terrain_tiles)
