@@ -75,7 +75,8 @@ func clear_data() -> void:
 	shps = {} 
 	seqs = {} 
 	maps_gltf = {}
-	maps_data = {} 
+	maps_data = {}
+	map_tile_meshes = {}
 	vfx = {}
 	projectiles_gltf = {}
 	items = {} 
@@ -90,8 +91,8 @@ func clear_data() -> void:
 	palettes = {}
 	textures = {}
 	unit_spritesheets_data = {}
+	animation_layer_priorities = []
 	initial_unit_data = null
-	map_tile_meshes = {}
 
 
 func import_data(directory_path: String) -> void:
