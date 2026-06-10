@@ -8,7 +8,7 @@ var bytes: PackedByteArray = []
 @export var times: PackedInt32Array = []
 @export var emitter_ids: PackedInt32Array = []
 @export var action_flags: PackedByteArray = []
-var num_keyframes: int = 0
+@export var num_keyframes: int = 0
 
 @export var keyframes: Array[EmitterKeyframe] = []
 var has_unknown_flags: bool = false
