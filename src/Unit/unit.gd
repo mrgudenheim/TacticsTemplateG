@@ -568,6 +568,8 @@ func generate_equipment() -> void:
 
 func set_equipment_slot(slot: EquipmentSlot, item: ItemData) -> void:
 	slot.item_unique_name = item.unique_name
+	if slot.equipment_slot_name == "RH":
+		set_primary_weapon(item.unique_name) # TODO update weapon data (palette, texture, eff_palette) correctly for either hand?
 	
 	update_passive_effects()
 
