@@ -49,7 +49,8 @@ var _rising_center_y: float = 0.0
 
 
 func initialize() -> void:
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
+	var trap_data: TrapEffectData = GameData.shared_vfx_data
+	trap_data.texture = GameData.textures["shared_vfx"]
 
 	# Physics
 	_physics = VfxPhysics.new()

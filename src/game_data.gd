@@ -19,6 +19,7 @@ var maps_gltf: Dictionary[String, Node] = {}
 var maps_data: Dictionary[String, MapData] = {} # var map_tiles: Dictionary[Vector2i, Array] = {} # Array[TerrainTile], palettes, animations
 var map_tile_meshes: Dictionary[TerrainTile.SlopeType, ArrayMesh] = {}
 var vfx: Dictionary[String, VisualEffectData] = {}
+var shared_vfx_data: TrapEffectData
 var projectiles_gltf: Dictionary[String, Node] = {}
 var items: Dictionary[String, ItemData] = {} # [unique_name, ItemData]
 var status_effects: Dictionary[String, StatusEffect] = {} # [unique_name, StatusEffect]
@@ -207,6 +208,8 @@ func import_data(directory_path: String) -> void:
 		elif file_path.to_lower().ends_with(".vfx_data.tres"):
 			var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")
 			vfx[file_path.get_file().trim_suffix(".vfx_data.tres")] = new_vfx
+		elif file_path.to_lower().ends_with("shared_vfx.data.tres"):
+			shared_vfx_data = ResourceLoader.load(file_path, "TrapEffectData")
 		elif file_path.ends_with(".projectile.glb"):
 			projectiles_gltf[file_path.get_file().trim_suffix(".projectile.glb")] = GltfManager.import_gltf(file_path)
 		elif file_path.ends_with("initial_unit_data.tres"):

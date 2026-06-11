@@ -21,7 +21,7 @@ var is_initialized: bool = false
 
 
 func initialize() -> void:
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
+	var trap_data: TrapEffectData = GameData.shared_vfx_data
 	if trap_data.texture == null:
 		return
 
@@ -36,7 +36,7 @@ func initialize() -> void:
 		preload("res://src/file_formats/vfx/shaders/effect_particle_mode3.gdshader"),
 	]
 
-	texture_size = Vector2(trap_data.trap_spr.width, trap_data.trap_spr.height)
+	texture_size = trap_data.texture.get_size()
 	_palette_textures[0] = trap_data.texture
 
 	_grow_pool(POOL_INITIAL_SIZE)

@@ -113,13 +113,13 @@ func _populate_ui() -> void:
 	for i: int in TrapEffectData.ELEMENT_NAMES.size():
 		element_option.add_item("%d: %s" % [i, TrapEffectData.ELEMENT_NAMES[i]], i)
 
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
+	var trap_data: TrapEffectData = GameData.shared_vfx_data
 	if trap_data.texture != null:
 		texture_preview.texture = trap_data.texture
 
 
 func _update_config_display() -> void:
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
+	var trap_data: TrapEffectData = GameData.shared_vfx_data
 	var handler_id: int = handler_option.get_selected_id()
 
 	var emitter_indices: Array
