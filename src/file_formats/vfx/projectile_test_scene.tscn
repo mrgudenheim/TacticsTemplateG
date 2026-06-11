@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cnoioihr3c7br" path="res://src/file_formats/vfx/projectile_test_scene.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://7tn6b6eup5na" path="res://src/camera_controller.tscn" id="2_camera"]
+[ext_resource type="PackedScene" uid="uid://c7upwdml4aygu" path="res://src/external_data_manager/external_data_setup_panel.tscn" id="3_hnk4m"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 3
@@ -246,3 +247,5 @@ size_flags_vertical = 3
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
+
+[node name="ExternalDataSetupPanel" parent="." unique_id=256136291 instance=ExtResource("3_hnk4m")]

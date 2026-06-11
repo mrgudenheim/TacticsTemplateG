@@ -52,10 +52,10 @@ func _ready() -> void:
 	height_offset_slider.value_changed.connect(_on_height_offset_changed)
 	loop_checkbox.toggled.connect(_on_loop_toggled)
 
-	if RomReader.is_ready:
+	if GameData.is_ready:
 		_on_rom_loaded()
 	else:
-		RomReader.rom_loaded.connect(_on_rom_loaded, CONNECT_ONE_SHOT)
+		GameData.data_imported.connect(_on_rom_loaded, CONNECT_ONE_SHOT)
 
 
 func _on_rom_loaded() -> void:
@@ -73,7 +73,7 @@ func _load_map() -> void:
 	if map_node == null:
 		return
 
-	var map_data: FftMapData = map_node.map_data
+	var map_data: MapData = map_node.map_data
 
 	# Store terrain data for tile lookups
 	_terrain_tiles.assign(map_data.terrain_tiles)
@@ -110,20 +110,20 @@ func _load_map() -> void:
 
 
 func _spawn_target_unit() -> void:
-	target_unit = _spawn_unit(target_world_pos, 0x4a, 0) # Squire, palette 0
+	target_unit = _spawn_unit(target_world_pos, "squire", 0) # Squire, palette 0
 
 
 func _spawn_attacker_unit() -> void:
-	attacker_unit = _spawn_unit(attacker_world_pos, 0x4a, 3) # Squire, palette 3 (different color)
+	attacker_unit = _spawn_unit(attacker_world_pos, "squire", 3) # Squire, palette 3 (different color)
 
 
-func _spawn_unit(pos: Vector3, job_id: int, palette: int) -> Unit:
+func _spawn_unit(pos: Vector3, job_name: String, palette: int) -> Unit:
 	var unit: Unit = Unit.instantiate()
 	units_container.add_child(unit)
 	unit.initialize_unit()
 	unit.char_body.global_position = pos + Vector3(0, 0.25, 0)
 	unit.stat_basis = Unit.StatBasis.MALE
-	unit.set_job_id(job_id)
+	unit.set_job(job_name)
 	unit.set_sprite_palette(palette)
 	unit.update_unit_facing(Vector3.FORWARD)
 	camera_controller.rotated.connect(unit.char_body.set_rotation_degrees)
