@@ -43,10 +43,10 @@ func _ready() -> void:
 	white_flash_button.pressed.connect(_on_white_flash_pressed)
 	direction_slider.value_changed.connect(_on_direction_changed)
 
-	if RomReader.is_ready:
+	if GameData.is_ready:
 		_on_rom_loaded()
 	else:
-		RomReader.rom_loaded.connect(_on_rom_loaded, CONNECT_ONE_SHOT)
+		GameData.data_imported.connect(_on_rom_loaded, CONNECT_ONE_SHOT)
 
 
 func _on_rom_loaded() -> void:
@@ -59,11 +59,11 @@ func _on_rom_loaded() -> void:
 
 
 func _load_map() -> void:
-	var map_node: MapChunkNodes = VfxTestUtils.load_mirrored_map(116, maps_container)
+	var map_node: MapChunkNodes = VfxTestUtils.load_mirrored_map("map_116", maps_container)
 	if map_node == null:
 		return
 
-	var map_data: FftMapData = map_node.map_data
+	var map_data: MapData = map_node.map_data
 
 	# Find tile for placement
 	for tile: TerrainTile in map_data.terrain_tiles:
@@ -85,7 +85,7 @@ func _spawn_squire() -> void:
 	test_unit.initialize_unit()
 	test_unit.char_body.global_position = target_world_pos + Vector3(0, 0.25, 0)
 	test_unit.stat_basis = Unit.StatBasis.MALE
-	test_unit.set_job_id(0x4a) # Squire
+	test_unit.set_job("squire_06") # Squire
 	test_unit.set_sprite_palette(0)
 	test_unit.update_unit_facing(Vector3.FORWARD)
 	camera_controller.rotated.connect(test_unit.char_body.set_rotation_degrees)

@@ -96,10 +96,10 @@ func _ready() -> void:
 	show_map_checkbox.toggled.connect(_on_show_map_toggled)
 	show_background_checkbox.toggled.connect(_on_show_background_toggled)
 
-	if RomReader.is_ready:
+	if GameData.is_ready:
 		_on_rom_loaded()
 	else:
-		RomReader.rom_loaded.connect(_on_rom_loaded, CONNECT_ONE_SHOT)
+		GameData.data_imported.connect(_on_rom_loaded, CONNECT_ONE_SHOT)
 
 
 func _on_rom_loaded() -> void:
@@ -108,7 +108,7 @@ func _on_rom_loaded() -> void:
 
 
 func _load_map() -> void:
-	var map_node: MapChunkNodes = VfxTestUtils.load_mirrored_map(116, maps_container)
+	var map_node: MapChunkNodes = VfxTestUtils.load_mirrored_map("map_116", maps_container)
 	if map_node == null:
 		return
 
@@ -117,7 +117,7 @@ func _load_map() -> void:
 		if map_mat:
 			map_mat.set_shader_parameter("debug_depth", true)
 
-	var map_data: FftMapData = map_node.map_data
+	var map_data: MapData = map_node.map_data
 
 	# Find tile positions
 	for tile: TerrainTile in map_data.terrain_tiles:
@@ -147,12 +147,14 @@ func _stop_current_effect() -> void:
 
 func _create_effect_instance() -> bool:
 	_stop_current_effect()
+	
+	var vfx_name: String = "e_%03d" % current_effect_index
 
-	if current_effect_index < 0 or current_effect_index >= RomReader.vfx.size():
-		print("[VfxTestScene] Effect index %d out of range" % current_effect_index)
-		return false
+	#if current_effect_index < 0 or current_effect_index >= RomReader.vfx.size():
+		#print("[VfxTestScene] Effect index %d out of range" % current_effect_index)
+		#return false
 
-	var vfx_data: VisualEffectData = RomReader.vfx[current_effect_index]
+	var vfx_data: VisualEffectData = GameData.vfx[vfx_name]
 	if vfx_data == null:
 		print("[VfxTestScene] Effect %d is null" % current_effect_index)
 		return false
@@ -183,7 +185,8 @@ func _play_effect() -> void:
 	if not _create_effect_instance():
 		return
 
-	var vfx_data: VisualEffectData = RomReader.vfx[current_effect_index]
+	var vfx_name: String = "e_%03d" % current_effect_index
+	var vfx_data: VisualEffectData = GameData.vfx[vfx_name]
 
 	if debug_depth:
 		for ai in range(vfx_data.animations.size()):
