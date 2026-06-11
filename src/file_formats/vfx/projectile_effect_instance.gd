@@ -36,6 +36,12 @@ const PSX_ARC_K: float = 4096.0
 const PSX_ARC_R: float = 336.0
 const PSX_HEIGHT_UNIT: float = 12.0 # 1h = 12 PSX world units
 
+const PROJECTILE_MESH_NAME: Dictionary[ProjectileType, String] = {
+	ProjectileType.ARROW : "projectile_ARROW",
+	ProjectileType.STONE : "projectile_STONE",
+	ProjectileType.SPECIAL : "projectile_SPECIAL",
+}
+
 var loop: bool = false
 
 var _state: State = State.IDLE
@@ -95,11 +101,11 @@ func initialize() -> void:
 	add_child(_mesh_instance)
 
 	# Build projectile_type meshes from parsed BATTLE.BIN data
-	var models: Dictionary = RomReader.battle_bin_data.projectile_model_data
-	for model_id: int in models:
-		var verts: Array[Vector3] = models[model_id]["vertices"]
-		var faces: Array = models[model_id]["faces"]
-		_meshes[model_id] = build_mesh(verts, faces)
+	# var models: Dictionary = RomReader.battle_bin_data.projectile_model_data
+	# for model_id: int in models:
+	# 	var verts: Array[Vector3] = models[model_id]["vertices"]
+	# 	var faces: Array = models[model_id]["faces"]
+	# 	_meshes[model_id] = build_mesh(verts, faces)
 
 
 func play(
@@ -145,7 +151,8 @@ func play(
 
 	_orientation = _compute_orientation(_delta)
 
-	_mesh_instance.mesh = _meshes[projectile_type]
+	# _mesh_instance.mesh = _meshes[projectile_type]
+	_mesh_instance.mesh = GameData.projectiles_gltf[PROJECTILE_MESH_NAME[projectile_type]].mesh
 	_mesh_instance.visible = true
 
 	_tick_timer = 0.0
