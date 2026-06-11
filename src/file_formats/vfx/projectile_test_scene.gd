@@ -69,7 +69,7 @@ func _on_rom_loaded() -> void:
 
 
 func _load_map() -> void:
-	var map_node: MapChunkNodes = VfxTestUtils.load_mirrored_map(116, maps_container)
+	var map_node: MapChunkNodes = VfxTestUtils.load_mirrored_map("map_116", maps_container)
 	if map_node == null:
 		return
 
@@ -110,11 +110,11 @@ func _load_map() -> void:
 
 
 func _spawn_target_unit() -> void:
-	target_unit = _spawn_unit(target_world_pos, "squire", 0) # Squire, palette 0
+	target_unit = _spawn_unit(target_world_pos, "squire_06", 0) # Squire, palette 0
 
 
 func _spawn_attacker_unit() -> void:
-	attacker_unit = _spawn_unit(attacker_world_pos, "squire", 3) # Squire, palette 3 (different color)
+	attacker_unit = _spawn_unit(attacker_world_pos, "squire_06", 3) # Squire, palette 3 (different color)
 
 
 func _spawn_unit(pos: Vector3, job_name: String, palette: int) -> Unit:
