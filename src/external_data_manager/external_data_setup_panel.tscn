@@ -1,0 +1,141 @@
+[gd_scene format=3 uid="uid://c7upwdml4aygu"]
+
+[ext_resource type="Script" uid="uid://daxiihrijoonn" path="res://src/external_data_manager/external_data_setup_panel.gd" id="1_av3h7"]
+[ext_resource type="AudioStream" uid="uid://dg7fjryqq6ovk" path="res://src/audio/select_002.ogg" id="2_jomhb"]
+[ext_resource type="Texture2D" uid="uid://e6xsp0scu0wy" path="res://src/godot_license/FolderBrowse_godot.svg" id="3_de2sd"]
+[ext_resource type="Texture2D" uid="uid://boj84aajpk67b" path="res://src/godot_license/FileBrowse_godot.svg" id="4_ltw8e"]
+
+[node name="ExternalDataSetupPanel" type="PanelContainer" unique_id=256136291 node_paths=PackedStringArray("import_button", "import_path_line_edit", "import_find_button", "import_file_dialog", "import_progress_ui", "import_progress", "rom_path_line_edit", "rom_find_button", "rom_file_dialog", "destination_path_line_edit", "destination_find_button", "destination_file_dialog", "export_data_button")]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -191.0
+offset_top = -30.0
+offset_right = 191.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_av3h7")
+import_button = NodePath("MarginContainer/VBoxContainer/ImportData/ImportButton")
+import_path_line_edit = NodePath("MarginContainer/VBoxContainer/ImportData/ImportLocationLineEdit")
+import_find_button = NodePath("MarginContainer/VBoxContainer/ImportData/ImportLocationButton")
+import_file_dialog = NodePath("")
+import_progress_ui = NodePath("MarginContainer/VBoxContainer/ImportDataProgress")
+import_progress = NodePath("MarginContainer/VBoxContainer/ImportDataProgress/ImportProgressBar")
+rom_path_line_edit = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationLineEdit")
+rom_find_button = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationButton")
+rom_file_dialog = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationButton/RomFileDialog")
+destination_path_line_edit = NodePath("MarginContainer/VBoxContainer/GridContainer/ExportLocationLineEdit")
+destination_find_button = NodePath("MarginContainer/VBoxContainer/GridContainer/ExportLocationButton")
+destination_file_dialog = NodePath("MarginContainer/VBoxContainer/GridContainer/ExportLocationButton/DestinationFileDialog")
+export_data_button = NodePath("MarginContainer/VBoxContainer/ExportRomData")
+finished_sound = ExtResource("2_jomhb")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=246884810]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=305720010]
+layout_mode = 2
+
+[node name="ImportData" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=452819131]
+layout_mode = 2
+
+[node name="ImportButton" type="Button" parent="MarginContainer/VBoxContainer/ImportData" unique_id=303160639]
+layout_mode = 2
+text = "Import"
+
+[node name="ImportLocationLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/ImportData" unique_id=52483188]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Select Folder to Load Data"
+select_all_on_focus = true
+
+[node name="ImportLocationButton" type="Button" parent="MarginContainer/VBoxContainer/ImportData" unique_id=887085765]
+layout_mode = 2
+icon = ExtResource("3_de2sd")
+
+[node name="LoadDataFileDialog" type="FileDialog" parent="MarginContainer/VBoxContainer/ImportData/ImportLocationButton" unique_id=347135749]
+title = "Open a Directory"
+initial_position = 1
+file_mode = 2
+display_mode = 1
+access = 2
+use_native_dialog = true
+
+[node name="ImportDataProgress" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1147646572]
+layout_mode = 2
+
+[node name="ImportProgressLabel" type="Label" parent="MarginContainer/VBoxContainer/ImportDataProgress" unique_id=676459115]
+layout_mode = 2
+text = "Importing:"
+
+[node name="ImportProgressBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/ImportDataProgress" unique_id=485823699]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=337292169]
+layout_mode = 2
+
+[node name="ExportRomData" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1568210541]
+layout_mode = 2
+tooltip_text = "Invalid path to ROM
+Invalid path to destination"
+disabled = true
+text = "Export Data from ROM"
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer" unique_id=570440546]
+layout_mode = 2
+columns = 3
+
+[node name="RomLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=394768896]
+layout_mode = 2
+text = "ROM:"
+
+[node name="RomLocationLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=1351902591]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Select ROM location"
+emoji_menu_enabled = false
+select_all_on_focus = true
+
+[node name="RomLocationButton" type="Button" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=566814189]
+layout_mode = 2
+icon = ExtResource("4_ltw8e")
+
+[node name="RomFileDialog" type="FileDialog" parent="MarginContainer/VBoxContainer/GridContainer/RomLocationButton" unique_id=1673410525]
+title = "Open a File"
+initial_position = 1
+ok_button_text = "Select"
+file_mode = 0
+display_mode = 1
+access = 2
+filters = PackedStringArray("*.bin")
+use_native_dialog = true
+
+[node name="ExportLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=1635743304]
+layout_mode = 2
+text = "Export:"
+
+[node name="ExportLocationLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=1566653469]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Select Export Destination"
+emoji_menu_enabled = false
+select_all_on_focus = true
+
+[node name="ExportLocationButton" type="Button" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=1135861734]
+layout_mode = 2
+icon = ExtResource("3_de2sd")
+
+[node name="DestinationFileDialog" type="FileDialog" parent="MarginContainer/VBoxContainer/GridContainer/ExportLocationButton" unique_id=27139890]
+title = "Open a Directory"
+initial_position = 1
+file_mode = 2
+display_mode = 1
+access = 2
+use_native_dialog = true
