@@ -175,7 +175,7 @@ static func element_type_to_trap_id(el: Action.ElementTypes) -> int:
 
 
 static func get_element_color(p_element_id: int) -> Color:
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
+	var trap_data: TrapEffectData = GameData.shared_vfx_data
 	if p_element_id >= 0 and p_element_id < trap_data.element_colors.size():
 		return trap_data.element_colors[p_element_id]
 	return Color.WHITE
@@ -242,15 +242,15 @@ func init_from_rom() -> void:
 	_create_trap_texture(wep_bytes)
 
 	# 7. Normalize frame UVs
-	if trap_spr != null:
+	if texture != null:
 		for frameset_idx: int in framesets.size():
 			for frame_idx: int in framesets[frameset_idx].frameset.size():
 				var vfx_frame: VfxFrame = framesets[frameset_idx].frameset[frame_idx]
 				vfx_frame.quad_uvs.resize(vfx_frame.quad_uvs_pixels.size())
 				for vert_idx: int in vfx_frame.quad_uvs_pixels.size():
 					vfx_frame.quad_uvs[vert_idx] = Vector2(
-						vfx_frame.quad_uvs_pixels[vert_idx].x / float(trap_spr.width),
-						vfx_frame.quad_uvs_pixels[vert_idx].y / float(trap_spr.height))
+						vfx_frame.quad_uvs_pixels[vert_idx].x / float(texture.get_width()),
+						vfx_frame.quad_uvs_pixels[vert_idx].y / float(texture.get_height()))
 
 
 func _parse_frames(data: PackedByteArray) -> void:

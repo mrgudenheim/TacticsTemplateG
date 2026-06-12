@@ -155,7 +155,7 @@ func _update_config_display() -> void:
 
 
 func _update_info_display() -> void:
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
+	var trap_data: TrapEffectData = GameData.shared_vfx_data
 	var text: String = ""
 	text += "[b]TRAP Effect Data[/b]\n"
 	text += "emitters: %d\n" % trap_data.emitters.size()
@@ -190,7 +190,7 @@ func _on_handler_changed(_index: int) -> void:
 
 
 func _on_element_changed(index: int) -> void:
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
+	var trap_data: TrapEffectData = GameData.shared_vfx_data
 	var elem_idx: int = element_option.get_item_id(index)
 	if elem_idx >= 0 and elem_idx < trap_data.element_colors.size():
 		element_color_rect.color = trap_data.element_colors[elem_idx]

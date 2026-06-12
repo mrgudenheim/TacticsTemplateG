@@ -50,7 +50,7 @@ func render(particles: Array[VfxParticleData],
 		_pool.release_all_meshes()
 		return
 
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
+	var trap_data: TrapEffectData = GameData.shared_vfx_data
 	if not _pool.is_initialized:
 		return
 

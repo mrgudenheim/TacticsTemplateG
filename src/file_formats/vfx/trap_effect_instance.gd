@@ -132,7 +132,7 @@ func play(handler_id: int, element_id: int, direction: Vector3 = Vector3.ZERO, t
 		_active_emitter_indices.assign(TrapEffectData.HANDLER_CONFIGS.get(handler_id, []))
 
 	# Cache max spawn end + set per-emitter palettes
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
+	var trap_data: TrapEffectData = GameData.shared_vfx_data
 	_max_spawn_end = 0
 	_emitter_palette.clear()
 	for idx: int in _active_emitter_indices:
@@ -223,7 +223,7 @@ func _handle_loop_or_complete(restart_fn: Callable) -> void:
 
 
 func _process_tick() -> void:
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
+	var trap_data: TrapEffectData = GameData.shared_vfx_data
 	if trap_data.emitters.is_empty():
 		return
 	if _active_handler is TrapOrbitalHandler:

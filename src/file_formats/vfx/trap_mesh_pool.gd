@@ -50,7 +50,7 @@ func initialize() -> void:
 func get_palette_texture(palette_id: int) -> Texture2D:
 	if _palette_textures.has(palette_id):
 		return _palette_textures[palette_id]
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
+	var trap_data: TrapEffectData = GameData.shared_vfx_data
 	var tex: Texture2D = trap_data.get_palette_texture(palette_id)
 	_palette_textures[palette_id] = tex
 	return tex
@@ -82,7 +82,7 @@ func release_all_meshes() -> void:
 func _grow_pool(new_size: int) -> void:
 	if new_size <= _pool_size:
 		return
-	for _i: int in range(new_size - _pool_size):
+	for pool_addition_idx: int in range(new_size - _pool_size):
 		var mesh_instance: MeshInstance3D = MeshInstance3D.new()
 		mesh_instance.mesh = _shared_quad
 		mesh_instance.visible = false
