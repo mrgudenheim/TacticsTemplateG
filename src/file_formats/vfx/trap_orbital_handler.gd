@@ -67,8 +67,8 @@ func start(origin: Vector3) -> void:
 
 	# Create 30 particles
 	particles.clear()
-	var trap_data: TrapEffectData = RomReader.trap_effect_data
-	var emitter: TrapEffectData.TrapEmitter = trap_data.emitters[EMITTER_INDEX] if EMITTER_INDEX < trap_data.emitters.size() else null
+	var trap_data: TrapEffectData = GameData.shared_vfx_data
+	var emitter: TrapEmitter = trap_data.emitters[EMITTER_INDEX] if EMITTER_INDEX < trap_data.emitters.size() else null
 	for i: int in range(TOTAL_PARTICLES):
 		var p: VfxParticleData = VfxParticleData.new()
 		p.initialize(anchor, Vector3.ZERO, PARTICLE_LIFETIME, EMITTER_INDEX)

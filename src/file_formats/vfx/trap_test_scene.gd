@@ -135,7 +135,7 @@ func _update_config_display() -> void:
 	for idx: int in emitter_indices:
 		if idx >= trap_data.emitters.size():
 			continue
-		var emitter: TrapEffectData.TrapEmitter = trap_data.emitters[idx]
+		var emitter: TrapEmitter = trap_data.emitters[idx]
 		text += "[b]Emitter %d: %s[/b]\n" % [emitter.index, emitter.name]
 		text += "anim_index: %d\n" % emitter.anim_index
 		text += "max_particles: %d\n" % emitter.max_particles

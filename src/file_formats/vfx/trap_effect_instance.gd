@@ -310,7 +310,7 @@ func _spawn_particles_for_tick(trap_data: TrapEffectData) -> void:
 	for emitter_idx: int in _active_emitter_indices:
 		if emitter_idx >= trap_data.emitters.size():
 			continue
-		var emitter: TrapEffectData.TrapEmitter = trap_data.emitters[emitter_idx]
+		var emitter: TrapEmitter = trap_data.emitters[emitter_idx]
 
 		if _tick_counter < emitter.spawn_check_lo or _tick_counter > emitter.spawn_check_hi:
 			continue
@@ -328,7 +328,7 @@ func _spawn_particles_for_tick(trap_data: TrapEffectData) -> void:
 			current_count += 1
 
 
-func _create_particle(emitter_idx: int, emitter: TrapEffectData.TrapEmitter, trap_data: TrapEffectData) -> VfxParticleData:
+func _create_particle(emitter_idx: int, emitter: TrapEmitter, trap_data: TrapEffectData) -> VfxParticleData:
 	var p: VfxParticleData = VfxParticleData.new()
 	var has_direction: bool = _impact_direction.length_squared() > 0.001
 
@@ -366,7 +366,7 @@ func _create_particle(emitter_idx: int, emitter: TrapEffectData.TrapEmitter, tra
 	return p
 
 
-func _calc_ellipsoid_offset(emitter: TrapEffectData.TrapEmitter) -> Vector3:
+func _calc_ellipsoid_offset(emitter: TrapEmitter) -> Vector3:
 	var vel: Vector3 = emitter.velocity  # semi-axes, already in world units
 	if vel.length_squared() < 0.001:
 		return Vector3.ZERO
@@ -375,7 +375,7 @@ func _calc_ellipsoid_offset(emitter: TrapEffectData.TrapEmitter) -> Vector3:
 	return Vector3(dir.x * vel.x, dir.y * vel.y, dir.z * vel.z)
 
 
-func _calc_scatter_velocity(emitter: TrapEffectData.TrapEmitter, ellipsoid_offset: Vector3) -> Vector3:
+func _calc_scatter_velocity(emitter: TrapEmitter, ellipsoid_offset: Vector3) -> Vector3:
 	var speed: float = randf_range(float(emitter.radius_min), float(emitter.radius_max)) * RADIUS_TO_VELOCITY
 	var vel: Vector3 = Vector3.ZERO
 	if ellipsoid_offset.length() > 0.001 and absf(speed) > 0.001:
@@ -383,7 +383,7 @@ func _calc_scatter_velocity(emitter: TrapEffectData.TrapEmitter, ellipsoid_offse
 	return vel
 
 
-func _calc_directional_velocity(emitter: TrapEffectData.TrapEmitter) -> Vector3:
+func _calc_directional_velocity(emitter: TrapEmitter) -> Vector3:
 	var angle_x: float = emitter.vel_range.x + randf_range(
 		-emitter.scatter_half_range.x * 0.5, emitter.scatter_half_range.x * 0.5)
 	var angle_y: float = emitter.vel_range.y + randf_range(
@@ -440,7 +440,7 @@ static func _build_direction_basis(direction: Vector3) -> Basis:
 #  TRAP animation — 1:1 tick (not /2 like E###.BIN)
 # ============================================================
 
-static func init_trap_animation(p: VfxParticleData, emitter: TrapEffectData.TrapEmitter, trap_data: TrapEffectData) -> void:
+static func init_trap_animation(p: VfxParticleData, emitter: TrapEmitter, trap_data: TrapEffectData) -> void:
 	p.anim_index = emitter.anim_index
 	p.anim_frame = 0
 	p.anim_time = 0
@@ -515,7 +515,7 @@ func _spawn_handler_sparkles(trap_data: TrapEffectData) -> void:
 	var emitter_idx: int = TrapSpellChargeHandler.SPARKLE_EMITTER_INDEX
 	if emitter_idx >= trap_data.emitters.size():
 		return
-	var emitter: TrapEffectData.TrapEmitter = trap_data.emitters[emitter_idx]
+	var emitter: TrapEmitter = trap_data.emitters[emitter_idx]
 	for i: int in range(count):
 		var p: VfxParticleData = _create_particle(emitter_idx, emitter, trap_data)
 		_particles.append(p)
