@@ -1302,6 +1302,11 @@ func export_unit_spritesheets(save_path: String) -> void:
 		var index_image: Image = unit_spr.get_index_image(true)
 		var unit_spritesheet_texture_webp_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name.to_lower() + ".texture.webp")
 		index_image.save_webp(unit_spritesheet_texture_webp_file_path)
+		
+		for palette_idx: int in 8:
+			var grid_image: Image = unit_spr.create_frame_grid_texture(palette_idx).get_image()
+			var unit_grid_spritesheet_texture_webp_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name.to_lower() + "_" + str(palette_idx) + ".grid_texture.webp")
+			grid_image.save_webp(unit_grid_spritesheet_texture_webp_file_path)
 
 
 func export_other_images(save_path: String) -> void:

@@ -43,8 +43,8 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	# RomReader.export_tile_meshes("res://src/content_scripts/map/", Vector3(-1.0, 1.0, 1.0))
-	if not external_data_paths["IMPORT_PATH"].is_empty() and DirAccess.dir_exists_absolute(external_data_paths["IMPORT_PATH"]):
-		call_deferred("import_data", external_data_paths["IMPORT_PATH"])
+	#if not external_data_paths["IMPORT_PATH"].is_empty() and DirAccess.dir_exists_absolute(external_data_paths["IMPORT_PATH"]):
+		#call_deferred("import_data", external_data_paths["IMPORT_PATH"])
 
 
 func _get_saved_data_paths() -> Dictionary [String, String]:
