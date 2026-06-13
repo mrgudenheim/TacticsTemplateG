@@ -218,7 +218,9 @@ func init_from_rom() -> void:
 	for i: int in NUM_EMITTERS:
 		var cfg_start: int = PARTICLE_CONFIGS_OFFSET + i * EMITTER_CONFIG_SIZE
 		var cfg_bytes: PackedByteArray = battle_bytes.slice(cfg_start, cfg_start + EMITTER_CONFIG_SIZE)
-		emitters[i] = TrapEmitter.new(cfg_bytes, i)
+		var new_emitter: TrapEmitter = TrapEmitter.new()
+		new_emitter.init_from_bytes(cfg_bytes, i)
+		emitters[i] = new_emitter
 
 	# 3. Frames (identical format to E###.BIN)
 	var frames_data: PackedByteArray = battle_bytes.slice(FRAMES_OFFSET, ANIMATIONS_OFFSET)

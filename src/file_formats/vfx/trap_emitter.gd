@@ -27,11 +27,13 @@ var index: int = 0
 @export var lifetime_min: int = 0 # -1 = animation-driven
 @export var lifetime_max: int = 0
 
-func _init(config_bytes: PackedByteArray, emitter_index: int) -> void:
+
+func init_from_bytes(config_bytes: PackedByteArray, emitter_index: int) -> void:
 	index = emitter_index
 	name = TrapEffectData.EMITTER_NAMES.get(emitter_index, "config_%d" % emitter_index)
 	_parse_raw(config_bytes)
 	_convert_units(config_bytes)
+
 
 func _parse_raw(config_bytes: PackedByteArray) -> void:
 	anim_index = config_bytes.decode_u8(0x00)
