@@ -747,6 +747,7 @@ func get_terrain(terrain_bytes: PackedByteArray) -> Array[TerrainTile]:
 				var tile_data: PackedByteArray = terrain_bytes.slice(tile_data_start, tile_data_start + tile_data_length)
 
 				var tile: TerrainTile = TerrainTile.new()
+				# tile.bytes = tile_data
 				tile.layer = layer
 				tile.location = Vector2i(x, z)
 				tile.surface_type_id = tile_data.decode_u8(0) & 0b0011_1111 # right 6 bits are the surface type

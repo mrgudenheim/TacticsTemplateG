@@ -30,6 +30,7 @@ const SLOPE_TYPE_CODE: Dictionary[SlopeType, int] = {
 @export var shading: int = 0 # Terrain Tile Shading. 0 = Normal, 1 = Dark, 2 = Darker, 3 = Darkest
 @export var no_walk: int = 0 # Can't walk on this tile 
 @export var no_cursor: int = 0 # Can't move cursor to this tile 
+# var bytes: PackedByteArray = []
 
 @export var default_camera_position_id: int = 0 # Controls which angles the camera will auto-rotate to when a unit enters this tile. 
 

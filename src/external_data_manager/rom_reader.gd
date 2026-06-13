@@ -1480,6 +1480,9 @@ func export_unit_animations(save_path: String) -> void:
 func export_maps(save_path: String) -> void:
 	# message.emit("Exporting maps...")
 	# await get_tree().process_frame
+
+	#var map_tile_80_test: PackedStringArray
+	#var map_tile_40_test: PackedStringArray
 	
 	var maps_path: String = save_path + "/maps/"
 	DirAccess.make_dir_recursive_absolute(maps_path)
@@ -1495,6 +1498,29 @@ func export_maps(save_path: String) -> void:
 			continue # skip map 0 - causes crash
 
 		export_map(maps_path, fft_map_data)
+		
+		#var map_tiles_80: PackedStringArray = []
+		#var map_tiles_40: PackedStringArray = []
+		#for tile: TerrainTile in fft_map_data.terrain_tiles:
+			#if tile.bytes[0] & 0x40 == 0x40:
+				#map_tiles_40.append(str(tile.location))
+			#if tile.bytes[0] & 0x80 == 0x80:
+				#map_tiles_80.append(str(tile.location))
+		#
+		#if not map_tiles_80.is_empty():
+			#map_tile_80_test.append(fft_map_data.unique_name + ": " + ",".join(map_tiles_80))
+		#if not map_tiles_40.is_empty():
+			#map_tile_40_test.append(fft_map_data.unique_name + ": " + ",".join(map_tiles_40))
+	#
+	#var map_tile_80_test_total: String = "\n".join(map_tile_80_test)
+	#var map_tile_80_file: FileAccess = FileAccess.open(maps_path.path_join("map_tile_0x80.txt"), FileAccess.WRITE)
+	#map_tile_80_file.store_string(map_tile_80_test_total)
+	#map_tile_80_file.close()
+#
+	#var map_tile_40_test_total: String = "\n".join(map_tile_40_test)
+	#var map_tile_40_file: FileAccess = FileAccess.open(maps_path.path_join("map_tile_0x40.txt"), FileAccess.WRITE)
+	#map_tile_40_file.store_string(map_tile_40_test_total)
+	#map_tile_40_file.close()
 
 
 func export_map(save_path: String, fft_map_data: FftMapData) -> void:
