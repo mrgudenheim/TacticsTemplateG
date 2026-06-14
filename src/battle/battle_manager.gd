@@ -87,6 +87,13 @@ var walled_maps: PackedInt32Array = [
 
 @export var scenario_editor: ScenarioEditor
 
+var unit_stat_bars_visible: bool = true:
+	get: return unit_stat_bars_visible
+	set(new_is_visible):
+		unit_stat_bars_visible = new_is_visible
+		for unit: Unit in units:
+			unit.set_stat_bar_visiblity(new_is_visible)
+
 
 func _ready() -> void:
 	main_camera = camera_controller.camera

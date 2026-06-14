@@ -339,6 +339,14 @@ func add_stat_bar(stat_type: StatType) -> StatBar:
 	return new_stat_bar
 
 
+func set_stat_bar_visiblity(new_is_visible: bool, stat_bar_idx: int = -1) -> void:
+	if stat_bar_idx == -1:
+		stat_bars_position.visible = new_is_visible
+		return
+	
+	stat_bars_container.get_child(stat_bar_idx).visible = new_is_visible
+
+
 func update_stat_bars_scale(camera_zoom: float) -> void:
 	stat_bars_position.scale = Vector2.ONE * 3.775 / camera_zoom
 
