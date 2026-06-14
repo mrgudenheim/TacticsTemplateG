@@ -62,7 +62,7 @@ albedo_color = Color(6.016344e-08, 0.39723238, 0.15930742, 1)
 [sub_resource type="QuadMesh" id="QuadMesh_vdfg3"]
 material = SubResource("StandardMaterial3D_we1pw")
 
-[node name="BattleManager" type="Node3D" unique_id=1724416264 node_paths=PackedStringArray("texture_viewer", "reference_quad", "load_rom_button", "orthographic_check", "camera_controller", "background_gradient", "maps", "battle_view", "action_menu", "action_button_list", "units_container", "controller", "battle_end_panel", "post_battle_messages", "start_new_battle_button", "game_state_container", "game_state_label", "icon_counter", "scenario_editor")]
+[node name="BattleManager" type="Node3D" unique_id=1724416264 node_paths=PackedStringArray("texture_viewer", "reference_quad", "load_rom_button", "orthographic_check", "camera_controller", "background_gradient", "maps", "battle_view", "action_menu", "action_button_list", "units_container", "controller", "battle_end_panel", "post_battle_messages", "start_new_battle_button", "game_state_container", "game_state_label", "scenario_editor", "icon_counter")]
 script = ExtResource("1_hnd0w")
 texture_viewer = NodePath("SpriteViewer")
 reference_quad = NodePath("ReferenceQuad")
@@ -88,8 +88,8 @@ post_battle_messages = NodePath("BattleEnd/VBoxContainer/Messages")
 start_new_battle_button = NodePath("BattleEnd/VBoxContainer/StartNewBattle")
 game_state_container = NodePath("GameState")
 game_state_label = NodePath("GameState/GameState")
-icon_counter = NodePath("IconGridContainer")
 scenario_editor = NodePath("ScenarioEditor")
+icon_counter = NodePath("IconGridContainer")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=931800301]
 environment = SubResource("Environment_njvnp")

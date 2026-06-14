@@ -331,7 +331,7 @@ func set_spritesheet_data(new_sprite_id: int) -> void:
 		5:
 			seq_name = "RUKA.SEQ"
 		6:
-			seq_name = "ARUTE.SHP"
+			seq_name = "ARUTE.SEQ"
 		7:
 			seq_name = "KANZEN.SEQ"
 
