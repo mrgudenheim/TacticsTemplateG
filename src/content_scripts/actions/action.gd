@@ -573,13 +573,13 @@ func apply_status(unit: Unit, status_list: Array[String], status_list_type: Stat
 				if not removable_status_list.is_empty():
 					var status_id: String = removable_status_list.pick_random()
 					unit.remove_status_id(status_id)
-					unit.show_popup_text(RomReader.status_effects[status_id].status_effect_name) # TODO different text for removing status
+					unit.show_popup_text(GameData.status_effects[status_id].status_effect_name) # TODO different text for removing status
 			elif not will_remove_status:
 				var addable_status_list: Array[String] = status_list.filter(func(status_id: String) -> bool: return not unit.current_status_ids.has(status_id))
 				if not addable_status_list.is_empty():
 					var status_id: String = addable_status_list.pick_random()
-					unit.show_popup_text(RomReader.status_effects[status_id].status_effect_name)
-					await unit.add_status(RomReader.status_effects[status_id].duplicate())
+					unit.show_popup_text(GameData.status_effects[status_id].status_effect_name)
+					await unit.add_status(GameData.status_effects[status_id].duplicate())
 
 
 func show_vfx(action_instance: ActionInstance, position: Vector3) -> Node3D:
