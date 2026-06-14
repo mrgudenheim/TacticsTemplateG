@@ -475,14 +475,15 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	new_unit.tile_position = tile_position
 	#new_unit.char_body.global_position = Vector3(tile_position.location.x + 0.5, randi_range(15, 20), tile_position.location.y + 0.5)
 	new_unit.char_body.global_position = Vector3(tile_position.location.x + 0.5, tile_position.get_world_position().y + 0.25, tile_position.location.y + 0.5)
-	var job_id: int = GameData.jobs_data[job_name].job_id
+	var new_job_data: JobData = GameData.jobs_data[job_name]
+	var job_id: int = new_job_data.job_id
 	if job_id < 0x5e: # non-monster
 		new_unit.stat_basis = [Unit.StatBasis.MALE, Unit.StatBasis.FEMALE].pick_random()
 	else:
 		new_unit.stat_basis = Unit.StatBasis.MONSTER
 	new_unit.set_job(job_name)
-	if range(0x4a, 0x5e).has(job_id):
-		new_unit.set_sprite_palette(range(0,5).pick_random())
+	# if new_job_data.default_palette_idx == -1:
+	# 	new_unit.set_sprite_palette(clampi(teams.find(team), 0, 8))
 	new_unit.update_unit_facing([Vector3.FORWARD, Vector3.BACK, Vector3.LEFT, Vector3.RIGHT].pick_random())
 	new_unit.stats[Unit.StatType.LEVEL].set_value(level)
 	Unit.generate_leveled_raw_stats(new_unit.stat_basis, level, new_unit.job_data, new_unit.stats_raw)

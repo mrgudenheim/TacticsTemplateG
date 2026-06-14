@@ -1657,8 +1657,12 @@ func set_sprite_by_job(new_job_name: String) -> void:
 	#set_sprite_by_id(new_sprite_id)
 	# TODO get different sprite_name for female generic jobs
 	set_sprite_by_file_name(new_job_data.sprite_name)
-	if new_job_data.job_id >= 0x5e: # monster
-		set_sprite_palette(job_data.monster_palette_id)
+	if job_data.default_palette_idx != -1:
+		set_sprite_palette(job_data.default_palette_idx)
+	else:
+		set_sprite_palette(randi_range(0, 4))
+	# if new_job_data.job_id >= 0x5e: # monster
+	# 	set_sprite_palette(job_data.monster_palette_id)
 
 
 func set_sprite_palette(new_palette_id: int) -> void:

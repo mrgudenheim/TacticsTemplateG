@@ -66,7 +66,7 @@ func _init(new_job_id: int = -1, job_bytes: PackedByteArray = []) -> void:
 			sprite_id = 0x83
 		if job_id == 0x5d: # mime is only 1 above dancer since there is no male dancer
 			sprite_id = 0x84
-		default_palette_idx = -1
+		default_palette_idx = -1 # TODO this should be based off spr file, not job_id
 	elif job_id >= 0x5e: # generic and special monsters
 		sprite_id = monster_portrait_id
 		if monster_type != 0:
