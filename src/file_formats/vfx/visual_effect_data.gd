@@ -36,7 +36,7 @@ var section_offsets: PackedInt32Array = []
 
 @export var num_frameset_groups: int = 0
 var frameset_group_offsets: PackedInt32Array = []
-var frameset_groups_num_framesets: PackedInt32Array = []
+@export var frameset_groups_num_framesets: PackedInt32Array = []
 @export var framesets: Array[VfxFrameSet] = []
 @export var animations: Array[VfxAnimation] = []
 var num_curves: int = 0
