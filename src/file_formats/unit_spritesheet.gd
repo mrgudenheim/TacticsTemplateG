@@ -26,11 +26,11 @@ func get_texture() -> Texture2D:
 
 
 func get_shp() -> Shp:
-	return GameData.shps[shp_name]
+	return GameData.get_shp(shp_name)
 
 
 func get_seq() -> Seq:
-	return GameData.seqs[seq_name]
+	return GameData.get_seq(seq_name)
 
 
 func create_frame_grid(anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: int = 0, submerged_depth: int = 0, different_shp_name: String = "") -> Image:

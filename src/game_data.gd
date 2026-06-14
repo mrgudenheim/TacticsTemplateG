@@ -43,6 +43,8 @@ var texture_paths: Dictionary[String, String] = {}
 var map_data_paths: Dictionary[String, String] = {}
 var map_gltf_paths: Dictionary[String, String] = {}
 var vfx_data_paths: Dictionary[String, String] = {}
+var shp_paths: Dictionary[String, String] = {}
+var seq_paths: Dictionary[String, String] = {}
 var scenario_paths: Dictionary[String, String] = {}
 var action_paths: Dictionary[String, String] = {}
 var passive_effect_paths: Dictionary[String, String] = {}
@@ -54,8 +56,8 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	# RomReader.export_tile_meshes("res://src/content_scripts/map/", Vector3(-1.0, 1.0, 1.0))
-	#if not external_data_paths["IMPORT_PATH"].is_empty() and DirAccess.dir_exists_absolute(external_data_paths["IMPORT_PATH"]):
-		#call_deferred("import_data", external_data_paths["IMPORT_PATH"])
+	if not external_data_paths["IMPORT_PATH"].is_empty() and DirAccess.dir_exists_absolute(external_data_paths["IMPORT_PATH"]):
+		call_deferred("import_data", external_data_paths["IMPORT_PATH"])
 
 
 func _get_saved_data_paths() -> Dictionary [String, String]:
@@ -110,6 +112,8 @@ func clear_data() -> void:
 	map_data_paths.clear()
 	map_gltf_paths.clear()
 	vfx_data_paths.clear()
+	shp_paths.clear()
+	seq_paths.clear()
 	scenario_paths.clear()
 	action_paths.clear()
 	passive_effect_paths.clear()
@@ -221,13 +225,15 @@ func import_data(directory_path: String) -> void:
 			# var new_image: Image = Image.load_from_file(file_path)
 			# textures[file_path.get_file().trim_suffix(".texture.webp")] = ImageTexture.create_from_image(new_image)
 		elif file_path.to_lower().ends_with(".shp.tres"):
-			var new_shp: Shp = ResourceLoader.load(file_path, "Shp")
-			new_shp.is_initialized = true
-			shps[file_path.get_file().trim_suffix(".shp.tres")] = new_shp
+			shp_paths[file_path.get_file().trim_suffix(".shp.tres")] = file_path
+			# var new_shp: Shp = ResourceLoader.load(file_path, "Shp")
+			# new_shp.is_initialized = true
+			# shps[file_path.get_file().trim_suffix(".shp.tres")] = new_shp
 		elif file_path.to_lower().ends_with(".seq.tres"):
-			var new_seq: Seq = ResourceLoader.load(file_path, "Seq")
-			new_seq.is_initialized = true
-			seqs[file_path.get_file().trim_suffix(".seq.tres")] = new_seq
+			seq_paths[file_path.get_file().trim_suffix(".seq.tres")] = file_path
+			# var new_seq: Seq = ResourceLoader.load(file_path, "Seq")
+			# new_seq.is_initialized = true
+			# seqs[file_path.get_file().trim_suffix(".seq.tres")] = new_seq
 		elif file_path.ends_with("animation_data.tres"):
 			var new_animation_data: AnimationData = ResourceLoader.load(file_path, "AnimationData")
 			animation_layer_priorities = new_animation_data.animation_layer_priorities.duplicate()
@@ -306,6 +312,28 @@ func get_vfx_data(unique_name: String) -> VisualEffectData:
 	return vfx[unique_name]
 
 
+func get_shp(unique_name: String) -> Shp:
+	if shps.has(unique_name):
+		return shps[unique_name]
+	
+	var file_path: String = shp_paths[unique_name]
+	var new_shp: Shp = ResourceLoader.load(file_path, "Shp")
+	new_shp.is_initialized = true
+	shps[unique_name] = new_shp
+	return shps[unique_name]
+
+
+func get_seq(unique_name: String) -> Seq:
+	if seqs.has(unique_name):
+		return seqs[unique_name]
+	
+	var file_path: String = seq_paths[unique_name]
+	var new_seq: Seq = ResourceLoader.load(file_path, "Seq")
+	new_seq.is_initialized = true
+	seqs[unique_name] = new_seq
+	return seqs[unique_name]
+
+
 func get_scenario(unique_name: String) -> Scenario:
 	if scenarios.has(unique_name):
 		return scenarios[unique_name]
@@ -348,6 +376,10 @@ func load_all_data() -> void:
 		get_map_gltf(file_name)
 	for file_name: String in vfx_data_paths.keys():
 		get_vfx_data(file_name)
+	for file_name: String in shp_paths.keys():
+		get_shp(file_name)
+	for file_name: String in seq_paths.keys():
+		get_seq(file_name)
 	for file_name: String in scenario_paths.keys():
 		get_scenario(file_name)
 	for file_name: String in action_paths.keys():

@@ -357,14 +357,14 @@ func initialize_unit() -> void:
 	#animation_manager.wep_spr = RomReader.sprs[RomReader.file_records["WEP.SPR"].type_index]
 	animation_manager.wep_texture = GameData.get_texture("wep")
 	animation_manager.wep_spritesheet_data = GameData.unit_spritesheets_data["wep"]
-	animation_manager.wep_shp = GameData.shps["wep1"]
-	animation_manager.wep_seq = GameData.seqs["wep1"]
+	animation_manager.wep_shp = GameData.get_shp("wep1")
+	animation_manager.wep_seq = GameData.get_seq("wep1")
 	
 	#animation_manager.eff_spr = RomReader.sprs[RomReader.file_records["EFF.SPR"].type_index]
 	animation_manager.eff_texture = GameData.get_texture("eff")
 	animation_manager.eff_spritesheet_data = GameData.unit_spritesheets_data["eff"]
-	animation_manager.eff_shp = GameData.shps["eff1"]
-	animation_manager.eff_seq = GameData.seqs["eff1"]
+	animation_manager.eff_shp = GameData.get_shp("eff1")
+	animation_manager.eff_seq = GameData.get_seq("eff1")
 	
 	#animation_manager.unit_sprites_manager.sprite_effect.texture = animation_manager.eff_spr.create_frame_grid_texture(0, 0, 0, 0, 0)
 	var eff_frame_grid: ImageTexture = GameData.unit_spritesheets_data["eff"].create_frame_grid_texture(0, 0, 0, 0)
@@ -381,7 +381,7 @@ func initialize_unit() -> void:
 	
 	#animation_manager.other_spr = RomReader.sprs[RomReader.file_records["OTHER.SPR"].type_index]
 	animation_manager.other_texture = GameData.get_texture("other")
-	animation_manager.other_shp = GameData.shps["other"]
+	animation_manager.other_shp = GameData.get_shp("other")
 
 	skillsets_names.resize(2)
 	skillsets_names.fill("")
@@ -1729,10 +1729,10 @@ func on_sprite_selected(new_spritesheet_name: String) -> void:
 	var animation_changed: bool = false
 	if shp.file_name == "type2":
 		if animation_manager.wep_shp.file_name != "wep2":
-			animation_manager.wep_shp = GameData.shps["wep2"]
+			animation_manager.wep_shp = GameData.get_shp("wep2")
 			set_primary_weapon(primary_weapon.unique_name) # get new texture based on wep2.shp
 			animation_changed = true
-		animation_manager.wep_seq = GameData.seqs["wep2"]
+		animation_manager.wep_seq = GameData.get_seq("wep2")
 	
 	var seq: Seq = GameData.unit_spritesheets_data[new_spritesheet_name].get_seq()
 	if shp != animation_manager.global_shp or seq != animation_manager.global_seq:
