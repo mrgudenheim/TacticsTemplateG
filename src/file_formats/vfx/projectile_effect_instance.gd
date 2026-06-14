@@ -8,7 +8,7 @@ extends Node3D
 
 signal completed
 
-enum ProjectileType { ARROW, STONE, SPECIAL, NONE }
+enum ProjectileType { ARROW, STONE, SHURIKEN, NONE }
 enum Trajectory { LINEAR, PARABOLIC }
 
 enum State { IDLE, FLYING, DONE }
@@ -39,7 +39,7 @@ const PSX_HEIGHT_UNIT: float = 12.0 # 1h = 12 PSX world units
 const PROJECTILE_MESH_NAME: Dictionary[ProjectileType, String] = {
 	ProjectileType.ARROW : "projectile_ARROW",
 	ProjectileType.STONE : "projectile_STONE",
-	ProjectileType.SPECIAL : "projectile_SPECIAL",
+	ProjectileType.SHURIKEN : "projectile_SHURIKEN",
 }
 
 var loop: bool = false
@@ -211,7 +211,7 @@ func _process_tick() -> void:
 		ProjectileType.STONE:
 			_tumble_y += STONE_TUMBLE_Y_RATE
 			_tumble_x += STONE_TUMBLE_X_RATE
-		ProjectileType.SPECIAL:
+		ProjectileType.SHURIKEN:
 			_spin_x -= SPECIAL_SPIN_RATE
 
 
@@ -262,7 +262,7 @@ func _update_transform() -> void:
 			model_scale = ARROW_SCALE
 		ProjectileType.STONE:
 			model_scale = STONE_SCALE
-		ProjectileType.SPECIAL:
+		ProjectileType.SHURIKEN:
 			model_scale = SPECIAL_SCALE
 
 	# Build rotation: orientation along trajectory + projectile_type-specific tumble
@@ -274,7 +274,7 @@ func _update_transform() -> void:
 			tumble_basis = Basis(Vector3.RIGHT, PI / 2.0)
 		ProjectileType.STONE:
 			tumble_basis = Basis.from_euler(Vector3(_tumble_x, _tumble_y, 0.0))
-		ProjectileType.SPECIAL:
+		ProjectileType.SHURIKEN:
 			tumble_basis = Basis.from_euler(Vector3(_spin_x, 0.0, 0.0))
 
 	var model_basis: Basis = _orientation * tumble_basis

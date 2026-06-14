@@ -145,7 +145,7 @@ func _populate_ui() -> void:
 	projectile_type_option.clear()
 	projectile_type_option.add_item("Arrow", ProjectileEffectInstance.ProjectileType.ARROW)
 	projectile_type_option.add_item("Stone", ProjectileEffectInstance.ProjectileType.STONE)
-	projectile_type_option.add_item("Special", ProjectileEffectInstance.ProjectileType.SPECIAL)
+	projectile_type_option.add_item("Shuriken", ProjectileEffectInstance.ProjectileType.SHURIKEN)
 	projectile_type_option.select(1) # Default to Stone
 
 	trajectory_option.clear()

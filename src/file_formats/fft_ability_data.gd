@@ -344,7 +344,7 @@ func set_action() -> void:
 	if id == 0x94:
 		ability_action.projectile_type = ProjectileEffectInstance.ProjectileType.STONE
 	elif id == 0x17e:
-		ability_action.projectile_type = ProjectileEffectInstance.ProjectileType.SPECIAL
+		ability_action.projectile_type = ProjectileEffectInstance.ProjectileType.SHURIKEN
 
 
 func create_ability() -> Ability:
