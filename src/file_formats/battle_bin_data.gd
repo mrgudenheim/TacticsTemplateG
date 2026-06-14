@@ -55,8 +55,12 @@ const PROJECTILE_MODEL_OFFSETS: Dictionary = {
 var projectile_model_data: Dictionary = {}  # model_id int -> {"vertices": Array[Vector3], "faces": Array}
 
 # https://ffhacktics.com/wiki/Secondary_effects_by_Charge_Animation
-var charging_vfx_ids_start: int = 0x1b84ac - 0x67000 # 1 byte each?, 0x13 total
+var charging_vfx_ids_start: int = 0x1b84ac - 0x67000 # 1 byte each, 0x13 total
 var charging_vfx_ids: PackedInt32Array = []
+
+# https://ffhacktics.com/wiki/Effect_Data
+var shared_vfx_handler_data_start: int = 0x1b84dc - 0x67000 # 4 byte each, 0x16 entries
+var shared_vfx_handler_ids: PackedInt32Array = [] # 1 byte
 
 var status_image_rects_start: int = 0x14cf68 - 0x67000 # 4 bytes each, 49 entries, mostly text + sword and rod icon
 var status_image_rects: Array[Rect2i] = []
@@ -163,11 +167,17 @@ func init_from_battle_bin() -> void:
 		ability_animation_text_ids[ability_id] = ability_animation_id_bytes.decode_u8((ability_id * entry_size) + 2)
 
 	# charging vfx ids (maps charge animation set to TRAP handler index)
-	var num_charge_entries: int = 0x13
+	var num_charge_entries: int = 0x14
 	charging_vfx_ids.resize(num_charge_entries)
 	var charge_data: PackedByteArray = battle_bytes.slice(charging_vfx_ids_start, charging_vfx_ids_start + num_charge_entries)
 	for idx: int in num_charge_entries:
 		charging_vfx_ids[idx] = charge_data.decode_u8(idx)
+
+	num_entries = 0x16
+	shared_vfx_handler_ids.resize(num_entries)
+	var shared_vfx_handler_data: PackedByteArray = battle_bytes.slice(shared_vfx_handler_data_start, shared_vfx_handler_data_start + (num_entries * 4))
+	for idx: int in num_entries:
+		shared_vfx_handler_ids[idx] = shared_vfx_handler_data.decode_u32(idx * 4) & 0xff # fourth byte is the handler id
 
 	# weapon animation ids - low, mid, high
 	entry_size = 3

@@ -336,8 +336,11 @@ func set_action() -> void:
 	ability_action.vfx_name = vfx_data.unique_name
 
 	if animation_charging_set_id < RomReader.battle_bin_data.charging_vfx_ids.size():
-		ability_action.trap_hit_handler_id = RomReader.battle_bin_data.charging_vfx_ids[animation_charging_set_id]
-	
+		var charging_vfx_id: int = RomReader.battle_bin_data.charging_vfx_ids[animation_charging_set_id]
+		ability_action.user_shared_vfx_handler_id = RomReader.battle_bin_data.shared_vfx_handler_ids[charging_vfx_id]
+	if id == 0x92: # accumulate
+		ability_action.user_shared_vfx_handler_id = 6 # red orbs
+
 	if id == 0x94:
 		ability_action.projectile_type = ProjectileEffectInstance.ProjectileType.STONE
 	elif id == 0x17e:

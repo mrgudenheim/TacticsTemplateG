@@ -116,7 +116,8 @@ var separate_status: bool = false
 @export var vfx_id: int = 0
 var vfx_data: VisualEffectData
 
-@export var trap_hit_handler_id: int = 0 # 0 = no TRAP, >0 = handler ID from charging_vfx_ids
+@export var user_shared_vfx_handler_id: int = 0 # 0 = no shared_vfx, >0 = handler ID from charging_vfx_ids -> shared_vfx_handler_ids
+@export var target_shared_vfx_handler_id: int = 0 # 0 = no shared_vfx, >0 = handler ID from charging_vfx_ids -> shared_vfx_handler_ids
 @export var projectile_type: ProjectileEffectInstance.ProjectileType = ProjectileEffectInstance.ProjectileType.NONE
 
 class SecondaryAction:
@@ -430,6 +431,8 @@ func apply_standard(action_instance: ActionInstance) -> void:
 			elif angle_to_target < -0.51:
 				mod_animation_executing_id = animation_executing_ids_alternate[1]
 	
+	show_shared_vfx(action_instance, user_shared_vfx_handler_id, action_instance.user)
+	action_instance.user.get_tree().create_timer(2.0).timeout.connect(func() -> void: action_instance.user.global_battle_manager.trap_instance.stop(), CONNECT_ONE_SHOT)
 	await action_instance.user.animate_start_action(animation_start_id, animation_charging_id)
 	
 	action_instance.user.animate_execute_action(mod_animation_executing_id)
@@ -449,7 +452,7 @@ func apply_standard(action_instance: ActionInstance) -> void:
 		var total_hit_chance: int = get_total_hit_chance(action_instance.user, target_unit, evade_direction)
 		var hit_success: bool = randi_range(0, 99) < total_hit_chance
 		if hit_success:
-			show_trap_hit(action_instance, target_unit)
+			show_shared_vfx(action_instance, target_shared_vfx_handler_id, target_unit)
 
 			for effect: ActionEffect in target_effects:
 				var effect_value: int = roundi(effect.base_power_formula.get_result(action_instance.user, target_unit, element))
@@ -596,8 +599,8 @@ func show_vfx(action_instance: ActionInstance, position: Vector3) -> Node3D:
 	return vfx_instance
 
 
-func show_trap_hit(action_instance: ActionInstance, target_unit: Unit) -> void:
-	if trap_hit_handler_id <= 0:
+func show_shared_vfx(action_instance: ActionInstance, shared_vfx_handler_id: int, target_unit: Unit) -> void:
+	if shared_vfx_handler_id <= 0:
 		return
 	var battle_manager: BattleManager = action_instance.user.global_battle_manager
 	if battle_manager == null or battle_manager.trap_instance == null:
@@ -606,8 +609,8 @@ func show_trap_hit(action_instance: ActionInstance, target_unit: Unit) -> void:
 	battle_manager.trap_instance.global_position = target_pos
 	var dir: Vector3 = (target_pos - action_instance.user.char_body.global_position).normalized()
 	var trap_element: int = TrapEffectData.element_type_to_trap_id(element)
-	var flash_unit: Unit = target_unit if trap_hit_handler_id in TrapEffectData.FLASH_HANDLER_IDS else null
-	battle_manager.trap_instance.play(trap_hit_handler_id, trap_element, dir, flash_unit)
+	var flash_unit: Unit = target_unit if shared_vfx_handler_id in TrapEffectData.FLASH_HANDLER_IDS else null
+	battle_manager.trap_instance.play(shared_vfx_handler_id, trap_element, dir, flash_unit)
 
 
 func show_projectile(action_instance: ActionInstance, target_unit: Unit, new_projectile_type: ProjectileEffectInstance.ProjectileType) -> void:
@@ -2000,7 +2003,7 @@ func set_data_from_formula_id(new_formula_id: int) -> void:
 static func get_modified_action(action_to_modify: Action, user: Unit) -> Action:
 	var modified_action: Action = action_to_modify.duplicate()
 	modified_action.vfx_data = action_to_modify.vfx_data
-	modified_action.trap_hit_handler_id = action_to_modify.trap_hit_handler_id
+	modified_action.user_shared_vfx_handler_id = action_to_modify.user_shared_vfx_handler_id
 	var all_passive_effects: Array[PassiveEffect] = user.get_all_passive_effects(action_to_modify.ignore_passives)
 
 	for passive_effect: PassiveEffect in all_passive_effects:
