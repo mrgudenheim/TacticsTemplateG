@@ -43,6 +43,7 @@ var current_cursor_map_position: Vector3
 @export var active_unit: Unit
 @export var game_state_container: Container
 @export var game_state_label: Label
+@export var scenario_editor: ScenarioEditor
 
 var trap_instance: TrapEffectInstance
 var projectile_instance: ProjectileEffectInstance
@@ -84,8 +85,6 @@ var walled_maps: PackedInt32Array = [
 	96,
 	104,
 ]
-
-@export var scenario_editor: ScenarioEditor
 
 var unit_stat_bars_visible: bool = true:
 	get: return unit_stat_bars_visible
@@ -160,8 +159,10 @@ func on_data_ready() -> void:
 
 	scenario_editor.populate_option_lists()
 	scenario_editor.visible = true
-	var default_scenario: Scenario = GameData.get_scenario("map_032_slums_in_dorter_01")
-	scenario_editor.init_scenario(default_scenario)
+	# var default_scenario: Scenario = GameData.get_scenario("map_032_slums_in_dorter_01")
+	var default_scenario: Scenario = GameData.get_scenario("map_083_zirekile_falls_14")
+	# scenario_editor.init_scenario(default_scenario)
+	scenario_editor.init_random_scenario()
 
 
 func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:

@@ -169,9 +169,11 @@ func init_random_scenario() -> void:
 	remove_all_teams()
 	
 	add_map_chunk_settings()
-	var map_chunk_data: FftMapData = RomReader.maps[scenario.map_chunks[0].unique_name]
-	background_gradient_color_pickers[0].color = map_chunk_data.background_gradient_bottom
-	background_gradient_color_pickers[1].color = map_chunk_data.background_gradient_top
+	# var map_chunk_data: MapData = GameData.maps_data[scenario.map_chunks[0].unique_name]
+	var random_scenario_name: String = GameData.scenario_paths.keys().pick_random()
+	var random_scenario: Scenario = GameData.get_scenario(random_scenario_name)
+	background_gradient_color_pickers[0].color = random_scenario.background_gradient_bottom
+	background_gradient_color_pickers[1].color = random_scenario.background_gradient_top
 	update_background_gradient()
 
 	for team_num: int in 2:
