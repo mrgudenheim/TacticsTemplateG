@@ -162,9 +162,6 @@ func import_data(directory_path: String) -> void:
 			match data_type:
 				"action":
 					action_paths[file_path.get_file().trim_suffix(".action.json")] = file_path
-					# var new_content: Action = Action.create_from_json(file_text)
-					# if not actions.keys().has(new_content.unique_name):
-					# 	actions[new_content.unique_name] = new_content
 				"ability":
 					var new_content: Ability = Ability.create_from_json(file_text)
 					if not abilities.keys().has(new_content.unique_name):
@@ -175,22 +172,12 @@ func import_data(directory_path: String) -> void:
 						triggered_actions[new_content.unique_name] = new_content
 				"passive_effect":
 					passive_effect_paths[file_path.get_file().trim_suffix(".passive_effect.json")] = file_path
-					# var new_content: PassiveEffect = PassiveEffect.create_from_json(file_text)
-					# if not passive_effects.keys().has(new_content.unique_name):
-					# 	passive_effects[new_content.unique_name] = new_content
-				# "status_effect":
-				# 	var new_content: StatusEffect = StatusEffect.create_from_json(file_text)
-				# 	if not status_effects.keys().has(new_content.unique_name):
-				# 		status_effects[new_content.unique_name] = new_content
 				"item":
 					var new_content: ItemData = ItemData.create_from_json(file_text)
 					if not items.keys().has(new_content.unique_name):
 						items[new_content.unique_name] = new_content
 				"scenario":
 					scenario_paths[file_path.get_file().trim_suffix(".scenario.json")] = file_path
-					# var new_content: Scenario = Scenario.create_from_json(file_text)
-					# if not scenarios.keys().has(new_content.unique_name):
-					# 	scenarios[new_content.unique_name] = new_content
 				"job":
 					var new_content: JobData = JobData.create_from_json(file_text)
 					if not scenarios.keys().has(new_content.unique_name):
@@ -247,17 +234,6 @@ func import_data(directory_path: String) -> void:
 			projectiles_gltf[file_path.get_file().trim_suffix(".projectile.glb")] = GltfManager.import_gltf(file_path)
 		elif file_path.ends_with("initial_unit_data.tres"):
 			initial_unit_data = ResourceLoader.load(file_path, "InitialUnitData")
-	
-	# for map_data: MapData in maps_data.values():
-	# 	var mesh_instance: MeshInstance3D = maps_gltf[map_data.unique_name].get_child(1)
-	# 	map_data.mesh = mesh_instance.mesh
-	
-	# for new_vfx: VisualEffectData in vfx.values():
-	# 	new_vfx.texture = textures[new_vfx.unique_name]
-	
-	# for new_action: Action in actions.values():
-	# 	if new_action.vfx_name != "":
-	# 		new_action.vfx_data = vfx[new_action.vfx_name]
 
 	if lazy_load_data == false:
 		load_all_data()
@@ -388,81 +364,5 @@ func load_all_data() -> void:
 		get_passive_effect(file_name)
 
 
-# func connect_data_references() -> void:
-# 	# actions have no direct references, stores StatusEffect names in several places
-# 	# for action: Action in actions:
-		
-# 	for triggered_action: TriggeredAction in triggered_actions.values():
-# 		if actions.has(triggered_action.action_unique_name):
-# 			triggered_action.action = actions[triggered_action.action_unique_name]
-
-# 	for status_effect: StatusEffect in status_effects.values():
-# 		if passive_effects.has(status_effect.passive_effect_name):
-# 			status_effect.passive_effect = passive_effects[status_effect.passive_effect_name]
-	
-# 	for job_data: JobData in jobs_data.values():
-# 		for passive_effect_name_idx: int in job_data.passive_effect_names.size():
-# 			var passive_effect_name: String = job_data.passive_effect_names[passive_effect_name_idx]
-# 			if passive_effect_name == "" and passive_effects.has(job_data.unique_name):
-# 				passive_effect_name = job_data.unique_name
-# 				job_data.passive_effect_names[passive_effect_name_idx] = passive_effect_name
-# 				job_data.passive_effects.append(passive_effects[passive_effect_name])
-# 			elif passive_effects.has(passive_effect_name):
-# 				job_data.passive_effects.append(passive_effects[passive_effect_name])
-			
-		
-# 		for innate_ability_id: int in job_data.innate_abilities_ids:
-# 			# var ability_uname: String = fft_abilities[innate_ability_id].display_name.to_snake_case()
-# 			var ability_uname: String = abilities.values()[innate_ability_id].unique_name
-# 			if not job_data.innate_ability_names.has(ability_uname):
-# 				job_data.innate_ability_names.append(ability_uname)
-
-# 		for ability_name: String in job_data.innate_ability_names:
-# 			if abilities.has(ability_name):
-# 				job_data.innate_abilities.append(abilities[ability_name])
-
-# 	for ability: Ability in abilities.values():
-# 		if ability.passive_effect_name == "" and passive_effects.has(ability.unique_name):
-# 			ability.passive_effect_name = ability.unique_name
-# 			ability.passive_effect = passive_effects[ability.passive_effect_name]
-# 		elif passive_effects.has(ability.passive_effect_name):
-# 			ability.passive_effect = passive_effects[ability.passive_effect_name]
-
-# 		for triggered_action_name: String in ability.triggered_actions_names:
-# 			if triggered_actions.has(triggered_action_name):
-# 				ability.triggered_actions.append(triggered_actions[triggered_action_name])
-		
-# 		if ability.triggered_actions_names.is_empty():
-# 			if triggered_actions.has(ability.unique_name):
-# 				ability.triggered_actions_names = [ability.unique_name]
-# 				ability.triggered_actions.append(triggered_actions[ability.unique_name])
-
-# 	for passive_effect: PassiveEffect in passive_effects.values():
-# 		for action_name: String in passive_effect.added_actions_names:
-# 			if actions.has(action_name):
-# 				passive_effect.added_actions.append(actions[action_name])
-# 		for triggered_action_name: String in passive_effect.added_triggered_actions_names:
-# 			if triggered_actions.has(triggered_action_name):
-# 				passive_effect.added_triggered_actions.append(triggered_actions[triggered_action_name])
-
-# 	for item: ItemData in items.values():
-# 		if passive_effects.has(item.passive_effect_name):
-# 			item.passive_effect = passive_effects[item.passive_effect_name]
-# 		if actions.has(item.weapon_attack_action_name):
-# 			item.weapon_attack_action = actions[item.weapon_attack_action_name]
-
-
 static func get_16_color_palette(palette_id: int, full_palette: PackedColorArray) -> PackedColorArray:
 	return full_palette.slice(palette_id * 16, (palette_id + 1) * 16)
-
-
-#func get_scenario(unique_name: String) -> Scenario:
-	#if _scenarios[unique_name].is_loaded:
-		#return _scenarios[unique_name]
-	#
-	#var data_filepath: String = "user://"
-	#var filepath: String = data_filepath + "scenarios/" + unique_name + ".scenario.json"
-	#var file_text: String = FileAccess.get_file_as_string(filepath)
-	#var new_scenario: Scenario = Scenario.create_from_json(file_text)
-	#_scenarios[new_scenario.unique_name] = new_scenario
-	#return new_scenario
