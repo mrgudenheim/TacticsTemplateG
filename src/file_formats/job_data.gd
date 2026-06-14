@@ -41,7 +41,7 @@ var passive_effects: Array[PassiveEffect] = [] # TODO job_data move stat modifie
 @export var monster_type: int = 0 # monster type sprite? sprite_id = 0x85 + this
 var sprite_id: int = 0
 @export var sprite_name: String = ""
-@export var default_palette_idx: int = 0 # -1 means to use the team idx
+@export var default_palette_idx: int = 0 # -1 means to use the team idx; TODO should this be defined in UnitSpritesheetData instead of JobData?
 
 
 func _init(new_job_id: int = -1, job_bytes: PackedByteArray = []) -> void:
