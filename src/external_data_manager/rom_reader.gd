@@ -1577,6 +1577,11 @@ func export_vfx(save_path: String) -> void:
 	error = ResourceSaver.save(shared_vfx_color_palette, shared_vfx_texture_palettes_file_path)
 	if error != Error.OK:
 		push_warning("error saving palette data shared_vfx.palette.tres: " + str(error))
+	
+	for palette_idx: int in 16:
+		var full_color_texture_webp_file_path: String = vfx_path.path_join("shared_vfx_%02d.texture.webp" % palette_idx)
+		trap_effect_data.trap_spr.set_pixel_colors(palette_idx)
+		trap_effect_data.trap_spr.get_rgba8_image().save_webp(full_color_texture_webp_file_path)
 
 	# projectiles
 	var models_data: Dictionary = RomReader.battle_bin_data.projectile_model_data
