@@ -22,7 +22,7 @@ func _init(spr: Spr = null) -> void:
 
 
 func get_texture() -> Texture2D:
-	return GameData.textures[unique_name]
+	return GameData.get_texture(unique_name)
 
 
 func get_shp() -> Shp:

@@ -425,11 +425,11 @@ func set_item_attributes(item_attribute: ScusData.ItemAttribute) -> void:
 
 
 func get_attack_action() -> Action:
-	return GameData.actions[weapon_attack_action_name]
+	return GameData.get_action(weapon_attack_action_name)
 
 
 func get_passive_effect() -> PassiveEffect:
-	return GameData.passive_effects[passive_effect_name]
+	return GameData.get_passive_effect(passive_effect_name)
 
 
 func add_to_global_list(will_overwrite: bool = false) -> void:

@@ -30,7 +30,7 @@ func _ready() -> void:
 	item_options.item_selected.connect(animation_manager.set_item)
 	
 	ability_id_spin.value_changed.connect(_on_ability_id_value_changed)
-	unit.ability_assigned.connect(func(action_name: String) -> void: ability_id_spin.value = GameData.actions.keys().find(action_name))
+	# unit.ability_assigned.connect(func(action_name: String) -> void: ability_id_spin.value = GameData.actions.keys().find(action_name))
 	
 	unit.primary_weapon_assigned.connect(func(weapon_unique_name: String) -> void: weapon_options.select(RomReader.items.keys().find(weapon_unique_name)))
 	# unit.primary_weapon_assigned.connect(weapon_options.select)
@@ -90,6 +90,7 @@ func _on_anim_id_spin_value_changed(value: int) -> void:
 
 
 func _on_ability_id_value_changed(ability_id: int) -> void:
-	var ability_name: String = GameData.actions.keys()[ability_id]
-	unit.set_ability(ability_name)
-	ability_name_line.text = ability_name
+	# var ability_name: String = GameData.actions.keys()[ability_id]
+	# unit.set_ability(ability_name)
+	# ability_name_line.text = ability_name
+	ability_name_line.text = "Ability id: " + str(ability_id)

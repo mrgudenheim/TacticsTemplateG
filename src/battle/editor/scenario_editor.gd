@@ -86,7 +86,7 @@ func _ready() -> void:
 
 
 func load_scenario(dropdown_idx: int) -> void:
-	var scenario_to_load: Scenario = GameData.scenarios[load_scenario_button.get_item_text(dropdown_idx)].duplicate_deep(Resource.DEEP_DUPLICATE_ALL)
+	var scenario_to_load: Scenario = GameData.get_scenario(load_scenario_button.get_item_text(dropdown_idx)).duplicate_deep(Resource.DEEP_DUPLICATE_ALL)
 	scenario_to_load.unique_name = scenario_to_load.unique_name + "_new"
 	# update mirror_scale for duplicated map chunks
 	for map_chunk: Scenario.MapChunk in scenario_to_load.map_chunks:
@@ -116,7 +116,7 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 	
 	load_scenario_button.clear()
 	load_scenario_button.add_separator("Load Scenario")
-	for scenario_unique_name: String in GameData.scenarios.keys():
+	for scenario_unique_name: String in GameData.scenario_paths.keys():
 		load_scenario_button.add_item(scenario_unique_name)
 	load_scenario_button.select(0)
 	
@@ -205,7 +205,7 @@ func setup_item_select(unit: Unit, slot: EquipmentSlot) -> void:
 	item_select_control.visible = true
 	for item_select_button: ItemSelectButton in item_select_control.item_select_buttons:
 		if item_select_button.sprite_rect.texture.atlas == null:
-			item_select_button.sprite_rect.texture.atlas = GameData.textures["items"]
+			item_select_button.sprite_rect.texture.atlas = GameData.get_texture("items")
 			var item_graphic_id: int = item_select_button.item_data.item_graphic_id
 			@warning_ignore("integer_division")
 			var row: int = item_graphic_id / 15 # 15 columns of icons

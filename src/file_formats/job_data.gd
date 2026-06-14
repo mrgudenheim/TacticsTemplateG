@@ -131,7 +131,7 @@ func _init(new_job_id: int = -1, job_bytes: PackedByteArray = []) -> void:
 func get_passive_effects() -> Array[PassiveEffect]:
 	if passive_effects.is_empty():
 		for name: String in passive_effect_names:
-			passive_effects.append(GameData.passive_effects[name])
+			passive_effects.append(GameData.get_passive_effect(name))
 	return passive_effects
 
 

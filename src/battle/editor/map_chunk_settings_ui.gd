@@ -31,8 +31,8 @@ func _ready() -> void:
 	chunk_name_dropdown.item_selected.connect(on_chunk_selected)
 	position_edit.vector_changed.connect(set_map_chunk_position)
 	
-	for map_data: MapData in GameData.maps_data.values():
-		chunk_name_dropdown.add_item(map_data.unique_name)
+	for map_data_name: String in GameData.map_data_paths.keys():
+		chunk_name_dropdown.add_item(map_data_name)
 	
 	var map_index: int = Utilities.get_option_button_index_by_string(chunk_name_dropdown, map_chunk.unique_name)
 	if map_index == -1: # map name not found
@@ -89,7 +89,7 @@ func on_mirror_changed(_toggled_on: bool) -> void:
 
 
 func get_map_chunk_nodes(map_chunk_unique_name: String) -> MapChunkNodes:
-	var map_chunk_data: MapData = GameData.maps_data[map_chunk_unique_name]
+	var map_chunk_data: MapData = GameData.get_map_data(map_chunk_unique_name)
 
 	var new_map_instance: MapChunkNodes = MapChunkNodes.instantiate()
 	new_map_instance.map_data = map_chunk_data
@@ -98,7 +98,7 @@ func get_map_chunk_nodes(map_chunk_unique_name: String) -> MapChunkNodes:
 	var transformed_mesh: ArrayMesh = FftMapData.get_transformed_mesh(map_chunk_data.mesh, map_chunk.mirror_scale)
 	new_map_instance.mesh_instance.mesh = transformed_mesh
 
-	new_map_instance.set_mesh_shader(GameData.textures[map_chunk_data.unique_name], map_chunk_data.palettes)
+	new_map_instance.set_mesh_shader(GameData.get_texture(map_chunk_data.unique_name), map_chunk_data.palettes)
 	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
 	
 	return new_map_instance

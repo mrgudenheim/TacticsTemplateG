@@ -38,8 +38,8 @@ func initialize() -> void:
 
 	texture_size = trap_data.texture.get_size()
 	_palette_textures[0] = trap_data.texture
-	if GameData.textures.has("shared_vfx_00"):
-		_palette_textures[0] = GameData.textures["shared_vfx_00"]
+	if GameData.texture_paths.has("shared_vfx_00"):
+		_palette_textures[0] = GameData.get_texture("shared_vfx_00")
 
 	_grow_pool(POOL_INITIAL_SIZE)
 	_free_mesh_indices.clear()

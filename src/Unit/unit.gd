@@ -309,7 +309,7 @@ func _ready() -> void:
 	ct_bar.show_value = true
 	
 	icon2.material_override = icon2.material_override.duplicate()
-	icon2.material_override.set_shader_parameter("sprite_texture", GameData.textures["misc"])
+	icon2.material_override.set_shader_parameter("sprite_texture", GameData.get_texture("misc"))
 	icon2.material_override.set_shader_parameter("palette_colors", GameData.palettes["misc"].slice(5 * 16, 6 * 16))
 	icon2.material_override.set_shader_parameter("billboard_enabled", true)
 	cycle_status_icons()
@@ -355,13 +355,13 @@ func initialize_unit() -> void:
 	debug_menu.populate_options()
 	
 	#animation_manager.wep_spr = RomReader.sprs[RomReader.file_records["WEP.SPR"].type_index]
-	animation_manager.wep_texture = GameData.textures["wep"]
+	animation_manager.wep_texture = GameData.get_texture("wep")
 	animation_manager.wep_spritesheet_data = GameData.unit_spritesheets_data["wep"]
 	animation_manager.wep_shp = GameData.shps["wep1"]
 	animation_manager.wep_seq = GameData.seqs["wep1"]
 	
 	#animation_manager.eff_spr = RomReader.sprs[RomReader.file_records["EFF.SPR"].type_index]
-	animation_manager.eff_texture = GameData.textures["eff"]
+	animation_manager.eff_texture = GameData.get_texture("eff")
 	animation_manager.eff_spritesheet_data = GameData.unit_spritesheets_data["eff"]
 	animation_manager.eff_shp = GameData.shps["eff1"]
 	animation_manager.eff_seq = GameData.seqs["eff1"]
@@ -377,10 +377,10 @@ func initialize_unit() -> void:
 
 	#animation_manager.item_spr = RomReader.sprs[RomReader.file_records["ITEM.BIN"].type_index]
 	
-	animation_manager.unit_sprites_manager.sprite_item.texture = GameData.textures["items"]
+	animation_manager.unit_sprites_manager.sprite_item.texture = GameData.get_texture("items")
 	
 	#animation_manager.other_spr = RomReader.sprs[RomReader.file_records["OTHER.SPR"].type_index]
-	animation_manager.other_texture = GameData.textures["other"]
+	animation_manager.other_texture = GameData.get_texture("other")
 	animation_manager.other_shp = GameData.shps["other"]
 
 	skillsets_names.resize(2)
@@ -671,7 +671,7 @@ func start_turn(battle_manager: BattleManager) -> void:
 
 	for status_effect: StatusEffect in current_statuses:
 		if status_effect.action_on_turn_start != "":
-			var action_instance: ActionInstance = ActionInstance.new(GameData.actions[status_effect.action_on_turn_start], self, battle_manager)
+			var action_instance: ActionInstance = ActionInstance.new(GameData.get_action(status_effect.action_on_turn_start), self, battle_manager)
 			action_instance.submitted_targets = [tile_position] # TODO allow other targeting for status actions on turn start
 			await action_instance.use()
 
@@ -745,8 +745,8 @@ func get_skillset_actions() -> Array[Action]:
 	for skillset: Skillset in get_skillsets():
 		for ability_name: String in skillset.ability_names:
 			var ability_is_action: bool = not [Ability.SlotType.REACTION, Ability.SlotType.SUPPORT, Ability.SlotType.MOVEMENT].has(GameData.abilities[ability_name].slot_type)
-			if ability_is_action and GameData.actions.has(ability_name):
-				var new_action: Action = GameData.actions[ability_name]
+			if ability_is_action and GameData.action_paths.has(ability_name):
+				var new_action: Action = GameData.get_action(ability_name)
 				action_list.append(new_action)
 	return action_list
 
@@ -802,14 +802,14 @@ func end_turn() -> void:
 	
 	for status_effect: StatusEffect in current_statuses:
 		if status_effect.action_on_turn_end != "":
-			var action_instance: ActionInstance = ActionInstance.new(GameData.actions[status_effect.action_on_turn_end], self, global_battle_manager)
+			var action_instance: ActionInstance = ActionInstance.new(GameData.get_action(status_effect.action_on_turn_end), self, global_battle_manager)
 			action_instance.submitted_targets = [tile_position] # TODO allow other targeting for status actions on turn end
 			await action_instance.use()
 		
 		if status_effect.duration_type == StatusEffect.DurationType.TURNS:
 			status_effect.duration -= 1
 			if status_effect.duration < 0 and status_effect.action_on_complete != "":
-				var status_action_instance: ActionInstance = ActionInstance.new(GameData.actions[status_effect.action_on_complete], self, global_battle_manager)
+				var status_action_instance: ActionInstance = ActionInstance.new(GameData.get_action(status_effect.action_on_complete), self, global_battle_manager)
 				status_action_instance.submitted_targets.append(tile_position) # TODO get targets for status action
 				global_battle_manager.game_state_label.text = job_nickname + "-" + unit_nickname + " processing " + status_effect.status_effect_name + " completing"
 				await status_action_instance.use()
@@ -865,7 +865,7 @@ func add_status(new_status: StatusEffect, ignore_immunity: bool = false) -> void
 	current_statuses.append(new_status)
 	# use action_on_apply
 	if new_status.action_on_apply != "":
-		var action_instance: ActionInstance = ActionInstance.new(GameData.actions[new_status.action_on_apply], self, global_battle_manager)
+		var action_instance: ActionInstance = ActionInstance.new(GameData.get_action(new_status.action_on_apply), self, global_battle_manager)
 		action_instance.submitted_targets = [tile_position] # TODO allow other targeting for status actions on turn end
 		await action_instance.use()
 	
@@ -1382,12 +1382,12 @@ func set_job(new_job_name: String) -> void:
 
 func set_ability(new_action_name: String) -> void:
 	active_ability_name = new_action_name
-	action_data = GameData.actions[new_action_name]
+	action_data = GameData.get_action(new_action_name)
 	
 	# if not action_data.vfx_data.is_initialized:
 	# 	action_data.vfx_data.init_from_file()
 	
-	image_changed.emit(GameData.textures[action_data.vfx_name])
+	image_changed.emit(GameData.get_texture(action_data.vfx_name))
 	#debug_menu.sprite_viewer.texture = ImageTexture.create_from_image(action_data.vfx_data.vfx_spr.spritesheet)
 	ability_assigned.emit(new_action_name)
 
@@ -1623,7 +1623,7 @@ func set_sprite_by_file_name(new_sprite_file_name: String) -> void:
 	sprite_file_name = new_sprite_file_name
 	#debug_menu.sprite_options.select(new_sprite_file_idx)
 	on_sprite_selected(new_sprite_file_name)
-	var num_sp2s: int = min(0, (GameData.textures[new_sprite_file_name].get_height() - 488)) / 256
+	var num_sp2s: int = min(0, (GameData.get_texture(new_sprite_file_name).get_height() - 488)) / 256
 	if new_sprite_file_name == "wep":
 		animation_manager.unit_sprites_manager.sprite_primary.vframes = 32
 	else:

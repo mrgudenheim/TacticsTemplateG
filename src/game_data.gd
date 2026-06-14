@@ -12,6 +12,7 @@ var external_data_paths: Dictionary [String, String] = {
 }
 
 var is_ready: bool = false
+var lazy_load_data: bool = true
 
 var shps: Dictionary[String, Shp] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
 var seqs: Dictionary[String, Seq] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
@@ -35,8 +36,18 @@ var palettes: Dictionary[String, PackedColorArray] = {}
 var textures: Dictionary[String, Texture2D] = {}
 var unit_spritesheets_data: Dictionary[String, UnitSpritesheetData] = {}
 var animation_layer_priorities: PackedVector4Array = []
-
 var initial_unit_data: InitialUnitData
+
+# lazy loading
+var texture_paths: Dictionary[String, String] = {}
+var map_data_paths: Dictionary[String, String] = {}
+var map_gltf_paths: Dictionary[String, String] = {}
+var vfx_data_paths: Dictionary[String, String] = {}
+var scenario_paths: Dictionary[String, String] = {}
+var action_paths: Dictionary[String, String] = {}
+var passive_effect_paths: Dictionary[String, String] = {}
+# var unit_spritesheet_data_paths: Dictionary[String, String] = {}
+
 
 func _ready() -> void:
 	external_data_paths = _get_saved_data_paths()
@@ -95,6 +106,15 @@ func clear_data() -> void:
 	animation_layer_priorities = []
 	initial_unit_data = null
 
+	texture_paths.clear()
+	map_data_paths.clear()
+	map_gltf_paths.clear()
+	vfx_data_paths.clear()
+	scenario_paths.clear()
+	action_paths.clear()
+	passive_effect_paths.clear()
+	# unit_spritesheet_data_paths.clear()
+
 
 func import_data(directory_path: String) -> void:
 	clear_data()
@@ -137,9 +157,10 @@ func import_data(directory_path: String) -> void:
 
 			match data_type:
 				"action":
-					var new_content: Action = Action.create_from_json(file_text)
-					if not actions.keys().has(new_content.unique_name):
-						actions[new_content.unique_name] = new_content
+					action_paths[file_path.get_file().trim_suffix(".action.json")] = file_path
+					# var new_content: Action = Action.create_from_json(file_text)
+					# if not actions.keys().has(new_content.unique_name):
+					# 	actions[new_content.unique_name] = new_content
 				"ability":
 					var new_content: Ability = Ability.create_from_json(file_text)
 					if not abilities.keys().has(new_content.unique_name):
@@ -149,9 +170,10 @@ func import_data(directory_path: String) -> void:
 					if not triggered_actions.keys().has(new_content.unique_name):
 						triggered_actions[new_content.unique_name] = new_content
 				"passive_effect":
-					var new_content: PassiveEffect = PassiveEffect.create_from_json(file_text)
-					if not passive_effects.keys().has(new_content.unique_name):
-						passive_effects[new_content.unique_name] = new_content
+					passive_effect_paths[file_path.get_file().trim_suffix(".passive_effect.json")] = file_path
+					# var new_content: PassiveEffect = PassiveEffect.create_from_json(file_text)
+					# if not passive_effects.keys().has(new_content.unique_name):
+					# 	passive_effects[new_content.unique_name] = new_content
 				# "status_effect":
 				# 	var new_content: StatusEffect = StatusEffect.create_from_json(file_text)
 				# 	if not status_effects.keys().has(new_content.unique_name):
@@ -161,9 +183,10 @@ func import_data(directory_path: String) -> void:
 					if not items.keys().has(new_content.unique_name):
 						items[new_content.unique_name] = new_content
 				"scenario":
-					var new_content: Scenario = Scenario.create_from_json(file_text)
-					if not scenarios.keys().has(new_content.unique_name):
-						scenarios[new_content.unique_name] = new_content
+					scenario_paths[file_path.get_file().trim_suffix(".scenario.json")] = file_path
+					# var new_content: Scenario = Scenario.create_from_json(file_text)
+					# if not scenarios.keys().has(new_content.unique_name):
+					# 	scenarios[new_content.unique_name] = new_content
 				"job":
 					var new_content: JobData = JobData.create_from_json(file_text)
 					if not scenarios.keys().has(new_content.unique_name):
@@ -178,7 +201,7 @@ func import_data(directory_path: String) -> void:
 		elif file_path.ends_with(".status_effect.tres"):
 			var new_status_effect: StatusEffect = ResourceLoader.load(file_path, "StatusEffect")
 			status_effects[new_status_effect.unique_name] = new_status_effect
-		elif file_path.ends_with("skillset.tres"):
+		elif file_path.ends_with(".skillset.tres"):
 			var new_skillset: Skillset = ResourceLoader.load(file_path, "Skillset")
 			skillsets[new_skillset.unique_name] = new_skillset
 		elif file_path.ends_with(".palette.tres"):
@@ -188,12 +211,15 @@ func import_data(directory_path: String) -> void:
 			var new_spritesheet_data: UnitSpritesheetData = ResourceLoader.load(file_path, "UnitSpritesheetData")
 			unit_spritesheets_data[file_path.get_file().trim_suffix(".unit_spritesheet.tres")] = new_spritesheet_data
 		elif file_path.ends_with(".map.glb"):
-			maps_gltf[file_path.get_file().trim_suffix(".map.glb")] = GltfManager.import_gltf(file_path)
+			map_gltf_paths[file_path.get_file().trim_suffix(".map.glb")] = file_path
+			# maps_gltf[file_path.get_file().trim_suffix(".map.glb")] = GltfManager.import_gltf(file_path)
 		elif file_path.ends_with(".map_data.tres"):
-			maps_data[file_path.get_file().trim_suffix(".map_data.tres")] = ResourceLoader.load(file_path, "MapData")
+			map_data_paths[file_path.get_file().trim_suffix(".map_data.tres")] = file_path
+			# maps_data[file_path.get_file().trim_suffix(".map_data.tres")] = ResourceLoader.load(file_path, "MapData")
 		elif file_path.ends_with(".texture.webp"):
-			var new_image: Image = Image.load_from_file(file_path)
-			textures[file_path.get_file().trim_suffix(".texture.webp")] = ImageTexture.create_from_image(new_image)
+			texture_paths[file_path.get_file().trim_suffix(".texture.webp")] = file_path
+			# var new_image: Image = Image.load_from_file(file_path)
+			# textures[file_path.get_file().trim_suffix(".texture.webp")] = ImageTexture.create_from_image(new_image)
 		elif file_path.to_lower().ends_with(".shp.tres"):
 			var new_shp: Shp = ResourceLoader.load(file_path, "Shp")
 			new_shp.is_initialized = true
@@ -206,8 +232,9 @@ func import_data(directory_path: String) -> void:
 			var new_animation_data: AnimationData = ResourceLoader.load(file_path, "AnimationData")
 			animation_layer_priorities = new_animation_data.animation_layer_priorities.duplicate()
 		elif file_path.to_lower().ends_with(".vfx_data.tres"):
-			var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")
-			vfx[file_path.get_file().trim_suffix(".vfx_data.tres")] = new_vfx
+			vfx_data_paths[file_path.get_file().trim_suffix(".vfx_data.tres")] = file_path
+			# var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")
+			# vfx[file_path.get_file().trim_suffix(".vfx_data.tres")] = new_vfx
 		elif file_path.to_lower().ends_with("shared_vfx.data.tres"):
 			shared_vfx_data = ResourceLoader.load(file_path, "TrapEffectData")
 		elif file_path.ends_with(".projectile.glb"):
@@ -215,84 +242,182 @@ func import_data(directory_path: String) -> void:
 		elif file_path.ends_with("initial_unit_data.tres"):
 			initial_unit_data = ResourceLoader.load(file_path, "InitialUnitData")
 	
-	for map_data: MapData in maps_data.values():
-		var mesh_instance: MeshInstance3D = maps_gltf[map_data.unique_name].get_child(1)
-		map_data.mesh = mesh_instance.mesh
+	# for map_data: MapData in maps_data.values():
+	# 	var mesh_instance: MeshInstance3D = maps_gltf[map_data.unique_name].get_child(1)
+	# 	map_data.mesh = mesh_instance.mesh
 	
-	for new_vfx: VisualEffectData in vfx.values():
-		new_vfx.texture = textures[new_vfx.unique_name]
+	# for new_vfx: VisualEffectData in vfx.values():
+	# 	new_vfx.texture = textures[new_vfx.unique_name]
 	
-	for new_action: Action in actions.values():
-		if new_action.vfx_name != "":
-			new_action.vfx_data = vfx[new_action.vfx_name]
+	# for new_action: Action in actions.values():
+	# 	if new_action.vfx_name != "":
+	# 		new_action.vfx_data = vfx[new_action.vfx_name]
 
-	push_warning("Time to import files (ms): " + str(Time.get_ticks_msec() - start_time))
+	if lazy_load_data == false:
+		load_all_data()
+
+	var import_time: int = Time.get_ticks_msec() - start_time
+	print_debug("Time to import files (ms): " + str(import_time))
+	push_warning("Time to import files (ms): " + str(import_time))
 	is_ready = true
 	data_imported.emit()
 
 
-func connect_data_references() -> void:
-	# actions have no direct references, stores StatusEffect names in several places
-	# for action: Action in actions:
-		
-	for triggered_action: TriggeredAction in triggered_actions.values():
-		if actions.has(triggered_action.action_unique_name):
-			triggered_action.action = actions[triggered_action.action_unique_name]
-
-	for status_effect: StatusEffect in status_effects.values():
-		if passive_effects.has(status_effect.passive_effect_name):
-			status_effect.passive_effect = passive_effects[status_effect.passive_effect_name]
+## Lazy loading functions
+func get_texture(unique_name: String) -> Texture2D:
+	if textures.has(unique_name):
+		return textures[unique_name]
 	
-	for job_data: JobData in jobs_data.values():
-		for passive_effect_name_idx: int in job_data.passive_effect_names.size():
-			var passive_effect_name: String = job_data.passive_effect_names[passive_effect_name_idx]
-			if passive_effect_name == "" and passive_effects.has(job_data.unique_name):
-				passive_effect_name = job_data.unique_name
-				job_data.passive_effect_names[passive_effect_name_idx] = passive_effect_name
-				job_data.passive_effects.append(passive_effects[passive_effect_name])
-			elif passive_effects.has(passive_effect_name):
-				job_data.passive_effects.append(passive_effects[passive_effect_name])
+	var file_path: String = texture_paths[unique_name]
+	var new_image: Image = Image.load_from_file(file_path)
+	textures[unique_name] = ImageTexture.create_from_image(new_image)
+	return textures[unique_name]
+
+
+func get_map_data(unique_name: String) -> MapData:
+	if maps_data.has(unique_name):
+		return maps_data[unique_name]
+	
+	var file_path: String = map_data_paths[unique_name]
+	var new_map_data: MapData = ResourceLoader.load(file_path, "MapData")
+	var mesh_instance: MeshInstance3D = get_map_gltf(new_map_data.unique_name).get_child(1)
+	new_map_data.mesh = mesh_instance.mesh
+	maps_data[unique_name] = new_map_data
+	return maps_data[unique_name]
+
+
+func get_map_gltf(unique_name: String) -> Node:
+	if maps_gltf.has(unique_name):
+		return maps_gltf[unique_name]
+	
+	var file_path: String = map_gltf_paths[unique_name]
+	maps_gltf[unique_name] = GltfManager.import_gltf(file_path)
+	return maps_gltf[unique_name]
+
+
+func get_vfx_data(unique_name: String) -> VisualEffectData:
+	if vfx.has(unique_name):
+		return vfx[unique_name]
+	
+	var file_path: String = vfx_data_paths[unique_name]
+	var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")
+	new_vfx.texture = get_texture(new_vfx.unique_name)
+	vfx[unique_name] = new_vfx
+	return vfx[unique_name]
+
+
+func get_scenario(unique_name: String) -> Scenario:
+	if scenarios.has(unique_name):
+		return scenarios[unique_name]
+	
+	var file_path: String = scenario_paths[unique_name]
+	var file_text: String = FileAccess.get_file_as_string(file_path)
+	scenarios[unique_name] = Scenario.create_from_json(file_text)
+	return scenarios[unique_name]
+
+
+func get_action(unique_name: String) -> Action:
+	if actions.has(unique_name):
+		return actions[unique_name]
+	
+	var file_path: String = action_paths[unique_name]
+	var file_text: String = FileAccess.get_file_as_string(file_path)
+	var new_action: Action = Action.create_from_json(file_text)
+	if new_action.vfx_name != "":
+		new_action.vfx_data = get_vfx_data(new_action.vfx_name)
+	actions[unique_name] = new_action
+	return actions[unique_name]
+
+
+func get_passive_effect(unique_name: String) -> PassiveEffect:
+	if passive_effects.has(unique_name):
+		return passive_effects[unique_name]
+	
+	var file_path: String = passive_effect_paths[unique_name]
+	var file_text: String = FileAccess.get_file_as_string(file_path)
+	passive_effects[unique_name] = PassiveEffect.create_from_json(file_text)
+	return passive_effects[unique_name]
+
+
+func load_all_data() -> void:
+	for file_name: String in texture_paths.keys():
+		get_texture(file_name)
+	for file_name: String in map_data_paths.keys():
+		get_map_data(file_name)
+	for file_name: String in map_gltf_paths.keys():
+		get_map_gltf(file_name)
+	for file_name: String in vfx_data_paths.keys():
+		get_vfx_data(file_name)
+	for file_name: String in scenario_paths.keys():
+		get_scenario(file_name)
+	for file_name: String in action_paths.keys():
+		get_action(file_name)
+	for file_name: String in passive_effect_paths.keys():
+		get_passive_effect(file_name)
+
+
+# func connect_data_references() -> void:
+# 	# actions have no direct references, stores StatusEffect names in several places
+# 	# for action: Action in actions:
+		
+# 	for triggered_action: TriggeredAction in triggered_actions.values():
+# 		if actions.has(triggered_action.action_unique_name):
+# 			triggered_action.action = actions[triggered_action.action_unique_name]
+
+# 	for status_effect: StatusEffect in status_effects.values():
+# 		if passive_effects.has(status_effect.passive_effect_name):
+# 			status_effect.passive_effect = passive_effects[status_effect.passive_effect_name]
+	
+# 	for job_data: JobData in jobs_data.values():
+# 		for passive_effect_name_idx: int in job_data.passive_effect_names.size():
+# 			var passive_effect_name: String = job_data.passive_effect_names[passive_effect_name_idx]
+# 			if passive_effect_name == "" and passive_effects.has(job_data.unique_name):
+# 				passive_effect_name = job_data.unique_name
+# 				job_data.passive_effect_names[passive_effect_name_idx] = passive_effect_name
+# 				job_data.passive_effects.append(passive_effects[passive_effect_name])
+# 			elif passive_effects.has(passive_effect_name):
+# 				job_data.passive_effects.append(passive_effects[passive_effect_name])
 			
 		
-		for innate_ability_id: int in job_data.innate_abilities_ids:
-			# var ability_uname: String = fft_abilities[innate_ability_id].display_name.to_snake_case()
-			var ability_uname: String = abilities.values()[innate_ability_id].unique_name
-			if not job_data.innate_ability_names.has(ability_uname):
-				job_data.innate_ability_names.append(ability_uname)
+# 		for innate_ability_id: int in job_data.innate_abilities_ids:
+# 			# var ability_uname: String = fft_abilities[innate_ability_id].display_name.to_snake_case()
+# 			var ability_uname: String = abilities.values()[innate_ability_id].unique_name
+# 			if not job_data.innate_ability_names.has(ability_uname):
+# 				job_data.innate_ability_names.append(ability_uname)
 
-		for ability_name: String in job_data.innate_ability_names:
-			if abilities.has(ability_name):
-				job_data.innate_abilities.append(abilities[ability_name])
+# 		for ability_name: String in job_data.innate_ability_names:
+# 			if abilities.has(ability_name):
+# 				job_data.innate_abilities.append(abilities[ability_name])
 
-	for ability: Ability in abilities.values():
-		if ability.passive_effect_name == "" and passive_effects.has(ability.unique_name):
-			ability.passive_effect_name = ability.unique_name
-			ability.passive_effect = passive_effects[ability.passive_effect_name]
-		elif passive_effects.has(ability.passive_effect_name):
-			ability.passive_effect = passive_effects[ability.passive_effect_name]
+# 	for ability: Ability in abilities.values():
+# 		if ability.passive_effect_name == "" and passive_effects.has(ability.unique_name):
+# 			ability.passive_effect_name = ability.unique_name
+# 			ability.passive_effect = passive_effects[ability.passive_effect_name]
+# 		elif passive_effects.has(ability.passive_effect_name):
+# 			ability.passive_effect = passive_effects[ability.passive_effect_name]
 
-		for triggered_action_name: String in ability.triggered_actions_names:
-			if triggered_actions.has(triggered_action_name):
-				ability.triggered_actions.append(triggered_actions[triggered_action_name])
+# 		for triggered_action_name: String in ability.triggered_actions_names:
+# 			if triggered_actions.has(triggered_action_name):
+# 				ability.triggered_actions.append(triggered_actions[triggered_action_name])
 		
-		if ability.triggered_actions_names.is_empty():
-			if triggered_actions.has(ability.unique_name):
-				ability.triggered_actions_names = [ability.unique_name]
-				ability.triggered_actions.append(triggered_actions[ability.unique_name])
+# 		if ability.triggered_actions_names.is_empty():
+# 			if triggered_actions.has(ability.unique_name):
+# 				ability.triggered_actions_names = [ability.unique_name]
+# 				ability.triggered_actions.append(triggered_actions[ability.unique_name])
 
-	for passive_effect: PassiveEffect in passive_effects.values():
-		for action_name: String in passive_effect.added_actions_names:
-			if actions.has(action_name):
-				passive_effect.added_actions.append(actions[action_name])
-		for triggered_action_name: String in passive_effect.added_triggered_actions_names:
-			if triggered_actions.has(triggered_action_name):
-				passive_effect.added_triggered_actions.append(triggered_actions[triggered_action_name])
+# 	for passive_effect: PassiveEffect in passive_effects.values():
+# 		for action_name: String in passive_effect.added_actions_names:
+# 			if actions.has(action_name):
+# 				passive_effect.added_actions.append(actions[action_name])
+# 		for triggered_action_name: String in passive_effect.added_triggered_actions_names:
+# 			if triggered_actions.has(triggered_action_name):
+# 				passive_effect.added_triggered_actions.append(triggered_actions[triggered_action_name])
 
-	for item: ItemData in items.values():
-		if passive_effects.has(item.passive_effect_name):
-			item.passive_effect = passive_effects[item.passive_effect_name]
-		if actions.has(item.weapon_attack_action_name):
-			item.weapon_attack_action = actions[item.weapon_attack_action_name]
+# 	for item: ItemData in items.values():
+# 		if passive_effects.has(item.passive_effect_name):
+# 			item.passive_effect = passive_effects[item.passive_effect_name]
+# 		if actions.has(item.weapon_attack_action_name):
+# 			item.weapon_attack_action = actions[item.weapon_attack_action_name]
 
 
 static func get_16_color_palette(palette_id: int, full_palette: PackedColorArray) -> PackedColorArray:

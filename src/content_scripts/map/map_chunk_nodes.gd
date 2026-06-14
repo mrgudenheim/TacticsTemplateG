@@ -29,7 +29,7 @@ func play_animations(local_map_data: MapData) -> void:
 	frame_positions.resize(num_texture_animations)
 	frame_idxs.resize(num_texture_animations)
 	
-	var texture_size: Vector2 = GameData.textures[local_map_data.unique_name].get_size()
+	var texture_size: Vector2 = GameData.get_texture(local_map_data.unique_name).get_size()
 	# var num_palettes: float = 16.0
 	for anim_id: int in num_texture_animations:
 		var texture_animation: TextureAnimation = local_map_data.texture_animations[anim_id]

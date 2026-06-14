@@ -392,8 +392,8 @@ func get_palette_texture(palette_id: int) -> Texture2D:
 	if textures_by_palette.has(palette_id):
 		return textures_by_palette[palette_id]
 	var texture_name: String = "shared_vfx_%02d" % palette_id
-	if GameData.textures.has(texture_name):
-		textures_by_palette[palette_id] = GameData.textures[texture_name]
+	if GameData.texture_paths.has(texture_name):
+		textures_by_palette[palette_id] = GameData.get_texture(texture_name)
 		return textures_by_palette[palette_id]
 	if trap_spr == null:
 		return texture

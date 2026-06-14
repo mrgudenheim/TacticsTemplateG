@@ -64,7 +64,7 @@ func to_json() -> String:
 
 
 func get_passive_effect() -> PassiveEffect:
-	return GameData.passive_effects[passive_effect_name]
+	return GameData.get_passive_effect(passive_effect_name)
 
 
 static func create_from_json(json_string: String) -> Ability:

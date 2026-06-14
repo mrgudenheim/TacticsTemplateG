@@ -160,7 +160,7 @@ func on_data_ready() -> void:
 
 	scenario_editor.populate_option_lists()
 	scenario_editor.visible = true
-	var default_scenario: Scenario = GameData.scenarios.get("map_032_slums_in_dorter_01")
+	var default_scenario: Scenario = GameData.get_scenario("map_032_slums_in_dorter_01")
 	scenario_editor.init_scenario(default_scenario)
 
 
@@ -168,7 +168,7 @@ func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
 	total_map_tiles.clear()
 
 	for map_chunk: Scenario.MapChunk in map_chunks:
-		var map_chunk_data: MapData = GameData.maps_data[map_chunk.unique_name]
+		var map_chunk_data: MapData = GameData.get_map_data(map_chunk.unique_name)
 		#if not map_chunk_data.is_initialized:
 			#continue
 
@@ -577,8 +577,8 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> Unit:
 	new_unit.update_stat_bars_scale(camera_controller.zoom)
 	camera_controller.zoom_changed.connect(new_unit.update_stat_bars_scale)
 	
-	new_unit.icon.texture = GameData.textures["misc"] # TODO clean up status icon stuff
-	new_unit.icon2.texture = GameData.textures["misc"]
+	new_unit.icon.texture = GameData.get_texture("misc") # TODO clean up status icon stuff
+	new_unit.icon2.texture = GameData.get_texture("misc")
 	
 	new_unit.skillsets_names = unit_data.skillsets_names
 	new_unit.ability_slots = unit_data.ability_slots
