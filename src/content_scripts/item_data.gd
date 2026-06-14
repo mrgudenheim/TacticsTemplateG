@@ -243,6 +243,9 @@ func _init(idx: int = -1) -> void:
 				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.MA_X_V1
 				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "user.magical_attack * %d" % weapon_power
 		
+		if [ItemType.BOW, ItemType.CROSSBOW].has(item_type):
+			weapon_attack_action.projectile_type = ProjectileEffectInstance.ProjectileType.ARROW
+		
 		# weapon_attack_action.description = "Attack Base Damage = " + FormulaData.formula_descriptions[weapon_attack_action.target_effects[0].base_power_formula.formula]
 		weapon_attack_action.description = "Attack Base Damage = " + weapon_attack_action.target_effects[0].base_power_formula.formula_text
 		weapon_attack_action.target_status_chance = 19 # https://ffhacktics.com/wiki/Weapon_Damage_Calculation

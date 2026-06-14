@@ -337,6 +337,11 @@ func set_action() -> void:
 
 	if animation_charging_set_id < RomReader.battle_bin_data.charging_vfx_ids.size():
 		ability_action.trap_hit_handler_id = RomReader.battle_bin_data.charging_vfx_ids[animation_charging_set_id]
+	
+	if id == 0x94:
+		ability_action.projectile_type = ProjectileEffectInstance.ProjectileType.STONE
+	elif id == 0x17e:
+		ability_action.projectile_type = ProjectileEffectInstance.ProjectileType.SPECIAL
 
 
 func create_ability() -> Ability:

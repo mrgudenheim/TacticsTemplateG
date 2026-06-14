@@ -116,7 +116,8 @@ var separate_status: bool = false
 @export var vfx_id: int = 0
 var vfx_data: VisualEffectData
 
-var trap_hit_handler_id: int = 0 # 0 = no TRAP, >0 = handler ID from charging_vfx_ids
+@export var trap_hit_handler_id: int = 0 # 0 = no TRAP, >0 = handler ID from charging_vfx_ids
+@export var projectile_type: ProjectileEffectInstance.ProjectileType = ProjectileEffectInstance.ProjectileType.NONE
 
 class SecondaryAction:
 	var action_idx: int
@@ -443,6 +444,7 @@ func apply_standard(action_instance: ActionInstance) -> void:
 		if vfx_data != null:
 			#vfx_data.vfx_completed.connect(func(): vfx_completed = true, CONNECT_ONE_SHOT)
 			vfx_locations.append(show_vfx(action_instance, target_unit.tile_position.get_world_position()))
+		show_projectile(action_instance, target_unit, projectile_type)
 		var evade_direction: EvadeData.Directions = get_evade_direction(action_instance.user, target_unit)
 		var total_hit_chance: int = get_total_hit_chance(action_instance.user, target_unit, evade_direction)
 		var hit_success: bool = randi_range(0, 99) < total_hit_chance
@@ -608,14 +610,17 @@ func show_trap_hit(action_instance: ActionInstance, target_unit: Unit) -> void:
 	battle_manager.trap_instance.play(trap_hit_handler_id, trap_element, dir, flash_unit)
 
 
-func show_projectile(action_instance: ActionInstance, target_unit: Unit, projectile_type: ProjectileEffectInstance.ProjectileType) -> void:
+func show_projectile(action_instance: ActionInstance, target_unit: Unit, new_projectile_type: ProjectileEffectInstance.ProjectileType) -> void:
+	if new_projectile_type == ProjectileEffectInstance.ProjectileType.NONE:
+		return
+	
 	var battle_manager: BattleManager = action_instance.user.global_battle_manager
 	if battle_manager == null or battle_manager.projectile_instance == null:
 		push_warning("[Action.show_projectile] battle_manager or projectile_instance is null")
 		return
 	var origin: Vector3 = action_instance.user.char_body.global_position
 	var target: Vector3 = target_unit.char_body.global_position
-	battle_manager.projectile_instance.play(origin, target, projectile_type)
+	battle_manager.projectile_instance.play(origin, target, new_projectile_type)
 
 
 # TODO set action type directly for each action? maybe as part of action processing per target to check values after formula processing and passive effect modifications
@@ -2042,6 +2047,16 @@ static func create_from_dictonary(property_dict: Dictionary) -> Action:
 			if property_dict[property_name] >= 0: # auto generate action_id if < 0
 				new_action.set(property_name, property_dict[property_name])
 				# TODO overwrite other Action at index
+		elif property_name == "projectile_type":
+			new_action.projectile_type = ProjectileEffectInstance.ProjectileType[property_dict[property_name]]
+		elif property_name == "applicable_evasion_type":
+			new_action.applicable_evasion_type = EvadeData.EvadeType[property_dict[property_name]]
+		elif property_name == "element":
+			new_action.element = ElementTypes[property_dict[property_name]]
+		elif property_name == "target_status_list_type":
+			new_action.target_status_list_type = StatusListType[property_dict[property_name]]
+		elif property_name == "user_status_list_type":
+			new_action.user_status_list_type = StatusListType[property_dict[property_name]]
 		else:
 			new_action.set(property_name, property_dict[property_name])
 

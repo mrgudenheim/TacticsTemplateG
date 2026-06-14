@@ -8,7 +8,7 @@ extends Node3D
 
 signal completed
 
-enum ProjectileType { ARROW, STONE, SPECIAL }
+enum ProjectileType { ARROW, STONE, SPECIAL, NONE }
 enum Trajectory { LINEAR, PARABOLIC }
 
 enum State { IDLE, FLYING, DONE }
