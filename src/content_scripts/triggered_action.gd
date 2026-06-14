@@ -309,6 +309,12 @@ static func create_from_dictonary(property_dict: Dictionary) -> TriggeredAction:
 				new_dictionary[key.to_int()] = roundi(json_dict[key])
 			
 			new_triggered_action.set(property_name, new_dictionary)
+		elif property_name == "trigger_timing":
+			new_triggered_action.trigger_timing = TriggerTiming[property_dict[property_name]]
+		elif property_name == "targeting":
+			new_triggered_action.targeting = TargetingTypes[property_dict[property_name]]
+		elif property_name == "requries_hit":
+			new_triggered_action.requries_hit = HitRequirement[property_dict[property_name]]
 		else:
 			new_triggered_action.set(property_name, property_dict[property_name])
 	

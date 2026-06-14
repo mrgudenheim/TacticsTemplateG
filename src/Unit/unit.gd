@@ -1661,8 +1661,6 @@ func set_sprite_by_job(new_job_name: String) -> void:
 		set_sprite_palette(job_data.default_palette_idx)
 	else:
 		set_sprite_palette(randi_range(0, 4))
-	# if new_job_data.job_id >= 0x5e: # monster
-	# 	set_sprite_palette(job_data.monster_palette_id)
 
 
 func set_sprite_palette(new_palette_id: int) -> void:
