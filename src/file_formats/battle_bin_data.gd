@@ -177,7 +177,7 @@ func init_from_battle_bin() -> void:
 	shared_vfx_handler_ids.resize(num_entries)
 	var shared_vfx_handler_data: PackedByteArray = battle_bytes.slice(shared_vfx_handler_data_start, shared_vfx_handler_data_start + (num_entries * 4))
 	for idx: int in num_entries:
-		shared_vfx_handler_ids[idx] = shared_vfx_handler_data.decode_u32(idx * 4) & 0xff # fourth byte is the handler id
+		shared_vfx_handler_ids[idx] = shared_vfx_handler_data.decode_u8(idx * 4) # first byte (out of 4) is the handler id
 
 	# weapon animation ids - low, mid, high
 	entry_size = 3
