@@ -2060,6 +2060,10 @@ static func create_from_dictonary(property_dict: Dictionary) -> Action:
 			new_action.target_status_list_type = StatusListType[property_dict[property_name]]
 		elif property_name == "user_status_list_type":
 			new_action.user_status_list_type = StatusListType[property_dict[property_name]]
+		elif property_name == "targeting_type":
+			new_action.targeting_type = TargetingTypes[property_dict[property_name]]
+		elif property_name == "use_type":
+			new_action.use_type = UseTypes[property_dict[property_name]]
 		else:
 			new_action.set(property_name, property_dict[property_name])
 
