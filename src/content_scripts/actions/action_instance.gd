@@ -99,10 +99,10 @@ func get_tile_highlights(tiles: Array[TerrainTile], highlight_material: Material
 	var highlight_offset: Vector3 = Vector3(0, 0.025, 0)
 	for tile: TerrainTile in tiles:
 		var new_tile_highlight: MeshInstance3D = tile.get_tile_mesh()
-		new_tile_highlight.material_override = highlight_material # use pre-existing materials
+		new_tile_highlight.material_override = highlight_material.duplicate() # use pre-existing materials
 		user.tile_highlights.add_child(new_tile_highlight)
 		new_tile_highlight.position = tile.get_world_position(true) + highlight_offset
-		new_tile_highlight.set_instance_shader_parameter("depth_position", tile.get_world_position() + highlight_offset)
+		new_tile_highlight.material_override.set_shader_parameter("depth_position", tile.get_world_position() + highlight_offset)
 		new_tile_highlight.visible = false
 		tile_highlights[tile] = new_tile_highlight
 	

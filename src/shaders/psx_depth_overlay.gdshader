@@ -6,7 +6,7 @@ render_mode blend_add, unshaded, cull_disabled, depth_draw_never;
 
 uniform vec4 overlay_color : source_color = vec4(0.0, 0.0, 1.0, 1.0);
 uniform float overlay_opacity : hint_range(0.0, 1.0) = 0.4;
-instance uniform vec3 depth_position = vec3(0.0, 0.0, 0.0);
+uniform vec3 depth_position = vec3(0.0, 0.0, 0.0);
 
 #include "res://src/shaders/psx_depth_common.gdshaderinc"
 
@@ -22,7 +22,7 @@ void vertex() {
 	else if (depth_mode == 5) bias = bias_pull_16;
 	else if (depth_mode == 6) bias = bias_unit;
 	else if (depth_mode == 7) bias = bias_tile_overlay;
-	vec4 clip_pos = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world_pos + cam_dir * bias, 1.0);
+	vec4 clip_pos = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world_pos + (cam_dir * bias), 1.0);
 	computed_depth = clip_pos.z / clip_pos.w;
 }
 
