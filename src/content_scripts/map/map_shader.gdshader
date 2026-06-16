@@ -14,6 +14,7 @@ uniform vec2[32] frame_pos;
 uniform float[32] frame_idx;
 
 const int NUM_PALETTES = 16;
+const float USABLE_TEXTURE_WIDTH = 240.0 / 256.0;
 
 uniform bool debug_depth = false;
 
@@ -36,7 +37,10 @@ void fragment() {
 				if (UV.x >= palette_canvas_pos.x && UV.x < canvas_max_pos.x && UV.y >= palette_canvas_pos.y && UV.y < canvas_max_pos.y) {
 					vec2 relative_pos = UV - palette_canvas_pos;
 					vec2 frame1_pos_palette = frame_pos[anim_idx] + palette_offset;
-					vec2 frame_offset = vec2(frame_idx[anim_idx] * canvas_size[anim_idx].x, 0.0);
+					float frame_row = floor(frame_idx[anim_idx] * canvas_size[anim_idx].x / (USABLE_TEXTURE_WIDTH / float(NUM_PALETTES)));
+					float frame_vert_offset = frame_row * canvas_size[anim_idx].y;
+					float frame_horz_offset = mod(frame_idx[anim_idx] * canvas_size[anim_idx].x, (USABLE_TEXTURE_WIDTH / float(NUM_PALETTES)));
+					vec2 frame_offset = vec2(frame_horz_offset, frame_vert_offset);
 					new_uv = frame1_pos_palette + relative_pos + frame_offset;
 				}
 			}
