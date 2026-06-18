@@ -1654,7 +1654,7 @@ func set_sprite_by_job(new_job_name: String) -> void:
 	
 	# TODO get different sprite_name for female generic jobs
 	var sprite_name: String = new_job_data.sprite_name
-	if (new_job_data.job_id >= 0x4a and new_job_data.job_id <= 0x5a or new_job_data.id == 0x5d) and stat_basis == StatBasis.FEMALE:
+	if (new_job_data.job_id >= 0x4a and new_job_data.job_id <= 0x5a or new_job_data.job_id == 0x5d) and stat_basis == StatBasis.FEMALE:
 		sprite_name = sprite_name.replace("_m", "_w")
 	set_sprite_by_file_name(sprite_name)
 	if job_data.default_palette_idx != -1:
