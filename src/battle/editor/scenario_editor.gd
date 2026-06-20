@@ -341,7 +341,7 @@ func update_unit_positions(units: Array[Unit]) -> void:
 			unit.tile_position = valid_tiles[existing_tile_idx]
 		else: # find nearest tile
 			var shortest_distance2: int = 9999
-			var closest_tile: TerrainTile = battle_manager.total_map_tiles.values()[0][0]
+			var closest_tile: TerrainTile = valid_tiles[0]
 			for potential_tile: TerrainTile in valid_tiles:
 				var this_distance2: int = potential_tile.location.distance_squared_to(unit.tile_position.location)
 				if this_distance2 < shortest_distance2:
