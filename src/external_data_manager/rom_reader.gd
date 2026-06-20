@@ -1526,7 +1526,7 @@ func export_maps(save_path: String) -> void:
 func export_map(save_path: String, fft_map_data: FftMapData) -> void:
 	# var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3(-1.0, -1.0, 1.0), Vector3(0, -FftMapData.HEIGHT_SCALE, 0))
 	# mirror map so positive y is up, mirror x so it ends up looking un-mirrored
-	var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3(-1.0, -1.0, 1.0), Vector3(1.0, 0.0, 0.0))
+	var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3(-1.0, -1.0, 1.0))
 	GltfManager.save_node(new_map_node, save_path, fft_map_data.unique_name + ".map.glb")
 	
 	var map_texture_webp_file_path: String = save_path.path_join(fft_map_data.unique_name + ".texture.webp")

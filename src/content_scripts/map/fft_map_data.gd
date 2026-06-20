@@ -911,10 +911,12 @@ static func get_transformed_mesh(
 	mesh_transform = mesh_transform.rotated(Vector3.UP, deg_to_rad(rotation_degrees))
 	mesh_transform = mesh_transform.scaled(scale)
 	# mesh_transform = mesh_transform.translated(mesh_center)
+	var mirror_offset: Vector3 = (scale * -1).clamp(Vector3.ZERO, Vector3.ONE)
+	mirror_offset.y = 0
 	if move_to_positive_quadrant:
-		mesh_transform = mesh_transform.translated(pivot_point.abs() + translation)
+		mesh_transform = mesh_transform.translated(pivot_point.abs() + translation + mirror_offset)
 	else:
-		mesh_transform = mesh_transform.translated(pivot_point + translation)
+		mesh_transform = mesh_transform.translated(pivot_point + translation + mirror_offset)
 
 	var surface_arrays: Array = original_mesh.surface_get_arrays(0)
 	for vertex_idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size():
