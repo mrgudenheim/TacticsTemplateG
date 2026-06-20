@@ -880,7 +880,8 @@ func get_map_scene(scale: Vector3 = Vector3.ONE, translation: Vector3 = Vector3.
 	new_map_instance.map_data = MapData.init_from_fft_map_data(self)
 	new_map_instance.name = unique_name
 
-	var transformed_mesh: ArrayMesh = get_transformed_mesh(mesh, scale, translation, rotation_degrees, true)
+	var tiles_center: Vector2 = MapData.get_tiles_center(new_map_instance.map_data.terrain_tiles)
+	var transformed_mesh: ArrayMesh = get_transformed_mesh(mesh, Vector3(tiles_center.x, 0.0, tiles_center.y), scale, translation, rotation_degrees, true)
 	new_map_instance.mesh_instance.mesh = transformed_mesh
 
 	new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes)
@@ -899,23 +900,21 @@ func get_map_scene(scale: Vector3 = Vector3.ONE, translation: Vector3 = Vector3.
 
 static func get_transformed_mesh(
 	original_mesh: ArrayMesh, 
+	pivot_point: Vector3,
 	scale: Vector3 = Vector3.ONE, 
 	translation: Vector3 = Vector3.ZERO, 
 	rotation_degrees: float = 0.0,
 	move_to_positive_quadrant: bool = false,
 ) -> ArrayMesh:
-	var mesh_aabb: AABB = original_mesh.get_aabb()
-	var mesh_center: Vector3 = mesh_aabb.get_center()
-	
 	var mesh_transform: Transform3D = Transform3D.IDENTITY
-	mesh_transform = mesh_transform.translated(-mesh_center)
+	mesh_transform = mesh_transform.translated(-pivot_point)
 	mesh_transform = mesh_transform.rotated(Vector3.UP, deg_to_rad(rotation_degrees))
 	mesh_transform = mesh_transform.scaled(scale)
 	# mesh_transform = mesh_transform.translated(mesh_center)
 	if move_to_positive_quadrant:
-		mesh_transform = mesh_transform.translated(mesh_center.abs() + translation)
+		mesh_transform = mesh_transform.translated(pivot_point.abs() + translation)
 	else:
-		mesh_transform = mesh_transform.translated(mesh_center + translation)
+		mesh_transform = mesh_transform.translated(pivot_point + translation)
 
 	var surface_arrays: Array = original_mesh.surface_get_arrays(0)
 	for vertex_idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size():

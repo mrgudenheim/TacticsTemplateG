@@ -85,8 +85,9 @@ static func transform_units_data_tile_location(
 ) -> Array[UnitData]:
 	var transformed_units_data: Array[UnitData] = local_units_data.duplicate_deep()
 
+	var tiles_center: Vector2 = MapData.get_tiles_center(terrain_tiles)
 	var tile_transform: Transform2D = MapData.get_transform2d(
-		terrain_tiles, 
+		tiles_center, 
 		scale,
 		translation,
 		rotation_degrees,

@@ -89,7 +89,9 @@ func animate_uv(texture_anim: TextureAnimation, map: MapChunkNodes, anim_idx: in
 
 func get_transformed_tiles(translation: Vector2 = Vector2.ZERO, scale: Vector2 = Vector2.ONE, rotation_degrees: float = 0.0) -> Array[TerrainTile]:
 	var mirrored_tiles: Array[TerrainTile] = []
-	var tile_transform: Transform2D = get_transform2d(terrain_tiles, scale, translation, rotation_degrees)
+
+	var tiles_center: Vector2 = get_tiles_center(terrain_tiles)	
+	var tile_transform: Transform2D = get_transform2d(tiles_center, scale, translation, rotation_degrees)
 	
 	for tile: TerrainTile in terrain_tiles:
 		if tile.no_cursor == 1:
@@ -113,14 +115,24 @@ func get_transformed_tiles(translation: Vector2 = Vector2.ZERO, scale: Vector2 =
 
 
 static func get_transform2d(
-	local_terrain_tiles: Array[TerrainTile], 
+	tiles_pivot: Vector2, 
 	scale: Vector2 = Vector2.ONE, 
 	translation: Vector2 = Vector2.ZERO, 
 	rotation_degrees: float = 0.0
-) -> Transform2D:
+) -> Transform2D:	
+	var transform: Transform2D = Transform2D.IDENTITY
+	transform = transform.translated(-tiles_pivot)
+	transform = transform.rotated(deg_to_rad(rotation_degrees))
+	transform = transform.scaled(scale)
+	transform = transform.translated(tiles_pivot + translation)
+
+	return transform
+
+
+static func get_tiles_center(tile_array: Array[TerrainTile]) -> Vector2:
 	var min_tile_location: Vector2i = Vector2i.ZERO
 	var max_tile_location: Vector2i = Vector2i.ZERO
-	for tile: TerrainTile in local_terrain_tiles:
+	for tile: TerrainTile in tile_array:
 		if tile.location.x > max_tile_location.x:
 			max_tile_location.x = tile.location.x
 		if tile.location.y > max_tile_location.y:
@@ -132,14 +144,7 @@ static func get_transform2d(
 			min_tile_location.y = tile.location.y
 	
 	var tiles_center: Vector2 = (max_tile_location -  min_tile_location) / 2.0
-	
-	var transform: Transform2D = Transform2D.IDENTITY
-	transform = transform.translated(-tiles_center)
-	transform = transform.rotated(deg_to_rad(rotation_degrees))
-	transform = transform.scaled(scale)
-	transform = transform.translated(tiles_center + translation)
-
-	return transform
+	return tiles_center
 
 
 class TextureAnimationData:
