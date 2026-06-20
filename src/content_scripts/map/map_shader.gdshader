@@ -1,7 +1,7 @@
 // https://docs.godotengine.org/en/stable/tutorials/shaders/shader_reference/shading_language.html
 
 shader_type spatial;
-render_mode unshaded, depth_draw_opaque;
+render_mode unshaded;
 
 // palette anim vars
 uniform sampler2D albedo_texture_color_indicies : source_color, filter_nearest;
@@ -18,12 +18,12 @@ const float USABLE_TEXTURE_WIDTH = 240.0 / 256.0;
 
 uniform bool debug_depth = false;
 
-varying float face_center_depth;
+// varying float face_center_depth;
 
-void vertex() {
-	vec4 centroid_clip = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(CUSTOM0.xyz, 1.0);
-	face_center_depth = centroid_clip.z / centroid_clip.w;
-}
+// void vertex() {
+// 	vec4 centroid_clip = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(CUSTOM0.xyz, 1.0);
+// 	face_center_depth = centroid_clip.z / centroid_clip.qw;
+// }
 
 void fragment() {
 	// uv animation
@@ -58,15 +58,15 @@ void fragment() {
 	else {
 		ALBEDO.rgb = COLOR.rgb;
 	}
-	if (debug_depth) {
-		// Reversed-Z: 1.0=near(blue), 0.0=far(red)
-		vec3 dc;
-		float d_inv = 1.0 - face_center_depth;
-		if (d_inv < 0.5)
-			dc = mix(vec3(0.0, 0.0, 1.0), vec3(0.0, 1.0, 0.0), d_inv * 2.0);
-		else
-			dc = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), (d_inv - 0.5) * 2.0);
-		ALBEDO = dc;
-	}
-	DEPTH = face_center_depth;
+	// if (debug_depth) {
+	// 	// Reversed-Z: 1.0=near(blue), 0.0=far(red)
+	// 	vec3 dc;
+	// 	float d_inv = 1.0 - face_center_depth;
+	// 	if (d_inv < 0.5)
+	// 		dc = mix(vec3(0.0, 0.0, 1.0), vec3(0.0, 1.0, 0.0), d_inv * 2.0);
+	// 	else
+	// 		dc = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), (d_inv - 0.5) * 2.0);
+	// 	ALBEDO = dc;
+	// }
+	// DEPTH = face_center_depth;
 }

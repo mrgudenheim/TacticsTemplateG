@@ -41,18 +41,6 @@ metadata/_snap_enabled = true
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dj13m"]
 render_priority = 0
 shader = ExtResource("12_v0g1v")
-shader_parameter/palette_colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-shader_parameter/unit_tint = Vector3(0, 0, 0)
-shader_parameter/billboard_enabled = false
-shader_parameter/depth_mode = 0
-shader_parameter/depth_bias_custom = 0.0
-shader_parameter/bias_pull_8 = 3.0
-shader_parameter/bias_pull_16 = 6.0
-shader_parameter/bias_fixed_front = 100.0
-shader_parameter/bias_fixed_back = -100.0
-shader_parameter/bias_fixed_16 = 80.0
-shader_parameter/bias_unit = 0.1
-shader_parameter/bias_tile_overlay = 0.05
 
 [node name="Unit" type="Node3D" unique_id=668783031 node_paths=PackedStringArray("char_body", "animation_manager", "popup_texts", "stat_bars_position", "stat_bars_container", "unit_battle_details_ui", "icon", "icon2", "debug_menu", "tile_highlights")]
 script = ExtResource("1_lcmw7")
@@ -99,7 +87,7 @@ texture = SubResource("GradientTexture2D_6vwfi")
 script = ExtResource("9_shadow_script")
 
 [node name="UnitAnimationManager" type="Node3D" parent="CharacterBody3D" unique_id=1134309126 node_paths=PackedStringArray("unit_data", "unit_sprites_manager")]
-transform = Transform3D(1, 0, 0, 0, 0.894934, 0.446198, 0, -0.446198, 0.894934, 0, 0.643, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.488, 0)
 script = ExtResource("3_l3ow2")
 unit_data = NodePath("../..")
 unit_sprites_manager = NodePath("UnitSpritesManager")
