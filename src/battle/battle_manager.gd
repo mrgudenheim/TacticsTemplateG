@@ -781,19 +781,21 @@ func get_random_terrain_tile() -> TerrainTile:
 
 
 func get_random_stand_terrain_tile() -> TerrainTile:
-	var potential_tiles: Array[TerrainTile] = get_valid_empty_tiles()
-	var random_valid_tlie: TerrainTile = potential_tiles.pick_random()
-	return random_valid_tlie
+	var potential_tiles: Array[TerrainTile] = get_stand_tiles()
+	var random_valid_tile: TerrainTile = potential_tiles.pick_random()
+	
+	while units.any(func(unit: Unit) -> bool: return unit.tile_position == random_valid_tile):
+		potential_tiles.erase(random_valid_tile)
+		random_valid_tile = potential_tiles.pick_random()
+	
+	return random_valid_tile
 
 
-func get_valid_empty_tiles() -> Array[TerrainTile]:
+func get_stand_tiles() -> Array[TerrainTile]:
 	var valid_tiles: Array[TerrainTile] = []
 	for tile_xy: Vector2i in total_map_tiles.keys():
 		var potential_tile: TerrainTile = total_map_tiles[tile_xy][0]
 		if potential_tile.no_stand_select != 0 or potential_tile.no_walk != 0:
-			continue
-		
-		if units.any(func(unit: Unit) -> bool: return unit.tile_position == potential_tile):
 			continue
 		
 		valid_tiles.append(potential_tile)

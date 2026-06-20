@@ -334,17 +334,19 @@ func update_unit_positions(units: Array[Unit]) -> void:
 	if battle_manager.total_map_tiles.is_empty():
 		push_warning("[ScenarioEditor] No map tiles loaded — cannot position units")
 		return
+	var valid_tiles: Array[TerrainTile] = battle_manager.get_stand_tiles()
 	for unit: Unit in units:
-		if battle_manager.total_map_tiles.keys().has(unit.tile_position.location):
-			unit.tile_position = battle_manager.total_map_tiles[unit.tile_position.location][0]
+		var existing_tile_idx: int = valid_tiles.find_custom(func(tile: TerrainTile) -> bool: return unit.tile_position.location == tile.location)
+		if existing_tile_idx >= 0:
+			unit.tile_position = valid_tiles[existing_tile_idx]
 		else: # find nearest tile
 			var shortest_distance2: int = 9999
 			var closest_tile: TerrainTile = battle_manager.total_map_tiles.values()[0][0]
-			for xy: Vector2i in battle_manager.total_map_tiles.keys():
-				var this_distance2: int = xy.distance_squared_to(unit.tile_position.location)
+			for potential_tile: TerrainTile in valid_tiles:
+				var this_distance2: int = potential_tile.location.distance_squared_to(unit.tile_position.location)
 				if this_distance2 < shortest_distance2:
 					shortest_distance2 = this_distance2
-					closest_tile = battle_manager.total_map_tiles[xy][0]
+					closest_tile = potential_tile
 			unit.tile_position = closest_tile
 
 		unit.set_position_to_tile()
