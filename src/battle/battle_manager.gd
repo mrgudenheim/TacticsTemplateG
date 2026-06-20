@@ -162,7 +162,7 @@ func on_data_ready() -> void:
 	# var default_scenario: Scenario = GameData.get_scenario("map_032_slums_in_dorter_01")
 	var default_scenario: Scenario = GameData.get_scenario("map_083_zirekile_falls_14")
 	# scenario_editor.init_scenario(default_scenario)
-	scenario_editor.init_random_scenario()
+	scenario_editor.init_scenario()
 
 
 func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
@@ -781,18 +781,23 @@ func get_random_terrain_tile() -> TerrainTile:
 
 
 func get_random_stand_terrain_tile() -> TerrainTile:
-	var tile: TerrainTile
-	for tile_idx: int in total_map_tiles.size():
-		tile = get_random_terrain_tile()
-		if tile.no_stand_select != 0 or tile.no_walk != 0:
+	var potential_tiles: Array[TerrainTile] = get_valid_empty_tiles()
+	var random_valid_tlie: TerrainTile = potential_tiles.pick_random()
+	return random_valid_tlie
+
+
+func get_valid_empty_tiles() -> Array[TerrainTile]:
+	var valid_tiles: Array[TerrainTile] = []
+	for tile_xy: Vector2i in total_map_tiles.keys():
+		var potential_tile: TerrainTile = total_map_tiles[tile_xy][0]
+		if potential_tile.no_stand_select != 0 or potential_tile.no_walk != 0:
 			continue
 		
-		if units.any(func(unit: Unit) -> bool: return unit.tile_position == tile):
+		if units.any(func(unit: Unit) -> bool: return unit.tile_position == potential_tile):
 			continue
 		
-		break
-	
-	return tile
+		valid_tiles.append(potential_tile)
+	return valid_tiles
 
 
 func clear_maps() -> void:

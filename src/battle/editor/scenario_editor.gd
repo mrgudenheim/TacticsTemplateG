@@ -113,6 +113,7 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 	# remove current map chunks
 	for map_chunk_settings_instance: MapChunkSettingsUi in map_chunk_settings_list:
 		map_chunk_settings_instance.queue_free()
+		map_chunk_settings_instance.deleted.emit(map_chunk_settings_instance) # queue_free takes 1 frame, but need to stop referencing data immediately
 	
 	load_scenario_button.clear()
 	load_scenario_button.add_separator("Load Scenario")
@@ -171,6 +172,7 @@ func init_random_scenario() -> void:
 	add_map_chunk_settings()
 	# var map_chunk_data: MapData = GameData.maps_data[scenario.map_chunks[0].unique_name]
 	var random_scenario_name: String = GameData.scenario_paths.keys().pick_random()
+	# random_scenario_name = "map_114_end_05"
 	var random_scenario: Scenario = GameData.get_scenario(random_scenario_name)
 	background_gradient_color_pickers[0].color = random_scenario.background_gradient_bottom
 	background_gradient_color_pickers[1].color = random_scenario.background_gradient_top
@@ -288,6 +290,7 @@ func add_map_chunk_settings(new_map_chunk: Scenario.MapChunk = null) -> void:
 	if new_map_chunk == null:
 		new_map_chunk = Scenario.MapChunk.new()
 		scenario.map_chunks.append(new_map_chunk)
+		# new_map_chunk.unique_name = "map_114_end"
 	
 	var new_map_chunk_settings: MapChunkSettingsUi = MapChunkSettingsUi.instantiate(new_map_chunk)
 	new_map_chunk_settings.map_chunk_nodes_changed.connect(update_map_chunk_nodes)
@@ -299,6 +302,7 @@ func add_map_chunk_settings(new_map_chunk: Scenario.MapChunk = null) -> void:
 			var idx: int = map_chunk_settings_list.find(deleted_map_chunk_settings)
 			if idx >= 0:
 				map_chunk_settings_list.remove_at(idx)
+				scenario.map_chunks.erase(deleted_map_chunk_settings.map_chunk)
 	)
 	
 	add_child(new_map_chunk_settings)
@@ -310,8 +314,6 @@ func update_map_chunk_nodes(new_map_chunk_settings: MapChunkSettingsUi) -> void:
 	new_map_chunk_settings.map_chunk_nodes.play_animations(new_map_chunk_settings.map_chunk_nodes.map_data)
 	new_map_chunk_settings.map_chunk_nodes.input_event.connect(battle_manager.on_map_input_event)
 	new_map_chunk_settings.set_map_chunk_position(new_map_chunk_settings.map_chunk.corner_position)
-
-	update_map(new_map_chunk_settings)
 
 
 func update_map(new_map_chunk_settings: MapChunkSettingsUi) -> void:
