@@ -17,6 +17,7 @@ enum AnimTechnique {
 
 @export var animation_type: AnimType = AnimType.OTHER
 @export var anim_technique: AnimTechnique = AnimTechnique.OTHER
+@export var is_script_animation: bool = false
 @export var num_frames: int = -1
 @export var frame_duration: float = -1.0 # seconds
 
@@ -51,6 +52,9 @@ func _init(fft_texture_animation: FftMapData.TextureAnimationData = null) -> voi
 		anim_technique = AnimTechnique.ONE_SHOT_REVERSE
 	else:
 		anim_technique = AnimTechnique.OTHER
+	
+	if [0, 13, 5, 15].has(fft_texture_animation.anim_technique):
+		is_script_animation = true
 	
 	num_frames = fft_texture_animation.num_frames
 	frame_duration = fft_texture_animation.frame_duration / 30.0

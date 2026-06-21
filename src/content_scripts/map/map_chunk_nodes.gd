@@ -51,6 +51,8 @@ func play_animations(local_map_data: MapData) -> void:
 	var anim_fps: float = 59.0 # TODO why does 59 look too fast?
 	for anim_id: int in num_texture_animations:
 		var texture_animation: TextureAnimation = local_map_data.texture_animations[anim_id]
+		if texture_animation.is_script_animation:
+			continue
 		if texture_animation.animation_type == TextureAnimation.AnimType.PALETTE: # if palette animation
 			local_map_data.animate_palette(texture_animation, self, anim_fps)
 		elif texture_animation.animation_type == TextureAnimation.AnimType.UV: # if uv animation
