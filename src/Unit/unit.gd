@@ -308,6 +308,7 @@ func _ready() -> void:
 	ct_bar.fill_color = Color.WEB_GREEN
 	ct_bar.show_value = true
 	
+	icon2.texture = GameData.get_texture("misc")
 	icon2.material_override = icon2.material_override.duplicate()
 	icon2.material_override.set_shader_parameter("sprite_texture", GameData.get_texture("misc"))
 	icon2.material_override.set_shader_parameter("palette_colors", GameData.palettes["misc"].slice(5 * 16, 6 * 16))
