@@ -21,6 +21,9 @@ offset_right = 32.0
 offset_bottom = 48.0
 size_flags_horizontal = 0
 size_flags_vertical = 4
+search_bar_enabled = true
+search_bar_min_item_count = 10
+search_bar_fuzzy_search_max_misses = 1
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=1279610938]
 layout_mode = 0

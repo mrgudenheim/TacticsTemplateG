@@ -517,6 +517,9 @@ use_native_dialog = true
 [node name="LoadScenario" type="OptionButton" parent="ScenarioEditor/MarginContainer/HBoxContainer" unique_id=1776173876]
 layout_mode = 2
 selected = 0
+search_bar_enabled = true
+search_bar_min_item_count = 10
+search_bar_fuzzy_search_max_misses = 1
 item_count = 1
 popup/item_0/text = "Load Scenario"
 popup/item_0/id = 0
