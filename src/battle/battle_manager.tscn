@@ -183,9 +183,9 @@ billboard = 1
 text = "North (0, 0, 1)"
 
 [node name="IconGridContainer" type="GridContainer" parent="." unique_id=1779577295]
-layout_direction = 3
 offset_right = 40.0
 offset_bottom = 40.0
+layout_direction = 3
 columns = 5
 
 [node name="ActionMenu" type="PanelContainer" parent="." unique_id=818999789]
