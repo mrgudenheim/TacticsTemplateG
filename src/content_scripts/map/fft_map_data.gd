@@ -778,6 +778,9 @@ func get_terrain(terrain_bytes: PackedByteArray) -> Array[TerrainTile]:
 					_:
 						push_warning("error determining slope type id: " + str(tile.location))
 				
+				if tile.slope_height == 0:
+					tile.slope_type = TerrainTile.SlopeType.FLAT
+				
 				# slope rotation
 				match tile.slope_type_id:
 					0, 0x85, 0x44, 0x99:
