@@ -30,9 +30,9 @@ func _start() -> void:
 	var maps_container := Node3D.new()
 	maps_container.name = "Maps"
 	add_child(maps_container)
-	var map_node: MapChunkNodes = VfxTestUtils.load_mirrored_map(116, maps_container)
+	var map_node: MapChunkNodes = VfxTestUtils.load_mirrored_map("map_116", maps_container)
 	if map_node:
-		var map_data: FftMapData = map_node.map_data
+		var map_data: MapData = map_node.map_data
 		for tile: TerrainTile in map_data.terrain_tiles:
 			if tile.location == Vector2i(1, 1):
 				origin_world_pos = tile.get_world_position()

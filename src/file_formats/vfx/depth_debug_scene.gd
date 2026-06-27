@@ -36,7 +36,7 @@ func _start() -> void:
 	var maps_container := Node3D.new()
 	maps_container.name = "Maps"
 	add_child(maps_container)
-	_map_node = VfxTestUtils.load_mirrored_map(116, maps_container)
+	_map_node = VfxTestUtils.load_mirrored_map("map_116", maps_container)
 
 	# Enable depth debug on map material
 	if _map_node:
