@@ -927,7 +927,7 @@ func add_entds(file_name: String) -> void:
 		fft_entds.append(new_entd)
 
 
-func generate_passive_effects(save_path: String) -> void:
+func generate_predefined_passive_effects(save_path: String) -> void:
 	var new_passive_effect: PassiveEffect
 
 	new_passive_effect = PassiveEffect.new()
@@ -1225,17 +1225,9 @@ func generate_passive_effects(save_path: String) -> void:
 	]
 	Utilities.save_json(new_passive_effect, save_path)
 
-	var new_action: Action = Action.new()
-	
-	new_action.display_name = "Defend"
-	new_action.unique_name = "defend"
-	new_action.target_status_chance = 100
-	new_action.target_status_list = ["defending"]
-	new_action.target_status_list_type = Action.StatusListType.ALL
-	new_action.targeting_type = Action.TargetingTypes.RANGE
-	new_action.auto_target = true
-	new_action.max_targeting_range = 0
-	new_action.status_prevents_use_any = [
+
+func generate_predefined_actions(save_path: String) -> void:
+	var standard_status_prevents_use: Array[String] = [
 		"crystal",
 		"dead",
 		"petrify",
@@ -1247,7 +1239,8 @@ func generate_passive_effects(save_path: String) -> void:
 		"stop",
 		"don't_act",
 	]
-	new_action.ignore_passives = [
+
+	var standard_ignore_passives: Array[String] = [
 		"protect_status",
 		"shell_status",
 		"attack_up",
@@ -1260,7 +1253,499 @@ func generate_passive_effects(save_path: String) -> void:
 		"maintenance",
 		"finger_guard",
 	]
+	
+	var new_action: Action = Action.new()
+
+	# TODO Move and Wait Actions
+	
+	new_action.display_name = "Defend"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.target_status_chance = 100
+	new_action.target_status_list = ["defending"]
+	new_action.target_status_list_type = Action.StatusListType.ALL
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	actions[new_action.unique_name] = new_action.duplicate_deep()
 	Utilities.save_json(new_action, save_path)
+
+	new_action = Action.new()
+	new_action.display_name = "Absorb Used MP"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	var new_effect: ActionEffect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.MP
+	# TODO get mp used based off of action? Maybe from TriggeredAction data?
+	new_effect.base_power_formula = FormulaData.new("10.0", [10], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Brave Up"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.BRAVE
+	new_effect.base_power_formula = FormulaData.new("3.0", [3], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	# Caution TiggeredAction should trigger defend action
+	# new_action = Action.new()
+	# new_action.display_name = "Caution"
+	# new_action.unique_name = new_action.display_name.to_snake_case()
+	# new_action.description = abilities[new_action.unique_name].description
+	# new_action.target_status_chance = 100
+	# new_action.target_status_list = ["defending"]
+	# new_action.target_status_list_type = Action.StatusListType.ALL
+	# new_action.auto_target = true
+	# new_action.max_targeting_range = 0
+	# new_action.status_prevents_use_any = standard_status_prevents_use
+	# new_action.ignore_passives = standard_ignore_passives
+	# new_action.base_hit_formula.formula_text = "100.0"
+	# Utilities.save_json(new_action, save_path)
+
+	new_action = Action.new()
+	new_action.display_name = "Counter Tackle"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.PHYSICAL
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives.duplicate()
+	new_action.ignore_passives.erase("protect")
+	new_action.ignore_passives.erase("attack_up")
+	new_action.ignore_passives.erase("defense_up")
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.HP
+	# TODO use correct formula for Counter Tackle
+	new_effect.base_power_formula = FormulaData.new("user.hp_max * 0.04", [4.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, true, true)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Critical Quick"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.CT
+	new_effect.base_power_formula = FormulaData.new("100.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Dead Damage"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = "Removes remaining HP from target when Dead status is added"
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = []
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.base_power_formula = FormulaData.new("target.hp", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Dead to Cyrstal Treasure"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = "Adds Crystal or Treasure status to unit"
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.target_status_chance = 100
+	new_action.target_status_list = ["crystal", "treasure"]
+	new_action.target_status_list_type = Action.StatusListType.RANDOM
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use.duplicate()
+	new_action.status_prevents_use_any.erase("dead")
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Death Sentence to Dead"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = "Add Dead status to unit at end of Death Sentence"
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.target_status_chance = 100
+	new_action.target_status_list = ["dead"]
+	new_action.target_status_list_type = Action.StatusListType.ALL
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Dragon Spirit"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.target_status_chance = 100
+	new_action.target_status_list = ["reraise"]
+	new_action.target_status_list_type = Action.StatusListType.ALL
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Faith Up"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.FAITH
+	new_effect.base_power_formula = FormulaData.new("3.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Gilgame Heart"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.type = ActionEffect.EffectType.CURRENCY
+	# TODO use correct formula for Gilgame Heart
+	new_effect.base_power_formula = FormulaData.new("50.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "HP Restore"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.base_power_formula = FormulaData.new("target.hp_max", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "MA Save"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.MAGIC_ATTACK
+	new_effect.base_power_formula = FormulaData.new("1.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Meatbone Slash"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.PHYSICAL
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.base_power_formula = FormulaData.new("user.hp_max", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Move Get EXP"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.EXP
+	new_effect.base_power_formula = FormulaData.new("12.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Move Get HP"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Move Get JP"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.EXP # TODO move get jp - implement jp
+	new_effect.base_power_formula = FormulaData.new("8.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Move Get MP"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.MP
+	new_effect.base_power_formula = FormulaData.new("target.mp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "MP Restore"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.MP
+	new_effect.base_power_formula = FormulaData.new("target.mp_max", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "PA Save"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.PHYSICAL_ATTACK
+	new_effect.base_power_formula = FormulaData.new("1.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Poison Damage"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = "Applies damage from Poison status"
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Regeneration Heal"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = "Heals HP from Regeneration status"
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Regenerator"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.target_status_chance = 100
+	new_action.target_status_list = ["regen"]
+	new_action.target_status_list_type = Action.StatusListType.ALL
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Reraise Remove Dead"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = "Reraise removes Dead status"
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.target_status_chance = 100
+	new_action.target_status_list = ["dead"]
+	new_action.target_status_list_type = Action.StatusListType.ALL
+	new_action.will_remove_target_status = true
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use.duplicate()
+	new_action.status_prevents_use_any.erase("dead")
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Speed Save"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.SPEED
+	new_effect.base_power_formula = FormulaData.new("1.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Sunken State"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.target_status_chance = 100
+	new_action.target_status_list = ["transparent"]
+	new_action.target_status_list_type = Action.StatusListType.ALL
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = Action.new()
+	new_action.display_name = "Undead Remove Dead"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = "Undead has chance to remove Dead status"
+	new_action.applicable_evasion_type = EvadeData.EvadeType.NONE
+	new_action.target_status_chance = 100
+	new_action.target_status_list = ["dead"]
+	new_action.target_status_list_type = Action.StatusListType.ALL
+	new_action.will_remove_target_status = true
+	new_action.auto_target = true
+	new_action.max_targeting_range = 0
+	new_action.status_prevents_use_any = standard_status_prevents_use.duplicate()
+	new_action.status_prevents_use_any.erase("dead")
+	new_action.ignore_passives = standard_ignore_passives
+	new_action.base_hit_formula.formula_text = "100.0"
+
+	new_effect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	actions[new_action.unique_name] = new_action.duplicate_deep()
+
+
+
+
+func generate_predefined_triggered_actions(save_path: String) -> void:
+	pass
+
+
+func generate_predefined_abilities(save_path: String) -> void:
+	pass
 
 
 func export_data(save_path: String) -> void:
@@ -1344,6 +1829,11 @@ func export_other_images(save_path: String) -> void:
 func export_data_tables(save_path: String) -> void:
 	message.emit("Exporting data tables...")
 	await get_tree().process_frame
+
+	generate_predefined_passive_effects(save_path)
+	generate_predefined_actions(save_path)
+	generate_predefined_triggered_actions(save_path)
+	generate_predefined_abilities(save_path)
 	
 	for item: ItemData in items.values():
 		Utilities.save_json(item, save_path)
@@ -1428,8 +1918,6 @@ func export_data_tables(save_path: String) -> void:
 	var error: Error = ResourceSaver.save(initial_unit_data, initial_unit_data_file_path)
 	if error != Error.OK:
 		push_warning("error saving unit initial_unit_data: " + str(error))
-
-	generate_passive_effects(save_path)
 
 
 func export_text(save_path: String) -> void:

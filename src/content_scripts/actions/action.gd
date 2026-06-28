@@ -34,7 +34,7 @@ var formula_y: int = 0
 @export var min_targeting_range: int = 0
 @export var max_targeting_range: int = 4
 @export var area_of_effect_range: int = 0
-@export var vertical_tolerance: float = 2
+@export var vertical_tolerance: float = 2.0
 var inflict_status_id: int = 0
 @export var ticks_charge_time: int = 0
 
@@ -54,7 +54,7 @@ var inflict_status_id: int = 0
 @export var targeting_linear: bool = false
 @export var targeting_los: bool = false # stop at obstacle
 @export var aoe_has_vertical_tolerance: bool = true # vertical tolerance
-@export var aoe_vertical_tolerance: float = 2
+@export var aoe_vertical_tolerance: float = 2.0
 @export var aoe_targeting_three_directions: bool = false
 @export var aoe_targeting_linear: bool = false
 @export var aoe_targeting_los: bool = false # stop at obstacle
