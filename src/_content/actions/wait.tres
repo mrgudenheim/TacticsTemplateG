@@ -6,6 +6,7 @@
 
 [sub_resource type="Resource" id="Resource_22o4i"]
 script = ExtResource("5_22o4i")
+formula_text = "100.0"
 reverse_sign = false
 is_modified_by_element = false
 is_modified_by_zodiac = false

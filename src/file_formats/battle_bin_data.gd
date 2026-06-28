@@ -249,7 +249,7 @@ func init_from_battle_bin() -> void:
 		spritesheet_graphic_height[idx] = data_bytes.decode_u8((idx * entry_size) + 3)
 	
 	
-	# animation layer prioity table
+	# animation layer priority table
 	entry_size = 16
 	num_entries = 0x1b
 	animation_layer_priorities.resize(num_entries)
@@ -262,7 +262,7 @@ func init_from_battle_bin() -> void:
 	
 	_load_battle_bin_sprite_data()
 	
-	# ai status prioity table
+	# ai status priority table
 	entry_size = 2
 	num_entries = 40
 	ai_status_priorities.resize(num_entries)

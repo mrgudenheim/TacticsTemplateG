@@ -13,7 +13,7 @@
 	"area_of_effect_range": 0,
 	"auto_target": false,
 	"base_hit_formula": {
-		"formula": "V1",
+		"formula_text": "100.0",
 		"is_modified_by_element": false,
 		"is_modified_by_zodiac": false,
 		"reverse_sign": false,
