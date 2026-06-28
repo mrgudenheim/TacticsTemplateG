@@ -988,7 +988,7 @@ func update_status_visuals() -> void:
 				shading_priority = status.order
 				animation_manager.unit_sprites_manager.sprite_primary.modulate = status.modulation_color
 			
-			if status.order >= other_type_priority and status.spritesheet_file_name == "OTHER.SPR":
+			if status.order >= other_type_priority and status.spritesheet_file_name == "other":
 				other_type_priority = status.order
 				other_type_status = status
 			

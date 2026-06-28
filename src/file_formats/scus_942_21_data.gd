@@ -539,7 +539,7 @@ func init_statuses() -> void:
 	status_effects[20].passive_effect.ai_strategy = UnitAi.Strategy.BEST
 	# chicken
 	status_effects[21].passive_effect.ai_strategy = UnitAi.Strategy.FLEE
-	status_effects[21].spritesheet_file_name = "OTHER.SPR"
+	status_effects[21].spritesheet_file_name = "other"
 	status_effects[21].palette_idx_offset = 0 # TODO chicken is actually palettes 0-4 depending on original palette
 	status_effects[1].other_type_index = 0
 	# blood suck
@@ -574,19 +574,19 @@ func init_statuses() -> void:
 	
 	# frog
 	status_effects[22].passive_effect.added_actions = [RomReader.fft_abilities[0x16f].ability_action] # frog attack action
-	status_effects[22].spritesheet_file_name = "OTHER.SPR"
+	status_effects[22].spritesheet_file_name = "other"
 	status_effects[22].palette_idx_offset = 5 # frog is actually palettes 5-9 depending on original palette
 	status_effects[22].other_type_index = 1
 	RomReader.fft_abilities[0x16f].ability_action.status_prevents_use_any.erase("frog") # can use frog attack
 	RomReader.fft_abilities[0x01d].ability_action.status_prevents_use_any.erase("frog") # can use Frog
 	
 	# crystal
-	status_effects[1].spritesheet_file_name = "OTHER.SPR"
+	status_effects[1].spritesheet_file_name = "other"
 	status_effects[1].palette_idx_offset = 10 # crystal is actually palettes 10-14 depending on original palette
 	status_effects[1].other_type_index = 2
 
 	# treasure
-	status_effects[15].spritesheet_file_name = "OTHER.SPR"
+	status_effects[15].spritesheet_file_name = "other"
 	status_effects[15].palette_idx_offset = 16 # treasure is actually palettes 16-20 depending on original palette
 	status_effects[15].other_type_index = 0
 
