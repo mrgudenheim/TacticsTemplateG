@@ -225,13 +225,21 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	new_passive_effect.status_always = ["reflect"]
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
-	# TODO define TwoSords, GainedJpUp,
+	# TODO define TwoSords, GainedJpUp, CantEnterDepth, Silent Walk
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "two_swords"
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "gained_jp_up"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "cant_enter_depth"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "silent_walk"
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 	
 	# TODO define Train and Secret Hunt passive_effects? could be triggered actions? timing = POST_ACTION?
@@ -406,7 +414,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action = standard_action.duplicate_deep()
 	new_action.display_name = "Wait"
 	new_action.unique_name = new_action.display_name.to_snake_case()
-	new_action.description = abilities[new_action.unique_name].description
+	new_action.description = "Ends turn. Boosts CT based on unused action or move"
 	new_action.action_points_cost = 0
 	new_action.allow_triggered_actions = false
 	new_action.animation_executing_id = -1

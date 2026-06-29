@@ -2,8 +2,6 @@
 
 [ext_resource type="Script" uid="uid://b1ogscpjrty2b" path="res://src/Unit/unit.gd" id="1_lcmw7"]
 [ext_resource type="Script" uid="uid://cmjcg2ou16liv" path="res://src/Unit/unit_animation_manager.gd" id="3_l3ow2"]
-[ext_resource type="Resource" uid="uid://hfseiukq3qpk" path="res://src/_content/actions/wait.tres" id="3_rw50f"]
-[ext_resource type="Resource" uid="uid://dv16rhvlwfg3h" path="res://src/_content/actions/move.tres" id="3_wg4to"]
 [ext_resource type="PackedScene" uid="uid://cw8mvbkue4ibk" path="res://src/Unit/unit_sprites_manager.tscn" id="4_h8uk5"]
 [ext_resource type="Script" uid="uid://x1o6jl12c6sh" path="res://src/Unit/unit_debug_menu.gd" id="5_aqiwa"]
 [ext_resource type="Script" uid="uid://baavg15lka8r7" path="res://src/Unit/unit_ui.gd" id="7_wg4to"]
@@ -66,8 +64,6 @@ icon = NodePath("CharacterBody3D/Control2/StatusBubble")
 icon2 = NodePath("CharacterBody3D/StatusIcon")
 debug_menu = NodePath("CharacterBody3D/UnitDebugMenu")
 tile_highlights = NodePath("TileHighlights")
-move_action = ExtResource("3_wg4to")
-wait_action = ExtResource("3_rw50f")
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="." unique_id=761181480]
 transform = Transform3D(0.707107, 0, 0.707107, 0, 0.999999, 0, -0.707107, 0, 0.707107, 0, 0, 0)

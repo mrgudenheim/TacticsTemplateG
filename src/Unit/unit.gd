@@ -354,6 +354,9 @@ func update_stat_bars_scale(camera_zoom: float) -> void:
 
 func initialize_unit() -> void:
 	debug_menu.populate_options()
+
+	move_action = GameData.get_action("move")
+	wait_action = GameData.get_action("wait")
 	
 	#animation_manager.wep_spr = RomReader.sprs[RomReader.file_records["WEP.SPR"].type_index]
 	animation_manager.wep_texture = GameData.get_texture("wep")
