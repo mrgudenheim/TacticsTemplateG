@@ -384,9 +384,41 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	standard_action.ignore_passives = standard_ignore_passives
 	standard_action.base_hit_formula.formula_text = "100.0"
 
-	# TODO Move, Wait, Equip Change Actions
-	
 	var new_action: Action = standard_action.duplicate_deep()
+	new_action.display_name = "Move"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = "Walk to target tile"
+	new_action.targeting_type = Action.TargetingTypes.MOVE
+	new_action.use_type = Action.UseTypes.MOVE
+	new_action.move_points_cost = 1
+	new_action.action_points_cost = 0
+	standard_action.auto_target = false
+	new_action.status_prevents_use_any = [
+		"crystal",
+		"dead",
+		"petrify",
+		"treasure",
+		"stop",
+		"don't_move",
+	]
+	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = standard_action.duplicate_deep()
+	new_action.display_name = "Wait"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	new_action.action_points_cost = 0
+	new_action.allow_triggered_actions = false
+	new_action.animation_executing_id = -1
+	new_action.set_target_animation_on_hit = false
+	new_action.ends_turn = true
+	var new_effect: ActionEffect = ActionEffect.new()
+	new_effect.effect_stat_type = Unit.StatType.CT
+	new_effect.base_power_formula = FormulaData.new("(target.action_points_remaining * 10) + (target.move_points_remaining * 10)", [3], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_action.target_effects.append(new_effect)
+	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
+	
+	new_action = standard_action.duplicate_deep()
 	new_action.display_name = "Defend"
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
@@ -395,11 +427,13 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.target_status_list_type = Action.StatusListType.ALL
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
+	# TODO equip_change Action
+
 	new_action = standard_action.duplicate_deep()
 	new_action.display_name = "Absorb Used MP"
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
-	var new_effect: ActionEffect = ActionEffect.new()
+	new_effect = ActionEffect.new()
 	new_effect.effect_stat_type = Unit.StatType.MP
 	# TODO get mp used based off of action? Maybe from TriggeredAction data?
 	new_effect.base_power_formula = FormulaData.new("10.0", [10], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
