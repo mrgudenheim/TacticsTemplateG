@@ -4,7 +4,6 @@ extends Node
 signal rom_loaded
 signal message(message: String)
 
-const ROM_PATH_CONFIG: String = "user://rom_path.cfg"
 const DIRECTORY_DATA_SECTORS_ROOT: PackedInt32Array = [22]
 const OFFSET_RECORD_DATA_START: int = 0x60
 
@@ -55,7 +54,6 @@ var triggered_actions: Dictionary[String, TriggeredAction] = {} # [unique_name, 
 var passive_effects: Dictionary[String, PassiveEffect] = {} # [unique_name, PassiveEffect]
 var abilities: Dictionary[String, Ability] = {} # [unique_name, Ability]
 var scenarios: Dictionary[String, Scenario] = {} # [unique_name, Scenario]
-var scenario_paths: Dictionary[String, String] = {} # [unique_name, file_path] for lazy-loaded scenarios
 
 var rom_load_times: Array[Dictionary] = [] # [{name: String, time_ms: int}]
 
@@ -74,59 +72,11 @@ var item_bin_texture: Texture2D
 # Text
 var fft_text: FftText = FftText.new()
 
-#func _init() -> void:
-	#pass
-
-
-# func _ready() -> void:
-# 	var auto_load_path: String = _get_saved_rom_path()
-# 	if not auto_load_path.is_empty() and FileAccess.file_exists(auto_load_path):
-# 		call_deferred("on_load_rom_dialog_file_selected", auto_load_path)
-
-
-func get_scenario(scenario_name: String) -> Scenario:
-	if scenarios.has(scenario_name):
-		return scenarios[scenario_name]
-	if scenario_paths.has(scenario_name):
-		var file: FileAccess = FileAccess.open(scenario_paths[scenario_name], FileAccess.READ)
-		var new_scenario: Scenario = Scenario.create_from_json(file.get_as_text())
-		file.close()
-		scenarios[scenario_name] = new_scenario
-		return new_scenario
-	push_error("Scenario not found: " + scenario_name)
-	return null
-
-
-func get_all_scenario_names() -> PackedStringArray:
-	var names: PackedStringArray = []
-	for key: String in scenarios.keys():
-		names.append(key)
-	for key: String in scenario_paths.keys():
-		if not scenarios.has(key):
-			names.append(key)
-	return names
-
-
-func has_scenario(scenario_name: String) -> bool:
-	return scenarios.has(scenario_name) or scenario_paths.has(scenario_name)
-
 
 func _profile_section(section_name: String, start_ms: int) -> int:
 	var elapsed: int = Time.get_ticks_msec() - start_ms
 	rom_load_times.append({"name": section_name, "time_ms": elapsed})
 	return Time.get_ticks_msec()
-
-
-func _get_saved_rom_path() -> String:
-	if not FileAccess.file_exists(ROM_PATH_CONFIG):
-		return ""
-	var file: FileAccess = FileAccess.open(ROM_PATH_CONFIG, FileAccess.READ)
-	return file.get_line().strip_edges()
-
-
-func _save_rom_path(path: String) -> void:
-	var file: FileAccess = FileAccess.open(ROM_PATH_CONFIG, FileAccess.WRITE)
-	file.store_line(path)
 
 
 func on_load_rom_dialog_file_selected(path: String) -> void:
@@ -158,7 +108,6 @@ func clear_data() -> void:
 	passive_effects.clear()
 	abilities.clear()
 	scenarios.clear()
-	scenario_paths.clear()
 
 
 func process_rom() -> void:
@@ -596,84 +545,6 @@ func process_frame_bin() -> void:
 			image.set_pixel(x, y, color8) # spr stores pixel data left to right, top to bottm
 
 	frame_bin_texture = ImageTexture.create_from_image(image)
-
-
-func import_custom_data() -> void:
-	# order of loading matters. Triggered Actions, PassiveEffect reference actions. Abilities, StatusEffect reference PassiveEffect. Items reference a lot.
-	var folder_names: PackedStringArray = [
-		"actions",
-		"passive_effects",
-		"triggered_actions",
-		"status_effects",
-		"items",
-		"abilities",
-		"scenarios",
-	]
-
-	# Also scan user:// for pre-extracted scenarios
-	var user_scenario_dir: DirAccess = DirAccess.open("user://overrides/" + Scenario.SAVE_FOLDER)
-	if user_scenario_dir:
-		user_scenario_dir.list_dir_begin()
-		var scenario_file: String = user_scenario_dir.get_next()
-		while scenario_file != "":
-			if scenario_file.ends_with(".scenario.json"):
-				var unique_name: String = scenario_file.trim_suffix(".scenario.json")
-				if not has_scenario(unique_name):
-					scenario_paths[unique_name] = ("user://overrides/" + Scenario.SAVE_FOLDER).path_join(scenario_file)
-			scenario_file = user_scenario_dir.get_next()
-		user_scenario_dir.list_dir_end()
-
-	for content_folder: String in folder_names:
-		var dir_path: String = "res://src/_content/" + content_folder + "/"
-		var dir: DirAccess = DirAccess.open(dir_path)
-
-		if dir:
-			dir.list_dir_begin()
-			var file_name: String = dir.get_next()
-			while file_name != "":
-				if not file_name.begins_with("."): # Exclude hidden files
-					#push_warning("Found file: " + file_name)
-					if file_name.ends_with(".json"):
-						var file_path: String = dir_path + file_name
-						var data_type: String = file_name.split(".")[-2]
-
-						if data_type == "scenario":
-							var unique_name: String = file_name.trim_suffix(".scenario.json")
-							if not has_scenario(unique_name):
-								scenario_paths[unique_name] = file_path
-						else:
-							var file: FileAccess = FileAccess.open(file_path, FileAccess.READ)
-							var file_text: String = file.get_as_text()
-
-							match data_type:
-								"action":
-									var new_content: Action = Action.create_from_json(file_text)
-									if not actions.keys().has(new_content.unique_name):
-										new_content.add_to_global_list()
-								"ability":
-									var new_content: Ability = Ability.create_from_json(file_text)
-									if not abilities.keys().has(new_content.unique_name):
-										new_content.add_to_global_list()
-								"triggered_action":
-									var new_content: TriggeredAction = TriggeredAction.create_from_json(file_text)
-									if not triggered_actions.keys().has(new_content.unique_name):
-										new_content.add_to_global_list()
-								"passive_effect":
-									var new_content: PassiveEffect = PassiveEffect.create_from_json(file_text)
-									if not passive_effects.keys().has(new_content.unique_name):
-										new_content.add_to_global_list()
-								"status_effect":
-									var new_content: StatusEffect = StatusEffect.create_from_json(file_text)
-									if not status_effects.keys().has(new_content.unique_name):
-										new_content.add_to_global_list()
-								"item":
-									var new_content: ItemData = ItemData.create_from_json(file_text)
-									if not items.keys().has(new_content.unique_name): # TODO allow overwriting content
-										new_content.add_to_global_list()
-				file_name = dir.get_next()
-			dir.list_dir_end()
-		else:
-			push_warning("Could not open directory: " + dir_path)
 
 
 func connect_data_references() -> void:

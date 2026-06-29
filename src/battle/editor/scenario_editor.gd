@@ -149,7 +149,7 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 			number = int(new_scenario_num) + 1
 			
 		scenario.unique_name = "new_scenario_%02d" % number
-		while RomReader.has_scenario(scenario.unique_name):
+		while RomReader.scenarios.has(scenario.unique_name):
 			number += 1
 			scenario.unique_name = "new_scenario_%02d" % number
 		init_random_scenario()
