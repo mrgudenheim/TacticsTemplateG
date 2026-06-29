@@ -189,14 +189,6 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	new_passive_effect.remove_prohibited_terrain = [0x12]
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
-	# new_passive_effect = PassiveEffect.new()
-	# new_passive_effect.unique_name = "ignore_weather"
-	# Utilities.save_json(new_passive_effect)
-
-	# new_passive_effect = PassiveEffect.new()
-	# new_passive_effect.unique_name = "cant_enter_depth"
-	# Utilities.save_json(new_passive_effect)
-
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "float"
 	new_passive_effect.status_always = ["float"]
@@ -225,9 +217,18 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	new_passive_effect.status_always = ["reflect"]
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
-	# TODO define TwoSords, GainedJpUp, CantEnterDepth, Silent Walk
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "weapon_guard"
+	new_passive_effect.include_evade_sources = [EvadeData.EvadeSource.WEAPON]
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	# TODO define two_swords, two_hands, gained_jp_up, gained_exp_up, silent_walk, equip_change, ignore_weather, cant_enter_depth
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "two_swords"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "two_hands"
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
 	new_passive_effect = PassiveEffect.new()
@@ -235,11 +236,40 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
 	new_passive_effect = PassiveEffect.new()
-	new_passive_effect.unique_name = "cant_enter_depth"
+	new_passive_effect.unique_name = "gained_exp_up"
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "silent_walk"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "ignore_weather"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "cant_enter_depth"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "equip_change"
+	new_passive_effect.added_actions_names = ["equip_change"]
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "catch"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "blade_grasp"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "arrow_guard"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "finger_guard"
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 	
 	# TODO define Train and Secret Hunt passive_effects? could be triggered actions? timing = POST_ACTION?
@@ -434,8 +464,6 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.target_status_list = ["defending"]
 	new_action.target_status_list_type = Action.StatusListType.ALL
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
-
-	# TODO equip_change Action
 
 	new_action = standard_action.duplicate_deep()
 	new_action.display_name = "Absorb Used MP"
@@ -727,6 +755,50 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
+	# TODO define Actions: equip_change, fly, teleport, teleport_2
+	new_action = standard_action.duplicate_deep()
+	new_action.display_name = "Equip Change"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = standard_action.duplicate_deep()
+	new_action.display_name = "Fly"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = standard_action.duplicate_deep()
+	new_action.display_name = "Teleport"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = standard_action.duplicate_deep()
+	new_action.display_name = "Teleport 2"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	# TODO define triggered_action actions: distribute, mp_switch, damage_split
+	new_action = standard_action.duplicate_deep()
+	new_action.display_name = "Distribute"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = standard_action.duplicate_deep()
+	new_action.display_name = "mp_switch"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
+
+	new_action = standard_action.duplicate_deep()
+	new_action.display_name = "damage_split"
+	new_action.unique_name = new_action.display_name.to_snake_case()
+	new_action.description = abilities[new_action.unique_name].description
+	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
+
 	return predefined_actions
 
 
@@ -945,6 +1017,25 @@ static func get_predefined_triggered_actions() -> Dictionary[String, TriggeredAc
 	new_triggered_action.trigger_timing = TriggeredAction.TriggerTiming.TURN_START
 	new_triggered_action.trigger_chance_formula.formula_text = "50.0"
 	new_triggered_action.required_status_id = ["dead"]
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	# TODO define triggered_action actions: distribute, mp_switch, damage_split
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Distribute"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "MP Switch"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Damage Split"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
 	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
 
 	return predefined_triggered_actions
