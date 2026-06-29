@@ -396,10 +396,13 @@ func create_ability() -> Ability:
 	match ability_type:
 		AbilityType.REACTION:
 			new_ability.slot_type = Ability.SlotType.REACTION
+			new_ability.triggered_actions_names = [new_ability.display_name.to_snake_case()]
 		AbilityType.SUPPORT:
 			new_ability.slot_type = Ability.SlotType.SUPPORT
+			new_ability.passive_effect_name = new_ability.display_name.to_snake_case()
 		AbilityType.MOVEMENT:
 			new_ability.slot_type = Ability.SlotType.MOVEMENT
+			new_ability.passive_effect_name = new_ability.display_name.to_snake_case()
 
 	new_ability.jp_cost = jp_cost
 	new_ability.chance_to_learn = chance_to_learn
