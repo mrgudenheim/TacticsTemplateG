@@ -928,7 +928,6 @@ func add_entds(file_name: String) -> void:
 
 
 func export_data(save_path: String) -> void:
-
 	# get other content data not in ROM data tables
 	var predifined_abilities: Dictionary[String, Ability] = ContentGenerator.get_predefined_abilities()
 	var predifined_passive_effects: Dictionary[String, PassiveEffect] = ContentGenerator.get_predefined_passive_effects()

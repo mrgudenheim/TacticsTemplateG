@@ -356,6 +356,8 @@ func create_ability() -> Ability:
 	# name changes
 	if display_name == "Equip Knife":
 		new_ability.display_name = "Equip Katana"
+	# elif display_name == "Equip Armor":
+	# 	new_ability.display_name = "Equip Armour"
 	elif display_name == "A Save":
 		new_ability.display_name = "PA Save"
 	elif display_name == "Counter":

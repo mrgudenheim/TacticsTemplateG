@@ -225,6 +225,49 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	new_passive_effect.status_always = ["reflect"]
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
+	# TODO define TwoSords, GainedJpUp,
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "two_swords"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "gained_jp_up"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+	
+	# TODO define Train and Secret Hunt passive_effects? could be triggered actions? timing = POST_ACTION?
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "train"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "secret_hunt"
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "move_find_item"
+	new_passive_effect.added_triggered_actions_names = [new_passive_effect.unique_name]
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "move_get_exp"
+	new_passive_effect.added_triggered_actions_names = [new_passive_effect.unique_name]
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "move_get_jp"
+	new_passive_effect.added_triggered_actions_names = [new_passive_effect.unique_name]
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "move_get_hp"
+	new_passive_effect.added_triggered_actions_names = [new_passive_effect.unique_name]
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
+	new_passive_effect = PassiveEffect.new()
+	new_passive_effect.unique_name = "move_get_mp"
+	new_passive_effect.added_triggered_actions_names = [new_passive_effect.unique_name]
+	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
+
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "standard_move"
 	new_passive_effect.add_prohibited_terrain = [
@@ -245,7 +288,7 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
 	new_passive_effect = PassiveEffect.new()
-	new_passive_effect.unique_name = "equip_armour"
+	new_passive_effect.unique_name = "equip_armor"
 	new_passive_effect.added_equipment_types_equipable = [
 		ItemData.ItemType.ARMOR
 	]
@@ -647,6 +690,220 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 
 static func get_predefined_triggered_actions() -> Dictionary[String, TriggeredAction]:
 	var predefined_triggered_actions: Dictionary[String, TriggeredAction] = {}
+
+	var new_triggered_action: TriggeredAction = TriggeredAction.new()
+	new_triggered_action.display_name = "Absorb Used MP"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.action_mp_cost_threshold = 1
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Auto Potion"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.requries_hit = TriggeredAction.HitRequirement.HIT
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Brave Up"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Caution"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Counter Attack"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = "ATTACK"
+	new_triggered_action.targeting = TriggeredAction.TargetingTypes.INITIATOR
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Counter Geomancy"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.targeting = TriggeredAction.TargetingTypes.INITIATOR
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Counter Magic"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = "COPY"
+	new_triggered_action.targeting = TriggeredAction.TargetingTypes.INITIATOR
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Counter Tackle"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.targeting = TriggeredAction.TargetingTypes.INITIATOR
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Critical Quick"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.required_status_id = ["critical"]
+	new_triggered_action.requries_hit = TriggeredAction.HitRequirement.HIT
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Dragon Spirit"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Faith Up"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.action_mp_cost_threshold = 1
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Gilgame Heart"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.requries_hit = TriggeredAction.HitRequirement.HIT
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Hamedo"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = "ATTACK"
+	new_triggered_action.trigger_timing = TriggeredAction.TriggerTiming.TARGETTED_PRE_ACTION
+	new_triggered_action.targeting = TriggeredAction.TargetingTypes.INITIATOR
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "HP Restore"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.required_status_id = ["critical"]
+	new_triggered_action.requries_hit = TriggeredAction.HitRequirement.HIT
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "MP Restore"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.required_status_id = ["critical"]
+	new_triggered_action.requries_hit = TriggeredAction.HitRequirement.HIT
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "MA Save"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.requries_hit = TriggeredAction.HitRequirement.HIT
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+	
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "PA Save"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.requries_hit = TriggeredAction.HitRequirement.HIT
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Speed Save"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.requries_hit = TriggeredAction.HitRequirement.HIT
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Meatbone Slash"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.required_status_id = ["critical"]
+	new_triggered_action.requries_hit = TriggeredAction.HitRequirement.HIT
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Move Find Item"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.trigger_timing = TriggeredAction.TriggerTiming.MOVED
+	new_triggered_action.trigger_chance_formula.formula_text = "100.0"
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Move Get EXP"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.trigger_timing = TriggeredAction.TriggerTiming.MOVED
+	new_triggered_action.trigger_chance_formula.formula_text = "100.0"
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Move Get JP"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.trigger_timing = TriggeredAction.TriggerTiming.MOVED
+	new_triggered_action.trigger_chance_formula.formula_text = "100.0"
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Move Get HP"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.trigger_timing = TriggeredAction.TriggerTiming.MOVED
+	new_triggered_action.trigger_chance_formula.formula_text = "100.0"
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Move Get MP"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.trigger_timing = TriggeredAction.TriggerTiming.MOVED
+	new_triggered_action.trigger_chance_formula.formula_text = "100.0"
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Regenerator"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.requries_hit = TriggeredAction.HitRequirement.HIT
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Sunken State"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Reflect"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = "COPY"
+	new_triggered_action.targeting = TriggeredAction.TargetingTypes.REFLECT
+	new_triggered_action.trigger_chance_formula.formula_text = "100.0"
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Reraise Remove Dead"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.trigger_timing = TriggeredAction.TriggerTiming.TURN_START
+	new_triggered_action.trigger_chance_formula.formula_text = "100.0"
+	new_triggered_action.required_status_id = ["dead"]
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
+
+	new_triggered_action = TriggeredAction.new()
+	new_triggered_action.display_name = "Undead Remove Dead"
+	new_triggered_action.unique_name = new_triggered_action.display_name.to_snake_case()
+	new_triggered_action.action_unique_name = new_triggered_action.unique_name
+	new_triggered_action.trigger_timing = TriggeredAction.TriggerTiming.TURN_START
+	new_triggered_action.trigger_chance_formula.formula_text = "50.0"
+	new_triggered_action.required_status_id = ["dead"]
+	predefined_triggered_actions[new_triggered_action.unique_name] = new_triggered_action.duplicate_deep()
 
 	return predefined_triggered_actions
 
