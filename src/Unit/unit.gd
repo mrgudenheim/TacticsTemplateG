@@ -541,9 +541,14 @@ static func calc_battle_stats(
 
 
 func generate_random_abilities() -> void:
-	var random_reaction: Ability = GameData.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.REACTION).pick_random()
-	var random_support: Ability = GameData.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.SUPPORT).pick_random()
-	var random_movement: Ability = GameData.abilities.values().filter(func(ability: Ability) -> bool: return ability.slot_type == Ability.SlotType.MOVEMENT).pick_random()
+	var random_reaction_name: String = GameData.ability_paths.keys().filter(func(ability_name: String) -> bool: return GameData.get_ability(ability_name).slot_type == Ability.SlotType.REACTION).pick_random()
+	var random_reaction: Ability = GameData.get_ability(random_reaction_name)
+
+	var random_support_name: String = GameData.ability_paths.keys().filter(func(ability_name: String) -> bool: return GameData.get_ability(ability_name).slot_type == Ability.SlotType.SUPPORT).pick_random()
+	var random_support: Ability = GameData.get_ability(random_support_name)
+	
+	var random_movement_name: String = GameData.ability_paths.keys().filter(func(ability_name: String) -> bool: return GameData.get_ability(ability_name).slot_type == Ability.SlotType.MOVEMENT).pick_random()
+	var random_movement: Ability = GameData.get_ability(random_movement_name)
 
 	ability_slots[0].ability_unique_name = random_reaction.unique_name
 	ability_slots[1].ability_unique_name =  random_support.unique_name
@@ -750,7 +755,7 @@ func get_skillset_actions() -> Array[Action]:
 	var action_list: Array[Action] = []
 	for skillset: Skillset in get_skillsets():
 		for ability_name: String in skillset.ability_names:
-			var ability_is_action: bool = not [Ability.SlotType.REACTION, Ability.SlotType.SUPPORT, Ability.SlotType.MOVEMENT].has(GameData.abilities[ability_name].slot_type)
+			var ability_is_action: bool = not [Ability.SlotType.REACTION, Ability.SlotType.SUPPORT, Ability.SlotType.MOVEMENT].has(GameData.get_ability(ability_name).slot_type)
 			if ability_is_action and GameData.action_paths.has(ability_name):
 				var new_action: Action = GameData.get_action(ability_name)
 				action_list.append(new_action)

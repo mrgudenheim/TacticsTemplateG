@@ -174,7 +174,7 @@ func update_ui(new_job_data: JobData) -> void:
 	
 	for ability_name: String in GameData.get_skillset(job_data.skillset_unique_name).ability_names:
 		var new_action_name: Label = Label.new()
-		new_action_name.text = GameData.abilities[ability_name].display_name
+		new_action_name.text = GameData.get_ability(ability_name).display_name
 		action_list.add_child(new_action_name)
 
 
