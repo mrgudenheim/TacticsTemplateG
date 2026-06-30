@@ -66,7 +66,7 @@ func populate_options() -> void:
 	
 	
 	sprite_options.clear()
-	for unit_spritesheet_name: String in GameData.unit_spritesheets_data.keys():
+	for unit_spritesheet_name: String in GameData.unit_spritesheet_data_paths.keys():
 		sprite_options.add_item(unit_spritesheet_name)
 
 

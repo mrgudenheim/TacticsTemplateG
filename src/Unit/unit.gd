@@ -360,22 +360,22 @@ func initialize_unit() -> void:
 	
 	#animation_manager.wep_spr = RomReader.sprs[RomReader.file_records["WEP.SPR"].type_index]
 	animation_manager.wep_texture = GameData.get_texture("wep")
-	animation_manager.wep_spritesheet_data = GameData.unit_spritesheets_data["wep"]
+	animation_manager.wep_spritesheet_data = GameData.get_spritesheet_data("wep")
 	animation_manager.wep_shp = GameData.get_shp("wep1")
 	animation_manager.wep_seq = GameData.get_seq("wep1")
 	
 	#animation_manager.eff_spr = RomReader.sprs[RomReader.file_records["EFF.SPR"].type_index]
 	animation_manager.eff_texture = GameData.get_texture("eff")
-	animation_manager.eff_spritesheet_data = GameData.unit_spritesheets_data["eff"]
+	animation_manager.eff_spritesheet_data = GameData.get_spritesheet_data("eff")
 	animation_manager.eff_shp = GameData.get_shp("eff1")
 	animation_manager.eff_seq = GameData.get_seq("eff1")
 	
 	#animation_manager.unit_sprites_manager.sprite_effect.texture = animation_manager.eff_spr.create_frame_grid_texture(0, 0, 0, 0, 0)
-	var eff_frame_grid: ImageTexture = GameData.unit_spritesheets_data["eff"].create_frame_grid_texture(0, 0, 0, 0)
+	var eff_frame_grid: ImageTexture = GameData.get_spritesheet_data("eff").create_frame_grid_texture(0, 0, 0, 0)
 	animation_manager.unit_sprites_manager.sprite_effect.texture = eff_frame_grid
 	var eff_material: ShaderMaterial = animation_manager.unit_sprites_manager.sprite_effect.material_override.duplicate()
 	eff_material.set_shader_parameter("sprite_texture", eff_frame_grid)
-	eff_material.set_shader_parameter("palette_colors", GameData.unit_spritesheets_data["eff"].color_palette.slice(0 * 16, 1 * 16))
+	eff_material.set_shader_parameter("palette_colors", GameData.get_spritesheet_data("eff").color_palette.slice(0 * 16, 1 * 16))
 	eff_material.set_shader_parameter("depth_mode", VfxConstants.DepthMode.UNIT)
 	animation_manager.unit_sprites_manager.sprite_effect.material_override = eff_material
 
@@ -1101,7 +1101,7 @@ func use_ability(pos: Vector3) -> void:
 		set_base_animation_ptr_id(current_animation_id_fwd)
 	else:
 		var ability_animation_executing_id: int = action_data.animation_executing_id
-		if ["ruka", "arute", "kanzen"].has(GameData.unit_spritesheets_data[sprite_file_name].seq_name):
+		if ["ruka", "arute", "kanzen"].has(GameData.get_spritesheet_data(sprite_file_name).seq_name):
 			ability_animation_executing_id = 0x2c * 2 # https://ffhacktics.com/wiki/Set_attack_animation_flags_and_facing_3
 		#debug_menu.anim_id_spin.value = ability_animation_executing_id + int(is_back_facing)
 		current_animation_id_fwd = ability_animation_executing_id
@@ -1180,7 +1180,7 @@ func animate_execute_action(animation_executing_id: int, vfx: VisualEffectData =
 		return
 	
 	var ability_animation_executing_id: int = animation_executing_id
-	if ["ruka", "arute", "kanzen"].has(GameData.unit_spritesheets_data[sprite_file_name].seq_name):
+	if ["ruka", "arute", "kanzen"].has(GameData.get_spritesheet_data(sprite_file_name).seq_name):
 		ability_animation_executing_id = 0x2c * 2 # https://ffhacktics.com/wiki/Set_attack_animation_flags_and_facing_3
 	#debug_menu.anim_id_spin.value = ability_animation_executing_id + int(is_back_facing)
 	set_base_animation_ptr_id(ability_animation_executing_id)
@@ -1412,8 +1412,8 @@ func set_primary_weapon(new_weapon_unique_name: String) -> void:
 	var weapon_grid_texture: ImageTexture = animation_manager.wep_spritesheet_data.create_frame_grid_texture(
 		0, 0, primary_weapon.wep_frame_v_offset, 0, animation_manager.wep_shp.file_name)
 	animation_manager.unit_sprites_manager.set_weapon_texture(weapon_grid_texture)
-	animation_manager.unit_sprites_manager.sprite_weapon.material_override.set_shader_parameter("palette_colors", GameData.unit_spritesheets_data["wep"].color_palette.slice(weapon_palette_id * 16, (weapon_palette_id + 1) * 16))
-	animation_manager.unit_sprites_manager.sprite_effect.material_override.set_shader_parameter("palette_colors", GameData.unit_spritesheets_data["eff"].color_palette.slice(weapon_eff_id * 16, (weapon_eff_id + 1) * 16))
+	animation_manager.unit_sprites_manager.sprite_weapon.material_override.set_shader_parameter("palette_colors", GameData.get_spritesheet_data("wep").color_palette.slice(weapon_palette_id * 16, (weapon_palette_id + 1) * 16))
+	animation_manager.unit_sprites_manager.sprite_effect.material_override.set_shader_parameter("palette_colors", GameData.get_spritesheet_data("eff").color_palette.slice(weapon_eff_id * 16, (weapon_eff_id + 1) * 16))
 
 	# attack_action = primary_weapon.weapon_attack_action
 	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
@@ -1708,7 +1708,7 @@ func set_submerged_depth(new_depth: int) -> void:
 
 
 func update_spritesheet_grid_texture() -> void:
-	var new_spritesheet_data: UnitSpritesheetData = GameData.unit_spritesheets_data[sprite_file_name]
+	var new_spritesheet_data: UnitSpritesheetData = GameData.get_spritesheet_data(sprite_file_name)
 	var palette_idx_final: int = sprite_palette_id_override
 	if sprite_palette_id_override < 0:
 		palette_idx_final = sprite_palette_id
@@ -1738,7 +1738,7 @@ func on_sprite_selected(new_spritesheet_name: String) -> void:
 	# if not seq.is_initialized:
 	# 	seq.set_data_from_seq_bytes(RomReader.get_file_data(seq.file_name))
 	
-	var shp: Shp = GameData.unit_spritesheets_data[new_spritesheet_name].get_shp()
+	var shp: Shp = GameData.get_spritesheet_data(new_spritesheet_name).get_shp()
 	var animation_changed: bool = false
 	if shp.file_name == "type2":
 		if animation_manager.wep_shp.file_name != "wep2":
@@ -1747,12 +1747,12 @@ func on_sprite_selected(new_spritesheet_name: String) -> void:
 			animation_changed = true
 		animation_manager.wep_seq = GameData.get_seq("wep2")
 	
-	var seq: Seq = GameData.unit_spritesheets_data[new_spritesheet_name].get_seq()
+	var seq: Seq = GameData.get_spritesheet_data(new_spritesheet_name).get_seq()
 	if shp != animation_manager.global_shp or seq != animation_manager.global_seq:
 		animation_changed = true
 	
 	# animation_manager.global_spr = spr
-	animation_manager.global_spritesheet_data = GameData.unit_spritesheets_data[new_spritesheet_name]
+	animation_manager.global_spritesheet_data = GameData.get_spritesheet_data(new_spritesheet_name)
 	animation_manager.global_shp = shp
 	animation_manager.global_seq = seq
 	

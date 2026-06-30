@@ -68,7 +68,7 @@ func setup(new_unit: Unit) -> void:
 	
 	palette_option_button.clear()
 	@warning_ignore("integer_division")
-	for palette_idx: int in GameData.unit_spritesheets_data[new_unit.sprite_file_name].color_palette.size() / 16:
+	for palette_idx: int in GameData.get_spritesheet_data(new_unit.sprite_file_name).color_palette.size() / 16:
 		palette_option_button.add_item(str(palette_idx))
 	palette_option_button.select(new_unit.sprite_palette_id)
 
@@ -133,7 +133,7 @@ func update_ui(new_unit: Unit) -> void:
 	var atlas_texture: AtlasTexture = sprite_button.texture_normal
 	var unit_sprite: Sprite3D = new_unit.animation_manager.unit_sprites_manager.sprite_primary
 	atlas_texture.atlas = unit_sprite.texture
-	var spritesheet_data: UnitSpritesheetData = GameData.unit_spritesheets_data[new_unit.sprite_file_name]
+	var spritesheet_data: UnitSpritesheetData = GameData.get_spritesheet_data(new_unit.sprite_file_name)
 
 	sprite_button.material.set_shader_parameter("palette_colors", spritesheet_data.color_palette.slice(new_unit.sprite_palette_id * 16, (new_unit.sprite_palette_id + 1) * 16))
 

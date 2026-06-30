@@ -182,7 +182,7 @@ func set_sprite() -> void:
 	if job_data == null or sprite_rect.texture.atlas != null:
 		return
 
-	var spritesheet_data: UnitSpritesheetData = GameData.unit_spritesheets_data[job_data.sprite_name]
+	var spritesheet_data: UnitSpritesheetData = GameData.get_spritesheet_data(job_data.sprite_name)
 	
 	var atlas_texture: AtlasTexture = sprite_rect.texture
 	atlas_texture.atlas = spritesheet_data.create_frame_grid_texture() # TODO cache frame grid in GameData?
