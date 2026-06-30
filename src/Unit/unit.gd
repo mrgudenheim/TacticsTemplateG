@@ -601,19 +601,21 @@ func update_stat_modifiers(all_passive_effects: Array[PassiveEffect]) -> void:
 
 
 func get_item_unique_name_for_slot(slot_type: ItemData.SlotType, item_level: int, random: bool = false) -> String:
-	var valid_items: Array[ItemData] = []
-	valid_items.assign(GameData.items.values().filter(func(item: ItemData) -> bool: 
+	# var valid_items: Array[ItemData] = []
+	var valid_items_names: Array[String] = []
+	valid_items_names.assign(GameData.item_paths.keys().filter(func(item_name: String) -> bool: 
+		var item: ItemData = GameData.get_item(item_name)
 		var slot_type_is_valid: bool = item.slot_type == slot_type
 		var level_is_valid: bool = item.min_level <= item_level
 		var type_is_valid: bool = equipable_item_types.has(item.item_type) # TODO allow forcing specifc type based on ability requirements
 		return slot_type_is_valid and level_is_valid and type_is_valid))
 	var item_unique_name: String = ""
-	if not valid_items.is_empty():
+	if not valid_items_names.is_empty():
 		if random:
-			item_unique_name = valid_items.pick_random().unique_name
+			item_unique_name = valid_items_names.pick_random()
 		else:
-			valid_items.sort_custom(func(item_a: ItemData, item_b: ItemData) -> bool: return item_a.min_level > item_b.min_level)
-			item_unique_name = valid_items[0].unique_name # pick highest level item
+			valid_items_names.sort_custom(func(item_a_name: String, item_b_name: String) -> bool: return GameData.get_item(item_a_name).min_level > GameData.get_item(item_b_name).min_level)
+			item_unique_name = valid_items_names[0] # pick highest level item
 			#item = valid_items.pick_random()
 	return item_unique_name
 
@@ -1398,7 +1400,7 @@ func set_ability(new_action_name: String) -> void:
 
 func set_primary_weapon(new_weapon_unique_name: String) -> void:
 	equip_slots[0].item_unique_name = new_weapon_unique_name
-	primary_weapon = GameData.items[new_weapon_unique_name]
+	primary_weapon = GameData.get_item(new_weapon_unique_name)
 	#animation_manager.weapon_id = new_weapon_id
 	var weapon_palette_id: int = primary_weapon.wep_frame_palette
 	var weapon_eff_id: int = primary_weapon.wep_eff_palette

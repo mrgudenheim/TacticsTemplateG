@@ -57,7 +57,8 @@ func populate_options() -> void:
 			#type_name = " (" + RomReader.fft_text.equipment_types[RomReader.items_array[item_index].item_type] + ")"
 		#item_options.add_item(str(item_index) + " - " + RomReader.items_array[item_index].display_name + type_name )
 	
-	for item: ItemData in GameData.items.values():
+	for item_name: String in GameData.item_paths.keys():
+		var item: ItemData = GameData.get_item(item_name)
 		var item_type_name: String = " (" + ItemData.ItemType.keys()[item.item_type] + ")"
 		if range(0, 20).has(item.item_type):
 			weapon_options.add_item(item.display_name + item_type_name)

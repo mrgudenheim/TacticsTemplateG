@@ -7,7 +7,8 @@ var item_select_buttons: Array[ItemSelectButton]
 
 
 func populate_list() -> void:
-	for item_data: ItemData in GameData.items.values():
+	for item_name: String in GameData.item_paths.keys():
+		var item_data: ItemData = GameData.get_item(item_name)
 		var item_select_button: ItemSelectButton = item_select_button_scene.instantiate()
 		item_select_button.item_data = item_data
 		item_select_button_container.add_child(item_select_button)

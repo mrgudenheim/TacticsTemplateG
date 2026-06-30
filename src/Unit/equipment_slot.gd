@@ -33,8 +33,8 @@ func _to_string() -> String:
 
 
 func get_item() -> ItemData:
-	if GameData.items.has(item_unique_name):
-		return GameData.items[item_unique_name]
+	if GameData.item_paths.has(item_unique_name):
+		return GameData.get_item(item_unique_name)
 	
 	push_warning("can't find item in GameData: " + item_unique_name)
 	return ItemData.new()
