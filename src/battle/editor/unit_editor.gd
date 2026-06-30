@@ -206,8 +206,8 @@ func update_ui(new_unit: Unit) -> void:
 		var skillset_display_name: String = ""
 		var skillset_uname: String = new_unit.skillsets_names[skillset_slot_idx]
 		if not skillset_uname.is_empty():
-			if GameData.skillsets.has(skillset_uname):
-				skillset_display_name = GameData.skillsets[skillset_uname].display_name
+			if GameData.skillset_paths.has(skillset_uname):
+				skillset_display_name = GameData.get_skillset(skillset_uname).display_name
 			else:
 				push_warning("GameData does not have skillset: " + skillset_uname)
 

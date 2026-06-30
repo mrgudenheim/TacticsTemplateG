@@ -741,7 +741,7 @@ func get_skillsets() -> Array[Skillset]:
 	var skillsets: Array[Skillset] = []
 	for skillset_name: String in skillsets_names:
 		if skillset_name != null and not skillset_name.is_empty():
-			skillsets.append(GameData.skillsets[skillset_name])
+			skillsets.append(GameData.get_skillset(skillset_name))
 	
 	return skillsets
 
@@ -844,10 +844,10 @@ func hp_changed(clamped_value: StatValue) -> void:
 	var critical_hp_threshold: int = clamped_value.max_value / 5
 
 	if clamped_value.current_value == 0:
-		await add_status(GameData.status_effects["dead"].duplicate(), true) # add dead
+		await add_status(GameData.get_status_effect("dead").duplicate(), true) # add dead
 	elif clamped_value.current_value < critical_hp_threshold: # critical
 		if not current_status_ids.has("critical"):
-			await add_status(GameData.status_effects["critical"].duplicate()) # add critical
+			await add_status(GameData.get_status_effect("critical").duplicate()) # add critical
 	elif clamped_value.current_value >= critical_hp_threshold: # not critical
 		remove_status_id("critical") # remove critical
 
@@ -911,7 +911,7 @@ func update_permanent_statuses(all_passive_effects: Array[PassiveEffect]) -> voi
 	for passive_effect: PassiveEffect in all_passive_effects:
 		always_statuses.append_array(passive_effect.status_always)
 	
-	for status_unique_name: String in GameData.status_effects.keys():
+	for status_unique_name: String in GameData.status_effect_paths.keys():
 		if immune_statuses.has(status_unique_name):
 			continue
 		
@@ -929,7 +929,7 @@ func update_permanent_statuses(all_passive_effects: Array[PassiveEffect]) -> voi
 			continue
 		elif change > 0:
 			for counter: int in change:
-				var new_status: StatusEffect = GameData.status_effects[status_unique_name].duplicate()
+				var new_status: StatusEffect = GameData.get_status_effect(status_unique_name).duplicate()
 				new_status.duration_type = StatusEffect.DurationType.PERMANENT
 				await add_status(new_status)
 		elif change < 0:
@@ -1364,11 +1364,11 @@ func hide_debug_menu() -> void:
 
 func set_job(new_job_name: String) -> void:
 	job_name = new_job_name
-	job_data = GameData.jobs_data[new_job_name]
+	job_data = GameData.get_job(new_job_name)
 	set_sprite_by_job(new_job_name)
 	
 	# skillsets_names.fill("")
-	equip_skillset(0, GameData.skillsets[job_data.skillset_unique_name])
+	equip_skillset(0, GameData.get_skillset(job_data.skillset_unique_name))
 	
 	job_nickname = job_data.display_name
 	
@@ -1655,7 +1655,7 @@ func set_sprite_by_id(new_sprite_id: int) -> void:
 
 
 func set_sprite_by_job(new_job_name: String) -> void:
-	var new_job_data: JobData = GameData.jobs_data[new_job_name]
+	var new_job_data: JobData = GameData.get_job(new_job_name)
 	var new_sprite_id: int = new_job_data.sprite_id
 	
 	# TODO get different sprite_name for female generic jobs

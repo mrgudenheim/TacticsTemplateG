@@ -455,9 +455,11 @@ func add_test_teams_to_map() -> void:
 
 
 func spawn_random_unit(team: Team) -> Unit:
-	var rand_job: JobData = GameData.jobs_data.values().pick_random()
+	var rand_job_name: String = GameData.job_paths.keys().pick_random()
+	var rand_job: JobData = GameData.get_job(rand_job_name)
 	while [0x2c, 0x31].has(rand_job.job_id): # prevent jobs without idle frames - 0x2c (Alma2) and 0x31 (Ajora) do not have walking frames
-		rand_job = GameData.jobs_data.values().pick_random()
+		rand_job_name = GameData.job_paths.keys().pick_random()
+		rand_job = GameData.get_job(rand_job_name)
 	var tile_location: TerrainTile = get_random_stand_terrain_tile()
 	var new_unit: Unit = spawn_unit(tile_location, rand_job.unique_name, team)
 	new_unit.is_ai_controlled = false
@@ -475,7 +477,7 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	new_unit.tile_position = tile_position
 	#new_unit.char_body.global_position = Vector3(tile_position.location.x + 0.5, randi_range(15, 20), tile_position.location.y + 0.5)
 	new_unit.char_body.global_position = Vector3(tile_position.location.x + 0.5, tile_position.get_world_position().y + 0.25, tile_position.location.y + 0.5)
-	var new_job_data: JobData = GameData.jobs_data[job_name]
+	var new_job_data: JobData = GameData.get_job(job_name)
 	var job_id: int = new_job_data.job_id
 	if job_id < 0x5e: # non-monster
 		new_unit.stat_basis = [Unit.StatBasis.MALE, Unit.StatBasis.FEMALE].pick_random()
