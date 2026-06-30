@@ -430,7 +430,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.use_type = Action.UseTypes.MOVE
 	new_action.move_points_cost = 1
 	new_action.action_points_cost = 0
-	standard_action.auto_target = false
+	new_action.auto_target = false
 	new_action.status_prevents_use_any = [
 		"crystal",
 		"dead",
