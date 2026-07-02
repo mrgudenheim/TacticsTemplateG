@@ -163,6 +163,7 @@ func import_data(directory_path: String) -> void:
 
 		var elapsed_time: float = (Time.get_ticks_msec() - last_frame_time) / 1000.0
 		if current_file == 1 or elapsed_time > (1/60.0):
+			message.emit("Importing: " + file_path.get_file())
 			await get_tree().process_frame
 			last_frame_time = Time.get_ticks_msec()
 

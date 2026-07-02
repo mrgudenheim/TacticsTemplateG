@@ -9,6 +9,7 @@ extends PanelContainer
 
 @export var import_progress_ui: Container
 @export var import_progress: ProgressBar
+@export var import_progress_message: Label
 
 @export var rom_path_line_edit: LineEdit
 @export var rom_find_button: Button
@@ -39,6 +40,7 @@ func _ready() -> void:
 	_default_export_button_text = export_data_button.text
 
 	GameData.import_progress.connect(update_import_progress)
+	GameData.message.connect(show_import_message)
 	GameData.data_imported.connect(func() -> void: visible = false)
 
 	await get_tree().process_frame
@@ -131,6 +133,13 @@ func update_import_progress(current_value: int, max_value: int) -> void:
 
 	if current_value >= max_value:
 		import_progress_ui.visible = false
+		import_progress_message.visible = false
+		import_progress_message.text = ""
 		Utilities.play_audio_one_shot(finished_sound)
 	else:
 		import_progress_ui.visible = true
+		import_progress_message.visible = true
+
+
+func show_import_message(message: String) -> void:
+	import_progress_message.text = message

@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://e6xsp0scu0wy" path="res://src/godot_license/FolderBrowse_godot.svg" id="3_de2sd"]
 [ext_resource type="Texture2D" uid="uid://boj84aajpk67b" path="res://src/godot_license/FileBrowse_godot.svg" id="4_ltw8e"]
 
-[node name="ExternalDataSetupPanel" type="PanelContainer" unique_id=256136291 node_paths=PackedStringArray("import_button", "import_path_line_edit", "import_find_button", "import_file_dialog", "import_progress_ui", "import_progress", "rom_path_line_edit", "rom_find_button", "rom_file_dialog", "destination_path_line_edit", "destination_find_button", "destination_file_dialog", "export_data_button")]
+[node name="ExternalDataSetupPanel" type="PanelContainer" unique_id=256136291 node_paths=PackedStringArray("import_button", "import_path_line_edit", "import_find_button", "import_progress_ui", "import_progress", "import_progress_message", "rom_path_line_edit", "rom_find_button", "rom_file_dialog", "destination_path_line_edit", "destination_find_button", "destination_file_dialog", "export_data_button")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -21,9 +21,9 @@ script = ExtResource("1_av3h7")
 import_button = NodePath("MarginContainer/VBoxContainer/ImportData/ImportButton")
 import_path_line_edit = NodePath("MarginContainer/VBoxContainer/ImportData/ImportLocationLineEdit")
 import_find_button = NodePath("MarginContainer/VBoxContainer/ImportData/ImportLocationButton")
-import_file_dialog = NodePath("")
 import_progress_ui = NodePath("MarginContainer/VBoxContainer/ImportDataProgress")
 import_progress = NodePath("MarginContainer/VBoxContainer/ImportDataProgress/ImportProgressBar")
+import_progress_message = NodePath("MarginContainer/VBoxContainer/ImportProgressMessage")
 rom_path_line_edit = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationLineEdit")
 rom_find_button = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationButton")
 rom_file_dialog = NodePath("MarginContainer/VBoxContainer/GridContainer/RomLocationButton/RomFileDialog")
@@ -75,6 +75,10 @@ text = "Importing:"
 [node name="ImportProgressBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/ImportDataProgress" unique_id=485823699]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="ImportProgressMessage" type="Label" parent="MarginContainer/VBoxContainer" unique_id=842347053]
+visible = false
+layout_mode = 2
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=337292169]
 layout_mode = 2
