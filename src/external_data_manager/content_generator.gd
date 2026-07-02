@@ -538,7 +538,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
 	new_action = standard_action.duplicate_deep()
-	new_action.display_name = "Dead to Cyrstal Treasure"
+	new_action.display_name = "Dead to Crystal Treasure"
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = "Adds Crystal or Treasure status to unit"
 	new_action.target_status_chance = 100
