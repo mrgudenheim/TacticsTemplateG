@@ -169,7 +169,7 @@ func import_data(directory_path: String) -> void:
 		var data_type: String = file_path.split(".")[-2]
 		
 		if file_path.ends_with(".json"):
-			var file_text: String = FileAccess.get_file_as_string(file_path)
+			#var file_text: String = FileAccess.get_file_as_string(file_path)
 
 			match data_type:
 				"action":
@@ -199,6 +199,7 @@ func import_data(directory_path: String) -> void:
 					#if not scenarios.keys().has(new_content.unique_name):
 						#jobs_data[new_content.unique_name] = new_content
 				"text":
+					var file_text: String = FileAccess.get_file_as_string(file_path)
 					names["all"] = JSON.parse_string(file_text) as PackedStringArray
 					names["all_no_empty"] = names["all"].duplicate()
 					for idx: int in range(names["all_no_empty"].size() -1, -1, -1):
