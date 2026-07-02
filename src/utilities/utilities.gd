@@ -15,7 +15,6 @@ func _ready() -> void:
 	}
 
 
-# TODO store Strings of enums - if property["hint"] == PROPERTY_HINT_ENUM
 func object_properties_to_dictionary(object: Object, exclude_property_names: PackedStringArray = []) -> Dictionary:
 	var property_list: Array[Dictionary] = object.get_property_list()
 	var property_dict: Dictionary = {}

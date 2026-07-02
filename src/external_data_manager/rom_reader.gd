@@ -832,9 +832,12 @@ func export_unit_spritesheets(save_path: String) -> void:
 	
 	var spritesheet_path: String = save_path + "/unit_spritesheets/"
 	DirAccess.make_dir_recursive_absolute(spritesheet_path)
+	var last_frame_time: int = Time.get_ticks_msec()
 	for unit_spr: Spr in spritesheets.values():
 		if unit_spr.file_name == "ITEM.BIN":
 			continue
+		
+		last_frame_time = await keep_60_fps(last_frame_time, "Exporting spritesheet: " + unit_spr.file_name)
 		
 		if not unit_spr.is_initialized:
 			unit_spr.set_data()
@@ -1024,49 +1027,16 @@ func export_unit_animations(save_path: String) -> void:
 
 
 func export_maps(save_path: String) -> void:
-	# message.emit("Exporting maps...")
-	# await get_tree().process_frame
-
-	#var map_tile_80_test: PackedStringArray
-	#var map_tile_40_test: PackedStringArray
-	
 	var maps_path: String = save_path + "/maps/"
 	DirAccess.make_dir_recursive_absolute(maps_path)
 	var last_frame_time: int = Time.get_ticks_msec()
 	for fft_map_data: FftMapData in maps.values():
-		var elapsed_time: float = (Time.get_ticks_msec() - last_frame_time) / 1000.0
-		if elapsed_time > (1 / 60.0):
-			message.emit("Exporting map: " + fft_map_data.unique_name)
-			await get_tree().process_frame
-			last_frame_time = Time.get_ticks_msec()
+		last_frame_time = await keep_60_fps(last_frame_time, "Exporting map: " + fft_map_data.unique_name)
 		
 		if fft_map_data.unique_name == "map_000":
 			continue # skip map 0 - causes crash
 
 		export_map(maps_path, fft_map_data)
-		
-		#var map_tiles_80: PackedStringArray = []
-		#var map_tiles_40: PackedStringArray = []
-		#for tile: TerrainTile in fft_map_data.terrain_tiles:
-			#if tile.bytes[0] & 0x40 == 0x40:
-				#map_tiles_40.append(str(tile.location))
-			#if tile.bytes[0] & 0x80 == 0x80:
-				#map_tiles_80.append(str(tile.location))
-		#
-		#if not map_tiles_80.is_empty():
-			#map_tile_80_test.append(fft_map_data.unique_name + ": " + ",".join(map_tiles_80))
-		#if not map_tiles_40.is_empty():
-			#map_tile_40_test.append(fft_map_data.unique_name + ": " + ",".join(map_tiles_40))
-	#
-	#var map_tile_80_test_total: String = "\n".join(map_tile_80_test)
-	#var map_tile_80_file: FileAccess = FileAccess.open(maps_path.path_join("map_tile_0x80.txt"), FileAccess.WRITE)
-	#map_tile_80_file.store_string(map_tile_80_test_total)
-	#map_tile_80_file.close()
-#
-	#var map_tile_40_test_total: String = "\n".join(map_tile_40_test)
-	#var map_tile_40_file: FileAccess = FileAccess.open(maps_path.path_join("map_tile_0x40.txt"), FileAccess.WRITE)
-	#map_tile_40_file.store_string(map_tile_40_test_total)
-	#map_tile_40_file.close()
 
 
 func export_map(save_path: String, fft_map_data: FftMapData) -> void:
@@ -1095,7 +1065,10 @@ func export_vfx(save_path: String) -> void:
 	
 	var vfx_path: String = save_path + "/vfx/"
 	DirAccess.make_dir_recursive_absolute(vfx_path)
+	var last_frame_time: int = Time.get_ticks_msec()
 	for vfx_file: VisualEffectData in vfx:
+		last_frame_time = await keep_60_fps(last_frame_time, "Exporting vfx: " + vfx_file.file_name)
+		
 		vfx_file.init_from_file()
 		if not vfx_file.is_initialized: # skip empty vfx files
 			continue
@@ -1140,6 +1113,15 @@ func export_vfx(save_path: String) -> void:
 		new_mesh_instance.name = "projectile_" + ProjectileEffectInstance.ProjectileType.keys()[model_id]
 		GltfManager.save_node(new_mesh_instance, vfx_path, new_mesh_instance.name + ".projectile.glb")
 		new_mesh_instance.queue_free()
+
+
+func keep_60_fps(last_frame_time_msec: int, message_text: String) -> int:
+	var elapsed_time: float = (Time.get_ticks_msec() - last_frame_time_msec) / 1000.0
+	if elapsed_time > (1 / 60.0):
+		message.emit(message_text)
+		await get_tree().process_frame
+		last_frame_time_msec = Time.get_ticks_msec()
+	return last_frame_time_msec
 
 
 static func export_tile_meshes(path: String, scale: Vector3 = Vector3.ONE) -> void:
