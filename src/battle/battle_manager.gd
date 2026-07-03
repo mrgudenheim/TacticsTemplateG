@@ -86,12 +86,7 @@ var walled_maps: PackedInt32Array = [
 	104,
 ]
 
-var unit_stat_bars_visible: bool = true:
-	get: return unit_stat_bars_visible
-	set(new_is_visible):
-		unit_stat_bars_visible = new_is_visible
-		for unit: Unit in units:
-			unit.set_stat_bar_visiblity(new_is_visible)
+@export var show_statbar_check: CheckBox
 
 
 func _ready() -> void:
@@ -100,6 +95,7 @@ func _ready() -> void:
 	load_rom_button.file_selected.connect(RomReader.on_load_rom_dialog_file_selected)
 	GameData.data_imported.connect(on_data_ready)
 	orthographic_check.toggled.connect(camera_controller.on_orthographic_toggled)
+	show_statbar_check.toggled.connect(set_unit_statbars_visible)
 	#camera_controller.zoom_changed.connect(update_phantom_camera_spring)
 
 
@@ -163,6 +159,7 @@ func on_data_ready() -> void:
 	var default_scenario: Scenario = GameData.get_scenario("map_083_zirekile_falls_14")
 	# scenario_editor.init_scenario(default_scenario)
 	scenario_editor.init_scenario()
+	set_unit_statbars_visible(show_statbar_check.button_pressed)
 
 
 func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
@@ -201,6 +198,7 @@ func start_battle() -> void:
 	battle_view.reparent(self)
 	# get list of units again; reparenting temporarily removes the unit from the tree and Units auto remove themselves from the Array when they leave the tree
 	units.assign(units_container.get_children())
+	set_unit_statbars_visible(show_statbar_check.button_pressed)
 	game_state_container.visible = true
 	
 	camera_controller.follow_node = units[0].char_body
@@ -802,6 +800,11 @@ func get_stand_tiles() -> Array[TerrainTile]:
 		
 		valid_tiles.append(potential_tile)
 	return valid_tiles
+
+
+func set_unit_statbars_visible(statbar_is_visible: bool) -> void:
+	for unit: Unit in units:
+		unit.set_stat_bar_visiblity(statbar_is_visible)
 
 
 func clear_maps() -> void:
