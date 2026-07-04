@@ -274,6 +274,7 @@ func get_map_data(unique_name: String) -> MapData:
 	var new_map_data: MapData = ResourceLoader.load(file_path, "MapData")
 	var mesh_instance: MeshInstance3D = get_map_gltf(new_map_data.unique_name).get_child(1)
 	new_map_data.mesh = mesh_instance.mesh
+	new_map_data.flag_polygons_to_hide()
 	maps_data[unique_name] = new_map_data
 	return maps_data[unique_name]
 
