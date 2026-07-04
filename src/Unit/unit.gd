@@ -318,7 +318,7 @@ func _ready() -> void:
 	add_to_group("Units")
 
 	if not GameData.is_ready:
-		GameData.data_imported.connect(initialize_unit)
+		GameData.data_indexed.connect(initialize_unit)
 	else:
 		initialize_unit()
 

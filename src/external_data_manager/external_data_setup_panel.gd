@@ -35,13 +35,13 @@ func _ready() -> void:
 	destination_file_dialog.dir_selected.connect(_on_destination_path_selected)
 
 	export_data_button.pressed.connect(export_data)
-	import_button.pressed.connect(func() -> void: GameData.import_data(GameData.external_data_paths["IMPORT_PATH"]))
+	import_button.pressed.connect(func() -> void: GameData.index_data(GameData.external_data_paths["IMPORT_PATH"]))
 
 	_default_export_button_text = export_data_button.text
 
 	GameData.import_progress.connect(update_import_progress)
 	GameData.message.connect(show_import_message)
-	GameData.data_imported.connect(func() -> void: visible = false)
+	GameData.data_indexed.connect(func() -> void: visible = false)
 
 	await get_tree().process_frame
 

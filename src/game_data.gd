@@ -1,6 +1,6 @@
 extends Node
 
-signal data_imported
+signal data_indexed
 signal message(message: String)
 signal import_progress(current_value: int, max_value: int)
 
@@ -63,7 +63,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 	# RomReader.export_tile_meshes("res://src/content_scripts/map/", Vector3(-1.0, 1.0, 1.0))
 	if not external_data_paths["IMPORT_PATH"].is_empty() and DirAccess.dir_exists_absolute(external_data_paths["IMPORT_PATH"]):
-		call_deferred("import_data", external_data_paths["IMPORT_PATH"])
+		call_deferred("index_data", external_data_paths["IMPORT_PATH"])
 
 
 func _get_saved_data_paths() -> Dictionary [String, String]:
@@ -132,7 +132,7 @@ func clear_data() -> void:
 	unit_spritesheet_data_paths.clear()
 
 
-func import_data(directory_path: String) -> void:
+func index_data(directory_path: String) -> void:
 	clear_data()
 
 	for slope_type: TerrainTile.SlopeType in TerrainTile.SlopeType.values():
@@ -170,35 +170,21 @@ func import_data(directory_path: String) -> void:
 		var data_type: String = file_path.split(".")[-2]
 		
 		if file_path.ends_with(".json"):
-			#var file_text: String = FileAccess.get_file_as_string(file_path)
-
 			match data_type:
 				"action":
 					action_paths[file_path.get_file().trim_suffix(".action.json")] = file_path
 				"ability":
 					ability_paths[file_path.get_file().trim_suffix(".ability.json")] = file_path
-					#var new_content: Ability = Ability.create_from_json(file_text)
-					#if not abilities.keys().has(new_content.unique_name):
-						#abilities[new_content.unique_name] = new_content
 				"triggered_action":
 					triggered_action_paths[file_path.get_file().trim_suffix(".triggered_action.json")] = file_path
-					#var new_content: TriggeredAction = TriggeredAction.create_from_json(file_text)
-					#if not triggered_actions.keys().has(new_content.unique_name):
-						#triggered_actions[new_content.unique_name] = new_content
 				"passive_effect":
 					passive_effect_paths[file_path.get_file().trim_suffix(".passive_effect.json")] = file_path
 				"item":
 					item_paths[file_path.get_file().trim_suffix(".item.json")] = file_path
-					#var new_content: ItemData = ItemData.create_from_json(file_text)
-					#if not items.keys().has(new_content.unique_name):
-						#items[new_content.unique_name] = new_content
 				"scenario":
 					scenario_paths[file_path.get_file().trim_suffix(".scenario.json")] = file_path
 				"job":
 					job_paths[file_path.get_file().trim_suffix(".job.json")] = file_path
-					#var new_content: JobData = JobData.create_from_json(file_text)
-					#if not scenarios.keys().has(new_content.unique_name):
-						#jobs_data[new_content.unique_name] = new_content
 				"text":
 					var file_text: String = FileAccess.get_file_as_string(file_path)
 					names["all"] = JSON.parse_string(file_text) as PackedStringArray
@@ -209,46 +195,28 @@ func import_data(directory_path: String) -> void:
 		
 		elif file_path.ends_with(".status_effect.tres"):
 			status_effect_paths[file_path.get_file().trim_suffix(".status_effect.tres")] = file_path
-			#var new_status_effect: StatusEffect = ResourceLoader.load(file_path, "StatusEffect")
-			#status_effects[new_status_effect.unique_name] = new_status_effect
 		elif file_path.ends_with(".skillset.tres"):
 			skillset_paths[file_path.get_file().trim_suffix(".skillset.tres")] = file_path
-			#var new_skillset: Skillset = ResourceLoader.load(file_path, "Skillset")
-			#skillsets[new_skillset.unique_name] = new_skillset
 		elif file_path.ends_with(".palette.tres"):
 			var new_palette: ColorPalette = ResourceLoader.load(file_path, "ColorPalette")
 			palettes[file_path.get_file().trim_suffix(".palette.tres")] = new_palette.colors
 		elif file_path.ends_with(".unit_spritesheet.tres"):
 			unit_spritesheet_data_paths[file_path.get_file().trim_suffix(".unit_spritesheet.tres")] = file_path
-			#var new_spritesheet_data: UnitSpritesheetData = ResourceLoader.load(file_path, "UnitSpritesheetData")
-			#unit_spritesheets_data[file_path.get_file().trim_suffix(".unit_spritesheet.tres")] = new_spritesheet_data
 		elif file_path.ends_with(".map.glb"):
 			map_gltf_paths[file_path.get_file().trim_suffix(".map.glb")] = file_path
-			# maps_gltf[file_path.get_file().trim_suffix(".map.glb")] = GltfManager.import_gltf(file_path)
 		elif file_path.ends_with(".map_data.tres"):
 			map_data_paths[file_path.get_file().trim_suffix(".map_data.tres")] = file_path
-			# maps_data[file_path.get_file().trim_suffix(".map_data.tres")] = ResourceLoader.load(file_path, "MapData")
 		elif file_path.ends_with(".texture.webp"):
 			texture_paths[file_path.get_file().trim_suffix(".texture.webp")] = file_path
-			# var new_image: Image = Image.load_from_file(file_path)
-			# textures[file_path.get_file().trim_suffix(".texture.webp")] = ImageTexture.create_from_image(new_image)
 		elif file_path.to_lower().ends_with(".shp.tres"):
 			shp_paths[file_path.get_file().trim_suffix(".shp.tres")] = file_path
-			# var new_shp: Shp = ResourceLoader.load(file_path, "Shp")
-			# new_shp.is_initialized = true
-			# shps[file_path.get_file().trim_suffix(".shp.tres")] = new_shp
 		elif file_path.to_lower().ends_with(".seq.tres"):
 			seq_paths[file_path.get_file().trim_suffix(".seq.tres")] = file_path
-			# var new_seq: Seq = ResourceLoader.load(file_path, "Seq")
-			# new_seq.is_initialized = true
-			# seqs[file_path.get_file().trim_suffix(".seq.tres")] = new_seq
 		elif file_path.ends_with("animation_data.tres"):
 			var new_animation_data: AnimationData = ResourceLoader.load(file_path, "AnimationData")
 			animation_layer_priorities = new_animation_data.animation_layer_priorities.duplicate()
 		elif file_path.to_lower().ends_with(".vfx_data.tres"):
 			vfx_data_paths[file_path.get_file().trim_suffix(".vfx_data.tres")] = file_path
-			# var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")
-			# vfx[file_path.get_file().trim_suffix(".vfx_data.tres")] = new_vfx
 		elif file_path.to_lower().ends_with("shared_vfx.data.tres"):
 			shared_vfx_data = ResourceLoader.load(file_path, "TrapEffectData")
 		elif file_path.ends_with(".projectile.glb"):
@@ -263,7 +231,7 @@ func import_data(directory_path: String) -> void:
 	print_debug("Time to import files (ms): " + str(import_time))
 	push_warning("Time to import files (ms): " + str(import_time))
 	is_ready = true
-	data_imported.emit()
+	data_indexed.emit()
 
 
 ## Lazy loading functions

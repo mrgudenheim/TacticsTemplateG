@@ -55,7 +55,7 @@ func _ready() -> void:
 	if GameData.is_ready:
 		_on_rom_loaded()
 	else:
-		GameData.data_imported.connect(_on_rom_loaded, CONNECT_ONE_SHOT)
+		GameData.data_indexed.connect(_on_rom_loaded, CONNECT_ONE_SHOT)
 
 
 func _on_rom_loaded() -> void:

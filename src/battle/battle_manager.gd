@@ -93,7 +93,7 @@ func _ready() -> void:
 	main_camera = camera_controller.camera
 
 	load_rom_button.file_selected.connect(RomReader.on_load_rom_dialog_file_selected)
-	GameData.data_imported.connect(on_data_ready)
+	GameData.data_indexed.connect(on_data_ready)
 	orthographic_check.toggled.connect(camera_controller.on_orthographic_toggled)
 	show_statbar_check.toggled.connect(set_unit_statbars_visible)
 	#camera_controller.zoom_changed.connect(update_phantom_camera_spring)
