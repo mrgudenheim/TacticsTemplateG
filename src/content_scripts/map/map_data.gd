@@ -144,7 +144,7 @@ func flag_polygons_to_hide() -> void:
 		total_max.y = row_mins.keys().max() + 1.0
 
 	var surface_arrays: Array = mesh.surface_get_arrays(0)
-	var mesh_centroids: Array = surface_arrays[Mesh.ARRAY_CUSTOM0]
+	var mesh_centroids: PackedFloat32Array = surface_arrays[Mesh.ARRAY_CUSTOM0]
 	# var mesh_custom1: PackedFloat32Array = []
 	# mesh_custom1.resize(mesh_centroids.size())
 	# mesh_custom1.fill(0)
@@ -180,9 +180,9 @@ func flag_polygons_to_hide() -> void:
 				flag_hidden = true
 
 		if flag_hidden:
-			mesh_centroids[x_index] = centroid.x
-			mesh_centroids[x_index + 1] = centroid.y
-			mesh_centroids[x_index + 2] = centroid.z
+			#mesh_centroids[x_index] = centroid.x
+			#mesh_centroids[x_index + 1] = centroid.y
+			#mesh_centroids[x_index + 2] = centroid.z
 			mesh_centroids[x_index + 3] = 1.0
 	surface_arrays[Mesh.ARRAY_CUSTOM0] = mesh_centroids
 	var format_flags: int = Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT
