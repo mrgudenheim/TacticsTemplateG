@@ -19,13 +19,20 @@ const float USABLE_TEXTURE_WIDTH = 240.0 / 256.0;
 uniform bool debug_depth = false;
 
 varying float face_center_depth;
+varying float hide_polygon;
 
 void vertex() {
 	vec4 centroid_clip = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(CUSTOM0.xyz, 1.0);
 	face_center_depth = centroid_clip.z / centroid_clip.w;
+
+	hide_polygon = CUSTOM0.a;
 }
 
 void fragment() {
+	if (hide_polygon != 0.0) {
+		discard;
+	}
+
 	// uv animation
 	vec2 new_uv = UV;
 	for (int anim_idx = 0; anim_idx < canvas_pos.length(); anim_idx++) {
