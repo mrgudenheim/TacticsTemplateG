@@ -99,12 +99,20 @@ func flag_polygons_to_hide() -> void:
 
 	var total_min: Vector2 = Vector2(999, 999)
 	var total_max: Vector2 = Vector2(-999, -999)
+	
+	var tile_heights: Dictionary[Vector2i, PackedFloat32Array] = {}
 
 	# for each row, get min_x and edge height, max_x and edge height
 	for tile: TerrainTile in terrain_tiles:
 		if tile.no_walk or tile.no_cursor:
 			continue
-		var tile_height_position: float = (tile.height_bottom + tile.slope_height + tile.depth) * FftMapData.HEIGHT_SCALE
+		
+		var tile_height_position: float = get_tile_height_position(tile)
+		
+		if tile_heights.has(tile.location):
+			tile_heights[tile.location].append(tile_height_position)
+		else:
+			tile_heights[tile.location] = [tile_height_position]
 		
 		# if first tile considered in the row
 		if not row_mins.has(tile.location.y):
@@ -143,6 +151,9 @@ func flag_polygons_to_hide() -> void:
 		total_max.x = column_mins.keys().max() + 1.0
 		total_max.y = row_mins.keys().max() + 1.0
 
+	for location: Vector2i in tile_heights.keys():
+		tile_heights[location].sort()
+
 	var surface_arrays: Array = mesh.surface_get_arrays(0)
 	var mesh_centroids: PackedFloat32Array = surface_arrays[Mesh.ARRAY_CUSTOM0]
 	# var mesh_custom1: PackedFloat32Array = []
@@ -159,28 +170,74 @@ func flag_polygons_to_hide() -> void:
 		var flag_hidden: bool = false
 		
 		# outer quadrants
-		if centroid.x < total_min.x and centroid.z < total_min.y:
-			flag_hidden = true
-		elif centroid.x < total_min.x and centroid.z > total_max.y:
-			flag_hidden = true
-		elif centroid.x > total_max.x and centroid.z < total_min.y:
-			flag_hidden = true
-		elif centroid.x > total_max.x and centroid.z > total_max.y:
-			flag_hidden = true
+		# if centroid.x < total_min.x and centroid.z < total_min.y:
+		# 	flag_hidden = true
+		# elif centroid.x < total_min.x and centroid.z > total_max.y:
+		# 	flag_hidden = true
+		# elif centroid.x > total_max.x and centroid.z < total_min.y:
+		# 	flag_hidden = true
+		# elif centroid.x > total_max.x and centroid.z > total_max.y:
+		# 	flag_hidden = true
+		
+		# if on edge between tiles:
+		# check each potential neighbor to find if it is a valid tile
+		# use highest height among valid neighbors for cutoff to hide polygons
+		# if neither are valid, always flag
+		var height_cutoff: float = -9999.9
+		if is_equal_approx(centroid.x, roundi(centroid.x)):
+			polygon_column = roundi(centroid.x)
+			
+			var location_a: Vector2i = Vector2i(polygon_column, polygon_row)
+			var location_b: Vector2i = Vector2i(polygon_column - 1, polygon_row)
+			if tile_heights.has(location_a) and tile_heights.has(location_b):
+				height_cutoff = max(tile_heights[location_a][0], tile_heights[location_b][-1])
+			elif tile_heights.has(location_a):
+				height_cutoff = tile_heights[location_a][-1]
+			elif tile_heights.has(location_b):
+				height_cutoff = tile_heights[location_b][-1]
+			
+			if centroid.y > height_cutoff:
+				flag_hidden = true
+		elif is_equal_approx(centroid.z, roundi(centroid.z)):
+			polygon_row = roundi(centroid.z)
+			
+			var location_a: Vector2i = Vector2i(polygon_column, polygon_row)
+			var location_b: Vector2i = Vector2i(polygon_column, polygon_row - 1)
+			if tile_heights.has(location_a) and tile_heights.has(location_b):
+				height_cutoff = max(tile_heights[location_a][-1], tile_heights[location_b][-1])
+			elif tile_heights.has(location_a):
+				height_cutoff = tile_heights[location_a][-1]
+			elif tile_heights.has(location_b):
+				height_cutoff = tile_heights[location_b][-1]
+		else:
+			var tile_location: Vector2i = Vector2i(polygon_column, polygon_row)
+			if tile_heights.has(tile_location):
+				height_cutoff = tile_heights[tile_location][-1]
+			elif row_mins.has(polygon_row) and column_mins.has(polygon_column):
+				if (tile_location.x > row_mins[polygon_row].x
+						and tile_location.x < row_maxes[polygon_row].x
+						and tile_location.y > column_mins[polygon_column].x
+						and tile_location.y < column_maxes[polygon_column].x):
+					height_cutoff = 9999.9 # don't hide impassable tiles in the middle of the battlefield
+		
+		if centroid.y > (height_cutoff + 0.01):
+				flag_hidden = true
+
+
 		
 		# row bounds
-		if row_mins.has(polygon_row):
-			if centroid.x <= row_mins[polygon_row].x and centroid.y > row_mins[polygon_row].y:
-				flag_hidden = true
-			elif centroid.x >= row_maxes[polygon_row].x and centroid.y > row_maxes[polygon_row].y:
-				flag_hidden = true
+		# if row_mins.has(polygon_row):
+		# 	if centroid.x <= row_mins[polygon_row].x and centroid.y > row_mins[polygon_row].y:
+		# 		flag_hidden = true
+		# 	elif centroid.x >= row_maxes[polygon_row].x and centroid.y > row_maxes[polygon_row].y:
+		# 		flag_hidden = true
 		
-		# column bounds
-		if column_mins.has(polygon_column):
-			if centroid.z <= column_mins[polygon_column].x and centroid.y > column_mins[polygon_column].y:
-				flag_hidden = true
-			elif centroid.z >= column_maxes[polygon_column].x and centroid.y > column_maxes[polygon_column].y:
-				flag_hidden = true
+		# # column bounds
+		# if column_mins.has(polygon_column):
+		# 	if centroid.z <= column_mins[polygon_column].x and centroid.y > column_mins[polygon_column].y:
+		# 		flag_hidden = true
+		# 	elif centroid.z >= column_maxes[polygon_column].x and centroid.y > column_maxes[polygon_column].y:
+		# 		flag_hidden = true
 		
 		# TODO ceiling obstruction stuff
 		# if centroid.y > (tile.height_bottom + tile.slope_height) of the highest tile at each location
@@ -195,6 +252,16 @@ func flag_polygons_to_hide() -> void:
 	var new_mesh: ArrayMesh = ArrayMesh.new()
 	new_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays, [], {}, format_flags)
 	mesh = new_mesh
+
+
+func sort_tiles_descending_height(tile_a: TerrainTile, tile_b: TerrainTile) -> bool:
+	var tile_a_total_height: int = tile_a.height_bottom + tile_a.depth + tile_a.slope_height
+	var tile_b_total_height: int = tile_b.height_bottom + tile_b.depth + tile_b.slope_height
+	return tile_a_total_height > tile_b_total_height
+
+
+func get_tile_height_position(tile: TerrainTile) -> float:
+	return (tile.height_bottom + tile.slope_height + tile.depth) * FftMapData.HEIGHT_SCALE
 
 
 func get_transformed_tiles(translation: Vector2 = Vector2.ZERO, scale: Vector2 = Vector2.ONE, rotation_degrees: float = 0.0) -> Array[TerrainTile]:
