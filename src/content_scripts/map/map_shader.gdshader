@@ -22,26 +22,25 @@ uniform float[32] frame_idx;
 uniform bool debug_depth = false;
 
 varying float face_center_depth;
+varying vec3 world_pos;
 varying float hide_polygon;
 
 void vertex() {
 	vec4 centroid_clip = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(CUSTOM0.xyz, 1.0);
 	face_center_depth = centroid_clip.z / centroid_clip.w;
 
-	vec4 center_pos_clip_space = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(center_xy.x, 0.0, center_xy.y, 1.0);
-	vec3 center_pos_screen_space = center_pos_clip_space.xyz / center_pos_clip_space.w;
-	vec4 vetex_pos_clip_space = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.x, 0.0, VERTEX.z, 1.0);
-	vec3 vetex_pos_screen_space = vetex_pos_clip_space.xyz / vetex_pos_clip_space.w;
-	vec3 vertex_pos_rel_center = vetex_pos_screen_space - center_pos_screen_space;
-
-	hide_polygon = 0.0;
-	if (vertex_pos_rel_center.y + adjustment > 0.0) {
-		hide_polygon = CUSTOM0.a;
-	}
+	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	hide_polygon = CUSTOM0.a;
 }
 
 void fragment() {
-	if (hide_polygon != 0.0) {
+	// hide obstructing polygons
+	vec3 center_world_pos = vec3(NODE_POSITION_WORLD.x, 0.0, NODE_POSITION_WORLD.z) + vec3(center_xy.x, 0.0, center_xy.y);
+	vec3 pos_relative_to_center = vec3(world_pos.x, 0.0, world_pos.z) - vec3(center_world_pos.x, 0.0, center_world_pos.z);
+	vec3 direction_to_camera = vec3(CAMERA_POSITION_WORLD.x, 0.0, CAMERA_POSITION_WORLD.z) - vec3(center_world_pos.x, 0.0, center_world_pos.z);
+	bool polygon_closer_than_center = dot(pos_relative_to_center, direction_to_camera) > 0.0;
+	
+	if (hide_polygon != 0.0 && polygon_closer_than_center) {
 		discard;
 	}
 
