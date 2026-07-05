@@ -76,7 +76,7 @@ static func transform_custom0(surface_arrays: Array, transform: Transform3D) -> 
 		mesh_custom0[x_index] = centroid.x
 		mesh_custom0[x_index + 1] = centroid.y
 		mesh_custom0[x_index + 2] = centroid.z
-		mesh_custom0[x_index + 3] = 0
+		mesh_custom0[x_index + 3] = mesh_custom0[x_index + 3] # keep flag to hide polygon
 	surface_arrays[Mesh.ARRAY_CUSTOM0] = mesh_custom0
 	# Godot needs explicit format flags for CUSTOM0 in add_surface_from_arrays()
 	# RGB_FLOAT = 6, CUSTOM0 format shift = 13

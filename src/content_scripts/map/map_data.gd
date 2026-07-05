@@ -106,37 +106,37 @@ func flag_polygons_to_hide() -> void:
 			continue
 		
 		# if first tile considered in the row
-		if not row_mins.has(tile.y):
-			row_mins[tile.y] = Vector2(tile.x, tile.height_bottom)
-			row_maxes[tile.y] = Vector2(tile.x + 1.0, tile.height_bottom)
+		if not row_mins.has(tile.location.y):
+			row_mins[tile.location.y] = Vector2(tile.location.x, tile.height_bottom)
+			row_maxes[tile.location.y] = Vector2(tile.location.x + 1.0, tile.height_bottom)
 		else:
-			if tile.x < row_mins[tile.y].x:
-				row_mins[tile.y] = Vector2(tile.x, tile.height_bottom)
-			elif tile.x == row_mins[tile.y].x and tile.height_bottom > row_mins[tile.y].y:
-				row_mins[tile.y] = Vector2(tile.x, tile.height_bottom)
+			if tile.location.x < row_mins[tile.location.y].x:
+				row_mins[tile.location.y] = Vector2(tile.location.x, tile.height_bottom)
+			elif tile.location.x == row_mins[tile.location.y].x and tile.height_bottom > row_mins[tile.y].y:
+				row_mins[tile.location.y] = Vector2(tile.location.x, tile.height_bottom)
 			
-			var tile_upper_bound: float = tile.x + 1.0
-			if tile_upper_bound > row_maxes[tile.y].x:
-				row_maxes[tile.y] = Vector2(tile_upper_bound, tile.height_bottom)
-			elif tile_upper_bound == row_maxes[tile.y].x and tile.height_bottom > row_maxes[tile.y].y:
-				row_maxes[tile.y] = Vector2(tile_upper_bound, tile.height_bottom)
+			var tile_upper_bound: float = tile.location.x + 1.0
+			if tile_upper_bound > row_maxes[tile.location.y].x:
+				row_maxes[tile.location.y] = Vector2(tile_upper_bound, tile.height_bottom)
+			elif tile_upper_bound == row_maxes[tile.location.y].x and tile.height_bottom > row_maxes[tile.location.y].y:
+				row_maxes[tile.location.y] = Vector2(tile_upper_bound, tile.height_bottom)
 
 
 		# if first tile considered in the column
-		if not column_mins.has(tile.x):
-			column_mins[tile.x] = Vector2(tile.y, tile.height_bottom)
-			column_maxes[tile.x] = Vector2(tile.y + 1.0, tile.height_bottom)
+		if not column_mins.has(tile.location.x):
+			column_mins[tile.location.x] = Vector2(tile.location.y, tile.height_bottom)
+			column_maxes[tile.location.x] = Vector2(tile.location.y + 1.0, tile.height_bottom)
 		else:
-			if tile.y < column_mins[tile.x].x:
-				column_mins[tile.x] = Vector2(tile.y, tile.height_bottom)
-			elif tile.y == column_mins[tile.x].x and tile.height_bottom > column_mins[tile.x].y:
-				column_mins[tile.x] = Vector2(tile.y, tile.height_bottom)
+			if tile.location.y < column_mins[tile.location.x].x:
+				column_mins[tile.x] = Vector2(tile.location.y, tile.height_bottom)
+			elif tile.location.y == column_mins[tile.location.x].x and tile.height_bottom > column_mins[tile.location.x].y:
+				column_mins[tile.x] = Vector2(tile.location.y, tile.height_bottom)
 
-			var tile_upper_bound: float = tile.y + 1.0
-			if tile_upper_bound > column_maxes[tile.x].x:
-				column_maxes[tile.x] = Vector2(tile_upper_bound, tile.height_bottom)
-			elif tile_upper_bound == column_maxes[tile.x].x and tile.height_bottom > column_maxes[tile.x].y:
-				column_maxes[tile.x] = Vector2(tile_upper_bound, tile.height_bottom)
+			var tile_upper_bound: float = tile.location.y + 1.0
+			if tile_upper_bound > column_maxes[tile.location.x].x:
+				column_maxes[tile.location.x] = Vector2(tile_upper_bound, tile.height_bottom)
+			elif tile_upper_bound == column_maxes[tile.location.x].x and tile.height_bottom > column_maxes[tile.location.x].y:
+				column_maxes[tile.location.x] = Vector2(tile_upper_bound, tile.height_bottom)
 
 		total_min.x = column_mins.keys().min()
 		total_min.y = row_mins.keys().min()
@@ -145,12 +145,12 @@ func flag_polygons_to_hide() -> void:
 
 	var surface_arrays: Array = mesh.surface_get_arrays(0)
 	var mesh_centroids: Array = surface_arrays[Mesh.ARRAY_CUSTOM0]
-	var mesh_custom1: PackedFloat32Array = []
-	mesh_custom1.resize(mesh_centroids.size())
-	mesh_custom1.fill(0)
+	# var mesh_custom1: PackedFloat32Array = []
+	# mesh_custom1.resize(mesh_centroids.size())
+	# mesh_custom1.fill(0)
 
 	@warning_ignore("integer_division")
-	var num_verticies: int = mesh_custom1.size() / 4
+	var num_verticies: int = mesh_centroids.size() / 4
 	for vertex_idx: int in range(num_verticies):
 		var x_index: int = vertex_idx * 4
 		var centroid: Vector3 = Vector3(mesh_centroids[x_index], mesh_centroids[x_index + 1], mesh_centroids[x_index + 2])
@@ -180,12 +180,15 @@ func flag_polygons_to_hide() -> void:
 				flag_hidden = true
 
 		if flag_hidden:
-			mesh_custom1[x_index] = 1.0
-			mesh_custom1[x_index + 1] = 1.0
-			mesh_custom1[x_index + 2] = 1.0
-			mesh_custom1[x_index + 3] = 1.0
-	surface_arrays[Mesh.ARRAY_CUSTOM1] = mesh_custom1
-	var format_flags: int = Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM1_SHIFT
+			mesh_centroids[x_index] = centroid.x
+			mesh_centroids[x_index + 1] = centroid.y
+			mesh_centroids[x_index + 2] = centroid.z
+			mesh_centroids[x_index + 3] = 1.0
+	surface_arrays[Mesh.ARRAY_CUSTOM0] = mesh_centroids
+	var format_flags: int = Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT
+	var new_mesh: ArrayMesh = ArrayMesh.new()
+	new_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays, [], {}, format_flags)
+	mesh = new_mesh
 
 
 func get_transformed_tiles(translation: Vector2 = Vector2.ZERO, scale: Vector2 = Vector2.ONE, rotation_degrees: float = 0.0) -> Array[TerrainTile]:
