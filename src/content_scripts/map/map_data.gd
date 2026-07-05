@@ -104,39 +104,40 @@ func flag_polygons_to_hide() -> void:
 	for tile: TerrainTile in terrain_tiles:
 		if tile.no_walk or tile.no_cursor:
 			continue
+		var tile_height_position: float = tile.height_bottom * FftMapData.HEIGHT_SCALE
 		
 		# if first tile considered in the row
 		if not row_mins.has(tile.location.y):
-			row_mins[tile.location.y] = Vector2(tile.location.x, tile.height_bottom)
-			row_maxes[tile.location.y] = Vector2(tile.location.x + 1.0, tile.height_bottom)
+			row_mins[tile.location.y] = Vector2(tile.location.x, tile_height_position)
+			row_maxes[tile.location.y] = Vector2(tile.location.x + 1.0, tile_height_position)
 		else:
 			if tile.location.x < row_mins[tile.location.y].x:
-				row_mins[tile.location.y] = Vector2(tile.location.x, tile.height_bottom)
-			elif tile.location.x == row_mins[tile.location.y].x and tile.height_bottom > row_mins[tile.y].y:
-				row_mins[tile.location.y] = Vector2(tile.location.x, tile.height_bottom)
+				row_mins[tile.location.y] = Vector2(tile.location.x, tile_height_position)
+			elif tile.location.x == row_mins[tile.location.y].x and tile_height_position > row_mins[tile.y].y:
+				row_mins[tile.location.y] = Vector2(tile.location.x, tile_height_position)
 			
 			var tile_upper_bound: float = tile.location.x + 1.0
 			if tile_upper_bound > row_maxes[tile.location.y].x:
-				row_maxes[tile.location.y] = Vector2(tile_upper_bound, tile.height_bottom)
-			elif tile_upper_bound == row_maxes[tile.location.y].x and tile.height_bottom > row_maxes[tile.location.y].y:
-				row_maxes[tile.location.y] = Vector2(tile_upper_bound, tile.height_bottom)
+				row_maxes[tile.location.y] = Vector2(tile_upper_bound, tile_height_position)
+			elif tile_upper_bound == row_maxes[tile.location.y].x and tile_height_position > row_maxes[tile.location.y].y:
+				row_maxes[tile.location.y] = Vector2(tile_upper_bound, tile_height_position)
 
 
 		# if first tile considered in the column
 		if not column_mins.has(tile.location.x):
-			column_mins[tile.location.x] = Vector2(tile.location.y, tile.height_bottom)
-			column_maxes[tile.location.x] = Vector2(tile.location.y + 1.0, tile.height_bottom)
+			column_mins[tile.location.x] = Vector2(tile.location.y, tile_height_position)
+			column_maxes[tile.location.x] = Vector2(tile.location.y + 1.0, tile_height_position)
 		else:
 			if tile.location.y < column_mins[tile.location.x].x:
-				column_mins[tile.x] = Vector2(tile.location.y, tile.height_bottom)
-			elif tile.location.y == column_mins[tile.location.x].x and tile.height_bottom > column_mins[tile.location.x].y:
-				column_mins[tile.x] = Vector2(tile.location.y, tile.height_bottom)
+				column_mins[tile.x] = Vector2(tile.location.y, tile_height_position)
+			elif tile.location.y == column_mins[tile.location.x].x and tile_height_position > column_mins[tile.location.x].y:
+				column_mins[tile.x] = Vector2(tile.location.y, tile_height_position)
 
 			var tile_upper_bound: float = tile.location.y + 1.0
 			if tile_upper_bound > column_maxes[tile.location.x].x:
-				column_maxes[tile.location.x] = Vector2(tile_upper_bound, tile.height_bottom)
-			elif tile_upper_bound == column_maxes[tile.location.x].x and tile.height_bottom > column_maxes[tile.location.x].y:
-				column_maxes[tile.location.x] = Vector2(tile_upper_bound, tile.height_bottom)
+				column_maxes[tile.location.x] = Vector2(tile_upper_bound, tile_height_position)
+			elif tile_upper_bound == column_maxes[tile.location.x].x and tile_height_position > column_maxes[tile.location.x].y:
+				column_maxes[tile.location.x] = Vector2(tile_upper_bound, tile_height_position)
 
 		total_min.x = column_mins.keys().min()
 		total_min.y = row_mins.keys().min()
@@ -167,17 +168,26 @@ func flag_polygons_to_hide() -> void:
 			flag_hidden = true
 		elif centroid.x > total_max.x and centroid.z > total_max.y:
 			flag_hidden = true
-		elif row_mins.has(polygon_row) and column_mins.has(polygon_column):
-			# row bounds
-			if centroid.x < row_mins[polygon_row].x and centroid.y > row_mins[polygon_row].y:
+		
+		# row bounds
+		if row_mins.has(polygon_row):
+			if centroid.x <= row_mins[polygon_row].x and centroid.y > row_mins[polygon_row].y:
 				flag_hidden = true
-			elif centroid.x > row_maxes[polygon_row].x and centroid.y > row_maxes[polygon_row].y:
+			elif centroid.x >= row_maxes[polygon_row].x and centroid.y > row_maxes[polygon_row].y:
 				flag_hidden = true
-			# column bounds
-			elif centroid.z < column_mins[polygon_column].x and centroid.y > column_mins[polygon_column].y:
+		
+		# column bounds
+		if column_mins.has(polygon_column):
+			if centroid.z <= column_mins[polygon_column].x and centroid.y > column_mins[polygon_column].y:
 				flag_hidden = true
-			elif centroid.z > column_maxes[polygon_column].x and centroid.y > column_maxes[polygon_column].y:
+			elif centroid.z >= column_maxes[polygon_column].x and centroid.y > column_maxes[polygon_column].y:
 				flag_hidden = true
+		
+		# TODO ceiling obstruction stuff
+		# if centroid.y > (tile.height_bottom + tile.slope_height) of the highest tile at each location
+		
+		if (centroid.x == 0.0 or centroid.x == 8.0) and polygon_row == 6:
+			pass
 
 		if flag_hidden:
 			#mesh_centroids[x_index] = centroid.x
