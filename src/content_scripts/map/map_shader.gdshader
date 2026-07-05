@@ -7,7 +7,6 @@ const int NUM_PALETTES = 16;
 const float USABLE_TEXTURE_WIDTH = 240.0 / 256.0;
 
 uniform vec2 center_xy = vec2(5.5, 6.0); // threshold to hide flagged polygons
-uniform float adjustment = -0.025;
 
 // palette anim vars
 uniform sampler2D albedo_texture_color_indicies : source_color, filter_nearest;

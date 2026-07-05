@@ -20,7 +20,7 @@ static func load_mirrored_map(map_name: String, container: Node3D) -> MapChunkNo
 	var transformed_mesh: ArrayMesh = FftMapData.get_transformed_mesh(map_data.mesh, Vector3(1, 1, 1))
 	new_map_instance.mesh_instance.mesh = transformed_mesh
 
-	new_map_instance.set_mesh_shader(GameData.get_texture(map_data.unique_name), map_data.palettes)
+	new_map_instance.set_mesh_shader(GameData.get_texture(map_data.unique_name), map_data.palettes, map_data.terrain_tiles)
 	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
 	new_map_instance.play_animations(map_data)
 	container.add_child(new_map_instance)

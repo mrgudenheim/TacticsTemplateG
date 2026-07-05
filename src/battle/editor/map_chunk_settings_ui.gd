@@ -99,7 +99,7 @@ func get_map_chunk_nodes(map_chunk_unique_name: String) -> MapChunkNodes:
 	var transformed_mesh: ArrayMesh = FftMapData.get_transformed_mesh(map_chunk_data.mesh, Vector3(tiles_center.x, 0.0, tiles_center.y), map_chunk.mirror_scale)
 	new_map_instance.mesh_instance.mesh = transformed_mesh
 
-	new_map_instance.set_mesh_shader(GameData.get_texture(map_chunk_data.unique_name), map_chunk_data.palettes)
+	new_map_instance.set_mesh_shader(GameData.get_texture(map_chunk_data.unique_name), map_chunk_data.palettes, map_chunk_data.terrain_tiles)
 	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
 	
 	return new_map_instance

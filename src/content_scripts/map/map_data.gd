@@ -156,9 +156,6 @@ func flag_polygons_to_hide() -> void:
 
 	var surface_arrays: Array = mesh.surface_get_arrays(0)
 	var mesh_centroids: PackedFloat32Array = surface_arrays[Mesh.ARRAY_CUSTOM0]
-	# var mesh_custom1: PackedFloat32Array = []
-	# mesh_custom1.resize(mesh_centroids.size())
-	# mesh_custom1.fill(0)
 
 	@warning_ignore("integer_division")
 	var num_verticies: int = mesh_centroids.size() / 4
@@ -168,16 +165,6 @@ func flag_polygons_to_hide() -> void:
 		var polygon_row: int = floori(centroid.z)
 		var polygon_column: int = floori(centroid.x)
 		var flag_hidden: bool = false
-		
-		# outer quadrants
-		# if centroid.x < total_min.x and centroid.z < total_min.y:
-		# 	flag_hidden = true
-		# elif centroid.x < total_min.x and centroid.z > total_max.y:
-		# 	flag_hidden = true
-		# elif centroid.x > total_max.x and centroid.z < total_min.y:
-		# 	flag_hidden = true
-		# elif centroid.x > total_max.x and centroid.z > total_max.y:
-		# 	flag_hidden = true
 		
 		# if on edge between tiles:
 		# check each potential neighbor to find if it is a valid tile
@@ -223,25 +210,6 @@ func flag_polygons_to_hide() -> void:
 		
 		if centroid.y > (height_cutoff + 0.01):
 				flag_hidden = true
-
-
-		
-		# row bounds
-		# if row_mins.has(polygon_row):
-		# 	if centroid.x <= row_mins[polygon_row].x and centroid.y > row_mins[polygon_row].y:
-		# 		flag_hidden = true
-		# 	elif centroid.x >= row_maxes[polygon_row].x and centroid.y > row_maxes[polygon_row].y:
-		# 		flag_hidden = true
-		
-		# # column bounds
-		# if column_mins.has(polygon_column):
-		# 	if centroid.z <= column_mins[polygon_column].x and centroid.y > column_mins[polygon_column].y:
-		# 		flag_hidden = true
-		# 	elif centroid.z >= column_maxes[polygon_column].x and centroid.y > column_maxes[polygon_column].y:
-		# 		flag_hidden = true
-		
-		# TODO ceiling obstruction stuff
-		# if centroid.y > (tile.height_bottom + tile.slope_height) of the highest tile at each location
 
 		if flag_hidden:
 			#mesh_centroids[x_index] = centroid.x

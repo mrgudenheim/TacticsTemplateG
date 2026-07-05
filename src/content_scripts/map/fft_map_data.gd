@@ -887,7 +887,7 @@ func get_map_scene(scale: Vector3 = Vector3.ONE, translation: Vector3 = Vector3.
 	var transformed_mesh: ArrayMesh = get_transformed_mesh(mesh, Vector3(tiles_center.x, 0.0, tiles_center.y), scale, translation, rotation_degrees, true)
 	new_map_instance.mesh_instance.mesh = transformed_mesh
 
-	new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes)
+	new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes, new_map_instance.map_data.terrain_tiles)
 	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
 
 	# # new_map_instance.position = map_position
