@@ -184,9 +184,6 @@ func flag_polygons_to_hide() -> void:
 		
 		# TODO ceiling obstruction stuff
 		# if centroid.y > (tile.height_bottom + tile.slope_height) of the highest tile at each location
-		
-		if (centroid.x == 0.0 or centroid.x == 8.0) and polygon_row == 6:
-			pass
 
 		if flag_hidden:
 			#mesh_centroids[x_index] = centroid.x
