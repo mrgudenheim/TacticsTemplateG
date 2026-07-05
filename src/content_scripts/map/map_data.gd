@@ -122,16 +122,15 @@ func flag_polygons_to_hide() -> void:
 			elif tile_upper_bound == row_maxes[tile.location.y].x and tile_height_position > row_maxes[tile.location.y].y:
 				row_maxes[tile.location.y] = Vector2(tile_upper_bound, tile_height_position)
 
-
 		# if first tile considered in the column
 		if not column_mins.has(tile.location.x):
 			column_mins[tile.location.x] = Vector2(tile.location.y, tile_height_position)
 			column_maxes[tile.location.x] = Vector2(tile.location.y + 1.0, tile_height_position)
 		else:
 			if tile.location.y < column_mins[tile.location.x].x:
-				column_mins[tile.x] = Vector2(tile.location.y, tile_height_position)
+				column_mins[tile.location.x] = Vector2(tile.location.y, tile_height_position)
 			elif tile.location.y == column_mins[tile.location.x].x and tile_height_position > column_mins[tile.location.x].y:
-				column_mins[tile.x] = Vector2(tile.location.y, tile_height_position)
+				column_mins[tile.location.x] = Vector2(tile.location.y, tile_height_position)
 
 			var tile_upper_bound: float = tile.location.y + 1.0
 			if tile_upper_bound > column_maxes[tile.location.x].x:
