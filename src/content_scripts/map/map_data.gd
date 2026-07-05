@@ -104,7 +104,7 @@ func flag_polygons_to_hide() -> void:
 	for tile: TerrainTile in terrain_tiles:
 		if tile.no_walk or tile.no_cursor:
 			continue
-		var tile_height_position: float = tile.height_bottom * FftMapData.HEIGHT_SCALE
+		var tile_height_position: float = (tile.height_bottom + tile.slope_height + tile.depth) * FftMapData.HEIGHT_SCALE
 		
 		# if first tile considered in the row
 		if not row_mins.has(tile.location.y):
