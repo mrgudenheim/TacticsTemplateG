@@ -3,6 +3,12 @@
 shader_type spatial;
 render_mode unshaded, depth_draw_opaque;
 
+const int NUM_PALETTES = 16;
+const float USABLE_TEXTURE_WIDTH = 240.0 / 256.0;
+
+uniform vec2 center_xy = vec2(5.5, 6.0); // threshold to hide flagged polygons
+uniform float adjustment = -0.025;
+
 // palette anim vars
 uniform sampler2D albedo_texture_color_indicies : source_color, filter_nearest;
 uniform vec4[256] palettes_colors : source_color; // 16 palettes of 16 colors each, TODO should this be an instance uniform?
@@ -13,9 +19,6 @@ uniform vec2[32] canvas_size;
 uniform vec2[32] frame_pos;
 uniform float[32] frame_idx;
 
-const int NUM_PALETTES = 16;
-const float USABLE_TEXTURE_WIDTH = 240.0 / 256.0;
-
 uniform bool debug_depth = false;
 
 varying float face_center_depth;
@@ -25,7 +28,16 @@ void vertex() {
 	vec4 centroid_clip = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(CUSTOM0.xyz, 1.0);
 	face_center_depth = centroid_clip.z / centroid_clip.w;
 
-	hide_polygon = CUSTOM0.a;
+	vec4 center_pos_clip_space = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(center_xy.x, 0.0, center_xy.y, 1.0);
+	vec3 center_pos_screen_space = center_pos_clip_space.xyz / center_pos_clip_space.w;
+	vec4 vetex_pos_clip_space = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX.x, 0.0, VERTEX.z, 1.0);
+	vec3 vetex_pos_screen_space = vetex_pos_clip_space.xyz / vetex_pos_clip_space.w;
+	vec3 vertex_pos_rel_center = vetex_pos_screen_space - center_pos_screen_space;
+
+	hide_polygon = 0.0;
+	if (vertex_pos_rel_center.y + adjustment > 0.0) {
+		hide_polygon = CUSTOM0.a;
+	}
 }
 
 void fragment() {
