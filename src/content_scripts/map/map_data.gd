@@ -178,9 +178,9 @@ func flag_polygons_to_hide() -> void:
 			var location_b: Vector2i = Vector2i(polygon_column - 1, polygon_row)
 			if tile_heights.has(location_a) and tile_heights.has(location_b):
 				height_cutoff = max(tile_heights[location_a][0], tile_heights[location_b][-1])
-			elif not tile_heights.has(location_a) and tile_is_internal(location_a, row_mins, row_maxes, column_mins, column_maxes):
+			elif not tile_heights.has(location_a) and tile_is_partial_internal(location_a, row_mins, row_maxes, column_mins, column_maxes):
 				height_cutoff = 9999.9 # don't hide impassable tiles in the middle of the battlefield
-			elif not tile_heights.has(location_b) and tile_is_internal(location_b, row_mins, row_maxes, column_mins, column_maxes):
+			elif not tile_heights.has(location_b) and tile_is_partial_internal(location_b, row_mins, row_maxes, column_mins, column_maxes):
 				height_cutoff = 9999.9 # don't hide impassable tiles in the middle of the battlefield
 			elif tile_heights.has(location_a):
 				height_cutoff = tile_heights[location_a][-1]
@@ -193,9 +193,9 @@ func flag_polygons_to_hide() -> void:
 			var location_b: Vector2i = Vector2i(polygon_column, polygon_row - 1)
 			if tile_heights.has(location_a) and tile_heights.has(location_b):
 				height_cutoff = max(tile_heights[location_a][-1], tile_heights[location_b][-1])
-			elif not tile_heights.has(location_a) and tile_is_internal(location_a, row_mins, row_maxes, column_mins, column_maxes):
+			elif not tile_heights.has(location_a) and tile_is_partial_internal(location_a, row_mins, row_maxes, column_mins, column_maxes):
 				height_cutoff = 9999.9 # don't hide impassable tiles in the middle of the battlefield
-			elif not tile_heights.has(location_b) and tile_is_internal(location_b, row_mins, row_maxes, column_mins, column_maxes):
+			elif not tile_heights.has(location_b) and tile_is_partial_internal(location_b, row_mins, row_maxes, column_mins, column_maxes):
 				height_cutoff = 9999.9 # don't hide impassable tiles in the middle of the battlefield
 			elif tile_heights.has(location_a):
 				height_cutoff = tile_heights[location_a][-1]
@@ -205,8 +205,8 @@ func flag_polygons_to_hide() -> void:
 			var tile_location: Vector2i = Vector2i(polygon_column, polygon_row)
 			if tile_heights.has(tile_location):
 				height_cutoff = tile_heights[tile_location][-1]
-			elif tile_is_internal(tile_location, row_mins, row_maxes, column_mins, column_maxes):
-				height_cutoff = 9999.9 # don't hide impassable tiles in the middle of the battlefield					
+			elif tile_is_partial_internal(tile_location, row_mins, row_maxes, column_mins, column_maxes):
+				height_cutoff = 9999.9 # don't hide impassable tiles in the middle of the battlefield
 		
 		if centroid.y > (height_cutoff + 0.01):
 				flag_hidden = true
@@ -237,6 +237,20 @@ func tile_is_internal(
 		and tile_location.x < row_maxes[tile_location.y].x
 		and tile_location.y > column_mins[tile_location.x].x
 		and tile_location.y < column_maxes[tile_location.x].x)
+
+
+func tile_is_partial_internal(
+	tile_location: Vector2i,
+	row_mins: Dictionary[int, Vector2],
+	row_maxes: Dictionary[int, Vector2],
+	column_mins: Dictionary[int, Vector2],
+	column_maxes: Dictionary[int, Vector2]
+) -> bool:
+	if not row_mins.has(tile_location.y) or not column_mins.has(tile_location.x):
+		return false
+	
+	return ((tile_location.x > row_mins[tile_location.y].x and tile_location.x < row_maxes[tile_location.y].x)
+		or (tile_location.y > column_mins[tile_location.x].x and tile_location.y < column_maxes[tile_location.x].x))
 
 
 func sort_tiles_descending_height(tile_a: TerrainTile, tile_b: TerrainTile) -> bool:
