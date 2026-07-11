@@ -59,13 +59,10 @@ func play_animations(local_map_data: MapData) -> void:
 			local_map_data.animate_uv(texture_animation, self, anim_id, anim_fps)
 
 
-func set_mesh_shader(texture: Texture2D, texture_palettes: PackedColorArray, terrain_tiles: Array[TerrainTile]) -> void:
+func set_mesh_shader(texture: Texture2D, texture_palettes: PackedColorArray) -> void:
 	var new_mesh_material: ShaderMaterial = ShaderMaterial.new()
 	new_mesh_material.shader = map_shader
 	new_mesh_material.set_shader_parameter("albedo_texture_color_indicies", texture)
 	new_mesh_material.set_shader_parameter("palettes_colors", texture_palettes)
 	
-	var tiles_center: Vector2 = MapData.get_tiles_center(terrain_tiles.filter(func(tile: TerrainTile) -> bool: return tile.no_walk == 0))
-	tiles_center += (Vector2.ONE * 0.5)
-	new_mesh_material.set_shader_parameter("center_xy", tiles_center)
 	mesh_instance.material_override = new_mesh_material

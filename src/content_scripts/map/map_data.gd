@@ -1,6 +1,13 @@
 class_name MapData
 extends Resource
 
+enum DirectionFlag {
+	NORTH = 1,
+	EAST = 2,
+	SOUTH = 4,
+	WEST = 8,
+}
+
 @export var unique_name: String = ""
 @export var display_name: String = "[map display name]"
 @export var description: String = "[map description]"
@@ -165,12 +172,14 @@ func flag_polygons_to_hide() -> void:
 		var polygon_row: int = floori(centroid.z)
 		var polygon_column: int = floori(centroid.x)
 		var flag_hidden: bool = false
+		var hidden_bitflags: int = 0
 		
 		# if on edge between tiles:
 		# check each potential neighbor to find if it is a valid tile
 		# use highest height among valid neighbors for cutoff to hide polygons
 		# if neither are valid, always flag
 		var height_cutoff: float = -9999.9
+		var max_height_cutoff: float = 9999.9
 		if is_equal_approx(centroid.x, roundi(centroid.x)):
 			polygon_column = roundi(centroid.x)
 			
@@ -179,13 +188,15 @@ func flag_polygons_to_hide() -> void:
 			if tile_heights.has(location_a) and tile_heights.has(location_b):
 				height_cutoff = max(tile_heights[location_a][0], tile_heights[location_b][-1])
 			elif not tile_heights.has(location_a) and tile_is_partial_internal(location_a, row_mins, row_maxes, column_mins, column_maxes):
-				height_cutoff = 9999.9 # don't hide impassable tiles in the middle of the battlefield
+				height_cutoff = max_height_cutoff # don't hide impassable tiles in the middle of the battlefield
 			elif not tile_heights.has(location_b) and tile_is_partial_internal(location_b, row_mins, row_maxes, column_mins, column_maxes):
-				height_cutoff = 9999.9 # don't hide impassable tiles in the middle of the battlefield
+				height_cutoff = max_height_cutoff # don't hide impassable tiles in the middle of the battlefield
+				polygon_column = polygon_column - 1
 			elif tile_heights.has(location_a):
 				height_cutoff = tile_heights[location_a][-1]
 			elif tile_heights.has(location_b):
 				height_cutoff = tile_heights[location_b][-1]
+				polygon_column = polygon_column - 1
 		elif is_equal_approx(centroid.z, roundi(centroid.z)):
 			polygon_row = roundi(centroid.z)
 			
@@ -194,28 +205,32 @@ func flag_polygons_to_hide() -> void:
 			if tile_heights.has(location_a) and tile_heights.has(location_b):
 				height_cutoff = max(tile_heights[location_a][-1], tile_heights[location_b][-1])
 			elif not tile_heights.has(location_a) and tile_is_partial_internal(location_a, row_mins, row_maxes, column_mins, column_maxes):
-				height_cutoff = 9999.9 # don't hide impassable tiles in the middle of the battlefield
+				height_cutoff = max_height_cutoff # don't hide impassable tiles in the middle of the battlefield
 			elif not tile_heights.has(location_b) and tile_is_partial_internal(location_b, row_mins, row_maxes, column_mins, column_maxes):
-				height_cutoff = 9999.9 # don't hide impassable tiles in the middle of the battlefield
+				height_cutoff = max_height_cutoff # don't hide impassable tiles in the middle of the battlefield
+				polygon_row = polygon_row - 1
 			elif tile_heights.has(location_a):
 				height_cutoff = tile_heights[location_a][-1]
 			elif tile_heights.has(location_b):
 				height_cutoff = tile_heights[location_b][-1]
+				polygon_row = polygon_row - 1
 		else:
 			var tile_location: Vector2i = Vector2i(polygon_column, polygon_row)
 			if tile_heights.has(tile_location):
-				height_cutoff = tile_heights[tile_location][-1]
+				height_cutoff = tile_heights[tile_location][-1] # get highest
 			elif tile_is_partial_internal(tile_location, row_mins, row_maxes, column_mins, column_maxes):
-				height_cutoff = 9999.9 # don't hide impassable tiles in the middle of the battlefield
+				height_cutoff = max_height_cutoff # don't hide impassable tiles in the middle of the battlefield
 		
 		if centroid.y > (height_cutoff + 0.01):
-				flag_hidden = true
+			var tile_location: Vector2i = Vector2i(polygon_column, polygon_row)
+			hidden_bitflags = get_tile_hidden_bitflags(tile_location, row_mins, row_maxes, column_mins, column_maxes)
+			flag_hidden = true
 
 		if flag_hidden:
 			#mesh_centroids[x_index] = centroid.x
 			#mesh_centroids[x_index + 1] = centroid.y
 			#mesh_centroids[x_index + 2] = centroid.z
-			mesh_centroids[x_index + 3] = 1.0
+			mesh_centroids[x_index + 3] = float(hidden_bitflags)
 	surface_arrays[Mesh.ARRAY_CUSTOM0] = mesh_centroids
 	var format_flags: int = Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT
 	var new_mesh: ArrayMesh = ArrayMesh.new()
@@ -251,6 +266,41 @@ func tile_is_partial_internal(
 	
 	return ((tile_location.x > row_mins[tile_location.y].x and tile_location.x < row_maxes[tile_location.y].x)
 		or (tile_location.y > column_mins[tile_location.x].x and tile_location.y < column_maxes[tile_location.x].x))
+
+
+func get_tile_hidden_bitflags(
+	tile_location: Vector2i,
+	row_mins: Dictionary[int, Vector2],
+	row_maxes: Dictionary[int, Vector2],
+	column_mins: Dictionary[int, Vector2],
+	column_maxes: Dictionary[int, Vector2]
+) -> int:
+	var hidden_bitflags: int = 0
+	if row_mins.has(tile_location.y):
+		if tile_location.x < row_mins[tile_location.y].x:
+			hidden_bitflags |= DirectionFlag.WEST
+		elif tile_location.x > row_maxes[tile_location.y].x:
+			hidden_bitflags |= DirectionFlag.EAST
+	else:
+		if tile_location.y < row_mins.keys().min():
+			hidden_bitflags |= DirectionFlag.SOUTH
+		elif tile_location.y > row_mins.keys().max():
+			hidden_bitflags |= DirectionFlag.NORTH
+	
+	if column_mins.has(tile_location.x):
+		if tile_location.y < column_mins[tile_location.x].x:
+			hidden_bitflags |= DirectionFlag.SOUTH
+		elif tile_location.y > column_maxes[tile_location.x].x:
+			hidden_bitflags |= DirectionFlag.NORTH
+	else:
+		if tile_location.x < column_mins.keys().min():
+			hidden_bitflags |= DirectionFlag.WEST
+		elif tile_location.x > column_mins.keys().max():
+			hidden_bitflags |= DirectionFlag.EAST
+
+	if tile_location.y > row_mins.keys().max():
+		pass
+	return hidden_bitflags
 
 
 func sort_tiles_descending_height(tile_a: TerrainTile, tile_b: TerrainTile) -> bool:
