@@ -14,8 +14,8 @@ var external_data_paths: Dictionary [String, String] = {
 var is_ready: bool = false
 var lazy_load_data: bool = true
 
-var shps: Dictionary[String, Shp] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
-var seqs: Dictionary[String, Seq] = {} # [unique_name (eg. filename without extension), Spr] TODO fill with data
+var shps: Dictionary[String, Shp] = {} # [unique_name (eg. filename without extension), Spr]
+var seqs: Dictionary[String, Seq] = {} # [unique_name (eg. filename without extension), Spr]
 var maps_gltf: Dictionary[String, Node] = {}
 var maps_data: Dictionary[String, MapData] = {} # var map_tiles: Dictionary[Vector2i, Array] = {} # Array[TerrainTile], palettes, animations
 var map_tile_meshes: Dictionary[TerrainTile.SlopeType, ArrayMesh] = {}
@@ -228,8 +228,8 @@ func index_data(directory_path: String) -> void:
 		load_all_data()
 
 	var import_time: int = Time.get_ticks_msec() - start_time
-	print_debug("Time to import files (ms): " + str(import_time))
-	push_warning("Time to import files (ms): " + str(import_time))
+	print_debug("Time to index files (ms): " + str(import_time))
+	push_warning("Time to index files (ms): " + str(import_time))
 	is_ready = true
 	data_indexed.emit()
 
