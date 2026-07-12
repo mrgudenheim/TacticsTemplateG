@@ -30,6 +30,14 @@ void vertex() {
 	int hidden_bitflags = int(round(CUSTOM0.a));
 	if (CAMERA_DIRECTION_WORLD.x == 0.0 && CAMERA_DIRECTION_WORLD.z == 0.0 && hidden_bitflags != 0) { // hide all hideable if camera faces directly up or down
 		hide_polygon = 1.0;
+	} else if ((hidden_bitflags & 1) == 1 && CAMERA_DIRECTION_WORLD.z <= 0.0) { // polygon is off North end of map and camera is facing NORTH, do not hide
+		hide_polygon = 0.0;
+	} else if ((hidden_bitflags & 2) == 2 && CAMERA_DIRECTION_WORLD.x <= 0.0) { // polygon is off East end of map and camera is facing EAST, do not hide
+		hide_polygon = 0.0;
+	} else if ((hidden_bitflags & 4) == 4 && CAMERA_DIRECTION_WORLD.z >= 0.0) { // polygon is off South end of map and camera is facing SOUTH, do not hide
+		hide_polygon = 0.0;
+	} else if ((hidden_bitflags & 8) == 8 && CAMERA_DIRECTION_WORLD.x >= 0.0) { // polygon is off West end of map and camera is facing WEST, do not hide
+		hide_polygon = 0.0;
 	} else if ((hidden_bitflags & 1) == 1 && CAMERA_DIRECTION_WORLD.z >= 0.0) { // polygon is off North end of map and camera is facing SOUTH
 		hide_polygon = 1.0;
 	} else if ((hidden_bitflags & 2) == 2 && CAMERA_DIRECTION_WORLD.x >= 0.0) { // polygon is off East end of map and camera is facing WEST

@@ -290,11 +290,11 @@ func get_tile_hidden_bitflags(
 	
 	var hidden_bitflags: int = 0
 	if row_mins.has(tile_location.y):
-		#if tile_location.x < row_mins[tile_location.y].x:
-		if tile_location.x < row_mins[tile_location.y].x and tile_location.y != total_min.y and tile_location.y != total_max.y:
+		if tile_location.x < row_mins[tile_location.y].x:
+		#if tile_location.x < row_mins[tile_location.y].x and tile_location.y != total_min.y and tile_location.y != total_max.y:
 			hidden_bitflags |= DirectionFlag.WEST
-		#elif tile_location.x > row_maxes[tile_location.y].x:
-		elif tile_location.x > row_maxes[tile_location.y].x and tile_location.y != total_min.y and tile_location.y != total_max.y:
+		elif tile_location.x > row_maxes[tile_location.y].x:
+		#elif tile_location.x > row_maxes[tile_location.y].x and tile_location.y != total_min.y and tile_location.y != total_max.y:
 			hidden_bitflags |= DirectionFlag.EAST
 	else:
 		if tile_location.y < row_mins.keys().min():
@@ -303,11 +303,11 @@ func get_tile_hidden_bitflags(
 			hidden_bitflags |= DirectionFlag.NORTH
 	
 	if column_mins.has(tile_location.x):
-		#if tile_location.y < column_mins[tile_location.x].x:
-		if tile_location.y < column_mins[tile_location.x].x and tile_location.x != total_min.x and tile_location.x != total_max.x:
+		if tile_location.y < column_mins[tile_location.x].x:
+		#if tile_location.y < column_mins[tile_location.x].x and tile_location.x != total_min.x and tile_location.x != total_max.x:
 			hidden_bitflags |= DirectionFlag.SOUTH
-		#elif tile_location.y > column_maxes[tile_location.x].x:
-		elif tile_location.y > column_maxes[tile_location.x].x and tile_location.x != total_min.x and tile_location.x != total_max.x:
+		elif tile_location.y > column_maxes[tile_location.x].x:
+		#elif tile_location.y > column_maxes[tile_location.x].x and tile_location.x != total_min.x and tile_location.x != total_max.x:
 			hidden_bitflags |= DirectionFlag.NORTH
 	else:
 		if tile_location.x < column_mins.keys().min():
