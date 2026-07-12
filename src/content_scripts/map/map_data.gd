@@ -198,6 +198,8 @@ func flag_polygons_to_hide() -> void:
 			elif tile_heights.has(location_b):
 				height_cutoff = tile_heights[location_b][-1]
 				polygon_column = polygon_column - 1
+			elif column_mins.keys().has(location_b.x): # wall on outer EAST and WEST borders should be treated the same, ie. as inside the map
+				polygon_column = polygon_column - 1
 		elif is_row_edge:
 			polygon_row = roundi(centroid.z)
 			
@@ -214,6 +216,8 @@ func flag_polygons_to_hide() -> void:
 				height_cutoff = tile_heights[location_a][-1]
 			elif tile_heights.has(location_b):
 				height_cutoff = tile_heights[location_b][-1]
+				polygon_row = polygon_row - 1
+			elif row_mins.keys().has(location_b.y):  # wall on outer NORTH and SOUTH borders should be treated the same, ie. as inside the map
 				polygon_row = polygon_row - 1
 		else:
 			var tile_location: Vector2i = Vector2i(polygon_column, polygon_row)
