@@ -103,9 +103,6 @@ func flag_polygons_to_hide() -> void:
 	var row_maxes: Dictionary[int, Vector2] = {}
 	var column_mins: Dictionary[int, Vector2] = {}
 	var column_maxes: Dictionary[int, Vector2] = {}
-
-	var total_min: Vector2 = Vector2(999, 999)
-	var total_max: Vector2 = Vector2(-999, -999)
 	
 	var tile_heights: Dictionary[Vector2i, PackedFloat32Array] = {}
 
@@ -151,11 +148,6 @@ func flag_polygons_to_hide() -> void:
 			elif tile.location.y == column_maxes[tile.location.x].x and tile_height_position > column_maxes[tile.location.x].y:
 				column_maxes[tile.location.x] = Vector2(tile.location.y, tile_height_position)
 
-		total_min.x = column_mins.keys().min()
-		total_min.y = row_mins.keys().min()
-		total_max.x = column_mins.keys().max()
-		total_max.y = row_mins.keys().max()
-
 	for location: Vector2i in tile_heights.keys():
 		tile_heights[location].sort()
 
@@ -178,7 +170,18 @@ func flag_polygons_to_hide() -> void:
 		# if neither are valid, always flag
 		var height_cutoff: float = -9999.9
 		var max_height_cutoff: float = 9999.9
-		if is_equal_approx(centroid.x, roundi(centroid.x)):
+		var is_row_edge: bool = is_equal_approx(centroid.z, roundi(centroid.z))
+		var is_column_edge: bool = is_equal_approx(centroid.x, roundi(centroid.x))
+		
+		# fix polygons whose centroid happen to fall at intersection of row and column edge (ex. a wall that is two tile wide)
+		if is_column_edge and is_row_edge:
+			var vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx]
+			if vertex.z != centroid.z:
+				is_row_edge = false
+			if vertex.x != centroid.x:
+				is_column_edge = false
+		
+		if is_column_edge:
 			polygon_column = roundi(centroid.x)
 			
 			var location_a: Vector2i = Vector2i(polygon_column, polygon_row)
@@ -195,7 +198,7 @@ func flag_polygons_to_hide() -> void:
 			elif tile_heights.has(location_b):
 				height_cutoff = tile_heights[location_b][-1]
 				polygon_column = polygon_column - 1
-		elif is_equal_approx(centroid.z, roundi(centroid.z)):
+		elif is_row_edge:
 			polygon_row = roundi(centroid.z)
 			
 			var location_a: Vector2i = Vector2i(polygon_column, polygon_row)
