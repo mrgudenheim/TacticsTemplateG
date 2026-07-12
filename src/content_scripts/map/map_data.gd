@@ -296,8 +296,6 @@ func get_tile_hidden_bitflags(
 		elif tile_location.x > column_mins.keys().max():
 			hidden_bitflags |= DirectionFlag.EAST
 
-	if tile_location.y > row_mins.keys().max():
-		pass
 	return hidden_bitflags
 
 
