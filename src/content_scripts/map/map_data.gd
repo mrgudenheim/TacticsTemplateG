@@ -176,6 +176,8 @@ func flag_polygons_to_hide() -> void:
 		# fix polygons whose centroid happen to fall at intersection of row and column edge (ex. a wall that is two tile wide)
 		if is_column_edge and is_row_edge:
 			var vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx]
+			#if vertex.z == centroid.z and vertex.x == centroid.x: # TODO handle triangle or rotated quads that have vertex aligned with the centroid
+				#break
 			if vertex.z != centroid.z:
 				is_row_edge = false
 			if vertex.x != centroid.x:
