@@ -60,6 +60,13 @@ var texture_anim_instructions_bytes: Array[PackedByteArray] = []
 var texture_animations_palette_frames: Array[PackedColorArray] = []
 var texture_animations: Array[TextureAnimationData] = []
 
+# polygon render flags
+var unknown_render_bytes: PackedByteArray # 896 bytes long
+var textured_tris_flags: PackedByteArray # 1024 bytes long for 512 textured triangles
+var textured_quads_flags: PackedByteArray # 1536 bytes for 768 textured quads
+var black_tris_flags: PackedByteArray # 128 bytes for 64 untextured triangles
+var black_quads_flags: PackedByteArray # 512 bytes for 256 untextured quads
+
 
 ## Mirror CUSTOM0 centroid data in surface arrays.
 ## Returns the CUSTOM0 format flags to pass to add_surface_from_arrays().
@@ -114,6 +121,7 @@ func create_map(mesh_bytes: PackedByteArray, texture_bytes: PackedByteArray = []
 	var terrain_data_start: int = other_bytes.decode_u32(0x68)
 	var texture_animation_instructions_data_start: int = other_bytes.decode_u32(0x6c)
 	var palette_animation_frames_data_start: int = other_bytes.decode_u32(0x70)
+	var polygon_render_flags_start: int = other_bytes.decode_u32(0xb0)
 	#var primary_mesh_data_end: int = texture_palettes_data_start if texture_palettes_data_start > 0 else 2147483647
 
 	#var primary_mesh_data: PackedByteArray = mesh_bytes.slice(primary_mesh_data_start, primary_mesh_data_end)
@@ -143,6 +151,15 @@ func create_map(mesh_bytes: PackedByteArray, texture_bytes: PackedByteArray = []
 		var terrain_data_end: int = terrain_data_start + terrain_data_length
 		var terrain_data: PackedByteArray = other_bytes.slice(terrain_data_start, terrain_data_end)
 		terrain_tiles = get_terrain(terrain_data)
+
+	if polygon_render_flags_start == 0:
+		push_warning("No polygon render flags found")
+	else:
+		unknown_render_bytes = other_bytes.slice(polygon_render_flags_start, polygon_render_flags_start + 896) # 896 bytes long
+		textured_tris_flags = other_bytes.slice(polygon_render_flags_start + 896, polygon_render_flags_start + 896 + 1024) # 1024 bytes long for 512 textured triangles
+		textured_quads_flags = other_bytes.slice(polygon_render_flags_start + 896 + 1024, polygon_render_flags_start + 896 + 1024 + 1536) # 1536 bytes for 768 textured quads
+		black_tris_flags = other_bytes.slice(polygon_render_flags_start + 896 + 1024 + 1536, polygon_render_flags_start + 896 + 1024 + 1536 + 128) # 128 bytes for 64 untextured triangles
+		black_quads_flags = other_bytes.slice(polygon_render_flags_start + 896 + 1024 + 1536 + 128, polygon_render_flags_start + 896 + 1024 + 1536 + 128 + 512) # 512 bytes for 256 untextured quads
 
 	_create_mesh()
 
@@ -254,7 +271,8 @@ func _create_mesh() -> void:
 		var v1: Vector3 = text_tri_vertices[i * 3 + 1] * SCALE
 		var v2: Vector3 = text_tri_vertices[i * 3 + 2] * SCALE
 		var centroid: Vector3 = (v0 + v1 + v2) / 3.0
-		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, 0.0)
+		var render_flags: int = textured_tris_flags.decode_u16(i * 2) >> 2
+		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, render_flags)
 		for vertex_index: int in 3:
 			var index: int = (i * 3) + vertex_index
 			st.set_normal(text_tri_normals[index] * SCALE)

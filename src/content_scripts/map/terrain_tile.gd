@@ -38,6 +38,7 @@ const SLOPE_TYPE_CODE: Dictionary[SlopeType, int] = {
 var tile_scale: Vector3 = Vector3.ONE
 @export var rotation_degrees: float = 0.0
 
+@export_flags("Northeast", "Northwest", "Southeast", "Southwest") var mesh_hidden_bitflags: int = 0
 
 func get_world_position(use_bottom_height: bool = false) -> Vector3:
 	var height_position: float = height_mid + depth
