@@ -440,7 +440,7 @@ func process_rom() -> void:
 		sprite_id_list.append(scus_data.jobs_data[job_id].sprite_id)
 	
 	var num_palettes: int = 8
-	var cell_width: int = 40
+	var cell_width: int = 45
 	var cell_height: int = 50
 	var grid_cell: Vector2i = Vector2i(2, 0) # (2, 0) - standing pose, (1,1) - monster damage pose, (9,1) - monster critical pose
 	var grid_cell_offset: Vector2i = grid_cell * 120
@@ -461,7 +461,7 @@ func process_rom() -> void:
 			#var src_rect: Rect2i = Rect2i(Vector2i(40, 0), Vector2i(20, 40))
 			
 			var spr_image: Image = spr.create_frame_grid_texture(palette_idx).get_image()
-			var src_rect: Rect2i = Rect2i(Vector2i(grid_cell_offset.x + 40, grid_cell_offset.y + 42), Vector2i(40, 45))
+			var src_rect: Rect2i = Rect2i(Vector2i(grid_cell_offset.x + 37, grid_cell_offset.y + 42), Vector2i(45, 45))
 			#var job_name: String = scus_data.jobs_data[specific_jobs[idx]].job_name
 			#var test_file_name: String =  job_name + "_" + str(spr_idx) + "_palette_" + str(palette_idx)
 			#spr_image.save_png("user://" + test_file_name + ".png")
