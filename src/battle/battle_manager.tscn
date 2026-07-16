@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://card26cltbba1"]
+[gd_scene format=3 uid="uid://card26cltbba1"]
 
 [ext_resource type="Script" uid="uid://cd31vmh881wm5" path="res://src/battle/battle_manager.gd" id="1_hnd0w"]
 [ext_resource type="PackedScene" uid="uid://buljw4afjva1d" path="res://src/Map/map.tscn" id="2_1os5c"]
@@ -44,7 +44,7 @@ material = SubResource("StandardMaterial3D_p2e2h")
 [sub_resource type="BoxMesh" id="BoxMesh_cqdh8"]
 material = SubResource("StandardMaterial3D_tjj5r")
 
-[node name="BattleManager" type="Node3D" node_paths=PackedStringArray("texture_viewer", "reference_quad", "load_rom_button", "camera_controller", "background_gradient", "menu_list", "map_dropdown", "orthographic_check", "menu_reminder", "map_size_label", "expand_map_check", "maps", "action_menu", "action_button_list", "units_container", "controller", "battle_end_panel", "post_battle_messages", "start_new_battle_button", "game_state_label", "units_per_team_spinbox", "units_level_spinbox", "icon_counter")]
+[node name="BattleManager" type="Node3D" unique_id=228611651 node_paths=PackedStringArray("texture_viewer", "reference_quad", "load_rom_button", "camera_controller", "background_gradient", "menu_list", "map_dropdown", "orthographic_check", "menu_reminder", "map_size_label", "expand_map_check", "maps", "action_menu", "action_button_list", "units_container", "controller", "battle_end_panel", "post_battle_messages", "start_new_battle_button", "game_state_label", "units_per_team_spinbox", "units_level_spinbox", "icon_counter")]
 script = ExtResource("1_hnd0w")
 use_test_teams = true
 texture_viewer = NodePath("SpriteViewer")
@@ -81,59 +81,59 @@ units_level_spinbox = NodePath("DebugOptions/MarginContainer/VBoxContainer2/VBox
 icon_counter = NodePath("IconGridContainer")
 allow_mirror = false
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1940697449]
 environment = SubResource("Environment_njvnp")
 
-[node name="CameraController" parent="." instance=ExtResource("12_l2dig")]
+[node name="CameraController" parent="." unique_id=643946473 instance=ExtResource("12_l2dig")]
 physics_interpolation_mode = 2
 transform = Transform3D(0.707107, -0.315509, 0.632814, 0, 0.894934, 0.446198, -0.707107, -0.315509, 0.632814, 0, 0, 0)
 
-[node name="DebugOptions" type="PanelContainer" parent="."]
+[node name="DebugOptions" type="PanelContainer" parent="." unique_id=1590979932]
 offset_right = 124.0
 offset_bottom = 92.0
 
-[node name="MarginContainer" type="MarginContainer" parent="DebugOptions"]
+[node name="MarginContainer" type="MarginContainer" parent="DebugOptions" unique_id=339733777]
 layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="DebugOptions/MarginContainer"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="DebugOptions/MarginContainer" unique_id=983666651]
 layout_mode = 2
 
-[node name="LoadRom" parent="DebugOptions/MarginContainer/VBoxContainer2" instance=ExtResource("9_pbg35")]
+[node name="LoadRom" parent="DebugOptions/MarginContainer/VBoxContainer2" unique_id=1810687011 instance=ExtResource("9_pbg35")]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="DebugOptions/MarginContainer/VBoxContainer2"]
+[node name="VBoxContainer" type="VBoxContainer" parent="DebugOptions/MarginContainer/VBoxContainer2" unique_id=117567640]
 visible = false
 layout_mode = 2
 
-[node name="MapDropdown" type="OptionButton" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer"]
+[node name="MapDropdown" type="OptionButton" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=55429033]
 layout_mode = 2
 
-[node name="MapSize" type="Label" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer"]
+[node name="MapSize" type="Label" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=170311189]
 layout_mode = 2
 text = "Map Size: X x Y"
 
-[node name="OrthographicCheckBox" type="CheckBox" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer"]
+[node name="OrthographicCheckBox" type="CheckBox" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=1562655198]
 layout_mode = 2
 button_pressed = true
 text = "Orthographic"
 
-[node name="ExpandMap" type="CheckBox" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer"]
+[node name="ExpandMap" type="CheckBox" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=1585292615]
 layout_mode = 2
 text = "Expand Map"
 
-[node name="GridContainer" type="GridContainer" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer"]
+[node name="GridContainer" type="GridContainer" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=1257336222]
 layout_mode = 2
 columns = 2
 
-[node name="Label" type="Label" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer/GridContainer"]
+[node name="Label" type="Label" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer/GridContainer" unique_id=1662678409]
 layout_mode = 2
 text = "Units per team:"
 
-[node name="UnitsPerTeam" type="SpinBox" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer/GridContainer"]
+[node name="UnitsPerTeam" type="SpinBox" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer/GridContainer" unique_id=219871857]
 layout_mode = 2
 min_value = 1.0
 max_value = 20.0
@@ -141,11 +141,11 @@ value = 5.0
 rounded = true
 allow_greater = true
 
-[node name="Label2" type="Label" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer/GridContainer"]
+[node name="Label2" type="Label" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer/GridContainer" unique_id=194539147]
 layout_mode = 2
 text = "Units Level:"
 
-[node name="UnitsLevel" type="SpinBox" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer/GridContainer"]
+[node name="UnitsLevel" type="SpinBox" parent="DebugOptions/MarginContainer/VBoxContainer2/VBoxContainer/GridContainer" unique_id=51999000]
 layout_mode = 2
 min_value = 1.0
 max_value = 99.0
@@ -153,14 +153,14 @@ value = 40.0
 rounded = true
 allow_greater = true
 
-[node name="MenuReminder" type="Label" parent="DebugOptions/MarginContainer/VBoxContainer2"]
+[node name="MenuReminder" type="Label" parent="DebugOptions/MarginContainer/VBoxContainer2" unique_id=699108649]
 layout_mode = 2
 text = "Press ESCAPE to toggle menu"
 
-[node name="BackgroundCanvasLayer" type="CanvasLayer" parent="."]
+[node name="BackgroundCanvasLayer" type="CanvasLayer" parent="." unique_id=1501067570]
 layer = -3
 
-[node name="TextureRect" type="TextureRect" parent="BackgroundCanvasLayer"]
+[node name="TextureRect" type="TextureRect" parent="BackgroundCanvasLayer" unique_id=100772922]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -168,27 +168,27 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("GradientTexture2D_1dnhu")
 
-[node name="CharacterController" type="Node3D" parent="."]
+[node name="CharacterController" type="Node3D" parent="." unique_id=1066853966]
 script = ExtResource("10_d5yoq")
 
-[node name="SpriteViewer" type="Sprite3D" parent="."]
+[node name="SpriteViewer" type="Sprite3D" parent="." unique_id=908735671]
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 5, 0)
 visible = false
 pixel_size = 0.05
 billboard = 1
 texture_filter = 0
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=936026549]
 transform = Transform3D(1, 0, 0, 0, 0.553391, -0.832921, 0, 0.832921, 0.553391, 0, 3.51982, 2.72607)
 
-[node name="ReferenceQuad" type="MeshInstance3D" parent="."]
+[node name="ReferenceQuad" type="MeshInstance3D" parent="." unique_id=135843193]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
 visible = false
 mesh = SubResource("QuadMesh_foefj")
 
-[node name="PathContainer" type="Node3D" parent="."]
+[node name="PathContainer" type="Node3D" parent="." unique_id=1381917178]
 
-[node name="CPUParticles3D" type="CPUParticles3D" parent="."]
+[node name="CPUParticles3D" type="CPUParticles3D" parent="." unique_id=553010134]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 5, 0, -5)
 visible = false
 amount = 1
@@ -197,63 +197,63 @@ mesh = SubResource("QuadMesh_tjj5r")
 emission_shape = 4
 emission_points = PackedVector3Array(0, 0, -10)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="CPUParticles3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CPUParticles3D" unique_id=1532211410]
 visible = false
 mesh = SubResource("BoxMesh_cqdh8")
 
-[node name="Maps" type="Node3D" parent="."]
+[node name="Maps" type="Node3D" parent="." unique_id=417509362]
 
-[node name="Units" type="Node3D" parent="."]
+[node name="Units" type="Node3D" parent="." unique_id=11023409]
 
-[node name="EastLabel3D" type="Label3D" parent="."]
+[node name="EastLabel3D" type="Label3D" parent="." unique_id=56954471]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, 0)
 visible = false
 pixel_size = 0.05
 billboard = 1
 text = "East (1, 0, 0)"
 
-[node name="WestLabel3D" type="Label3D" parent="."]
+[node name="WestLabel3D" type="Label3D" parent="." unique_id=1038852299]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 0)
 visible = false
 pixel_size = 0.05
 billboard = 1
 text = "West (-1, 0, 0)"
 
-[node name="SouthLabel3D" type="Label3D" parent="."]
+[node name="SouthLabel3D" type="Label3D" parent="." unique_id=1407406490]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -20)
 visible = false
 pixel_size = 0.05
 billboard = 1
 text = "South (0, 0, -1)"
 
-[node name="NorthLabel3D" type="Label3D" parent="."]
+[node name="NorthLabel3D" type="Label3D" parent="." unique_id=1104047507]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 20)
 visible = false
 pixel_size = 0.05
 billboard = 1
 text = "North (0, 0, 1)"
 
-[node name="IconGridContainer" type="GridContainer" parent="."]
-layout_direction = 3
+[node name="IconGridContainer" type="GridContainer" parent="." unique_id=1294243292]
 offset_right = 40.0
 offset_bottom = 40.0
+layout_direction = 3
 columns = 5
 
-[node name="ActionMenu" type="PanelContainer" parent="."]
+[node name="ActionMenu" type="PanelContainer" parent="." unique_id=151646783]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 grow_vertical = 0
 
-[node name="ActionButtonsList" type="VBoxContainer" parent="ActionMenu"]
+[node name="ActionButtonsList" type="VBoxContainer" parent="ActionMenu" unique_id=696709422]
 layout_mode = 2
 
-[node name="ActionButton" type="Button" parent="ActionMenu/ActionButtonsList"]
+[node name="ActionButton" type="Button" parent="ActionMenu/ActionButtonsList" unique_id=1552196130]
 layout_mode = 2
 script = ExtResource("16_l2dig")
 metadata/_custom_type_script = "uid://cectjl7guvpqa"
 
-[node name="BattleEnd" type="PanelContainer" parent="."]
+[node name="BattleEnd" type="PanelContainer" parent="." unique_id=787621462]
 visible = false
 anchors_preset = 8
 anchor_left = 0.5
@@ -267,17 +267,17 @@ offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="BattleEnd"]
+[node name="VBoxContainer" type="VBoxContainer" parent="BattleEnd" unique_id=1007226347]
 layout_mode = 2
 
-[node name="Messages" type="VBoxContainer" parent="BattleEnd/VBoxContainer"]
+[node name="Messages" type="VBoxContainer" parent="BattleEnd/VBoxContainer" unique_id=1908113334]
 layout_mode = 2
 
-[node name="StartNewBattle" type="Button" parent="BattleEnd/VBoxContainer"]
+[node name="StartNewBattle" type="Button" parent="BattleEnd/VBoxContainer" unique_id=1567176494]
 layout_mode = 2
 text = "Start New Battle"
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=159431034]
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
@@ -286,7 +286,7 @@ offset_right = 45.0
 offset_bottom = 40.0
 grow_horizontal = 2
 
-[node name="GameState" type="Label" parent="PanelContainer"]
+[node name="GameState" type="Label" parent="PanelContainer" unique_id=415455205]
 layout_mode = 2
 text = "Game State"
 horizontal_alignment = 1
