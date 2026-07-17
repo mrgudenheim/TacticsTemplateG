@@ -917,6 +917,8 @@ func export_data_tables(save_path: String) -> void:
 		var map_chunk: Scenario.MapChunk = scenario.map_chunks[0]
 		var map_chunk_data: FftMapData = maps[map_chunk.unique_name]
 		scenario.units_data = Scenario.transform_units_data_tile_location(scenario.units_data, map_chunk_data.terrain_tiles, Vector2(-1, 1))
+		scenario.background_gradient_bottom = RomReader.maps[scenario.map_chunks[0].unique_name].background_gradient_bottom
+		scenario.background_gradient_top = RomReader.maps[scenario.map_chunks[0].unique_name].background_gradient_top
 		Utilities.save_json(scenario, save_path)
 	for skillset: Skillset in scus_data.skillsets_data:
 		var skillset_path: String = save_path.path_join("/skillsets/")

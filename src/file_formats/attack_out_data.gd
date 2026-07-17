@@ -122,6 +122,8 @@ func get_unique_scenarios() -> Array[Scenario]:
 		# new_map_chunk.set_mirror_xyz([true, true, false])
 		new_map_chunk.unique_name = map_unique_name
 		new_scenario.map_chunks.append(new_map_chunk)
+		new_scenario.background_gradient_bottom = RomReader.maps[map_unique_name].background_gradient_bottom
+		new_scenario.background_gradient_top = RomReader.maps[map_unique_name].background_gradient_top
 
 		var scenario_entd: FftEntd = RomReader.fft_entds[fft_scenario.entd_idx]
 		new_scenario.units_data = scenario_entd.get_units_data()

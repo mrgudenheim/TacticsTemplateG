@@ -63,6 +63,8 @@ static func get_scenarios_from_random_battle(fft_random_battle: Variant) -> Arra
 	new_map_chunk.unique_name = map_unique_name
 	# new_map_chunk.set_mirror_xyz([true, true, false])
 	new_scenario_base.map_chunks.append(new_map_chunk)
+	new_scenario_base.background_gradient_bottom = RomReader.maps[map_unique_name].background_gradient_bottom
+	new_scenario_base.background_gradient_top = RomReader.maps[map_unique_name].background_gradient_top
 	
 	var unique_entds: PackedInt64Array = []
 	for entd_idx: int in fft_random_battle.entds:
