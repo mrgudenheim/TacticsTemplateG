@@ -39,6 +39,39 @@ static func init_from_fft_map_data(fft_map_data: FftMapData) -> MapData:
 	return new_map_data
 
 
+static func get_transform2d(
+	tiles_pivot: Vector2, 
+	scale: Vector2 = Vector2.ONE, 
+	translation: Vector2 = Vector2.ZERO, 
+	rotation_degrees: float = 0.0
+) -> Transform2D:	
+	var transform: Transform2D = Transform2D.IDENTITY
+	transform = transform.translated(-tiles_pivot)
+	transform = transform.rotated(deg_to_rad(rotation_degrees))
+	transform = transform.scaled(scale)
+	transform = transform.translated(tiles_pivot + translation)
+
+	return transform
+
+
+static func get_tiles_center(tile_array: Array[TerrainTile]) -> Vector2:
+	var min_tile_location: Vector2i = Vector2i.ZERO
+	var max_tile_location: Vector2i = Vector2i.ZERO
+	for tile: TerrainTile in tile_array:
+		if tile.location.x > max_tile_location.x:
+			max_tile_location.x = tile.location.x
+		if tile.location.y > max_tile_location.y:
+			max_tile_location.y = tile.location.y
+		
+		if tile.location.x < min_tile_location.x:
+			min_tile_location.x = tile.location.x
+		if tile.location.y < min_tile_location.y:
+			min_tile_location.y = tile.location.y
+	
+	var tiles_center: Vector2 = (max_tile_location -  min_tile_location) / 2.0
+	return tiles_center
+
+
 func animate_palette(texture_anim: TextureAnimation, map: MapChunkNodes, anim_fps: float) -> void:
 	var frame_id: int = 0
 	var dir: int = 1
@@ -363,39 +396,6 @@ func get_transformed_tiles(translation: Vector2 = Vector2.ZERO, scale: Vector2 =
 		mirrored_tiles.append(transformed_tile)
 	
 	return mirrored_tiles
-
-
-static func get_transform2d(
-	tiles_pivot: Vector2, 
-	scale: Vector2 = Vector2.ONE, 
-	translation: Vector2 = Vector2.ZERO, 
-	rotation_degrees: float = 0.0
-) -> Transform2D:	
-	var transform: Transform2D = Transform2D.IDENTITY
-	transform = transform.translated(-tiles_pivot)
-	transform = transform.rotated(deg_to_rad(rotation_degrees))
-	transform = transform.scaled(scale)
-	transform = transform.translated(tiles_pivot + translation)
-
-	return transform
-
-
-static func get_tiles_center(tile_array: Array[TerrainTile]) -> Vector2:
-	var min_tile_location: Vector2i = Vector2i.ZERO
-	var max_tile_location: Vector2i = Vector2i.ZERO
-	for tile: TerrainTile in tile_array:
-		if tile.location.x > max_tile_location.x:
-			max_tile_location.x = tile.location.x
-		if tile.location.y > max_tile_location.y:
-			max_tile_location.y = tile.location.y
-		
-		if tile.location.x < min_tile_location.x:
-			min_tile_location.x = tile.location.x
-		if tile.location.y < min_tile_location.y:
-			min_tile_location.y = tile.location.y
-	
-	var tiles_center: Vector2 = (max_tile_location -  min_tile_location) / 2.0
-	return tiles_center
 
 
 class TextureAnimationData:

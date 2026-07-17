@@ -68,6 +68,52 @@ var black_tris_flags: PackedByteArray # 128 bytes for 64 untextured triangles
 var black_quads_flags: PackedByteArray # 512 bytes for 256 untextured quads
 
 
+static func get_transformed_mesh(
+	original_mesh: ArrayMesh, 
+	pivot_point: Vector3,
+	scale: Vector3 = Vector3.ONE, 
+	translation: Vector3 = Vector3.ZERO, 
+	rotation_degrees: float = 0.0,
+	move_to_positive_quadrant: bool = false,
+) -> ArrayMesh:
+	var mesh_transform: Transform3D = Transform3D.IDENTITY
+	mesh_transform = mesh_transform.translated(-pivot_point)
+	mesh_transform = mesh_transform.rotated(Vector3.UP, deg_to_rad(rotation_degrees))
+	mesh_transform = mesh_transform.scaled(scale)
+	# mesh_transform = mesh_transform.translated(mesh_center)
+	var mirror_offset: Vector3 = (scale * -1).clamp(Vector3.ZERO, Vector3.ONE)
+	mirror_offset.y = 0
+	if move_to_positive_quadrant:
+		mesh_transform = mesh_transform.translated(pivot_point.abs() + translation + mirror_offset)
+	else:
+		mesh_transform = mesh_transform.translated(pivot_point + translation + mirror_offset)
+
+	var surface_arrays: Array = original_mesh.surface_get_arrays(0)
+	for vertex_idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size():
+		var vertex: Vector3 = mesh_transform * surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx]
+		surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx] = vertex
+
+	var custom0_flags: int = FftMapData.transform_custom0(surface_arrays, mesh_transform)
+
+	# reorder verticies so polygon will have correct facing
+	var sum_scale: int = roundi(scale.x) + roundi(scale.y) + roundi(scale.z)
+	if sum_scale == 1 or sum_scale == -3:
+		for idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size() / 3:
+			var tri_idx: int = idx * 3
+			var temp_vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][tri_idx]
+			surface_arrays[Mesh.ARRAY_VERTEX][tri_idx] = surface_arrays[Mesh.ARRAY_VERTEX][tri_idx + 2]
+			surface_arrays[Mesh.ARRAY_VERTEX][tri_idx + 2] = temp_vertex
+
+			var temp_uv: Vector2 = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx]
+			surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx] = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2]
+			surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2] = temp_uv
+
+	var transformed_mesh: ArrayMesh = ArrayMesh.new()
+	transformed_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays, [], {}, custom0_flags)
+	
+	return transformed_mesh
+
+
 ## Mirror CUSTOM0 centroid data in surface arrays.
 ## Returns the CUSTOM0 format flags to pass to add_surface_from_arrays().
 static func transform_custom0(surface_arrays: Array, transform: Transform3D) -> int:
@@ -968,52 +1014,6 @@ func get_map_scene(scale: Vector3 = Vector3.ONE, translation: Vector3 = Vector3.
 	# # new_map_instance.input_event.connect(on_map_input_event)
 	
 	return new_map_instance
-
-
-static func get_transformed_mesh(
-	original_mesh: ArrayMesh, 
-	pivot_point: Vector3,
-	scale: Vector3 = Vector3.ONE, 
-	translation: Vector3 = Vector3.ZERO, 
-	rotation_degrees: float = 0.0,
-	move_to_positive_quadrant: bool = false,
-) -> ArrayMesh:
-	var mesh_transform: Transform3D = Transform3D.IDENTITY
-	mesh_transform = mesh_transform.translated(-pivot_point)
-	mesh_transform = mesh_transform.rotated(Vector3.UP, deg_to_rad(rotation_degrees))
-	mesh_transform = mesh_transform.scaled(scale)
-	# mesh_transform = mesh_transform.translated(mesh_center)
-	var mirror_offset: Vector3 = (scale * -1).clamp(Vector3.ZERO, Vector3.ONE)
-	mirror_offset.y = 0
-	if move_to_positive_quadrant:
-		mesh_transform = mesh_transform.translated(pivot_point.abs() + translation + mirror_offset)
-	else:
-		mesh_transform = mesh_transform.translated(pivot_point + translation + mirror_offset)
-
-	var surface_arrays: Array = original_mesh.surface_get_arrays(0)
-	for vertex_idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size():
-		var vertex: Vector3 = mesh_transform * surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx]
-		surface_arrays[Mesh.ARRAY_VERTEX][vertex_idx] = vertex
-
-	var custom0_flags: int = FftMapData.transform_custom0(surface_arrays, mesh_transform)
-
-	# reorder verticies so polygon will have correct facing
-	var sum_scale: int = roundi(scale.x) + roundi(scale.y) + roundi(scale.z)
-	if sum_scale == 1 or sum_scale == -3:
-		for idx: int in surface_arrays[Mesh.ARRAY_VERTEX].size() / 3:
-			var tri_idx: int = idx * 3
-			var temp_vertex: Vector3 = surface_arrays[Mesh.ARRAY_VERTEX][tri_idx]
-			surface_arrays[Mesh.ARRAY_VERTEX][tri_idx] = surface_arrays[Mesh.ARRAY_VERTEX][tri_idx + 2]
-			surface_arrays[Mesh.ARRAY_VERTEX][tri_idx + 2] = temp_vertex
-
-			var temp_uv: Vector2 = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx]
-			surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx] = surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2]
-			surface_arrays[Mesh.ARRAY_TEX_UV][tri_idx + 2] = temp_uv
-
-	var transformed_mesh: ArrayMesh = ArrayMesh.new()
-	transformed_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays, [], {}, custom0_flags)
-	
-	return transformed_mesh
 
 
 func get_scaled_collision_shape(collision_scale: Vector3) -> ConcavePolygonShape3D:
