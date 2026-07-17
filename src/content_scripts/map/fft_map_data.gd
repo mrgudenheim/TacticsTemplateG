@@ -79,11 +79,45 @@ static func transform_custom0(surface_arrays: Array, transform: Transform3D) -> 
 	for vertex_idx: int in range(num_verticies):
 		var x_index: int = vertex_idx * 4
 		var centroid: Vector3 = Vector3(mesh_custom0[x_index], mesh_custom0[x_index + 1], mesh_custom0[x_index + 2])
+		var render_flags: int = roundi(mesh_custom0[x_index + 3])
+		var scale: Vector3 = Vector3(transform.basis.x.x, transform.basis.y.y, transform.basis.z.z)
+		var new_render_flags: int = 0
+		# mirror render flags
+		if roundi(scale.x) == -1 and roundi(scale.z) == -1:
+			if render_flags & MapData.HiddenDirectionFlag.NORTHEAST != 0:
+				new_render_flags |= MapData.HiddenDirectionFlag.SOUTHWEST
+			if render_flags & MapData.HiddenDirectionFlag.SOUTHEAST != 0:
+				new_render_flags |= MapData.HiddenDirectionFlag.NORTHWEST
+			if render_flags & MapData.HiddenDirectionFlag.NORTHWEST != 0:
+				new_render_flags |= MapData.HiddenDirectionFlag.SOUTHEAST
+			if render_flags & MapData.HiddenDirectionFlag.SOUTHWEST != 0:
+				new_render_flags |= MapData.HiddenDirectionFlag.NORTHEAST
+		elif roundi(scale.x) == -1:
+			if render_flags & MapData.HiddenDirectionFlag.NORTHEAST != 0:
+				new_render_flags |= MapData.HiddenDirectionFlag.NORTHWEST
+			if render_flags & MapData.HiddenDirectionFlag.SOUTHEAST != 0:
+				new_render_flags |= MapData.HiddenDirectionFlag.SOUTHWEST
+			if render_flags & MapData.HiddenDirectionFlag.NORTHWEST != 0:
+				new_render_flags |= MapData.HiddenDirectionFlag.NORTHEAST
+			if render_flags & MapData.HiddenDirectionFlag.SOUTHWEST != 0:
+				new_render_flags |= MapData.HiddenDirectionFlag.SOUTHEAST
+		elif roundi(scale.z) == -1:
+			if render_flags & MapData.HiddenDirectionFlag.NORTHEAST != 0:
+				new_render_flags |= MapData.HiddenDirectionFlag.SOUTHEAST
+			if render_flags & MapData.HiddenDirectionFlag.SOUTHEAST != 0:
+				new_render_flags |= MapData.HiddenDirectionFlag.NORTHEAST
+			if render_flags & MapData.HiddenDirectionFlag.NORTHWEST != 0:
+				new_render_flags |= MapData.HiddenDirectionFlag.SOUTHWEST
+			if render_flags & MapData.HiddenDirectionFlag.SOUTHWEST != 0:
+				new_render_flags |= MapData.HiddenDirectionFlag.NORTHWEST
+		else:
+			new_render_flags = render_flags
+		# TODO rotate render flags
 		centroid = transform * centroid
 		mesh_custom0[x_index] = centroid.x
 		mesh_custom0[x_index + 1] = centroid.y
 		mesh_custom0[x_index + 2] = centroid.z
-		mesh_custom0[x_index + 3] = mesh_custom0[x_index + 3] # keep flag to hide polygon
+		mesh_custom0[x_index + 3] = float(new_render_flags) # keep flag to hide polygon
 	surface_arrays[Mesh.ARRAY_CUSTOM0] = mesh_custom0
 	# Godot needs explicit format flags for CUSTOM0 in add_surface_from_arrays()
 	# RGB_FLOAT = 6, CUSTOM0 format shift = 13
@@ -270,9 +304,9 @@ func _create_mesh() -> void:
 		var v0: Vector3 = text_tri_vertices[i * 3] * SCALE
 		var v1: Vector3 = text_tri_vertices[i * 3 + 1] * SCALE
 		var v2: Vector3 = text_tri_vertices[i * 3 + 2] * SCALE
-		var render_flags: int = textured_tris_flags.decode_u16(i * 2) >> 2
+		var render_flags: int = convert_render_bitflags(textured_tris_flags.decode_u16(i * 2))
 		var centroid: Vector3 = (v0 + v1 + v2) / 3.0
-		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, render_flags)
+		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, float(render_flags))
 		for vertex_index: int in 3:
 			var index: int = (i * 3) + vertex_index
 			st.set_normal(text_tri_normals[index] * SCALE)
@@ -286,9 +320,9 @@ func _create_mesh() -> void:
 		var v0: Vector3 = black_tri_vertices[i * 3] * SCALE
 		var v1: Vector3 = black_tri_vertices[i * 3 + 1] * SCALE
 		var v2: Vector3 = black_tri_vertices[i * 3 + 2] * SCALE
-		var render_flags: int = black_tris_flags.decode_u16(i * 2) >> 2
+		var render_flags: int = convert_render_bitflags(black_tris_flags.decode_u16(i * 2))
 		var centroid: Vector3 = (v0 + v1 + v2) / 3.0
-		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, render_flags)
+		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, float(render_flags))
 		for vertex_index: int in 3:
 			var index: int = (i * 3) + vertex_index
 			st.set_color(Color.BLACK)
@@ -302,9 +336,9 @@ func _create_mesh() -> void:
 		var quad_vertices: PackedVector3Array = text_quad_vertices.slice(quad_start, quad_end)
 		var quad_normals: PackedVector3Array = text_quad_normals.slice(quad_start, quad_end)
 		var quad_uvs: PackedVector2Array = quads_uvs.slice(quad_start, quad_end)
-		var render_flags: int = textured_quads_flags.decode_u16(i * 2) >> 2
+		var render_flags: int = convert_render_bitflags(textured_quads_flags.decode_u16(i * 2))
 		var centroid: Vector3 = (quad_vertices[0] + quad_vertices[1] + quad_vertices[2] + quad_vertices[3]) * SCALE / 4.0
-		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, render_flags)
+		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, float(render_flags))
 
 		for vert_index: int in [0, 1, 2]:
 			st.set_normal(quad_normals[vert_index] * SCALE) # TODO why is there error on MAP105 "terminate"
@@ -325,9 +359,9 @@ func _create_mesh() -> void:
 		var quad_start: int = i * 4
 		var quad_end: int = (i + 1) * 4
 		var quad_vertices: PackedVector3Array = black_quad_vertices.slice(quad_start, quad_end)
-		var render_flags: int = black_quads_flags.decode_u16(i * 2) >> 2
+		var render_flags: int = convert_render_bitflags(black_quads_flags.decode_u16(i * 2))
 		var centroid: Vector3 = (quad_vertices[0] + quad_vertices[1] + quad_vertices[2] + quad_vertices[3]) * SCALE / 4.0
-		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, render_flags)
+		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, float(render_flags))
 
 		for vert_index: int in [0, 1, 2]:
 			st.set_color(Color.BLACK)
@@ -341,6 +375,20 @@ func _create_mesh() -> void:
 
 	st.generate_tangents()
 	mesh = st.commit()
+
+
+func convert_render_bitflags(render_flags: int) -> int:
+	var new_flags: int = 0 # see https://ffhacktics.com/wiki/Maps/Mesh#Polygon_Render_Properties
+	if render_flags & (1 << 13) != 0:
+		new_flags |= MapData.HiddenDirectionFlag.NORTHEAST
+	if render_flags & (1 << 12) != 0:
+		new_flags |= MapData.HiddenDirectionFlag.SOUTHEAST
+	if render_flags & (1 << 11) != 0:
+		new_flags |= MapData.HiddenDirectionFlag.SOUTHWEST
+	if render_flags & (1 << 10) != 0:
+		new_flags |= MapData.HiddenDirectionFlag.NORTHWEST
+	
+	return new_flags
 
 
 func set_mesh_data(primary_mesh_data: PackedByteArray) -> void:
