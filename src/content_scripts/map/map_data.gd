@@ -1,11 +1,11 @@
 class_name MapData
 extends Resource
 
-enum DirectionFlag {
-	NORTH = 1,
-	EAST = 2,
-	SOUTH = 4,
-	WEST = 8,
+enum HiddenDirectionFlag {
+	NORTHEAST = 1,
+	NORTHWEST = 2,
+	SOUTHEAST = 4,
+	SOUTHWEST = 8,
 }
 
 @export var unique_name: String = ""
@@ -292,30 +292,38 @@ func get_tile_hidden_bitflags(
 	
 	var hidden_bitflags: int = 0
 	if row_mins.has(tile_location.y):
-		if tile_location.x < row_mins[tile_location.y].x:
+		if tile_location.x < row_mins[tile_location.y].x: # if tile is off West side, hide when camera is facing East
 		#if tile_location.x < row_mins[tile_location.y].x and tile_location.y != total_min.y and tile_location.y != total_max.y:
-			hidden_bitflags |= DirectionFlag.WEST
-		elif tile_location.x > row_maxes[tile_location.y].x:
+			hidden_bitflags |= HiddenDirectionFlag.NORTHEAST
+			hidden_bitflags |= HiddenDirectionFlag.SOUTHEAST
+		elif tile_location.x > row_maxes[tile_location.y].x: # if tile is of East side, hide when camera is facing West
 		#elif tile_location.x > row_maxes[tile_location.y].x and tile_location.y != total_min.y and tile_location.y != total_max.y:
-			hidden_bitflags |= DirectionFlag.EAST
+			hidden_bitflags |= HiddenDirectionFlag.NORTHWEST
+			hidden_bitflags |= HiddenDirectionFlag.SOUTHWEST
 	else:
-		if tile_location.y < row_mins.keys().min():
-			hidden_bitflags |= DirectionFlag.SOUTH
-		elif tile_location.y > row_mins.keys().max():
-			hidden_bitflags |= DirectionFlag.NORTH
+		if tile_location.y < row_mins.keys().min(): # if tile is off South side, hide when camera is facing North
+			hidden_bitflags |= HiddenDirectionFlag.NORTHEAST
+			hidden_bitflags |= HiddenDirectionFlag.NORTHWEST
+		elif tile_location.y > row_mins.keys().max(): # if tile is off North side, hide when camera is facing South
+			hidden_bitflags |= HiddenDirectionFlag.SOUTHEAST
+			hidden_bitflags |= HiddenDirectionFlag.SOUTHWEST
 	
 	if column_mins.has(tile_location.x):
-		if tile_location.y < column_mins[tile_location.x].x:
+		if tile_location.y < column_mins[tile_location.x].x: # if tile is off South side, hide when camera is facing North
 		#if tile_location.y < column_mins[tile_location.x].x and tile_location.x != total_min.x and tile_location.x != total_max.x:
-			hidden_bitflags |= DirectionFlag.SOUTH
-		elif tile_location.y > column_maxes[tile_location.x].x:
+			hidden_bitflags |= HiddenDirectionFlag.NORTHEAST
+			hidden_bitflags |= HiddenDirectionFlag.NORTHWEST
+		elif tile_location.y > column_maxes[tile_location.x].x: # if tile is off North side, hide when camera is facing South
 		#elif tile_location.y > column_maxes[tile_location.x].x and tile_location.x != total_min.x and tile_location.x != total_max.x:
-			hidden_bitflags |= DirectionFlag.NORTH
+			hidden_bitflags |= HiddenDirectionFlag.SOUTHEAST
+			hidden_bitflags |= HiddenDirectionFlag.SOUTHWEST
 	else:
-		if tile_location.x < column_mins.keys().min():
-			hidden_bitflags |= DirectionFlag.WEST
-		elif tile_location.x > column_mins.keys().max():
-			hidden_bitflags |= DirectionFlag.EAST
+		if tile_location.x < column_mins.keys().min(): # if tile is off West side, hide when camera is facing East
+			hidden_bitflags |= HiddenDirectionFlag.NORTHEAST
+			hidden_bitflags |= HiddenDirectionFlag.SOUTHEAST
+		elif tile_location.x > column_mins.keys().max(): # if tile is of East side, hide when camera is facing West
+			hidden_bitflags |= HiddenDirectionFlag.NORTHWEST
+			hidden_bitflags |= HiddenDirectionFlag.SOUTHWEST
 
 	return hidden_bitflags
 
