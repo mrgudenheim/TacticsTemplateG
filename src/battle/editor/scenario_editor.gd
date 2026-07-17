@@ -154,6 +154,7 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 			scenario.unique_name = "new_scenario_%02d" % number
 		init_random_scenario()
 
+	battle_manager.set_unit_statbars_visible(battle_manager.show_statbar_check.button_pressed)
 	await get_tree().process_frame
 	var first_unit: Unit = battle_manager.units[0]
 	for unit_idx: int in battle_manager.units.size():
