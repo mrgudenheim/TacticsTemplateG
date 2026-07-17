@@ -432,7 +432,7 @@ func apply_standard(action_instance: ActionInstance) -> void:
 				mod_animation_executing_id = animation_executing_ids_alternate[1]
 	
 	show_shared_vfx(action_instance, user_shared_vfx_handler_id, action_instance.user)
-	action_instance.user.get_tree().create_timer(2.0).timeout.connect(func() -> void: action_instance.user.global_battle_manager.trap_instance.stop(), CONNECT_ONE_SHOT)
+	action_instance.user.get_tree().create_timer(2.0).timeout.connect(func() -> void: if is_instance_valid(action_instance.user): action_instance.user.global_battle_manager.trap_instance.stop(), CONNECT_ONE_SHOT)
 	await action_instance.user.animate_start_action(animation_start_id, animation_charging_id)
 	
 	action_instance.user.animate_execute_action(mod_animation_executing_id)
