@@ -425,7 +425,13 @@ func set_item_attributes(item_attribute: ScusData.ItemAttribute) -> void:
 
 
 func get_attack_action() -> Action:
-	return GameData.get_action(weapon_attack_action_name)
+	# A unit with no weapon (monsters, empty ROM job slots) reaches here via a blank
+	# ItemData, whose weapon_attack_action_name is "". FFT attacks bare-handed there,
+	# so fall back to the generic "attack" action rather than returning null.
+	var attack_action: Action = GameData.get_action(weapon_attack_action_name)
+	if attack_action == null:
+		attack_action = GameData.get_action("attack")
+	return attack_action
 
 
 func get_passive_effect() -> PassiveEffect:

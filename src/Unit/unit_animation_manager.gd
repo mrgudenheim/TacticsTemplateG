@@ -186,7 +186,11 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 	# handle LoadFrameWait
 	if not seq_part.is_opcode:
 		var new_frame_id: int = seq_part.parameters[0]
-		var frame_id_offset: int = get_animation_frame_offset(unit_data.primary_weapon.item_type, fft_animation.shp, fft_animation.back_face_offset)
+		# A unit with no weapon (monsters, the empty ROM job slots) has no primary_weapon.
+		# FFT animates those bare-handed, which is item type FISTS (0).
+		var weapon_item_type: int = (unit_data.primary_weapon.item_type
+				if unit_data.primary_weapon != null else ItemData.ItemType.FISTS)
+		var frame_id_offset: int = get_animation_frame_offset(weapon_item_type, fft_animation.shp, fft_animation.back_face_offset)
 		new_frame_id = new_frame_id + frame_id_offset + opcode_frame_offset
 		
 		## clear the frame to prevent weird and inconsistent ghosting issues

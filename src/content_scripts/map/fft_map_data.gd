@@ -62,6 +62,10 @@ var st: SurfaceTool = SurfaceTool.new()
 @export var lighting_and_gradient_bytes: PackedByteArray = []
 @export var background_gradient_top: Color = Color.DIM_GRAY
 @export var background_gradient_bottom: Color = Color.BLACK
+## The three directional lights + ambient decoded out of the FIRST 39 bytes of
+## `lighting_and_gradient_bytes` - the gradient above is the last 6 of the same
+## block. `MapLighting.unlit()` until `create_map` reads a block.
+@export var map_lighting: MapLighting = MapLighting.unlit()
 
 @export var terrain_data_bytes: PackedByteArray = []
 @export var map_width: int = 0 # width (x) in tiles
@@ -242,6 +246,7 @@ func create_map(mesh_bytes: PackedByteArray, texture_bytes: PackedByteArray = []
 		var lighting_data_length: int = 18 + 18 + 3 + 6
 		var lighting_data_end: int = lighting_data_start + lighting_data_length
 		lighting_and_gradient_bytes = other_bytes.slice(lighting_data_start, lighting_data_end)
+		map_lighting = MapLighting.from_lighting_bytes(lighting_and_gradient_bytes)
 		set_gradient_colors(lighting_and_gradient_bytes.slice(-6))
 
 	if terrain_data_start == 0:
@@ -1037,7 +1042,7 @@ func get_map_scene(scale: Vector3 = Vector3.ONE, translation: Vector3 = Vector3.
 	var transformed_mesh: ArrayMesh = get_transformed_mesh(mesh, Vector3(tiles_center.x, 0.0, tiles_center.y), scale, translation, rotation_degrees, true)
 	new_map_instance.mesh_instance.mesh = transformed_mesh
 
-	new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes)
+	new_map_instance.set_mesh_shader(albedo_texture_indexed, texture_palettes, map_lighting)
 	new_map_instance.collision_shape.shape = new_map_instance.mesh_instance.mesh.create_trimesh_shape()
 
 	# # new_map_instance.position = map_position

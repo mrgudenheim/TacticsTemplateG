@@ -7,3 +7,10 @@
 addons/script-ide/
 addons/Todo_Manager/
 overrides/MAP
+
+# Local build/test trees and release staging (never ROM/source inputs).
+/.build/
+/dist/
+__pycache__/
+# ROM-derived Effects content — never committed. See docs/effects-installation.md.
+/content/

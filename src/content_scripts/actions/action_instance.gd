@@ -533,34 +533,42 @@ func animate_evade(target_unit: Unit, evade_direction: EvadeData.Directions, use
 	target_unit.update_unit_facing(target_original_facing)
 
 
-func show_vfx(position: Vector3) -> Node3D:
-	if not is_instance_valid(action.vfx_data):
-		push_warning("[Action.show_vfx] vfx_data is not valid, skipping")
-		return
+## This action's ability effect on `target_unit`, drawn by
+## `addons/exmateria_effects`. Returns the cast so the caller can time against it, or
+## null when this action has no effect or playback is unavailable.
+##
+## `char_body`, never the `Unit` node — a `Unit` sits at the world origin for the whole
+## battle (see `EffectsPlayback.play_action_vfx`, which refuses one). It is also the node
+## that moves when a unit walks, so an effect following it stays on the unit.
+func show_vfx(target_unit: Unit) -> Node3D:
+	var playback: EffectsPlayback = _effects_playback()
+	if playback == null or not is_instance_valid(target_unit):
+		return null
+	if user.char_body == null or target_unit.char_body == null:
+		return null
+	return playback.play_action_vfx(user.char_body, target_unit.char_body, action)
 
-	var parent_node: Node = user.get_parent()
 
-	var vfx_instance: VfxEffectInstance = VfxEffectInstance.new()
-	vfx_instance.name = "VfxEffectInstance"
-	vfx_instance.position = position
-	parent_node.add_child(vfx_instance)
-
-	var origin_pos: Vector3 = user.tile_position.get_world_position()
-	vfx_instance.initialize(action.vfx_data, position, origin_pos)
-	return vfx_instance
-
-
+## The TRAP handlers (hit clouds, knight break, charge poses). The handler id and element
+## come from this action's own ROM tables — see `EffectsPlayback.play_shared_vfx` for why
+## they are passed rather than derived from an ability id.
 func show_shared_vfx(shared_vfx_handler_id: int, target_unit: Unit) -> void:
-	if shared_vfx_handler_id <= 0:
+	var playback: EffectsPlayback = _effects_playback()
+	if playback == null or shared_vfx_handler_id <= 0 or not is_instance_valid(target_unit):
 		return
-	if battle_manager == null or battle_manager.trap_instance == null:
-		return
-	var target_pos: Vector3 = target_unit.char_body.global_position
-	battle_manager.trap_instance.global_position = target_pos
-	var dir: Vector3 = (target_pos - user.char_body.global_position).normalized()
-	var trap_element: int = TrapEffectData.element_type_to_trap_id(action.element)
-	var flash_unit: Unit = target_unit if shared_vfx_handler_id in TrapEffectData.FLASH_HANDLER_IDS else null
-	battle_manager.trap_instance.play(shared_vfx_handler_id, trap_element, dir, flash_unit)
+	playback.play_shared_vfx(
+		shared_vfx_handler_id,
+		TrapEffectData.element_type_to_trap_id(action.element),
+		user.char_body.global_position,
+		target_unit.char_body,
+		shared_vfx_handler_id in TrapEffectData.FLASH_HANDLER_IDS,
+		action.projectile_type == ProjectileEffectInstance.ProjectileType.NONE)
+
+
+func _effects_playback() -> EffectsPlayback:
+	if battle_manager == null or not is_instance_valid(battle_manager.effects_playback):
+		return null
+	return battle_manager.effects_playback
 
 
 func show_projectile(target_unit: Unit, new_projectile_type: ProjectileEffectInstance.ProjectileType) -> void:
@@ -637,7 +645,6 @@ func apply_standard() -> void:
 				mod_animation_executing_id = action.animation_executing_ids_alternate[1]
 	
 	show_shared_vfx(action.user_shared_vfx_handler_id, user)
-	user.get_tree().create_timer(2.0).timeout.connect(func() -> void: if is_instance_valid(battle_manager): battle_manager.trap_instance.stop(), CONNECT_ONE_SHOT)
 	await user.animate_start_action(action.animation_start_id, action.animation_charging_id)
 	
 	user.animate_execute_action(mod_animation_executing_id)
@@ -646,12 +653,12 @@ func apply_standard() -> void:
 	
 	# TODO show vfx, including rock, arrow, bolt...
 	
-	var vfx_locations: Array[Node3D] = []
+	var vfx_casts: Array[Node3D] = []
 	# apply effects to targets
 	for target_unit: Unit in target_units:
-		if action.vfx_data != null:
-			#vfx_data.vfx_completed.connect(func(): vfx_completed = true, CONNECT_ONE_SHOT)
-			vfx_locations.append(show_vfx(target_unit.tile_position.get_world_position()))
+		var cast: Node3D = show_vfx(target_unit)
+		if cast != null:
+			vfx_casts.append(cast)
 		show_projectile(target_unit, action.projectile_type)
 		var evade_direction: EvadeData.Directions = get_evade_direction(user.tile_position, target_unit)
 		var total_hit_chance: int = get_total_hit_chance(target_unit, evade_direction)
@@ -714,15 +721,17 @@ func apply_standard() -> void:
 
 	# wait for applying effect animation
 	battle_manager.game_state_label.text = "Waiting for " + action.display_name + " vfx" 
-	if action.vfx_data != null and target_units.size() > 0:
-		while vfx_locations.any(func(vfx_location: Node3D) -> bool: return is_instance_valid(vfx_location)): # wait until vfx is completed
-			await user.get_tree().process_frame
+	# Wait for the real casts, falling back to the flat timer only when there were none.
+	# `await_casts` keeps the `any()` shape so multiple targets resolve together.
+	var playback: EffectsPlayback = _effects_playback()
+	if playback != null:
+		await playback.await_casts(vfx_casts)
 	else:
-		await user.get_tree().create_timer(0.5).timeout # TODO show based on vfx timing data? (attacks use vfx 0xFFFF?)
+		await user.get_tree().create_timer(0.5).timeout
 	for target_unit: Unit in target_units:
 		if is_instance_valid(target_unit):
 			target_unit.return_to_idle_from_hit()
-	vfx_locations.clear()
+	vfx_casts.clear()
 
 	if not is_instance_valid(user):
 		return

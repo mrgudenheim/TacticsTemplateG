@@ -19,10 +19,14 @@ config/icon="uid://b05fn7pqo1rrn"
 
 [autoload]
 
+ApplicationShutdown="*res://src/utilities/application_shutdown.gd"
+EffectMultiMeshPool="*res://addons/exmateria_effects/render/EffectMultiMeshPool.gd"
+ScreenEffectOverlay="*res://addons/exmateria_effects/overlay/ScreenEffectOverlay.gd"
+TintedSurfaces="*res://addons/exmateria_effects/overlay/TintedSurfaces.gd"
 RomReader="*res://src/external_data_manager/rom_reader.gd"
 Raycaster="*res://src/utilities/raycaster.gd"
 Utilities="*res://src/utilities/utilities.gd"
-GameData="*uid://dswmqkavcf0yp"
+GameData="*res://src/game_data.gd"
 
 [debug]
 
@@ -123,3 +127,18 @@ common/physics_interpolation=true
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+
+[shader_globals]
+
+pixel_aspect={
+"type": "float",
+"value": 1.0
+}
+psx_fx_stretch={
+"type": "float",
+"value": 1.0
+}
+psx_cursor_stretch={
+"type": "float",
+"value": 1.0
+}
