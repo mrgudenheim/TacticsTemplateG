@@ -814,6 +814,22 @@ func export_data(save_path: String) -> void:
 
 	DirAccess.make_dir_recursive_absolute(save_path)
 
+	var maps_path: String = save_path + "/maps/"
+	var map_unique_name: String = "map_060_underground_book_storage_fourth_floor"
+	var fft_map_data: FftMapData = maps[map_unique_name]
+	export_map(maps_path, fft_map_data)
+
+	var mirror_quadrants: PackedVector2Array = [
+		Vector2(0, 0), # vanilla location
+		# Vector2(1, 0),
+		Vector2(0, -1),
+		# Vector2(1, 1),
+	]
+	var cropped_rect: Rect2i = Rect2i(Vector2i(0, -8), Vector2i(16, 16))
+	var new_file_path: String = "user://MAP60_mirror.9"
+	export_mirrored_map(maps_path, new_file_path, map_unique_name, mirror_quadrants, cropped_rect)
+	return
+
 	await export_unit_spritesheets(save_path)
 	await export_other_images(save_path)
 	await export_text(save_path)
