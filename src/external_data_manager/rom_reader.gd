@@ -169,15 +169,15 @@ func process_rom() -> void:
 		var new_ability: Ability = new_fft_ability.create_ability()
 		new_ability.add_to_global_list()
 
-	for fft_ability: FftAbilityData in fft_abilities:
-		if fft_ability.ability_type == FftAbilityData.AbilityType.NORMAL:
-			fft_ability.set_action()
+	#for fft_ability: FftAbilityData in fft_abilities:
+		#if fft_ability.ability_type == FftAbilityData.AbilityType.NORMAL:
+			#fft_ability.set_action()
 	section_start = _profile_section("abilities (512 + set_action)", section_start)
 
 	# must be after fft_abilities to set secondary actions
 	items_array.resize(NUM_ITEMS)
-	for id: int in NUM_ITEMS:
-		items_array[id] = ItemData.new(id)
+	#for id: int in NUM_ITEMS:
+		#items_array[id] = ItemData.new(id)
 	section_start = _profile_section("items (254)", section_start)
 
 	scus_data.init_statuses()
@@ -193,37 +193,37 @@ func process_rom() -> void:
 			if not job_data.innate_ability_names.has(ability_uname):
 				job_data.innate_ability_names.append(ability_uname)
 
-	if not fft_scenarios_pre_extracted:
-		add_entds("ENTD1.ENT")
-		add_entds("ENTD2.ENT")
-		add_entds("ENTD3.ENT")
-		add_entds("ENTD4.ENT")
-		section_start = _profile_section("add_entds (4 files)", section_start)
-
-		var wldcore_scenarios: Array[Scenario] = wldcore_data.get_all_scenarios()
-		for new_scenario: Scenario in wldcore_scenarios:
-			var number: int = 1
-			var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
-			while scenarios.keys().has(new_unique_name):
-				number += 1
-				new_unique_name = new_scenario.unique_name + ("_%02d" % number)
-			new_scenario.unique_name = new_unique_name
-
-			RomReader.scenarios[new_scenario.unique_name] = new_scenario
-
-		var attack_out_scenarios: Array[Scenario] = attack_out_data.get_unique_scenarios()
-		for new_scenario: Scenario in attack_out_scenarios:
-			var number: int = 1
-			var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
-			while scenarios.keys().has(new_unique_name):
-				number += 1
-				new_unique_name = new_scenario.unique_name + ("_%02d" % number)
-			new_scenario.unique_name = new_unique_name
-
-			RomReader.scenarios[new_scenario.unique_name] = new_scenario
-		section_start = _profile_section("scenario_extraction", section_start)
-	else:
-		section_start = _profile_section("SKIPPED entds+scenarios (pre-extracted)", section_start)
+	#if not fft_scenarios_pre_extracted:
+		#add_entds("ENTD1.ENT")
+		#add_entds("ENTD2.ENT")
+		#add_entds("ENTD3.ENT")
+		#add_entds("ENTD4.ENT")
+		#section_start = _profile_section("add_entds (4 files)", section_start)
+#
+		#var wldcore_scenarios: Array[Scenario] = wldcore_data.get_all_scenarios()
+		#for new_scenario: Scenario in wldcore_scenarios:
+			#var number: int = 1
+			#var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
+			#while scenarios.keys().has(new_unique_name):
+				#number += 1
+				#new_unique_name = new_scenario.unique_name + ("_%02d" % number)
+			#new_scenario.unique_name = new_unique_name
+#
+			#RomReader.scenarios[new_scenario.unique_name] = new_scenario
+#
+		#var attack_out_scenarios: Array[Scenario] = attack_out_data.get_unique_scenarios()
+		#for new_scenario: Scenario in attack_out_scenarios:
+			#var number: int = 1
+			#var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
+			#while scenarios.keys().has(new_unique_name):
+				#number += 1
+				#new_unique_name = new_scenario.unique_name + ("_%02d" % number)
+			#new_scenario.unique_name = new_unique_name
+#
+			#RomReader.scenarios[new_scenario.unique_name] = new_scenario
+		#section_start = _profile_section("scenario_extraction", section_start)
+	#else:
+		#section_start = _profile_section("SKIPPED entds+scenarios (pre-extracted)", section_start)
 
 	# for status_: int in status_effects.size():
 		# status_effects[idx].ai_score_formula.values[0] = battle_bin_data.ai_status_priorities[idx] / 128.0
@@ -802,13 +802,13 @@ func export_data(save_path: String) -> void:
 	# get other content data not in ROM data tables
 	var predifined_abilities: Dictionary[String, Ability] = ContentGenerator.get_predefined_abilities()
 	var predifined_passive_effects: Dictionary[String, PassiveEffect] = ContentGenerator.get_predefined_passive_effects()
-	var predifined_actions: Dictionary[String, Action] = ContentGenerator.get_predefined_actions(abilities)
-	var predifined_triggered_actions: Dictionary[String, TriggeredAction] = ContentGenerator.get_predefined_triggered_actions()
+	#var predifined_actions: Dictionary[String, Action] = ContentGenerator.get_predefined_actions(abilities)
+	#var predifined_triggered_actions: Dictionary[String, TriggeredAction] = ContentGenerator.get_predefined_triggered_actions()
 
 	abilities.merge(predifined_abilities, true)
 	passive_effects.merge(predifined_passive_effects, true)
-	actions.merge(predifined_actions, true)
-	triggered_actions.merge(predifined_triggered_actions, true)
+	#actions.merge(predifined_actions, true)
+	#triggered_actions.merge(predifined_triggered_actions, true)
 
 	# TODO rename content better
 
