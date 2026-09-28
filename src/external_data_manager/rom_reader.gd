@@ -815,9 +815,8 @@ func export_data(save_path: String) -> void:
 	DirAccess.make_dir_recursive_absolute(save_path)
 
 	var maps_path: String = save_path + "/maps/"
-	var map_unique_name: String = "map_060_underground_book_storage_fourth_floor"
-	var fft_map_data: FftMapData = maps[map_unique_name]
-	export_map(maps_path, fft_map_data)
+	#var map_unique_name: String = "map_039_underground_passage_in_goland"
+	var map_unique_name: String = "map_025_weapon_stof_0h+of_f_0/わ"
 
 	var mirror_quadrants: PackedVector2Array = [
 		Vector2(0, 0), # vanilla location
