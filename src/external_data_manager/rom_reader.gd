@@ -1154,7 +1154,8 @@ func export_mirrored_map(maps_path: String, save_file_path: String, map_unique_n
 	var fft_map_data: FftMapData = maps[map_unique_name]
 	export_map(maps_path, fft_map_data)
 
-	var custom_mesh_file: PackedByteArray = FftMapData.get_adjusted_mesh_file(fft_map_data, mirror_quadrants, cropped_rect)
+	#var custom_mesh_file: PackedByteArray = FftMapData.get_adjusted_mesh_file(fft_map_data, mirror_quadrants, cropped_rect)
+	var custom_mesh_file: PackedByteArray = FftMapData.get_fft_mesh_file(fft_map_data, false)
 	var file: FileAccess = FileAccess.open(save_file_path, FileAccess.WRITE)
 
 	# Verify that the file opened successfully before attempting to write
