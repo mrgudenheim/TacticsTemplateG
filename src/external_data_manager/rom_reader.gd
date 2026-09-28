@@ -820,12 +820,12 @@ func export_data(save_path: String) -> void:
 
 	var mirror_quadrants: PackedVector2Array = [
 		Vector2(0, 0), # vanilla location
-		# Vector2(1, 0),
-		Vector2(0, -1),
-		# Vector2(1, 1),
+		#Vector2(1, 0),
+		#Vector2(0, 1),
+		#Vector2(-1, 1),
 	]
-	var cropped_rect: Rect2i = Rect2i(Vector2i(0, -8), Vector2i(16, 16))
-	var new_file_path: String = "user://MAP60_mirror.9"
+	var cropped_rect: Rect2i = Rect2i(Vector2i(0, 0), Vector2i(10, 12))
+	var new_file_path: String = "user://MAP025.8"
 	export_mirrored_map(maps_path, new_file_path, map_unique_name, mirror_quadrants, cropped_rect)
 	return
 
