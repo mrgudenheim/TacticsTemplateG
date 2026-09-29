@@ -889,6 +889,49 @@ func export_other_images(save_path: String) -> void:
 		push_warning("error saving palette data items.palette.tres: " + str(error))
 
 
+static func export_all_items_full_color() -> void:
+	var item_palettes: PackedColorArray = GameData.palettes["items"]
+	var items_texture: Texture2D = GameData.get_texture("items")
+	var items_full_color_images: Dictionary[int, Image] = {}
+	var all_items: Image = Image.create_empty(256, 256, false, Image.Format.FORMAT_RGBA8)
+	all_items.fill(Color.BLACK)
+
+	for palette_idx: int in 16:
+		var new_color_items: Image = items_texture.get_image()
+		var image_width: int = new_color_items.get_width()
+		var image_height: int = new_color_items.get_height()
+
+		var new_palette: PackedColorArray = item_palettes.slice(palette_idx * 16, (palette_idx + 1) * 16)
+
+		for x: int in image_width:
+			for y: int in image_height:
+				var pixel_color: Color = new_color_items.get_pixel(x, y)
+				var new_color: Color = new_palette[pixel_color.r8]
+				new_color_items.set_pixel(x, y, new_color)
+
+		items_full_color_images[palette_idx] = new_color_items
+
+	for new_item_name: String in GameData.item_paths.keys():
+		var new_item_data: ItemData = GameData.get_item(new_item_name)
+		var new_item_full_texture: Image = items_full_color_images[new_item_data.item_palette_id]
+
+		@warning_ignore("integer_division")
+		var row: int = new_item_data.item_graphic_id / 15 # 15 columns of icons
+		var col: int = new_item_data.item_graphic_id % 15
+		var item_region: Rect2 = Rect2(col * 16, 32 + (row * 16), 16, 16)
+
+		@warning_ignore("integer_division")
+		var new_row: int = new_item_data.item_idx / 16
+		var new_col: int = new_item_data.item_idx % 16
+		var new_item_region: Rect2 = Rect2(new_col * 16, new_row * 16, 16, 16)
+
+		all_items.blit_rect(new_item_full_texture, item_region, new_item_region.position)
+
+		var path: String = GameData.external_data_paths["EXPORT_PATH"].path_join("other_images/")
+		var all_items_webp_file_path: String = path.path_join("all_items_full_color.webp")
+		all_items.save_webp(all_items_webp_file_path)
+
+
 func export_data_tables(save_path: String) -> void:
 	message.emit("Exporting data tables...")
 	await get_tree().process_frame
