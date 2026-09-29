@@ -889,7 +889,7 @@ func export_other_images(save_path: String) -> void:
 		push_warning("error saving palette data items.palette.tres: " + str(error))
 
 
-static func export_all_items_full_color() -> void:
+func export_all_items_full_color() -> void:
 	var item_palettes: PackedColorArray = GameData.palettes["items"]
 	var items_texture: Texture2D = GameData.get_texture("items")
 	var items_full_color_images: Dictionary[int, Image] = {}
@@ -927,9 +927,9 @@ static func export_all_items_full_color() -> void:
 
 		all_items.blit_rect(new_item_full_texture, item_region, new_item_region.position)
 
-		var path: String = GameData.external_data_paths["EXPORT_PATH"].path_join("other_images/")
-		var all_items_webp_file_path: String = path.path_join("all_items_full_color.webp")
-		all_items.save_webp(all_items_webp_file_path)
+	var path: String = GameData.external_data_paths["EXPORT_PATH"].path_join("other_images/")
+	var all_items_webp_file_path: String = path.path_join("all_items_full_color.webp")
+	all_items.save_webp(all_items_webp_file_path)
 
 
 func export_data_tables(save_path: String) -> void:
