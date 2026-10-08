@@ -1069,7 +1069,7 @@ static func get_adjusted_mesh_file(fft_map_data: FftMapData, mirror_quadrants: P
 	return adjusted_map_mesh_file
 
 
-static func get_fft_mesh_file(fft_map_data: FftMapData) -> PackedByteArray:
+static func get_fft_mesh_file(fft_map_data: FftMapData, remove_untextured_polygons: bool = true, keep_polygon_render_flags: bool = false) -> PackedByteArray:
 	var primary_mesh_data_start: int = 0xc4
 	var primary_mesh_bytes: PackedByteArray = []
 	var primary_mesh_header: PackedByteArray = []
@@ -1077,8 +1077,9 @@ static func get_fft_mesh_file(fft_map_data: FftMapData) -> PackedByteArray:
 	primary_mesh_header.fill(0)
 	primary_mesh_header.encode_u16(0, fft_map_data.num_text_tris)
 	primary_mesh_header.encode_u16(2, fft_map_data.num_text_quads)
-	primary_mesh_header.encode_u16(4, fft_map_data.num_black_tris)
-	primary_mesh_header.encode_u16(6, fft_map_data.num_black_quads)
+	if not remove_untextured_polygons:
+		primary_mesh_header.encode_u16(4, fft_map_data.num_black_tris)
+		primary_mesh_header.encode_u16(6, fft_map_data.num_black_quads)
 
 	var primary_mesh_textured_tri_verticies: PackedByteArray = []
 	primary_mesh_textured_tri_verticies.resize(fft_map_data.num_text_tris * NUM_VERTICIES_PER_TRI * 3 * 2) # 3 coordinates (x, y, x) per vertex, 2 bytes per coordinate
@@ -1103,28 +1104,28 @@ static func get_fft_mesh_file(fft_map_data: FftMapData) -> PackedByteArray:
 			primary_mesh_textured_quad_verticies.encode_s16((coordinate_index + 2) * 2, roundi(vertex_coordinates.z))
 	
 	var primary_mesh_black_tri_verticies: PackedByteArray = []
-	primary_mesh_black_tri_verticies.resize(fft_map_data.num_black_tris * NUM_VERTICIES_PER_TRI * 3 * 2) # 3 coordinates (x, y, x) per vertex, 2 bytes per coordinate
-	for tri_index: int in fft_map_data.num_black_tris:
-		for vertex_index: int in NUM_VERTICIES_PER_TRI:
-			var total_index: int = (tri_index * NUM_VERTICIES_PER_TRI) + vertex_index
-			var vertex_coordinates: Vector3 = fft_map_data.black_tri_vertices[total_index]
-			var coordinate_index: int = total_index * 3
-			primary_mesh_black_tri_verticies.encode_s16(coordinate_index * 2, roundi(vertex_coordinates.x))
-			primary_mesh_black_tri_verticies.encode_s16((coordinate_index + 1) * 2, roundi(vertex_coordinates.y))
-			primary_mesh_black_tri_verticies.encode_s16((coordinate_index + 2) * 2, roundi(vertex_coordinates.z))
-	primary_mesh_black_tri_verticies.fill(0)
+	if not remove_untextured_polygons:
+		primary_mesh_black_tri_verticies.resize(fft_map_data.num_black_tris * NUM_VERTICIES_PER_TRI * 3 * 2) # 3 coordinates (x, y, x) per vertex, 2 bytes per coordinate
+		for tri_index: int in fft_map_data.num_black_tris:
+			for vertex_index: int in NUM_VERTICIES_PER_TRI:
+				var total_index: int = (tri_index * NUM_VERTICIES_PER_TRI) + vertex_index
+				var vertex_coordinates: Vector3 = fft_map_data.black_tri_vertices[total_index]
+				var coordinate_index: int = total_index * 3
+				primary_mesh_black_tri_verticies.encode_s16(coordinate_index * 2, roundi(vertex_coordinates.x))
+				primary_mesh_black_tri_verticies.encode_s16((coordinate_index + 1) * 2, roundi(vertex_coordinates.y))
+				primary_mesh_black_tri_verticies.encode_s16((coordinate_index + 2) * 2, roundi(vertex_coordinates.z))
 	
 	var primary_mesh_black_quad_verticies: PackedByteArray = []
-	primary_mesh_black_quad_verticies.resize(fft_map_data.num_black_quads * NUM_VERTICIES_PER_QUAD * 3 * 2) # 3 coordinates (x, y, x) per vertex, 2 bytes per coordinate
-	for quad_index: int in fft_map_data.num_black_quads:
-		for vertex_index: int in NUM_VERTICIES_PER_QUAD:
-			var total_index: int = (quad_index * NUM_VERTICIES_PER_QUAD) + vertex_index
-			var vertex_coordinates: Vector3 = fft_map_data.black_quad_vertices[total_index]
-			var coordinate_index: int = total_index * 3
-			primary_mesh_black_quad_verticies.encode_s16(coordinate_index * 2, roundi(vertex_coordinates.x))
-			primary_mesh_black_quad_verticies.encode_s16((coordinate_index + 1) * 2, roundi(vertex_coordinates.y))
-			primary_mesh_black_quad_verticies.encode_s16((coordinate_index + 2) * 2, roundi(vertex_coordinates.z))
-	primary_mesh_black_quad_verticies.fill(0)
+	if not remove_untextured_polygons:
+		primary_mesh_black_quad_verticies.resize(fft_map_data.num_black_quads * NUM_VERTICIES_PER_QUAD * 3 * 2) # 3 coordinates (x, y, x) per vertex, 2 bytes per coordinate
+		for quad_index: int in fft_map_data.num_black_quads:
+			for vertex_index: int in NUM_VERTICIES_PER_QUAD:
+				var total_index: int = (quad_index * NUM_VERTICIES_PER_QUAD) + vertex_index
+				var vertex_coordinates: Vector3 = fft_map_data.black_quad_vertices[total_index]
+				var coordinate_index: int = total_index * 3
+				primary_mesh_black_quad_verticies.encode_s16(coordinate_index * 2, roundi(vertex_coordinates.x))
+				primary_mesh_black_quad_verticies.encode_s16((coordinate_index + 1) * 2, roundi(vertex_coordinates.y))
+				primary_mesh_black_quad_verticies.encode_s16((coordinate_index + 2) * 2, roundi(vertex_coordinates.z))
 
 	var primary_mesh_textured_tri_normals: PackedByteArray = []
 	primary_mesh_textured_tri_normals.resize(fft_map_data.num_text_tris * NUM_VERTICIES_PER_TRI * 3 * 2) # 3 coordinates (x, y, x) per vertex, 2 bytes per coordinate
@@ -1176,13 +1177,15 @@ static func get_fft_mesh_file(fft_map_data: FftMapData) -> PackedByteArray:
 
 	# polygon render flags
 	var polygon_render_flags_bytes: PackedByteArray = []
-	polygon_render_flags_bytes.resize(896 + 1024 + 1536 + 128 + 512)
-	polygon_render_flags_bytes.fill(0)
-	# polygon_render_flags_bytes.append_array(fft_map_data.unknown_render_bytes)
-	# polygon_render_flags_bytes.append_array(fft_map_data.textured_tris_flags)
-	# polygon_render_flags_bytes.append_array(fft_map_data.textured_quads_flags)
-	# polygon_render_flags_bytes.append_array(fft_map_data.black_tris_flags)
-	# polygon_render_flags_bytes.append_array(fft_map_data.black_quads_flags)
+	if keep_polygon_render_flags:
+		polygon_render_flags_bytes.append_array(fft_map_data.unknown_render_bytes)
+		polygon_render_flags_bytes.append_array(fft_map_data.textured_tris_flags)
+		polygon_render_flags_bytes.append_array(fft_map_data.textured_quads_flags)
+		polygon_render_flags_bytes.append_array(fft_map_data.black_tris_flags)
+		polygon_render_flags_bytes.append_array(fft_map_data.black_quads_flags)
+	else:
+		polygon_render_flags_bytes.resize(896 + 1024 + 1536 + 128 + 512)
+		polygon_render_flags_bytes.fill(0)
 
 	# header
 	var next_section_start: int = 0
