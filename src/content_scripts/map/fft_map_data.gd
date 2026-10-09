@@ -1069,7 +1069,7 @@ static func get_adjusted_mesh_file(fft_map_data: FftMapData, mirror_quadrants: P
 	return adjusted_map_mesh_file
 
 
-static func get_fft_mesh_file(fft_map_data: FftMapData, remove_untextured_polygons: bool = true) -> PackedByteArray:
+static func get_fft_mesh_file(fft_map_data: FftMapData, remove_untextured_polygons: bool = true, keep_polygon_render_flags: bool = false) -> PackedByteArray:
 	var primary_mesh_data_start: int = 0xc4
 	var primary_mesh_bytes: PackedByteArray = []
 	var primary_mesh_header: PackedByteArray = []
@@ -1177,13 +1177,15 @@ static func get_fft_mesh_file(fft_map_data: FftMapData, remove_untextured_polygo
 
 	# polygon render flags
 	var polygon_render_flags_bytes: PackedByteArray = []
-	polygon_render_flags_bytes.resize(896 + 1024 + 1536 + 128 + 512)
-	polygon_render_flags_bytes.fill(0)
-	# polygon_render_flags_bytes.append_array(fft_map_data.unknown_render_bytes)
-	# polygon_render_flags_bytes.append_array(fft_map_data.textured_tris_flags)
-	# polygon_render_flags_bytes.append_array(fft_map_data.textured_quads_flags)
-	# polygon_render_flags_bytes.append_array(fft_map_data.black_tris_flags)
-	# polygon_render_flags_bytes.append_array(fft_map_data.black_quads_flags)
+	if keep_polygon_render_flags:
+		polygon_render_flags_bytes.append_array(fft_map_data.unknown_render_bytes)
+		polygon_render_flags_bytes.append_array(fft_map_data.textured_tris_flags)
+		polygon_render_flags_bytes.append_array(fft_map_data.textured_quads_flags)
+		polygon_render_flags_bytes.append_array(fft_map_data.black_tris_flags)
+		polygon_render_flags_bytes.append_array(fft_map_data.black_quads_flags)
+	else:
+		polygon_render_flags_bytes.resize(896 + 1024 + 1536 + 128 + 512)
+		polygon_render_flags_bytes.fill(0)
 
 	# header
 	var next_section_start: int = 0
