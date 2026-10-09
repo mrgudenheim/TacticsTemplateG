@@ -1317,9 +1317,9 @@ static func get_rotated_fft_map_data(
 				
 				# Adjust slope type and camera rotation trigger ID
 				var new_slope_type: int = rotate_slope_type(tile_data.decode_u8(4), rotation_steps)
-				var new_camera_id: int = rotate_camera_flags(tile_data.decode_u8(7), rotation_steps)
+				var new_camera_flags: int = rotate_camera_flags(tile_data.decode_u8(7), rotation_steps)
 				tile_data.encode_u8(4, new_slope_type)
-				tile_data.encode_u8(7, new_camera_id)
+				tile_data.encode_u8(7, new_camera_flags)
 				
 				for byte_offset: int in BYTES_PER_TERRAIN_TILE:
 					rotated_map_data.terrain_data_bytes[new_byte_start + byte_offset] = tile_data[byte_offset]
@@ -1378,22 +1378,22 @@ static func rotate_slope_type(slope_type_id: int, rotation_steps: int) -> int:
 	return current_slope
 
 
-## Rotates terrain camera auto-rotation flags byte clockwise by rotation_steps.
-## Bits 0-3 represent Top views (NW, SW, SE, NE), and Bits 4-7 represent Bottom views (NW, SW, SE, NE).
+## Rotates an 8-bit terrain camera auto-rotation flag byte clockwise by rotation_steps.
+## Bits 0xf0 represent Top views (NW, SW, SE, NE), and Bits 0x0f represent Bottom views (NW, SW, SE, NE).
 static func rotate_camera_flags(camera_flags: int, rotation_steps_clockwise: int) -> int:
 	var rotation_steps: int = posmod(rotation_steps_clockwise, 4)
 	if rotation_steps == 0:
 		return camera_flags
-	
-	# Extract Top (low nibble, bits 0-3) and Bottom (high nibble, bits 4-7) camera flags
-	var top_camera_flags: int = camera_flags & 0x0F
-	var bottom_camera_flags: int = (camera_flags >> 4) & 0x0F
-	
-	# Rotate both 4-bit nibbles clockwise (1-bit right circular shift per 90 degree step)
-	var rotated_top_flags: int = ~((top_camera_flags >> rotation_steps) | (top_camera_flags << (4 - rotation_steps))) & 0x0F
-	var rotated_bottom_flags: int = ~((bottom_camera_flags >> rotation_steps) | (bottom_camera_flags << (4 - rotation_steps))) & 0x0F
-	
-	return (rotated_bottom_flags << 4) | rotated_top_flags
+
+	# Extract Top (high nibble, bits 0xf0) and Bottom (low nibble, bits 0x0f) camera flags
+	var top_camera_flags: int = (camera_flags >> 4) & 0x0f
+	var bottom_camera_flags: int = camera_flags & 0x0f
+
+	# Rotate both 4-bit nibbles clockwise (1-bit left circular shift per 90 degree step)
+	var rotated_top_flags: int = ((top_camera_flags << rotation_steps) | (top_camera_flags >> (4 - rotation_steps))) & 0x0f
+	var rotated_bottom_flags: int = ((bottom_camera_flags << rotation_steps) | (bottom_camera_flags >> (4 - rotation_steps))) & 0x0f
+
+	return (rotated_top_flags << 4) | rotated_bottom_flags
 
 
 ## Rotates a block of 16-bit render flags in-place
@@ -1417,17 +1417,17 @@ static func rotate_render_flags(render_flags: int, rotation_steps: int) -> int:
 		return render_flags
 	
 	# Preserve non-directional bits (bit 15: unlit, bit 14, bit 1, bit 0)
-	var updated_flags: int = render_flags & 0xC003
+	var updated_flags: int = render_flags & 0xc003
 	
 	# 4 Primary diagonal bits (bits 13..10)
-	var diagonal_flags: int = (render_flags >> 10) & 0x0F
-	var rotated_diagonals: int = ((diagonal_flags >> rotation_steps) | (diagonal_flags << (4 - rotation_steps))) & 0x0F
+	var diagonal_flags: int = (render_flags >> 10) & 0x0f
+	var rotated_diagonals: int = ((diagonal_flags >> rotation_steps) | (diagonal_flags << (4 - rotation_steps))) & 0x0f
 	updated_flags |= (rotated_diagonals << 10)
 	
 	# 8 Secondary intermediate bits (bits 9..2)
 	var shift_amount: int = (2 * rotation_steps) % 8
-	var intermediate_flags: int = (render_flags >> 2) & 0xFF
-	var rotated_intermediates: int = ((intermediate_flags >> shift_amount) | (intermediate_flags << (8 - shift_amount))) & 0xFF
+	var intermediate_flags: int = (render_flags >> 2) & 0xff
+	var rotated_intermediates: int = ((intermediate_flags >> shift_amount) | (intermediate_flags << (8 - shift_amount))) & 0xff
 	updated_flags |= (rotated_intermediates << 2)
 	
 	return updated_flags
