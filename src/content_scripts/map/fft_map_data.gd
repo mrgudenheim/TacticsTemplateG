@@ -1302,13 +1302,13 @@ static func get_rotated_fft_map_data(
 				var new_tile_x: int = tile_x
 				var new_tile_z: int = tile_z
 				match rotation_steps:
-					1: # 90° Clockwise: (tile_z, original_width - 1 - tile_x)
+					1: # 90 degrees Clockwise: (tile_z, original_width - 1 - tile_x)
 						new_tile_x = tile_z
 						new_tile_z = (original_width - 1) - tile_x
-					2: # 180° Clockwise: (original_width - 1 - tile_x, original_length - 1 - tile_z)
+					2: # 180 degrees Clockwise: (original_width - 1 - tile_x, original_length - 1 - tile_z)
 						new_tile_x = (original_width - 1) - tile_x
 						new_tile_z = (original_length - 1) - tile_z
-					3: # 270° Clockwise: (original_length - 1 - tile_z, tile_x)
+					3: # 270 degrees Clockwise: (original_length - 1 - tile_z, tile_x)
 						new_tile_x = (original_length - 1) - tile_z
 						new_tile_z = tile_x
 				
@@ -1317,7 +1317,7 @@ static func get_rotated_fft_map_data(
 				
 				# Adjust slope type and camera rotation trigger ID
 				var new_slope_type: int = rotate_slope_type(tile_data.decode_u8(4), rotation_steps)
-				var new_camera_id: int = rotate_camera_id(tile_data.decode_u8(7), rotation_steps)
+				var new_camera_id: int = rotate_camera_flags(tile_data.decode_u8(7), rotation_steps)
 				tile_data.encode_u8(4, new_slope_type)
 				tile_data.encode_u8(7, new_camera_id)
 				
@@ -1342,7 +1342,7 @@ static func get_rotated_fft_map_data(
 	rotate_vertices_and_normals(rotated_map_data.black_tri_vertices, [], rotation_steps, x_translation_offset, z_translation_offset)
 	rotate_vertices_and_normals(rotated_map_data.black_quad_vertices, [], rotation_steps, x_translation_offset, z_translation_offset)
 	
-	# Map Polygon to Terrain Tiles
+	# Map Polygons to Terrain Tiles
 	map_polygons_to_terrain_tiles(rotated_map_data)
 	
 	# Transform Polygon Render Properties
@@ -1354,7 +1354,7 @@ static func get_rotated_fft_map_data(
 	return rotated_map_data
 
 
-## Rotates a terrain slope type ID clockwise by rotation_steps (90-degree increments)
+## Rotates a terrain slope type ID clockwise by rotation_steps (90 degree increments)
 static func rotate_slope_type(slope_type_id: int, rotation_steps: int) -> int:
 	var current_slope: int = slope_type_id
 	for step_index: int in posmod(rotation_steps, 4):
@@ -1378,16 +1378,22 @@ static func rotate_slope_type(slope_type_id: int, rotation_steps: int) -> int:
 	return current_slope
 
 
-## Rotates a terrain camera auto-rotation position ID clockwise by rotation_steps
-static func rotate_camera_id(camera_position_id: int, rotation_steps: int) -> int:
-	rotation_steps = posmod(rotation_steps, 4)
-	if camera_position_id >= 0 and camera_position_id <= 3:
-		# Top views (0: NW, 1: SW, 2: SE, 3: NE)
-		return (camera_position_id + 4 - rotation_steps) % 4
-	elif camera_position_id >= 4 and camera_position_id <= 7:
-		# Bottom views (4: NW, 5: SW, 6: SE, 7: NE)
-		return 4 + ((camera_position_id - 4 + 4 - rotation_steps) % 4)
-	return camera_position_id
+## Rotates terrain camera auto-rotation flags byte clockwise by rotation_steps.
+## Bits 0-3 represent Top views (NW, SW, SE, NE), and Bits 4-7 represent Bottom views (NW, SW, SE, NE).
+static func rotate_camera_flags(camera_flags: int, rotation_steps_clockwise: int) -> int:
+	var rotation_steps: int = posmod(rotation_steps_clockwise, 4)
+	if rotation_steps == 0:
+		return camera_flags
+	
+	# Extract Top (low nibble, bits 0-3) and Bottom (high nibble, bits 4-7) camera flags
+	var top_camera_flags: int = camera_flags & 0x0F
+	var bottom_camera_flags: int = (camera_flags >> 4) & 0x0F
+	
+	# Rotate both 4-bit nibbles clockwise (1-bit right circular shift per 90 degree step)
+	var rotated_top_flags: int = ~((top_camera_flags >> rotation_steps) | (top_camera_flags << (4 - rotation_steps))) & 0x0F
+	var rotated_bottom_flags: int = ~((bottom_camera_flags >> rotation_steps) | (bottom_camera_flags << (4 - rotation_steps))) & 0x0F
+	
+	return (rotated_bottom_flags << 4) | rotated_top_flags
 
 
 ## Rotates a block of 16-bit render flags in-place
