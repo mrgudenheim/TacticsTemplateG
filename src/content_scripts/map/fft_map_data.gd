@@ -1264,6 +1264,280 @@ static func get_fft_mesh_file(fft_map_data: FftMapData, remove_untextured_polygo
 	return mesh_file_bytes
 
 
+static func get_rotated_fft_map_data(
+	original_map_data: FftMapData, 
+	rotation_steps_clockwise: int = 1
+) -> FftMapData:
+	var rotation_steps: int = posmod(rotation_steps_clockwise, 4)
+	if rotation_steps == 0:
+		return original_map_data.duplicate_deep()
+	
+	var rotated_map_data: FftMapData = original_map_data.duplicate_deep()
+	var original_width: int = original_map_data.map_width
+	var original_length: int = original_map_data.map_length
+	
+	# Determine new map dimensions
+	var new_width: int = original_width 
+	if rotation_steps % 2 != 0:
+		new_width = original_length
+	var new_length: int = original_length
+	if rotation_steps % 2 != 0:
+		new_length = original_width
+	rotated_map_data.map_width = new_width
+	rotated_map_data.map_length = new_length
+	
+	# Terrain Tiles Matrix Re-indexing (both Layer 0 and Layer 1)
+	rotated_map_data.terrain_data_bytes.fill(0)
+	rotated_map_data.terrain_data_bytes.encode_u8(0, new_width)
+	rotated_map_data.terrain_data_bytes.encode_u8(1, new_length)
+	
+	for layer_index: int in [0, 1]:
+		for tile_z: int in original_length:
+			for tile_x: int in original_width:
+				var old_tile_index: int = tile_x + (tile_z * original_width)
+				var old_byte_start: int = 2 + (old_tile_index * BYTES_PER_TERRAIN_TILE) + (layer_index * 256 * BYTES_PER_TERRAIN_TILE)
+				var tile_data: PackedByteArray = original_map_data.terrain_data_bytes.slice(old_byte_start, old_byte_start + BYTES_PER_TERRAIN_TILE)
+				
+				# Map old (tile_x, tile_z) to (new_tile_x, new_tile_z) with North = +Z
+				var new_tile_x: int = tile_x
+				var new_tile_z: int = tile_z
+				match rotation_steps:
+					1: # 90° Clockwise: (tile_z, original_width - 1 - tile_x)
+						new_tile_x = tile_z
+						new_tile_z = (original_width - 1) - tile_x
+					2: # 180° Clockwise: (original_width - 1 - tile_x, original_length - 1 - tile_z)
+						new_tile_x = (original_width - 1) - tile_x
+						new_tile_z = (original_length - 1) - tile_z
+					3: # 270° Clockwise: (original_length - 1 - tile_z, tile_x)
+						new_tile_x = (original_length - 1) - tile_z
+						new_tile_z = tile_x
+				
+				var new_tile_index: int = new_tile_x + (new_tile_z * new_width)
+				var new_byte_start: int = 2 + (new_tile_index * BYTES_PER_TERRAIN_TILE) + (layer_index * 256 * BYTES_PER_TERRAIN_TILE)
+				
+				# Adjust slope type and camera rotation trigger ID
+				var new_slope_type: int = rotate_slope_type(tile_data.decode_u8(4), rotation_steps)
+				var new_camera_id: int = rotate_camera_id(tile_data.decode_u8(7), rotation_steps)
+				tile_data.encode_u8(4, new_slope_type)
+				tile_data.encode_u8(7, new_camera_id)
+				
+				for byte_offset: int in BYTES_PER_TERRAIN_TILE:
+					rotated_map_data.terrain_data_bytes[new_byte_start + byte_offset] = tile_data[byte_offset]
+	rotated_map_data.terrain_tiles = rotated_map_data.get_terrain(rotated_map_data.terrain_data_bytes)
+	
+	# Transform Mesh Vertices & Normals (North = +Z)
+	var x_translation_offset: float = 0.0
+	if rotation_steps == 3:
+		x_translation_offset = original_length * TILE_SIDE_LENGTH
+	elif rotation_steps == 2:
+		x_translation_offset = original_width * TILE_SIDE_LENGTH
+
+	var z_translation_offset: float = 0.0
+	if rotation_steps == 1:
+		z_translation_offset = original_width * TILE_SIDE_LENGTH
+	elif rotation_steps == 2:
+		z_translation_offset = original_length * TILE_SIDE_LENGTH
+	rotate_vertices_and_normals(rotated_map_data.text_tri_vertices, rotated_map_data.text_tri_normals, rotation_steps, x_translation_offset, z_translation_offset)
+	rotate_vertices_and_normals(rotated_map_data.text_quad_vertices, rotated_map_data.text_quad_normals, rotation_steps, x_translation_offset, z_translation_offset)
+	rotate_vertices_and_normals(rotated_map_data.black_tri_vertices, [], rotation_steps, x_translation_offset, z_translation_offset)
+	rotate_vertices_and_normals(rotated_map_data.black_quad_vertices, [], rotation_steps, x_translation_offset, z_translation_offset)
+	
+	# Map Polygon to Terrain Tiles
+	map_polygons_to_terrain_tiles(rotated_map_data)
+	
+	# Transform Polygon Render Properties
+	rotate_render_flags_block(rotated_map_data.textured_tris_flags, rotated_map_data.num_text_tris, rotation_steps)
+	rotate_render_flags_block(rotated_map_data.textured_quads_flags, rotated_map_data.num_text_quads, rotation_steps)
+	rotate_render_flags_block(rotated_map_data.black_tris_flags, rotated_map_data.num_black_tris, rotation_steps)
+	rotate_render_flags_block(rotated_map_data.black_quads_flags, rotated_map_data.num_black_quads, rotation_steps)
+
+	return rotated_map_data
+
+
+## Rotates a terrain slope type ID clockwise by rotation_steps (90-degree increments)
+static func rotate_slope_type(slope_type_id: int, rotation_steps: int) -> int:
+	var current_slope: int = slope_type_id
+	for step_index: int in posmod(rotation_steps, 4):
+		match current_slope:
+			# Ramps
+			0x85: current_slope = 0x52
+			0x52: current_slope = 0x25
+			0x25: current_slope = 0x58
+			0x58: current_slope = 0x85
+			# Low Corners (Convex)
+			0x41: current_slope = 0x11
+			0x11: current_slope = 0x14
+			0x14: current_slope = 0x44
+			0x44: current_slope = 0x41
+			# High Corners (Concave)
+			0x96: current_slope = 0x66
+			0x66: current_slope = 0x69
+			0x69: current_slope = 0x99
+			0x99: current_slope = 0x96
+			_: current_slope = current_slope # Flat (0x00) or unrecognized
+	return current_slope
+
+
+## Rotates a terrain camera auto-rotation position ID clockwise by rotation_steps
+static func rotate_camera_id(camera_position_id: int, rotation_steps: int) -> int:
+	rotation_steps = posmod(rotation_steps, 4)
+	if camera_position_id >= 0 and camera_position_id <= 3:
+		# Top views (0: NW, 1: SW, 2: SE, 3: NE)
+		return (camera_position_id + 4 - rotation_steps) % 4
+	elif camera_position_id >= 4 and camera_position_id <= 7:
+		# Bottom views (4: NW, 5: SW, 6: SE, 7: NE)
+		return 4 + ((camera_position_id - 4 + 4 - rotation_steps) % 4)
+	return camera_position_id
+
+
+## Rotates a block of 16-bit render flags in-place
+static func rotate_render_flags_block(
+	flags_bytes: PackedByteArray, 
+	polygon_count: int, 
+	rotation_steps: int
+) -> void:
+	rotation_steps = posmod(rotation_steps, 4)
+	for polygon_index: int in polygon_count:
+		var byte_offset: int = polygon_index * 2
+		var original_flags: int = flags_bytes.decode_u16(byte_offset)
+		var rotated_flags: int = rotate_render_flags(original_flags, rotation_steps)
+		flags_bytes.encode_u16(byte_offset, rotated_flags)
+
+
+## Rotates a 16-bit polygon render property flag clockwise by rotation_steps
+static func rotate_render_flags(render_flags: int, rotation_steps: int) -> int:
+	rotation_steps = posmod(rotation_steps, 4)
+	if rotation_steps == 0:
+		return render_flags
+	
+	# Preserve non-directional bits (bit 15: unlit, bit 14, bit 1, bit 0)
+	var updated_flags: int = render_flags & 0xC003
+	
+	# 4 Primary diagonal bits (bits 13..10)
+	var diagonal_flags: int = (render_flags >> 10) & 0x0F
+	var rotated_diagonals: int = ((diagonal_flags >> rotation_steps) | (diagonal_flags << (4 - rotation_steps))) & 0x0F
+	updated_flags |= (rotated_diagonals << 10)
+	
+	# 8 Secondary intermediate bits (bits 9..2)
+	var shift_amount: int = (2 * rotation_steps) % 8
+	var intermediate_flags: int = (render_flags >> 2) & 0xFF
+	var rotated_intermediates: int = ((intermediate_flags >> shift_amount) | (intermediate_flags << (8 - shift_amount))) & 0xFF
+	updated_flags |= (rotated_intermediates << 2)
+	
+	return updated_flags
+
+
+## Rotates packed vertex coordinates and normal vectors in-place
+static func rotate_vertices_and_normals(
+	vertices: PackedVector3Array, 
+	normals: PackedVector3Array, 
+	rotation_steps: int, 
+	x_translation_offset: float, 
+	z_translation_offset: float
+) -> void:
+	rotation_steps = posmod(rotation_steps, 4)
+	
+	for vertex_index: int in vertices.size():
+		var original_vertex: Vector3 = vertices[vertex_index]
+		var rotated_vertex: Vector3 = original_vertex
+		
+		match rotation_steps:
+			1: # 90 degrees Clockwise
+				rotated_vertex.x = original_vertex.z + x_translation_offset
+				rotated_vertex.z = -original_vertex.x + z_translation_offset
+			2: # 180 degrees Clockwise
+				rotated_vertex.x = -original_vertex.x + x_translation_offset
+				rotated_vertex.z = -original_vertex.z + z_translation_offset
+			3: # 270 degrees Clockwise
+				rotated_vertex.x = -original_vertex.z + x_translation_offset
+				rotated_vertex.z = original_vertex.x + z_translation_offset
+		
+		vertices[vertex_index] = rotated_vertex
+		
+		if not normals.is_empty() and vertex_index < normals.size():
+			var original_normal: Vector3 = normals[vertex_index]
+			var rotated_normal: Vector3 = original_normal
+
+			match rotation_steps:
+				1:
+					rotated_normal.x = original_normal.z
+					rotated_normal.z = -original_normal.x
+				2:
+					rotated_normal.x = -original_normal.x
+					rotated_normal.z = -original_normal.z
+				3:
+					rotated_normal.x = -original_normal.z
+					rotated_normal.z = original_normal.x
+			normals[vertex_index] = rotated_normal
+
+
+## Updates the 2-byte (Z, Level, X) textured polygon terrain coordinate lookup table
+## based on the newly transformed polygon vertices.
+static func map_polygons_to_terrain_tiles(map_data: FftMapData) -> void:
+	var updated_bytes: PackedByteArray = []
+	updated_bytes.resize((map_data.num_text_tris + map_data.num_text_quads) * 2)
+	var byte_write_offset: int = 0
+	
+	# Process textured triangles
+	for triangle_index: int in map_data.num_text_tris:
+		var vertex_offset: int = triangle_index * 3
+		var centroid: Vector3 = (
+			map_data.text_tri_vertices[vertex_offset] + 
+			map_data.text_tri_vertices[vertex_offset + 1] + 
+			map_data.text_tri_vertices[vertex_offset + 2]
+		) / 3.0
+		
+		# Preserve original height level bit if previously set
+		var original_byte_zero: int = 0
+		if byte_write_offset < map_data.textured_polygon_tile_bytes.size():
+			original_byte_zero = map_data.textured_polygon_tile_bytes[byte_write_offset]
+		var height_level_bit: int = original_byte_zero & 0x01
+		
+		var rounded_x: int = roundi(centroid.x)
+		var rounded_z: int = roundi(centroid.z)
+		
+		# Vertical polygons (skirt/wall boundaries) are flagged with [254, 255] to prevent movement highlighting
+		if rounded_x % TILE_SIDE_LENGTH == 0 or rounded_z % TILE_SIDE_LENGTH == 0:
+			updated_bytes[byte_write_offset] = 254 # z = 127, level = 0
+			updated_bytes[byte_write_offset + 1] = 255
+		else:
+			var tile_x: int = rounded_x / TILE_SIDE_LENGTH
+			var tile_z: int = rounded_z / TILE_SIDE_LENGTH
+			updated_bytes[byte_write_offset] = (tile_z << 1) | height_level_bit
+			updated_bytes[byte_write_offset + 1] = tile_x
+		byte_write_offset += 2
+	
+	# Process textured quads
+	for quad_index: int in map_data.num_text_quads:
+		var vertex_offset: int = quad_index * 4
+		var centroid: Vector3 = (
+			map_data.text_quad_vertices[vertex_offset] + 
+			map_data.text_quad_vertices[vertex_offset + 1] + 
+			map_data.text_quad_vertices[vertex_offset + 2] + 
+			map_data.text_quad_vertices[vertex_offset + 3]
+		) / 4.0
+		
+		var original_byte_zero: int = 0
+		if byte_write_offset < map_data.textured_polygon_tile_bytes.size():
+			original_byte_zero = map_data.textured_polygon_tile_bytes[byte_write_offset]
+		var height_level_bit: int = original_byte_zero & 0x01
+		
+		var rounded_x: int = roundi(centroid.x)
+		var rounded_z: int = roundi(centroid.z)
+		
+		if rounded_x % TILE_SIDE_LENGTH == 0 or rounded_z % TILE_SIDE_LENGTH == 0:
+			updated_bytes[byte_write_offset] = 254
+			updated_bytes[byte_write_offset + 1] = 255
+		else:
+			var tile_x: int = rounded_x / TILE_SIDE_LENGTH
+			var tile_z: int = rounded_z / TILE_SIDE_LENGTH
+			updated_bytes[byte_write_offset] = (tile_z << 1) | height_level_bit
+			updated_bytes[byte_write_offset + 1] = tile_x
+		byte_write_offset += 2
+	
+	map_data.textured_polygon_tile_bytes = updated_bytes
+
+
 static func get_adjusted_map_data(original_fft_map_data: FftMapData, quadrants: PackedVector2Array, cropped_rect: Rect2i) -> FftMapData:
 	var mirrored_maps: Dictionary[Vector2i, FftMapData] = get_mirrored_expanded_map_data(original_fft_map_data, quadrants, true)
 
