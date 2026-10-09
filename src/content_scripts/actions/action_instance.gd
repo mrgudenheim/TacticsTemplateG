@@ -221,7 +221,7 @@ func get_ai_score() -> int:
 			target_score += effect_value
 		
 		var evade_direction: EvadeData.Directions = get_evade_direction(user.tile_position, target)
-		var hit_chance_value: int = action.get_total_hit_chance(user, target, evade_direction)
+		var hit_chance_value: int = get_total_hit_chance(target, evade_direction)
 		hit_chance_value = clamp(hit_chance_value, 0, 100)
 		target_score = target_score * (hit_chance_value / 100.0)
 		
