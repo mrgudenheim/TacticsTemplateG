@@ -95,69 +95,50 @@ func get_map_paths(user: Unit, map_tiles: Dictionary[Vector2i, Array], units: Ar
 	user.path_costs.clear()
 	
 	var start_tile: TerrainTile = user.tile_position
-	#var start_tile: TerrainTile = map_tiles[map_position][0]
-	#if map_tiles[map_position].size() > 1:
-		#for potential_tile in map_tiles[map_position]:
-			#
-	var frontier: Array[TerrainTile] = [] # TODO use priority_queue for dijkstra's
-	frontier.append(start_tile)
-	var came_from: Dictionary[TerrainTile, TerrainTile] = {} # path A->B is stored as came_from[B] == A
+	var frontier: PriorityQueue = PriorityQueue.new()
+	var came_from: Dictionary[TerrainTile, TerrainTile] = {}
 	var cost_so_far: Dictionary[TerrainTile, float] = {}
+	frontier.push(start_tile, 0.0)
 	came_from[start_tile] = null
-	cost_so_far[start_tile] = 0
+	cost_so_far[start_tile] = 0.0
 	
+	var max_frame_time_ms: float = 1000.0 / 60.0
 	var start_time: int = Time.get_ticks_msec()
-	var max_frame_time_ms: float = 1000.0 / (units.size() * 60.0)
-
+	
 	var unit_tiles: Dictionary[TerrainTile, Unit] = {}
 	for unit: Unit in units:
 		if unit == user or unit.is_defeated:
 			continue
 		unit_tiles[unit.tile_position] = unit
 	
-	var current: TerrainTile
 	while not frontier.is_empty():
-		current = frontier.pop_front()
+		var popped: Array = frontier.pop_with_priority()
+		var current_tile: TerrainTile = popped[0]
+		var current_cost: float = popped[1]
 		
-		# break early
-		#if current == goal:
-			#break 
+		# Lazy Deletion: skip if this tile was already reached via a cheaper path
+		if current_cost > cost_so_far.get(current_tile, INF):
+			continue
 		
-		for next: TerrainTile in get_map_path_neighbors(user, current, map_tiles, unit_tiles):
-			var new_cost: float = cost_so_far[current] + get_move_cost(current, next, user.terrain_costs)
+		# True Early Termination: in a min-heap with non-negative costs,
+		# no subsequent node will ever have cost <= max_cost
+		if current_cost > max_cost:
+			break
+		
+		for next_tile: TerrainTile in get_map_path_neighbors(user, current_tile, map_tiles, unit_tiles):
+			var step_cost: float = get_move_cost(current_tile, next_tile, user.terrain_costs)
+			var new_cost: float = current_cost + step_cost
+			
 			if new_cost > max_cost:
-				continue # break early
+				continue
 			
-			if next not in cost_so_far or new_cost < cost_so_far[next]:
-				# TODO use a priority_queue
-				if next not in cost_so_far:
-					cost_so_far[next] = new_cost
-					var inserted: bool = false
-					
-					for idx: int in frontier.size(): # TODO use frontier.bsearch_custom(new_cost, func(a, b): return cost_so_far[b] < a)?
-						if new_cost < cost_so_far[frontier[idx]]: # assumes frontier is sorted by ascending cost_so_far
-							frontier.insert(idx, next)
-							inserted = true
-							break
-					if not inserted:
-						frontier.append(next) # add at end if highest cost
-				elif new_cost < cost_so_far[next]:
-					var current_priority: int = frontier.bsearch(next)
-					cost_so_far[next] = new_cost
-					if current_priority == 0:
-						pass # don't need to change priority
-					elif cost_so_far[frontier[current_priority - 1]] < new_cost:
-						pass # don't need to change priority
-					else: # move position in queue
-						frontier.remove_at(current_priority)
-						for idx: int in frontier.size(): # TODO use frontier.bsearch_custom(new_cost, func(a, b): return cost_so_far[b] < a)?
-							if new_cost < cost_so_far[frontier[idx]]: # assumes frontier is sorted by ascending cost_so_far
-								frontier.insert(idx, next)
-								break
-				
-				came_from[next] = current
-			
-		if Time.get_ticks_msec() - start_time > max_frame_time_ms:
+			if next_tile not in cost_so_far or new_cost < cost_so_far[next_tile]:
+				cost_so_far[next_tile] = new_cost
+				came_from[next_tile] = current_tile
+				frontier.push(next_tile, new_cost)
+		
+		# keep reasonable frame rate
+		if (Time.get_ticks_msec() - start_time) > max_frame_time_ms:
 			await user.get_tree().process_frame
 			start_time = Time.get_ticks_msec()
 			
