@@ -1486,36 +1486,21 @@ static func map_polygons_to_terrain_tiles(map_data: FftMapData) -> void:
 	
 	# Process textured triangles
 	for triangle_index: int in map_data.num_text_tris:
-		var vertex_offset: int = triangle_index * 3
+		var vertex_offset: int = triangle_index * NUM_VERTICIES_PER_TRI
 		var centroid: Vector3 = (
 			map_data.text_tri_vertices[vertex_offset] + 
 			map_data.text_tri_vertices[vertex_offset + 1] + 
 			map_data.text_tri_vertices[vertex_offset + 2]
 		) / 3.0
 		
-		# Preserve original height level bit if previously set
-		var original_byte_zero: int = 0
-		if byte_write_offset < map_data.textured_polygon_tile_bytes.size():
-			original_byte_zero = map_data.textured_polygon_tile_bytes[byte_write_offset]
-		var height_level_bit: int = original_byte_zero & 0x01
-		
-		var rounded_x: int = roundi(centroid.x)
-		var rounded_z: int = roundi(centroid.z)
-		
-		# Vertical polygons (skirt/wall boundaries) are flagged with [254, 255] to prevent movement highlighting
-		if rounded_x % TILE_SIDE_LENGTH == 0 or rounded_z % TILE_SIDE_LENGTH == 0:
-			updated_bytes[byte_write_offset] = 254 # z = 127, level = 0
-			updated_bytes[byte_write_offset + 1] = 255
-		else:
-			var tile_x: int = rounded_x / TILE_SIDE_LENGTH
-			var tile_z: int = rounded_z / TILE_SIDE_LENGTH
-			updated_bytes[byte_write_offset] = (tile_z << 1) | height_level_bit
-			updated_bytes[byte_write_offset + 1] = tile_x
+		var new_coord_bytes: Array[int] = polygon_centroid_to_tile_coordinates(map_data, centroid, byte_write_offset)
+		updated_bytes.encode_u8(byte_write_offset, new_coord_bytes[0])
+		updated_bytes.encode_u8(byte_write_offset + 1, new_coord_bytes[1])
 		byte_write_offset += 2
 	
 	# Process textured quads
 	for quad_index: int in map_data.num_text_quads:
-		var vertex_offset: int = quad_index * 4
+		var vertex_offset: int = quad_index * NUM_VERTICIES_PER_QUAD
 		var centroid: Vector3 = (
 			map_data.text_quad_vertices[vertex_offset] + 
 			map_data.text_quad_vertices[vertex_offset + 1] + 
@@ -1523,25 +1508,37 @@ static func map_polygons_to_terrain_tiles(map_data: FftMapData) -> void:
 			map_data.text_quad_vertices[vertex_offset + 3]
 		) / 4.0
 		
-		var original_byte_zero: int = 0
-		if byte_write_offset < map_data.textured_polygon_tile_bytes.size():
-			original_byte_zero = map_data.textured_polygon_tile_bytes[byte_write_offset]
-		var height_level_bit: int = original_byte_zero & 0x01
-		
-		var rounded_x: int = roundi(centroid.x)
-		var rounded_z: int = roundi(centroid.z)
-		
-		if rounded_x % TILE_SIDE_LENGTH == 0 or rounded_z % TILE_SIDE_LENGTH == 0:
-			updated_bytes[byte_write_offset] = 254
-			updated_bytes[byte_write_offset + 1] = 255
-		else:
-			var tile_x: int = rounded_x / TILE_SIDE_LENGTH
-			var tile_z: int = rounded_z / TILE_SIDE_LENGTH
-			updated_bytes[byte_write_offset] = (tile_z << 1) | height_level_bit
-			updated_bytes[byte_write_offset + 1] = tile_x
+		var new_coord_bytes: Array[int] = polygon_centroid_to_tile_coordinates(map_data, centroid, byte_write_offset)
+		updated_bytes.encode_u8(byte_write_offset, new_coord_bytes[0])
+		updated_bytes.encode_u8(byte_write_offset + 1, new_coord_bytes[1])
 		byte_write_offset += 2
 	
 	map_data.textured_polygon_tile_bytes = updated_bytes
+
+
+static func polygon_centroid_to_tile_coordinates(map_data: FftMapData, centroid: Vector3, byte_write_offset: int) -> Array[int]:
+	var original_byte_zero: int = 0
+	if byte_write_offset < map_data.textured_polygon_tile_bytes.size():
+		original_byte_zero = map_data.textured_polygon_tile_bytes[byte_write_offset]
+	var height_level_bit: int = original_byte_zero & 0x01 # Preserve original height level bit if previously set
+	
+	var rounded_x: int = roundi(centroid.x)
+	var rounded_z: int = roundi(centroid.z)
+
+	var new_byte0: int = 0
+	var new_byte1: int = 0
+	
+	# Vertical polygons (skirt/wall boundaries) are flagged with [254, 255] to prevent movement highlighting
+	if rounded_x % TILE_SIDE_LENGTH == 0 or rounded_z % TILE_SIDE_LENGTH == 0:
+		new_byte0 = 254 # z = 127, level = 0
+		new_byte1 = 255
+	else:
+		var tile_x: int = rounded_x / TILE_SIDE_LENGTH
+		var tile_z: int = rounded_z / TILE_SIDE_LENGTH
+		new_byte0 = (tile_z << 1) | height_level_bit
+		new_byte1 = tile_x
+	
+	return [new_byte0, new_byte1]
 
 
 static func get_adjusted_map_data(original_fft_map_data: FftMapData, quadrants: PackedVector2Array, cropped_rect: Rect2i) -> FftMapData:
@@ -1736,7 +1733,7 @@ static func get_cropped_map_data(cropped_rect: Rect2i, mirrored_map_data: Dictio
 					new_fft_map_data.black_quad_vertices.resize(new_map_total_index + 1)
 				new_fft_map_data.black_quad_vertices[new_map_total_index] = Vector3(quad_verticies[vertex_index]) + vertex_translation
 			new_map_black_quad_index += 1
-
+		
 		# get terrain data
 		var cropped_terrain_rect: Rect2i = cropped_intersection.grow_individual(0, 0, 0, 0) # grow rect so terrain tiles on edge are included
 		# cropped_terrain_rect.position = cropped_terrain_rect.position - Vector2i(0, 1) # shift rect so points on the top are not included and so points on the bottom are included
