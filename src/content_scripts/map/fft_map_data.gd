@@ -1343,7 +1343,7 @@ static func get_rotated_fft_map_data(
 	rotate_vertices_and_normals(rotated_map_data.black_quad_vertices, [], rotation_steps, x_translation_offset, z_translation_offset)
 	
 	# Map Polygons to Terrain Tiles
-	map_polygons_to_terrain_tiles(rotated_map_data)
+	associate_polygons_to_terrain_tiles(rotated_map_data)
 	
 	# Transform Polygon Render Properties
 	rotate_render_flags_block(rotated_map_data.textured_tris_flags, rotated_map_data.num_text_tris, rotation_steps)
@@ -1479,66 +1479,91 @@ static func rotate_vertices_and_normals(
 
 ## Updates the 2-byte (Z, Level, X) textured polygon terrain coordinate lookup table
 ## based on the newly transformed polygon vertices.
-static func map_polygons_to_terrain_tiles(map_data: FftMapData) -> void:
+static func associate_polygons_to_terrain_tiles(map_data: FftMapData) -> void:
+	var total_textured_polygons: int = map_data.num_text_tris + map_data.num_text_quads
 	var updated_bytes: PackedByteArray = []
-	updated_bytes.resize((map_data.num_text_tris + map_data.num_text_quads) * 2)
-	var byte_write_offset: int = 0
+	updated_bytes.resize(total_textured_polygons * 2)
+	
+	var quads_byte_start: int = map_data.num_text_tris * 2
 	
 	# Process textured triangles
-	for triangle_index: int in map_data.num_text_tris:
-		var vertex_offset: int = triangle_index * NUM_VERTICIES_PER_TRI
-		var centroid: Vector3 = (
-			map_data.text_tri_vertices[vertex_offset] + 
-			map_data.text_tri_vertices[vertex_offset + 1] + 
-			map_data.text_tri_vertices[vertex_offset + 2]
-		) / 3.0
-		
-		var new_coord_bytes: Array[int] = polygon_centroid_to_tile_coordinates(map_data, centroid, byte_write_offset)
-		updated_bytes.encode_u8(byte_write_offset, new_coord_bytes[0])
-		updated_bytes.encode_u8(byte_write_offset + 1, new_coord_bytes[1])
-		byte_write_offset += 2
+	var triangle_bytes: PackedByteArray = get_polygon_tile_bytes(
+		map_data.text_tri_vertices, 
+		NUM_VERTICIES_PER_TRI, 
+		map_data.textured_polygon_tile_bytes, 
+		0
+	)
 	
 	# Process textured quads
-	for quad_index: int in map_data.num_text_quads:
-		var vertex_offset: int = quad_index * NUM_VERTICIES_PER_QUAD
-		var centroid: Vector3 = (
-			map_data.text_quad_vertices[vertex_offset] + 
-			map_data.text_quad_vertices[vertex_offset + 1] + 
-			map_data.text_quad_vertices[vertex_offset + 2] + 
-			map_data.text_quad_vertices[vertex_offset + 3]
-		) / 4.0
+	var quad_bytes: PackedByteArray = get_polygon_tile_bytes(
+		map_data.text_quad_vertices, 
+		NUM_VERTICIES_PER_QUAD, 
+		map_data.textured_polygon_tile_bytes, 
+		quads_byte_start
+	)
+	
+	map_data.textured_polygon_tile_bytes = triangle_bytes
+	map_data.textured_polygon_tile_bytes.append_array(quad_bytes)
+
+
+## Gets the 2-byte tile coordinate entries for a collection of polygon vertices.
+## vertices_per_polygon: 3 for triangles, 4 for quadrilaterals.
+static func get_polygon_tile_bytes(
+	vertices: PackedVector3Array, 
+	vertices_per_polygon: int, 
+	existing_tile_bytes: PackedByteArray = [], 
+	existing_byte_read_offset: int = 0
+) -> PackedByteArray:
+	if vertices.is_empty() or vertices_per_polygon <= 0:
+		return PackedByteArray()
+	
+	@warning_ignore("integer_division")
+	var polygon_count: int = vertices.size() / vertices_per_polygon
+	var result_bytes: PackedByteArray = []
+	result_bytes.resize(polygon_count * 2)
+	
+	var divisor: float = float(vertices_per_polygon)
+	for polygon_index: int in polygon_count:
+		var vertex_offset: int = polygon_index * vertices_per_polygon
+		var centroid: Vector3 = Vector3.ZERO
+		for vertex_index: int in vertices_per_polygon:
+			centroid += vertices[vertex_offset + vertex_index]
+		centroid /= divisor
 		
-		var new_coord_bytes: Array[int] = polygon_centroid_to_tile_coordinates(map_data, centroid, byte_write_offset)
-		updated_bytes.encode_u8(byte_write_offset, new_coord_bytes[0])
-		updated_bytes.encode_u8(byte_write_offset + 1, new_coord_bytes[1])
-		byte_write_offset += 2
+		# Read existing height level bit if available
+		var source_read_offset: int = existing_byte_read_offset + (polygon_index * 2)
+		var height_level: int = 0
+		if source_read_offset < existing_tile_bytes.size():
+			height_level = existing_tile_bytes[source_read_offset] & 0x01
+		
+		encode_polygon_tile_bytes(result_bytes, polygon_index * 2, centroid, height_level)
 	
-	map_data.textured_polygon_tile_bytes = updated_bytes
+	return result_bytes
 
 
-static func polygon_centroid_to_tile_coordinates(map_data: FftMapData, centroid: Vector3, byte_write_offset: int) -> Array[int]:
-	var original_byte_zero: int = 0
-	if byte_write_offset < map_data.textured_polygon_tile_bytes.size():
-		original_byte_zero = map_data.textured_polygon_tile_bytes[byte_write_offset]
-	var height_level_bit: int = original_byte_zero & 0x01 # Preserve original height level bit if previously set
-	
+## Encodes a polygon's centroid into the 2-byte FFT tile coordinate format in destination_bytes at byte_offset.
+## If the centroid sits on a vertical seam, writes [254, 255] to disable movement highlighting.
+static func encode_polygon_tile_bytes(
+	destination_bytes: PackedByteArray, 
+	byte_offset: int, 
+	centroid: Vector3, 
+	height_level: int = 0
+) -> void:
 	var rounded_x: int = roundi(centroid.x)
 	var rounded_z: int = roundi(centroid.z)
-
-	var new_byte0: int = 0
-	var new_byte1: int = 0
 	
 	# Vertical polygons (skirt/wall boundaries) are flagged with [254, 255] to prevent movement highlighting
 	if rounded_x % TILE_SIDE_LENGTH == 0 or rounded_z % TILE_SIDE_LENGTH == 0:
-		new_byte0 = 254 # z = 127, level = 0
-		new_byte1 = 255
+		destination_bytes.encode_u8(byte_offset, 254) # tile_z = 127, height_level = 0
+		destination_bytes.encode_u8(byte_offset + 1, 255)
 	else:
+		@warning_ignore("integer_division")
 		var tile_x: int = rounded_x / TILE_SIDE_LENGTH
+		@warning_ignore("integer_division")
 		var tile_z: int = rounded_z / TILE_SIDE_LENGTH
-		new_byte0 = (tile_z << 1) | height_level_bit
-		new_byte1 = tile_x
-	
-	return [new_byte0, new_byte1]
+		var byte_zero: int = (tile_z << 1) | height_level
+		destination_bytes.encode_u8(byte_offset, byte_zero)
+		destination_bytes.encode_u8(byte_offset + 1, tile_x)
 
 
 static func get_adjusted_map_data(original_fft_map_data: FftMapData, quadrants: PackedVector2Array, cropped_rect: Rect2i) -> FftMapData:
@@ -1618,24 +1643,11 @@ static func get_cropped_map_data(cropped_rect: Rect2i, mirrored_map_data: Dictio
 			var polygon_texture_bytes: PackedByteArray = mirrored_map.tris_texture_bytes.slice(tri_texture_bytes_start, tri_texture_bytes_start + TEXTURE_BYTES_PER_TRI)
 			new_fft_map_data.tris_texture_bytes.append_array(polygon_texture_bytes)
 
-			# var polygon_tile_bytes: PackedByteArray = [
-			# 	mirrored_map.textured_polygon_tile_bytes[tri_index * 2],
-			# 	mirrored_map.textured_polygon_tile_bytes[(tri_index * 2) + 1],
-			# ]
+			# Centroid calculation and tile coordinates encoding
 			centroid = centroid / 3.0
-			@warning_ignore("integer_division")
-			var polygon_tile_x: int = roundi(centroid.x) / TILE_SIDE_LENGTH
-			@warning_ignore("integer_division")
-			var polygon_tile_z: int = (roundi(centroid.z) / TILE_SIDE_LENGTH) << 1
-			var polygon_tile_bytes: PackedByteArray = [
-				polygon_tile_z,
-				polygon_tile_x,
-			]
-			# don't highlight polygon if it's vertical
-			if roundi(centroid.x) % TILE_SIDE_LENGTH == 0 or roundi(centroid.z) % TILE_SIDE_LENGTH == 0:
-				polygon_tile_bytes = [254, 255]
-
-			textured_tri_tile_bytes.append_array(polygon_tile_bytes)
+			var polygon_tile_offset: int = textured_tri_tile_bytes.size()
+			textured_tri_tile_bytes.resize(polygon_tile_offset + 2)
+			encode_polygon_tile_bytes(textured_tri_tile_bytes, polygon_tile_offset, centroid, 0)
 			
 		# add black tris
 		for tri_index: int in mirrored_map.num_black_tris:
@@ -1692,23 +1704,11 @@ static func get_cropped_map_data(cropped_rect: Rect2i, mirrored_map_data: Dictio
 			var polygon_texture_bytes: PackedByteArray = mirrored_map.quads_texture_bytes.slice(quad_texture_bytes_start, quad_texture_bytes_start + TEXTURE_BYTES_PER_QUAD)
 			new_fft_map_data.quads_texture_bytes.append_array(polygon_texture_bytes)
 
-			# var polygon_tile_bytes: PackedByteArray = [
-			# 	mirrored_map.textured_polygon_tile_bytes[quad_index * 2],
-			# 	mirrored_map.textured_polygon_tile_bytes[(quad_index * 2) + 1],
-			# ]
+			# Centroid calculation and tile coordinates encoding
 			centroid = centroid / 4.0
-			@warning_ignore("integer_division")
-			var polygon_tile_x: int = roundi(centroid.x) / TILE_SIDE_LENGTH
-			@warning_ignore("integer_division")
-			var polygon_tile_z: int = (roundi(centroid.z) / TILE_SIDE_LENGTH) << 1
-			var polygon_tile_bytes: PackedByteArray = [
-				polygon_tile_z,
-				polygon_tile_x,
-			]
-			# don't highlight polygon if it's vertical
-			if roundi(centroid.x) % TILE_SIDE_LENGTH == 0 or roundi(centroid.z) % TILE_SIDE_LENGTH == 0:
-				polygon_tile_bytes = [254, 255]
-			textured_quad_tile_bytes.append_array(polygon_tile_bytes)
+			var polygon_tile_offset: int = textured_quad_tile_bytes.size()
+			textured_quad_tile_bytes.resize(polygon_tile_offset + 2)
+			encode_polygon_tile_bytes(textured_quad_tile_bytes, polygon_tile_offset, centroid, 0)
 
 		# add black quads
 		for quad_index: int in mirrored_map.num_black_quads:
@@ -1733,7 +1733,7 @@ static func get_cropped_map_data(cropped_rect: Rect2i, mirrored_map_data: Dictio
 					new_fft_map_data.black_quad_vertices.resize(new_map_total_index + 1)
 				new_fft_map_data.black_quad_vertices[new_map_total_index] = Vector3(quad_verticies[vertex_index]) + vertex_translation
 			new_map_black_quad_index += 1
-		
+
 		# get terrain data
 		var cropped_terrain_rect: Rect2i = cropped_intersection.grow_individual(0, 0, 0, 0) # grow rect so terrain tiles on edge are included
 		# cropped_terrain_rect.position = cropped_terrain_rect.position - Vector2i(0, 1) # shift rect so points on the top are not included and so points on the bottom are included
