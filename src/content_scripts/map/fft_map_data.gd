@@ -1081,79 +1081,24 @@ static func get_fft_mesh_file(fft_map_data: FftMapData, remove_untextured_polygo
 		primary_mesh_header.encode_u16(4, fft_map_data.num_black_tris)
 		primary_mesh_header.encode_u16(6, fft_map_data.num_black_quads)
 
-	var primary_mesh_textured_tri_verticies: PackedByteArray = []
-	primary_mesh_textured_tri_verticies.resize(fft_map_data.num_text_tris * NUM_VERTICIES_PER_TRI * 3 * 2) # 3 coordinates (x, y, x) per vertex, 2 bytes per coordinate
-	for tri_index: int in fft_map_data.num_text_tris:
-		for vertex_index: int in NUM_VERTICIES_PER_TRI:
-			var total_index: int = (tri_index * NUM_VERTICIES_PER_TRI) + vertex_index
-			var vertex_coordinates: Vector3 = fft_map_data.text_tri_vertices[total_index]
-			var coordinate_index: int = total_index * 3
-			primary_mesh_textured_tri_verticies.encode_s16(coordinate_index * 2, roundi(vertex_coordinates.x))
-			primary_mesh_textured_tri_verticies.encode_s16((coordinate_index + 1) * 2, roundi(vertex_coordinates.y))
-			primary_mesh_textured_tri_verticies.encode_s16((coordinate_index + 2) * 2, roundi(vertex_coordinates.z))
-	
-	var primary_mesh_textured_quad_verticies: PackedByteArray = []
-	primary_mesh_textured_quad_verticies.resize(fft_map_data.num_text_quads * NUM_VERTICIES_PER_QUAD * 3 * 2) # 3 coordinates (x, y, x) per vertex, 2 bytes per coordinate
-	for quad_index: int in fft_map_data.num_text_quads:
-		for vertex_index: int in NUM_VERTICIES_PER_QUAD:
-			var total_index: int = (quad_index * NUM_VERTICIES_PER_QUAD) + vertex_index
-			var vertex_coordinates: Vector3 = fft_map_data.text_quad_vertices[total_index]
-			var coordinate_index: int = total_index * 3
-			primary_mesh_textured_quad_verticies.encode_s16(coordinate_index * 2, roundi(vertex_coordinates.x))
-			primary_mesh_textured_quad_verticies.encode_s16((coordinate_index + 1) * 2, roundi(vertex_coordinates.y))
-			primary_mesh_textured_quad_verticies.encode_s16((coordinate_index + 2) * 2, roundi(vertex_coordinates.z))
-	
-	var primary_mesh_black_tri_verticies: PackedByteArray = []
+	# Encode vertex coordinates (6 bytes per vertex)
+	var primary_mesh_textured_tri_vertices: PackedByteArray = encode_vertices(fft_map_data.text_tri_vertices)
+	var primary_mesh_textured_quad_vertices: PackedByteArray = encode_vertices(fft_map_data.text_quad_vertices)
+	var primary_mesh_black_tri_vertices: PackedByteArray = []
+	var primary_mesh_black_quad_vertices: PackedByteArray = []
 	if not remove_untextured_polygons:
-		primary_mesh_black_tri_verticies.resize(fft_map_data.num_black_tris * NUM_VERTICIES_PER_TRI * 3 * 2) # 3 coordinates (x, y, x) per vertex, 2 bytes per coordinate
-		for tri_index: int in fft_map_data.num_black_tris:
-			for vertex_index: int in NUM_VERTICIES_PER_TRI:
-				var total_index: int = (tri_index * NUM_VERTICIES_PER_TRI) + vertex_index
-				var vertex_coordinates: Vector3 = fft_map_data.black_tri_vertices[total_index]
-				var coordinate_index: int = total_index * 3
-				primary_mesh_black_tri_verticies.encode_s16(coordinate_index * 2, roundi(vertex_coordinates.x))
-				primary_mesh_black_tri_verticies.encode_s16((coordinate_index + 1) * 2, roundi(vertex_coordinates.y))
-				primary_mesh_black_tri_verticies.encode_s16((coordinate_index + 2) * 2, roundi(vertex_coordinates.z))
+		primary_mesh_black_tri_vertices = encode_vertices(fft_map_data.black_tri_vertices)
+		primary_mesh_black_quad_vertices = encode_vertices(fft_map_data.black_quad_vertices)
 	
-	var primary_mesh_black_quad_verticies: PackedByteArray = []
-	if not remove_untextured_polygons:
-		primary_mesh_black_quad_verticies.resize(fft_map_data.num_black_quads * NUM_VERTICIES_PER_QUAD * 3 * 2) # 3 coordinates (x, y, x) per vertex, 2 bytes per coordinate
-		for quad_index: int in fft_map_data.num_black_quads:
-			for vertex_index: int in NUM_VERTICIES_PER_QUAD:
-				var total_index: int = (quad_index * NUM_VERTICIES_PER_QUAD) + vertex_index
-				var vertex_coordinates: Vector3 = fft_map_data.black_quad_vertices[total_index]
-				var coordinate_index: int = total_index * 3
-				primary_mesh_black_quad_verticies.encode_s16(coordinate_index * 2, roundi(vertex_coordinates.x))
-				primary_mesh_black_quad_verticies.encode_s16((coordinate_index + 1) * 2, roundi(vertex_coordinates.y))
-				primary_mesh_black_quad_verticies.encode_s16((coordinate_index + 2) * 2, roundi(vertex_coordinates.z))
-
-	var primary_mesh_textured_tri_normals: PackedByteArray = []
-	primary_mesh_textured_tri_normals.resize(fft_map_data.num_text_tris * NUM_VERTICIES_PER_TRI * 3 * 2) # 3 coordinates (x, y, x) per vertex, 2 bytes per coordinate
-	for tri_index: int in fft_map_data.num_text_tris:
-		for vertex_index: int in NUM_VERTICIES_PER_TRI:
-			var total_index: int = (tri_index * NUM_VERTICIES_PER_TRI) + vertex_index
-			var vertex_normals: Vector3 = fft_map_data.text_tri_normals[total_index]
-			var coordinate_index: int = total_index * 3
-			primary_mesh_textured_tri_normals.encode_s16(coordinate_index * 2, roundi(vertex_normals.x * 4096.0))
-			primary_mesh_textured_tri_normals.encode_s16((coordinate_index + 1) * 2, roundi(vertex_normals.y * 4096.0))
-			primary_mesh_textured_tri_normals.encode_s16((coordinate_index + 2) * 2, roundi(vertex_normals.z * 4096.0))
-
-	var primary_mesh_textured_quad_normals: PackedByteArray = []
-	primary_mesh_textured_quad_normals.resize(fft_map_data.num_text_quads * NUM_VERTICIES_PER_QUAD * 3 * 2) # 3 coordinates (x, y, x) per vertex, 2 bytes per coordinate
-	for quad_index: int in fft_map_data.num_text_quads:
-		for vertex_index: int in NUM_VERTICIES_PER_QUAD:
-			var total_index: int = (quad_index * NUM_VERTICIES_PER_QUAD) + vertex_index
-			var vertex_normals: Vector3 = fft_map_data.text_quad_normals[total_index]
-			var coordinate_index: int = total_index * 3
-			primary_mesh_textured_quad_normals.encode_s16(coordinate_index * 2, roundi(vertex_normals.x * 4096.0))
-			primary_mesh_textured_quad_normals.encode_s16((coordinate_index + 1) * 2, roundi(vertex_normals.y * 4096.0))
-			primary_mesh_textured_quad_normals.encode_s16((coordinate_index + 2) * 2, roundi(vertex_normals.z * 4096.0))
-
+	# Encode normal vectors (6 bytes per vertex)
+	var primary_mesh_textured_tri_normals: PackedByteArray = encode_normals(fft_map_data.text_tri_normals)
+	var primary_mesh_textured_quad_normals: PackedByteArray = encode_normals(fft_map_data.text_quad_normals)
+	
 	primary_mesh_bytes.append_array(primary_mesh_header)
-	primary_mesh_bytes.append_array(primary_mesh_textured_tri_verticies)
-	primary_mesh_bytes.append_array(primary_mesh_textured_quad_verticies)
-	primary_mesh_bytes.append_array(primary_mesh_black_tri_verticies)
-	primary_mesh_bytes.append_array(primary_mesh_black_quad_verticies)
+	primary_mesh_bytes.append_array(primary_mesh_textured_tri_vertices)
+	primary_mesh_bytes.append_array(primary_mesh_textured_quad_vertices)
+	primary_mesh_bytes.append_array(primary_mesh_black_tri_vertices)
+	primary_mesh_bytes.append_array(primary_mesh_black_quad_vertices)
 	primary_mesh_bytes.append_array(primary_mesh_textured_tri_normals)
 	primary_mesh_bytes.append_array(primary_mesh_textured_quad_normals)
 	primary_mesh_bytes.append_array(fft_map_data.tris_texture_bytes)
@@ -1262,6 +1207,38 @@ static func get_fft_mesh_file(fft_map_data: FftMapData, remove_untextured_polygo
 	mesh_file_bytes.append_array(polygon_render_flags_bytes)
 
 	return mesh_file_bytes
+
+
+## Encodes an array of 3D vertices into signed 16-bit integer byte representation (6 bytes per vertex).
+static func encode_vertices(vertices: PackedVector3Array) -> PackedByteArray:
+	var encoded_bytes: PackedByteArray = []
+	var number_of_vertices: int = vertices.size()
+	encoded_bytes.resize(number_of_vertices * 6)
+	
+	for vertex_index: int in number_of_vertices:
+		var byte_index: int = vertex_index * 6
+		var vertex_coordinates: Vector3 = vertices[vertex_index]
+		encoded_bytes.encode_s16(byte_index, roundi(vertex_coordinates.x))
+		encoded_bytes.encode_s16(byte_index + 2, roundi(vertex_coordinates.y))
+		encoded_bytes.encode_s16(byte_index + 4, roundi(vertex_coordinates.z))
+	
+	return encoded_bytes
+
+
+## Encodes an array of 3D normal vectors into signed 16-bit integer byte representation (scale factor 4096.0; 12-bit).
+static func encode_normals(normals: PackedVector3Array) -> PackedByteArray:
+	var encoded_bytes: PackedByteArray = []
+	var number_of_normals: int = normals.size()
+	encoded_bytes.resize(number_of_normals * 6)
+	
+	for normal_index: int in number_of_normals:
+		var byte_index: int = normal_index * 6
+		var normal_vector: Vector3 = normals[normal_index]
+		encoded_bytes.encode_s16(byte_index, roundi(normal_vector.x * 4096.0))
+		encoded_bytes.encode_s16(byte_index + 2, roundi(normal_vector.y * 4096.0))
+		encoded_bytes.encode_s16(byte_index + 4, roundi(normal_vector.z * 4096.0))
+	
+	return encoded_bytes
 
 
 static func get_rotated_fft_map_data(
