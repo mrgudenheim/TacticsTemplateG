@@ -5,6 +5,13 @@ signal map_input_event(action_instance: ActionInstance, camera: Camera3D, event:
 signal unit_created(new_unit: Unit)
 signal delayed_action_completed
 
+## Where the gitignored ROM-derived Effects content lives.
+## Not a second literal: `RomReader.generate_effects_content()` generates that tree, so the
+## path playback reads and the path the exporter writes must be one value — a drift between
+## them shows up as effects that load nothing, with no error anywhere.
+const EffectExtractPaths := preload("res://src/file_formats/vfx/effect_extract.gd")
+const EFFECTS_CONTENT_ROOT: String = EffectExtractPaths.CONTENT_ROOT
+
 const SCALE: float = 1.0 / FftMapData.TILE_SIDE_LENGTH
 const SCALED_UNITS_PER_HEIGHT: float = SCALE * FftMapData.UNITS_PER_HEIGHT
 
@@ -19,7 +26,15 @@ const SCALED_UNITS_PER_HEIGHT: float = SCALE * FftMapData.UNITS_PER_HEIGHT
 @export var orthographic_check: CheckBox
 @export var camera_controller: CameraController
 var main_camera: Camera3D
+## The 2D half of the background: a CanvasLayer TextureRect drawn BEHIND the 3D scene
+## by the WorldEnvironment's `background_mode = 3` (BG_CANVAS, canvas_max_layer -3). It
+## covers the whole window, including the parts the battle view does not occupy while
+## the scenario editor has the camera inside its SubViewport.
 @export var background_gradient: TextureRect
+## The 3D half: the one node `addons/exmateria_effects` can drive. Kept at the SAME
+## colours as `background_gradient` by `set_background_gradient()`, so the pair is
+## seamless at rest and only the quad moves while an effect is playing.
+var screen_background: ScreenBackgroundQuad
 
 @export var maps: Node3D
 var total_map_tiles: Dictionary[Vector2i, Array] = {} # Array[TerrainTile]
@@ -45,8 +60,12 @@ var current_cursor_map_position: Vector3
 @export var game_state_label: Label
 @export var scenario_editor: ScenarioEditor
 
-var trap_instance: TrapEffectInstance
+## Weapon projectiles (arrow/stone/shuriken) are TacticsG's own; the effects addon has
+## no equivalent.
 var projectile_instance: ProjectileEffectInstance
+
+## The ability-VFX path. Built in `on_data_ready` once the camera is in the tree.
+var effects_playback: EffectsPlayback
 
 var event_num: int = 0 # TODO handle event timeline
 
@@ -91,6 +110,15 @@ var walled_maps: PackedInt32Array = [
 
 func _ready() -> void:
 	main_camera = camera_controller.camera
+	# Must exist before anything casts: the addon picks its renderer on the first effect
+	# frame and keeps that choice, so setting this up late means never for that effect,
+	# with a push_error as the only symptom.
+	screen_background = ScreenBackgroundQuad.attach(main_camera)
+	# Seed from the gradient the scene ships, so the quad matches the TextureRect from
+	# the first frame rather than starting black and snapping once a scenario loads.
+	var initial: PackedColorArray = background_gradient.texture.gradient.colors
+	if initial.size() >= 2:
+		set_background_gradient(initial[1], initial[0])
 
 	load_rom_button.file_selected.connect(RomReader.on_load_rom_dialog_file_selected)
 	GameData.data_indexed.connect(on_data_ready)
@@ -137,14 +165,6 @@ func on_data_ready() -> void:
 	#push_warning("on data ready")
 	load_rom_button.visible = false
 
-	if trap_instance != null:
-		trap_instance.stop()
-		trap_instance.queue_free()
-	trap_instance = TrapEffectInstance.new()
-	trap_instance.name = "TrapEffectInstance"
-	battle_view.add_child(trap_instance)
-	trap_instance.initialize()
-
 	if projectile_instance != null:
 		projectile_instance.stop()
 		projectile_instance.queue_free()
@@ -153,6 +173,8 @@ func on_data_ready() -> void:
 	battle_view.add_child(projectile_instance)
 	projectile_instance.initialize()
 
+	_begin_effects_playback()
+
 	scenario_editor.populate_option_lists()
 	scenario_editor.visible = true
 	# var default_scenario: Scenario = GameData.get_scenario("map_032_slums_in_dorter_01")
@@ -160,6 +182,61 @@ func on_data_ready() -> void:
 	# scenario_editor.init_scenario(default_scenario)
 	scenario_editor.init_scenario()
 	set_unit_statbars_visible(show_statbar_check.button_pressed)
+
+
+## Stand up `addons/exmateria_effects` for this battle.
+##
+## Effects hang off this BattleManager, not off `battle_view`, for two reasons.
+## `EffectsCastHost` reads `units` and `total_map_tiles`, which only this node has; and
+## every spawned spell is parented here, so this node has to share the camera's World3D.
+## It does — the editor's SubViewport has `own_world_3d` unset, so `battle_view` resolves
+## to the same world in both of its parentings. Hanging casts off `battle_view` would put
+## them through `reparent()`, which briefly takes them out of the tree.
+func _begin_effects_playback() -> void:
+	if effects_playback != null:
+		effects_playback.end()
+		effects_playback.queue_free()
+	effects_playback = EffectsPlayback.new()
+	effects_playback.name = "EffectsPlayback"
+	effects_playback.enabled = true
+	effects_playback.battle_manager = self
+	# 388 of the 401 installed effects move the camera, and not only the charge-time
+	# cinematics — ordinary spell casts do too. What is handed over is the
+	# `CameraController` rig rather than `main_camera`, because an effect asks for a
+	# point to orbit, an orbit and a zoom, which is exactly the rig plus its child
+	# camera, and because the handover has to drop `follow_node` and put it back.
+	effects_playback.camera_rig = camera_controller
+	# Declared at runtime, not in project.godot: the content is ROM-derived and
+	# gitignored, so a committed default would point every contentless checkout at a
+	# root that cannot exist. Left empty when the directory is absent, which makes
+	# `begin()` refuse with a reason instead of failing per cast.
+	if DirAccess.dir_exists_absolute(EFFECTS_CONTENT_ROOT):
+		effects_playback.content_root = EFFECTS_CONTENT_ROOT
+	add_child(effects_playback)
+	# `begin()` runs the addon's `setup_native()` initialisation. A refusal is an ordinary
+	# outcome (stock GL, no content, no camera), not an error being swallowed here.
+	if not effects_playback.begin(main_camera):
+		push_warning("BattleManager: ability VFX unavailable — "
+			+ effects_playback.unavailable_reason)
+	else:
+		# "No error" and "the addon is live" look identical in a log; this tells them
+		# apart.
+		print("BattleManager: ability VFX ready (exmateria_effects, content root %s)"
+			% EFFECTS_CONTENT_ROOT)
+
+
+## The one place the battle's background colours are written. Both renderers are fed
+## here so they cannot drift: the 2D `TextureRect` that covers the window, and the 3D
+## quad the effects addon drives.
+##
+## ORDER: `Gradient.colors[0]` is the BOTTOM colour and `[1]` is the TOP — the texture
+## fills from (0.5, 1) to (0.5, 0), so offset 0 is the bottom of the screen.
+## `ScenarioEditor.background_gradient_colors` and the pair of colour pickers use that
+## same order. Swapping them here turns every sky upside down without erroring.
+func set_background_gradient(top: Color, bottom: Color) -> void:
+	background_gradient.texture.gradient.colors = PackedColorArray([bottom, top])
+	if screen_background != null:
+		screen_background.set_gradient(top, bottom)
 
 
 func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:

@@ -3,6 +3,11 @@ extends StaticBody3D
 
 const MAP_SCENE: PackedScene = preload("uid://buljw4afjva1d")
 
+## `SURFACE_MAP` is read from this script, not from the `TintedSurfaces` autoload: the
+## autoload is a node, and a node cannot serve a script const. The call itself still
+## goes to the autoload.
+const TintedSurfacesPort := preload("res://addons/exmateria_effects/install/TintedSurfacesPort.gd")
+
 @export var mesh_instance: MeshInstance3D
 @export var collision_shape: CollisionShape3D
 @export var map_shader: Shader
@@ -59,10 +64,24 @@ func play_animations(local_map_data: MapData) -> void:
 			local_map_data.animate_uv(texture_animation, self, anim_id, anim_fps)
 
 
-func set_mesh_shader(texture: Texture2D, texture_palettes: PackedColorArray) -> void:
+func set_mesh_shader(texture: Texture2D, texture_palettes: PackedColorArray, lighting: MapLighting = null) -> void:
 	var new_mesh_material: ShaderMaterial = ShaderMaterial.new()
 	new_mesh_material.shader = map_shader
 	new_mesh_material.set_shader_parameter("albedo_texture_color_indicies", texture)
 	new_mesh_material.set_shader_parameter("palettes_colors", texture_palettes)
-	
+
+	# NO LIGHTING IS A LOUD FALLBACK, NOT A DARK MAP. `lighting` is null for a
+	# `.map_data.tres` carrying no `MapLighting`; `unlit()` is ambient 1.0 with no
+	# directional term. Re-export the maps from the ROM to get the real thing.
+	var chunk_lighting: MapLighting = lighting
+	if chunk_lighting == null:
+		push_warning("MapChunkNodes: no ROM lighting for \"%s\"; rendering flat. Re-export this map." % name)
+		chunk_lighting = MapLighting.unlit()
+	chunk_lighting.apply_to_material(new_mesh_material)
+
 	mesh_instance.material_override = new_mesh_material
+
+	# Without this the map tint is still computed on every cast and then discarded
+	# silently, against an empty material list. Registering twice is a no-op.
+	if is_instance_valid(TintedSurfaces):
+		TintedSurfaces.register_surface(TintedSurfacesPort.SURFACE_MAP, new_mesh_material)

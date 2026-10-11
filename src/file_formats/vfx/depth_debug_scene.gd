@@ -116,7 +116,7 @@ func _process(_delta: float) -> void:
 	_angle_index += 1
 	if _angle_index >= _angles.size():
 		print("[DEPTH_TEST] === Test Complete ===")
-		get_tree().quit()
+		ApplicationShutdown.request_quit()
 		return
 
 	_set_camera_angle(_angles[_angle_index])
@@ -166,8 +166,8 @@ func _log_depth_at_angle(angle: float, angle_name: String) -> void:
 		var clip_custom: Vector4 = proj * Vector4(view_pos_custom.x, view_pos_custom.y, view_pos_custom.z, 1.0)
 		var clip_vert: Vector4 = proj * Vector4(view_pos_vert.x, view_pos_vert.y, view_pos_vert.z, 1.0)
 
-		var depth_custom: float = clip_custom.z / clip_custom.w
-		var depth_vert: float = clip_vert.z / clip_vert.w
+		var depth_custom: float = _window_depth(clip_custom.z / clip_custom.w)
+		var depth_vert: float = _window_depth(clip_vert.z / clip_vert.w)
 
 		print("[DEPTH_TEST] Tri %d: custom0=%s vert_centroid=%s depth_custom=%.4f depth_vert=%.4f delta=%.4f" % [
 			tri, VfxTestUtils.vec3_str(custom_centroid), VfxTestUtils.vec3_str(vert_centroid),
@@ -177,5 +177,14 @@ func _log_depth_at_angle(angle: float, angle_name: String) -> void:
 	var particle_pos := Vector3(3.5, 1.0, 1.5)
 	var view_pos_particle: Vector3 = view_matrix * particle_pos
 	var clip_particle: Vector4 = proj * Vector4(view_pos_particle.x, view_pos_particle.y, view_pos_particle.z, 1.0)
-	var depth_particle: float = clip_particle.z / clip_particle.w
+	var depth_particle: float = _window_depth(clip_particle.z / clip_particle.w)
 	print("[DEPTH_TEST] Particle at %s: depth=%.4f" % [VfxTestUtils.vec3_str(particle_pos), depth_particle])
+
+
+## CPU mirror of `psx_window_depth()` in `src/shaders/psx_window_depth.gdshaderinc`. The
+## numbers this scene prints are only useful if they are the numbers the shaders actually
+## write, so the NDC [-1,1] -> window [0,1] conversion has to be applied here too. It is
+## `gl_compatibility` that needs the conversion; under Forward+ the shader-side guard
+## skips it.
+func _window_depth(ndc_z: float) -> float:
+	return ndc_z * 0.5 + 0.5

@@ -1,0 +1,24 @@
+[gd_resource type="CompositorRenderLayer" format=3]
+
+; The single shared display-space fold layer (ADR-0074 / compositor_layer primitive). Every fold
+; carrier (Fold.add + EngineFoldCompositor) references THIS resource, so they land in one engine-owned
+; held-out target = one partition (the fast path). Identity only + declared format/seed:
+;   format      = 1  -> FORMAT_RGBA8  (maps to DATA_FORMAT_R8G8B8A8_UNORM). A UNORM format (preserves
+;                       the PSX additive saturation at 1.0) that a game-authored Texture2DRD seed can
+;                       wrap — A2B10G10R10 has no Image::Format so Texture2DRD rejects it (ticket 15);
+;                       8-bit is fidelity-equivalent after Pass C's RGB555 quantize and gives 8-bit
+;                       (not 2-bit) coverage alpha.
+;   seed_source = 1  -> SEED_SOURCE_TEXTURE (Pass A authors the display-space scene seed; wired in ticket 15).
+;                       NOTE: was 2 until the engine dropped the unimplemented SEED_SOURCE_SCENE_COLOR value,
+;                       which shifted TEXTURE from 2 down to 1 (enum is now CLEAR=0, TEXTURE=1).
+;   stage       = 1  -> EFFECT_CALLBACK_TYPE_POST_OPAQUE. The fold composites BEFORE the transparent pass
+;                       (ADR-0080) so modern linear-alpha transparents layer over the folded PSX result:
+;                       the engine draws the held-out carriers in the POST_OPAQUE pass (between Pass A's
+;                       POST_OPAQUE seed and Pass C's PRE_TRANSPARENT resolve). Overrides the resource
+;                       default of POST_TRANSPARENT (4, the v1 post-transparent position).
+;   seed_texture     -> bound by the game's Pass A in ticket 15 (a live Texture2DRD)
+
+[resource]
+format = 1
+seed_source = 1
+stage = 1

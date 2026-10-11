@@ -27,7 +27,12 @@ var parent_anim: FftAnimation = null: # used for nested loops in animations
 	set(value):
 		parent_anim = value
 var is_primary_anim: bool = true # false if this animation created through an opcode of another animation, such as QueueSpriteAnim
-var primary_anim: FftAnimation = self
+# A primary animation resolves to itself without owning a reference to itself.
+var primary_anim: FftAnimation = null:
+	get:
+		return self if primary_anim == null else primary_anim
+	set(value):
+		primary_anim = null if value == self else value
 var primary_anim_opcode_part_id: int = 0 # used for nested loops in animations
 
 

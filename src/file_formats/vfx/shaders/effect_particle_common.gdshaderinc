@@ -1,5 +1,7 @@
 // Common uniforms, varyings, and vertex function for STP effect particle shaders.
 
+#include "res://src/shaders/psx_window_depth.gdshaderinc"
+
 uniform sampler2D effect_texture : filter_nearest, repeat_disable;
 uniform vec2 texture_size = vec2(128.0, 256.0);
 
@@ -46,19 +48,19 @@ void vertex() {
 	vec3 cam_dir = normalize(INV_VIEW_MATRIX[3].xyz - world_pos);
 
 	vec4 clip_pos = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world_pos, 1.0);
-	tile_center_depth = clip_pos.z / clip_pos.w;
+	tile_center_depth = psx_window_depth(clip_pos.z / clip_pos.w);
 
 	// Precompute biased depths for all modes: shift position toward camera
 	vec4 c1 = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world_pos + cam_dir * bias_pull_8 * depth_scale, 1.0);
-	depth_mode_1 = c1.z / c1.w;
+	depth_mode_1 = psx_window_depth(c1.z / c1.w);
 	vec4 c2 = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world_pos + cam_dir * bias_fixed_front, 1.0);
-	depth_mode_2 = c2.z / c2.w;
+	depth_mode_2 = psx_window_depth(c2.z / c2.w);
 	vec4 c3 = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world_pos + cam_dir * bias_fixed_back, 1.0);
-	depth_mode_3 = c3.z / c3.w;
+	depth_mode_3 = psx_window_depth(c3.z / c3.w);
 	vec4 c4 = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world_pos + cam_dir * bias_fixed_16, 1.0);
-	depth_mode_4 = c4.z / c4.w;
+	depth_mode_4 = psx_window_depth(c4.z / c4.w);
 	vec4 c5 = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world_pos + cam_dir * bias_pull_16 * depth_scale, 1.0);
-	depth_mode_5 = c5.z / c5.w;
+	depth_mode_5 = psx_window_depth(c5.z / c5.w);
 
 	const float PSX_SCALE = 1.0 / 28.0;
 	VERTEX.x = corner.x * PSX_SCALE;

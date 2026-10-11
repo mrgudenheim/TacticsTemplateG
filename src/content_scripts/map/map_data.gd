@@ -14,6 +14,10 @@ enum HiddenDirectionFlag {
 
 @export var terrain_tiles: Array[TerrainTile] = []
 @export var palettes: PackedColorArray = []
+## ROM lighting for this chunk. NULL on a `.map_data.tres` exported before maps
+## carried lighting - `MapChunkNodes.set_mesh_shader` substitutes
+## `MapLighting.unlit()` and says so rather than rendering a black map.
+@export var lighting: MapLighting = null
 @export var texture_animations: Array[TextureAnimation] = []
 @export var palette_animation_frames: Array[PackedColorArray] = []
 
@@ -28,6 +32,7 @@ static func init_from_fft_map_data(fft_map_data: FftMapData) -> MapData:
 	
 	new_map_data.terrain_tiles = fft_map_data.terrain_tiles.duplicate(true)
 	new_map_data.palettes = fft_map_data.texture_palettes.duplicate()
+	new_map_data.lighting = fft_map_data.map_lighting
 	for fft_texture_animation: FftMapData.TextureAnimationData in fft_map_data.texture_animations:
 		var new_texture_anim: TextureAnimation = TextureAnimation.new(fft_texture_animation)
 		if new_texture_anim.animation_type == TextureAnimation.AnimType.OTHER:

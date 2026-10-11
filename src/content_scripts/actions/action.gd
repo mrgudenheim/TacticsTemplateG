@@ -267,6 +267,9 @@ static func get_element_types_array(element_bitflags: PackedByteArray) -> Array[
 
 
 static func get_modified_action(action_to_modify: Action, user: Unit) -> Action:
+	if action_to_modify == null:
+		push_error("Action.get_modified_action: null action")
+		return null
 	var modified_action: Action = action_to_modify.duplicate()
 	modified_action.vfx_data = action_to_modify.vfx_data
 	modified_action.user_shared_vfx_handler_id = action_to_modify.user_shared_vfx_handler_id

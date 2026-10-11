@@ -358,9 +358,13 @@ func update_background_gradient(_new_color: Color = Color.BLACK) -> void:
 	for color_picker: ColorPickerButton in background_gradient_color_pickers:
 		background_gradient_colors.append(color_picker.color)
 	
-	battle_manager.background_gradient.texture.gradient.colors = background_gradient_colors
 	scenario.background_gradient_bottom = background_gradient_colors[0]
 	scenario.background_gradient_top = background_gradient_colors[1]
+	# Goes through `BattleManager`, not straight onto the TextureRect: this gradient has
+	# TWO renderers (the 2D one and the 3D quad the effects addon drives) and
+	# `BattleManager` owns keeping them equal. `[0]` is the bottom, `[1]` the top.
+	battle_manager.set_background_gradient(
+		background_gradient_colors[1], background_gradient_colors[0])
 
 
 func add_team(new_team: Team, is_random: bool = false) -> Team:	

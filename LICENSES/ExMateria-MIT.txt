@@ -1,0 +1,61 @@
+MIT License
+
+Copyright (c) 2026 timbermania
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial
+portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+================================================================================
+SCOPE — WHAT THIS FILE DOES AND DOES NOT COVER
+================================================================================
+
+This MIT grant covers `godot-learning/` ONLY. It does not change the repository
+root `LICENSE` (GPL-3.0-or-later), which continues to govern every other
+directory in this monorepo, and it is narrower than that root LICENSE rather
+than an exception to it: the root remains GPL because the codebase links JUCE
+(GPL v3+) in `exmateria-daw-plugin/` and ports EDC/ECC code from FFTPatcher
+(GPL v3+) in `fft-iso-patcher/`. Neither of those reaches this directory.
+
+TWO SUBDIRECTORIES INSIDE `godot-learning/` ARE EXCLUDED FROM THIS GRANT. They
+are third-party or third-party-derived, are not the copyright holder's to
+relicense, and keep the licences they already carry:
+
+  godot-learning/vendor/
+      Mirrors of packages whose originals are GPL-licensed or GPL-derived:
+
+        vendor/exmateria_sound/     the PSX sound runtime
+        vendor/exmateria_spu/       the SPU extension, whose native sources port
+                                    PCSX-Redux's GPL-2.0 SPU — the spu.cc noise
+                                    generator, the adsr.cc envelope, reverb.cc,
+                                    and kode54's gauss interpolation table. Its
+                                    own NOTICE records the provenance. (The one
+                                    PCSX-Redux file that IS MIT, supportpsx/
+                                    adpcm.{h,cc}, is vendored separately under
+                                    exmateria-sound/src/vendor/ and carries its
+                                    own MIT header.)
+        vendor/fft_iso_patcher/     ports of FFTPatcher (GPL v3+)
+
+  godot-learning/tools/data/vendor/
+      FFTPatcher's upstream `EventCommands.xml` and
+      `BattleConditionalCommands.xml` data tables (GPL v3+).
+
+Everything else under `godot-learning/` — including all ten `addons/exmateria_*`
+packages, `src/`, `tests/`, `tools/` outside the vendor directory above, and
+`docs/` — is the copyright holder's own work and is offered under the MIT terms
+at the top of this file.
+
+Verified when this file was written: no file under `godot-learning/` outside
+`vendor/` carries a third-party copyright, SPDX identifier or GPL header.
