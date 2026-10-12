@@ -1,7 +1,7 @@
 # [Click here for newest release](https://github.com/mrgudenheim/TacticsEngineG/releases)
 
 # About
-This engine is intended to create a game similar to Final Fantasy Tactics (FFT), including reading data from an FFT ROM
+This template is intended to create a game similar to Final Fantasy Tactics (FFT), including reading data from an FFT ROM
 
 
 Controls:
@@ -78,3 +78,6 @@ In the scenario editor, unit can be drag and dropped with the mouse.
 # Building From Source
 This project is built with Godot 4.6.1
 https://godotengine.org/
+
+#  AI Disclosure
+Some code included in this repo was developed with AI-assistance with manual review.
