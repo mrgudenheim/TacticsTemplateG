@@ -99,6 +99,10 @@ var is_defeated: bool:
 	get:
 		return current_statuses.any(func(status: StatusEffect) -> bool: return status.counts_as_ko) # returns false when no statuses
 
+var is_ct_frozen: bool:
+	get:
+		return current_statuses.any(func(status: StatusEffect) -> bool: return status.freezes_ct) # returns false when no statuses
+
 @export var unit_nickname: String = "Unit Nickname"
 @export var job_nickname: String = "Job Nickname"
 @export var job_name: String = ""

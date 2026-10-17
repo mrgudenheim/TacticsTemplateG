@@ -691,37 +691,66 @@ func process_clock_tick() -> void:
 			unit.remove_status(status)
 
 	for unit: Unit in units: # increment each units ct by speed
-		if not unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.freezes_ct): # check status that prevent ct gain (stop, sleep, etc.)
+		if not unit.is_ct_frozen: # check status that prevent ct gain (stop, sleep, etc.)
 			var ct_gain: int = unit.speed
-			for status: StatusEffect in unit.current_statuses:
-				ct_gain = status.passive_effect.ct_gain_modifier.apply(ct_gain)
+			for passive_effect: PassiveEffect in unit.get_all_passive_effects():
+				ct_gain = passive_effect.ct_gain_modifier.apply(ct_gain)
 			unit.stats[Unit.StatType.CT].add_value(ct_gain)
 
-	# execute unit turns, ties decided by unit index in units[]
-	# TODO keep looping until all units ct_current < 100
-	for unit: Unit in units:
-		if unit.ct_current >= 100:
-			safe_to_load_map = false
-			await start_units_turn(unit)
-			if not battle_is_running: return
-			#if unit.is_defeated: # check status that counts as KO, aka prevents turn (dead, petrify, etc.)
-				#unit.end_turn()
-			if not unit.is_defeated:
-				if not unit.is_ai_controlled:
-					safe_to_load_map = true
-				while not unit.is_ending_turn:
-					await get_tree().process_frame
-					if not battle_is_running: return
-					if unit == null: # prevent error when loading map
-						return
-				if check_end_conditions():
-					safe_to_load_map = true
+	# Execute unit turns in PriorityQueue order until all units have CT < 100
+	while true:
+		var ready_queue: PriorityQueue = get_ready_turn_queue()
+		if ready_queue.is_empty():
+			break
+		
+		var unit: Unit = ready_queue.pop()
+		
+		safe_to_load_map = false
+		await start_units_turn(unit) # execute status actions on turn start and update actions
+		
+		if not battle_is_running:
+			return
+		
+		if not unit.is_defeated:
+			if not unit.is_ai_controlled:
+				safe_to_load_map = true
+			
+			# wait for player controlled turn
+			while not unit.is_ending_turn:
+				await get_tree().process_frame
+				if not battle_is_running:
 					return
-			safe_to_load_map = true
-			await get_tree().process_frame
-			if not battle_is_running: return
+				if unit == null: 
+					return
+			
+			if check_end_conditions():
+				safe_to_load_map = true
+				return
+		
+		safe_to_load_map = true
+		await get_tree().process_frame
+		
+		if not battle_is_running: 
+			return
 	
 	# TODO increment status ticks, delayed action ticks, and unit ticks in the same step, then order resolution?
+
+
+## Builds a PriorityQueue of all units currently ready to take a turn (CT >= 100).
+## Uses negative CT so highest CT acts first; unit index breaks ties.
+func get_ready_turn_queue() -> PriorityQueue:
+	var queue: PriorityQueue = PriorityQueue.new()
+	for idx: int in units.size():
+		var unit: Unit = units[idx]
+		if not is_instance_valid(unit):
+			continue
+		
+		if unit.ct_current >= 100 and not unit.is_ct_frozen:
+			# negative CT pops highest CT first; index breaks ties
+			var priority: float = -float(unit.ct_current) + (float(idx) * 0.0001)
+			queue.push(unit, priority)
+	
+	return queue
 
 
 func check_end_conditions() -> bool:
