@@ -697,7 +697,7 @@ func process_clock_tick() -> void:
 				ct_gain = passive_effect.ct_gain_modifier.apply(ct_gain)
 			unit.stats[Unit.StatType.CT].add_value(ct_gain)
 
-	# Execute unit turns in PriorityQueue order until all units have CT < 100
+	# execute unit turns in PriorityQueue order until all units have CT < 100
 	while true:
 		var ready_queue: PriorityQueue = get_ready_turn_queue()
 		if ready_queue.is_empty():
@@ -706,7 +706,7 @@ func process_clock_tick() -> void:
 		var unit: Unit = ready_queue.pop()
 		
 		safe_to_load_map = false
-		await start_units_turn(unit) # execute status actions on turn start and update actions
+		await start_units_turn(unit) # process statuses on turn start and update actions
 		
 		if not battle_is_running:
 			return
