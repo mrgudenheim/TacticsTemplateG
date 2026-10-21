@@ -25,7 +25,7 @@ const SPECIAL_SPIN_RATE: float = 256.0 / 4096.0 * TAU
 # Projectile model coordinate scale — divide PSX vertex coords by this for Godot units
 const PROJECTILE_COORD_SCALE: float = 100.0
 
-# Model scales (matching godot-learning reference)
+# Model scales
 const ARROW_SCALE: float = 0.064
 const STONE_SCALE: float = 0.1
 const SPECIAL_SCALE: float = 0.1

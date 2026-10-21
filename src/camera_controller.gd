@@ -67,6 +67,9 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# Every branch below writes `global_position`, which would overwrite an effect's camera move.
+	if is_effect_driven():
+		return
 	if is_transitioning and follow_node != null:
 		transition_time += delta
 		var transition_percent: float = transition_time / time_to_transition
@@ -91,6 +94,9 @@ func start_transitioning() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Mid-cast input would corrupt the state the takeover restores afterwards, so it is dropped.
+	if is_effect_driven():
+		return
 	if event.is_action_pressed(&"zoom_in", false, true):  # Wheel Up Event
 		zoom_camera(1)
 	elif event.is_action_pressed(&"zoom_out", false, true):  # Wheel Down Event
@@ -107,6 +113,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func zoom_camera(dir: int) -> void:
+	if is_effect_driven():
+		return
 	var zoom_margin: float = zoom * (-dir) / 5
 	var new_zoom: float = zoom + zoom_margin
 	if new_zoom < zoom_out_max and new_zoom > zoom_in_max:
@@ -134,7 +142,7 @@ func zoom_camera(dir: int) -> void:
 
 
 func start_rotating_camera(dir: int) -> void:
-	if is_rotating:
+	if is_rotating or is_effect_driven():
 		return
 	
 	is_rotating = true
@@ -187,3 +195,74 @@ func on_orthographic_toggled(toggled_on: bool) -> void:
 func update_distance() -> void:
 	if camera.projection == Camera3D.PROJECTION_PERSPECTIVE:
 		camera.position.z = camera.size * 8.0 / 12.0
+
+
+# --- Effect-track takeover ------------------------------------------------------
+#
+# The effects addon computes a camera pose per effect frame but never touches a Camera3D.
+# `EffectCameraTrack` converts those poses and calls these to save, drive and restore the rig.
+
+## Everything a takeover overwrites; empty while nobody is driving.
+var _takeover_saved: Dictionary = {}
+
+
+## True while an effect camera track owns this rig.
+func is_effect_driven() -> bool:
+	return not _takeover_saved.is_empty()
+
+
+## Save the player's camera and hand the rig to an effect track. Returns false if one is
+## already driving, so the first cast of a multi-target volley keeps the camera.
+func begin_effect_takeover() -> bool:
+	if is_effect_driven():
+		return false
+	_takeover_saved = {
+		"follow_node": follow_node,
+		"global_position": global_position,
+		"rotation_degrees": rotation_degrees,
+		"zoom": zoom,
+		"camera_size": camera.size,
+		"camera_z": camera.position.z,
+		"projection": camera.projection,
+	}
+	# Dropped so a unit freed mid-cast cannot leave the restore holding a dangling reference.
+	# The setter arms a transition; cancel it, since a takeover snaps to the first pose.
+	follow_node = null
+	is_transitioning = false
+	pan_direction = Vector2.ZERO
+	return true
+
+
+## Move the camera for one effect frame: `focus` is the orbited world point, `orbit_degrees`
+## this node's euler angles, `ortho_size` the orthographic size.
+func apply_effect_pose(focus: Vector3, orbit_degrees: Vector3, ortho_size: float) -> void:
+	if not is_effect_driven():
+		return
+	global_position = focus
+	# Not a bare `rotation_degrees` write: unit billboards re-face only through `rotate_camera`.
+	rotate_camera(orbit_degrees)
+	# `zoom` is this rig's orthographic size; `update_distance()` derives the perspective
+	# stand-off from it.
+	zoom = ortho_size
+	camera.size = ortho_size
+	update_distance()
+
+
+## Give the camera back, snapping to the exact pre-cast values. Restoring `follow_node` arms
+## a transition that would ease back instead, adding a camera move to the end of every spell.
+func end_effect_takeover() -> void:
+	if not is_effect_driven():
+		return
+	var saved: Dictionary = _takeover_saved
+	_takeover_saved = {}
+	camera.projection = saved["projection"]
+	camera.size = saved["camera_size"]
+	camera.position.z = saved["camera_z"]
+	zoom = saved["zoom"]
+	# Through `rotate_camera`, so the units turn back too.
+	rotate_camera(saved["rotation_degrees"])
+	# Unless something claimed the camera mid-cast, such as the scenario editor or a turn change.
+	if follow_node == null:
+		follow_node = saved["follow_node"]
+	is_transitioning = false
+	global_position = saved["global_position"]

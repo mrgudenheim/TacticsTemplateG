@@ -16,14 +16,52 @@ uniform vec2[32] canvas_size;
 uniform vec2[32] frame_pos;
 uniform float[32] frame_idx;
 
+#include "res://src/shaders/psx_window_depth.gdshaderinc"
+
+// The uniforms and `color_apply()` an effect uses to tint the map. Keep in sync with
+// `src/Unit/shaders/unit_sprite.gdshader`.
+#include "res://addons/exmateria_schema/colour_model/color_stack.gdshaderinc"
+
 uniform bool debug_depth = false;
+
+// ==== PSX per-vertex lighting (MapLighting) ====
+//
+// Lit in the mesh's model space: light directions share the normals' coordinate system, so
+// use the raw `NORMAL`, and mirroring a chunk for layout must not relight it.
+// `light_gains` are gains, not colours, and may exceed 1.0; nothing clamps until the pixel.
+uniform bool lighting_enabled = false;
+// Debug A/B toggle; false lights per pixel (see `v_diffuse`).
+uniform bool lighting_per_vertex = true;
+uniform vec3 ambient_light = vec3(1.0);
+uniform vec3 light_gains[3];
+uniform vec3 light_directions[3];
 
 varying float face_center_depth;
 varying float hide_polygon;
 
+// Lit per vertex, as the PS1 did. Per pixel, a face straddling two lights gets a dark band
+// where both dot products clamp to 0.
+varying vec3 v_diffuse;
+// Only read when `lighting_per_vertex` is false, i.e. the debug comparison path.
+varying vec3 v_normal;
+
+vec3 psx_diffuse(vec3 n) {
+	vec3 lit = vec3(0.0);
+	for (int i = 0; i < 3; i++) {
+		float d = dot(n, light_directions[i]);
+		if (d > 0.0) {
+			lit += light_gains[i] * d;
+		}
+	}
+	return lit;
+}
+
 void vertex() {
+	v_normal = NORMAL;
+	v_diffuse = psx_diffuse(normalize(NORMAL));
+
 	vec4 centroid_clip = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(CUSTOM0.xyz, 1.0);
-	face_center_depth = centroid_clip.z / centroid_clip.w;
+	face_center_depth = psx_window_depth(centroid_clip.z / centroid_clip.w);
 
 	hide_polygon = 0.0;
 	// see MapData.DirectionFlag
@@ -69,14 +107,27 @@ void fragment() {
 	}
 
 	// palette animation/swap
+	// COLOR here is a switch, not shading: a non-black vertex colour selects the
+	// textured/palette path, black selects the untextured "black polygon" path.
 	if (COLOR.rgb != vec3(0.0, 0.0, 0.0)) {
 		vec4 new_color = palettes_colors[int(round(texture(albedo_texture_color_indicies, new_uv).r * 255.0))];
 		if (new_color.a < 0.5) {
 			discard;
 		}
-		ALBEDO.rgb = new_color.rgb;
+		// Tint before lighting: the palette track rewrites the CLUT entry the polygon is lit
+		// through. Tinting after the multiply barely moves dark faces and blows out bright ones.
+		vec3 base = color_apply(new_color.rgb, 0);
+		if (lighting_enabled) {
+			vec3 diffuse = lighting_per_vertex ? v_diffuse : psx_diffuse(normalize(v_normal));
+			// The model's only clamp. No `ambient x 1.5` fudge: that compensates for clamping
+			// gains, which this does not do.
+			base = clamp(base * (ambient_light + diffuse), vec3(0.0), vec3(1.0));
+		}
+		ALBEDO.rgb = base;
 	}
 	else {
+		// Untextured flat-colour polygons carry no palette index and no normal, so there
+		// is nothing to tint or light.
 		ALBEDO.rgb = COLOR.rgb;
 	}
 	if (debug_depth) {

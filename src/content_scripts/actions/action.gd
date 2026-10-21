@@ -114,7 +114,6 @@ var separate_status: bool = false
 
 @export var vfx_name: String
 @export var vfx_id: int = 0
-var vfx_data: VisualEffectData
 
 @export var user_shared_vfx_handler_id: int = 0 # 0 = no shared_vfx, >0 = handler ID from charging_vfx_ids -> shared_vfx_handler_ids
 @export var target_shared_vfx_handler_id: int = 0 # 0 = no shared_vfx, >0 = handler ID from charging_vfx_ids -> shared_vfx_handler_ids
@@ -267,8 +266,10 @@ static func get_element_types_array(element_bitflags: PackedByteArray) -> Array[
 
 
 static func get_modified_action(action_to_modify: Action, user: Unit) -> Action:
+	if action_to_modify == null:
+		push_error("Action.get_modified_action: null action")
+		return null
 	var modified_action: Action = action_to_modify.duplicate()
-	modified_action.vfx_data = action_to_modify.vfx_data
 	modified_action.user_shared_vfx_handler_id = action_to_modify.user_shared_vfx_handler_id
 	var all_passive_effects: Array[PassiveEffect] = user.get_all_passive_effects(action_to_modify.ignore_passives)
 

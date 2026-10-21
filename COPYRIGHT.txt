@@ -7,3 +7,7 @@ Files: res://src/audio/select_002.ogg
 Author: kenny.nl
 License: Creative Commons CC0 https://creativecommons.org/publicdomain/zero/1.0/
 Source: https://kenney.nl/assets/interface-sounds
+
+Files: res://addons/exmateria_effects/*, res://addons/exmateria_platform/*, res://addons/exmateria_render/*, res://addons/exmateria_schema/*
+Author: timbermania
+License: MIT License, see LICENSE.txt in each addon folder

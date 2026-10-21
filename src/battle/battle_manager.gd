@@ -5,6 +5,8 @@ signal map_input_event(action_instance: ActionInstance, camera: Camera3D, event:
 signal unit_created(new_unit: Unit)
 signal delayed_action_completed
 
+const EffectExtractPaths := preload("res://src/file_formats/vfx/effect_extract.gd")
+
 const SCALE: float = 1.0 / FftMapData.TILE_SIDE_LENGTH
 const SCALED_UNITS_PER_HEIGHT: float = SCALE * FftMapData.UNITS_PER_HEIGHT
 
@@ -19,7 +21,7 @@ const SCALED_UNITS_PER_HEIGHT: float = SCALE * FftMapData.UNITS_PER_HEIGHT
 @export var orthographic_check: CheckBox
 @export var camera_controller: CameraController
 var main_camera: Camera3D
-@export var background_gradient: TextureRect
+@export var background_gradient: ScreenBackground
 
 @export var maps: Node3D
 var total_map_tiles: Dictionary[Vector2i, Array] = {} # Array[TerrainTile]
@@ -45,8 +47,10 @@ var current_cursor_map_position: Vector3
 @export var game_state_label: Label
 @export var scenario_editor: ScenarioEditor
 
-var trap_instance: TrapEffectInstance
 var projectile_instance: ProjectileEffectInstance
+
+## The ability-VFX path. Built in `on_data_ready` once the camera is in the tree.
+var effects_playback: EffectsPlayback
 
 var event_num: int = 0 # TODO handle event timeline
 
@@ -137,14 +141,6 @@ func on_data_ready() -> void:
 	#push_warning("on data ready")
 	load_rom_button.visible = false
 
-	if trap_instance != null:
-		trap_instance.stop()
-		trap_instance.queue_free()
-	trap_instance = TrapEffectInstance.new()
-	trap_instance.name = "TrapEffectInstance"
-	battle_view.add_child(trap_instance)
-	trap_instance.initialize()
-
 	if projectile_instance != null:
 		projectile_instance.stop()
 		projectile_instance.queue_free()
@@ -153,6 +149,8 @@ func on_data_ready() -> void:
 	battle_view.add_child(projectile_instance)
 	projectile_instance.initialize()
 
+	_initialize_effects_playback()
+
 	scenario_editor.populate_option_lists()
 	scenario_editor.visible = true
 	# var default_scenario: Scenario = GameData.get_scenario("map_032_slums_in_dorter_01")
@@ -160,6 +158,35 @@ func on_data_ready() -> void:
 	# scenario_editor.init_scenario(default_scenario)
 	scenario_editor.init_scenario()
 	set_unit_statbars_visible(show_statbar_check.button_pressed)
+
+
+## Stand up `addons/exmateria_effects` for this battle. Casts are parented here, not under
+## `battle_view`: `EffectsCastHost` reads this node's `units` and `total_map_tiles`, and
+## `battle_view` is reparented in and out of the editor's SubViewport.
+func _initialize_effects_playback() -> void:
+	if effects_playback != null:
+		effects_playback.shutdown()
+		effects_playback.queue_free()
+	effects_playback = EffectsPlayback.new()
+	effects_playback.name = "EffectsPlayback"
+	effects_playback.enabled = true
+	effects_playback.battle_manager = self
+	# The rig, not `main_camera`: effects orbit a focus point, and the takeover must drop and
+	# restore `follow_node`.
+	effects_playback.camera_rig = camera_controller
+	# Set at runtime: the content is ROM-derived and lives with the imported data. Left empty
+	# when absent, so `initialize()` refuses with a reason instead of failing per cast.
+	var effects_content_root: String = EffectExtractPaths.content_root()
+	if DirAccess.dir_exists_absolute(EffectExtractPaths.effects_dir(effects_content_root)):
+		effects_playback.content_root = effects_content_root
+	add_child(effects_playback)
+	# Refusal is an ordinary outcome: stock GL, no content, or no camera.
+	if not effects_playback.initialize(main_camera):
+		push_warning("BattleManager: ability VFX unavailable — "
+			+ effects_playback.unavailable_reason)
+	else:
+		print("BattleManager: ability VFX ready (exmateria_effects, content root %s)"
+			% effects_content_root)
 
 
 func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:

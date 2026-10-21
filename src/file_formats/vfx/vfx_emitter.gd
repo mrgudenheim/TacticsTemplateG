@@ -2,7 +2,6 @@ class_name VfxEmitter
 extends Resource
 
 ## Unit conversion constants (FFT raw → Godot units)
-## These match godot-learning/tools/transform_for_godot.py
 const POSITION_DIVISOR: float = 28.0           ## FFT world units → Godot tile units
 const VELOCITY_DIVISOR: float = 14336.0        ## raw → Godot units/frame
 const ACCEL_DIVISOR: float = 114688.0          ## raw → Godot units/frame² (4096 * 28)
@@ -109,7 +108,7 @@ var vfx_data: VisualEffectData
 @export var child_emitter_idx_on_death: int = 0
 @export var child_emitter_idx_on_interval: int = 0
 
-## Converted fields (Godot units, matching godot-learning's EffectEmitter)
+## Converted fields (Godot units)
 ## Positions: / 28.0 with Y-flip
 @export var conv_position_start: Vector3 = Vector3.ZERO
 @export var conv_position_end: Vector3 = Vector3.ZERO

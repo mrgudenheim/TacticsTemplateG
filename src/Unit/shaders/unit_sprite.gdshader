@@ -8,6 +8,15 @@ uniform bool billboard_enabled = false;
 
 #include "res://src/shaders/psx_depth_common.gdshaderinc"
 
+// Effects recolour a unit through these `color_layer_*` uniforms, which `TintedSurfaces`
+// writes once `UnitSpritesManager.bind_tint_surface` registers it; until then
+// `color_apply()` is a no-op. Keep in sync with `map_shader.gdshader`.
+#include "res://addons/exmateria_schema/colour_model/color_stack.gdshaderinc"
+
+// Which part this material paints (`UnitSpritesManager.SURFACE_*`). The three need distinct
+// ids, or a change meant for one recolours all three. 0 for unregistered materials.
+uniform int color_surface_id : hint_range(0, 2) = 0;
+
 void vertex() {
 	if (billboard_enabled) {
 		mat4 modified_model_view = VIEW_MATRIX * mat4(
@@ -21,18 +30,9 @@ void vertex() {
 		MODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);
 	}
 	
-	vec3 world_pos = MODEL_MATRIX[3].xyz;
-	vec3 cam_dir = normalize(INV_VIEW_MATRIX[3].xyz - world_pos);
-	float bias = depth_bias_custom;
-	if (depth_mode == 1) bias = bias_pull_8;
-	else if (depth_mode == 2) bias = bias_fixed_front;
-	else if (depth_mode == 3) bias = bias_fixed_back;
-	else if (depth_mode == 4) bias = bias_fixed_16;
-	else if (depth_mode == 5) bias = bias_pull_16;
-	else if (depth_mode == 6) bias = bias_unit;
-	else if (depth_mode == 7) bias = bias_tile_overlay;
-	vec4 clip_pos = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world_pos + cam_dir * bias, 1.0);
-	computed_depth = clip_pos.z / clip_pos.w;
+	computed_depth = psx_depth(
+		MODEL_MATRIX[3].xyz, PROJECTION_MATRIX, VIEW_MATRIX,
+		INV_VIEW_MATRIX[3].xyz, depth_mode, depth_bias_custom);
 }
 
 void fragment() {
@@ -43,6 +43,8 @@ void fragment() {
 	if (col.a < 0.5) {
 		discard;
 	}
-	ALBEDO = clamp(col.rgb + unit_tint, vec3(0.0), vec3(1.0));
+	// Effect colours replace the palette entry first, as on the PSX; `unit_tint` is
+	// TacticsG's own highlight, added on top.
+	ALBEDO = clamp(color_apply(col.rgb, color_surface_id) + unit_tint, vec3(0.0), vec3(1.0));
 	DEPTH = computed_depth;
 }

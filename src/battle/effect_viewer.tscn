@@ -1,0 +1,60 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/battle/effect_viewer.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://7tn6b6eup5na" path="res://src/camera_controller.tscn" id="2_camera"]
+[ext_resource type="PackedScene" uid="uid://c7upwdml4aygu" path="res://src/external_data_manager/external_data_setup_panel.tscn" id="3_data"]
+[ext_resource type="Script" uid="uid://b3i55ho4jel58" path="res://src/battle/screen_background.gd" id="4_background"]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 3
+background_canvas_max_layer = -3
+
+[sub_resource type="Gradient" id="Gradient_1"]
+colors = PackedColorArray(0.1332, 0.14724, 0.18, 1, 0.39, 0.695, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_1"]
+gradient = SubResource("Gradient_1")
+fill_from = Vector2(0.5, 1)
+fill_to = Vector2(0.5, 0)
+
+[node name="EffectViewer" type="Node3D" node_paths=PackedStringArray("camera_controller", "maps_container", "ui_root")]
+script = ExtResource("1_script")
+camera_controller = NodePath("CameraController")
+maps_container = NodePath("Maps")
+ui_root = NodePath("UI/Root")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.553391, -0.832921, 0, 0.832921, 0.553391, 0, 3.51982, 2.72607)
+
+[node name="BackgroundCanvasLayer" type="CanvasLayer" parent="."]
+layer = -3
+
+[node name="TextureRect" type="TextureRect" parent="BackgroundCanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_1")
+script = ExtResource("4_background")
+
+[node name="CameraController" parent="." instance=ExtResource("2_camera")]
+transform = Transform3D(0.707107, -0.315509, 0.632814, 0, 0.894934, 0.446198, -0.707107, -0.315509, 0.632814, 0, 0, 0)
+
+[node name="Maps" type="Node3D" parent="."]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Root" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ExternalDataSetupPanel" parent="." instance=ExtResource("3_data")]

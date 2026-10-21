@@ -22,6 +22,7 @@
 [ext_resource type="Script" uid="uid://dexgwf7yyfugb" path="res://src/battle/editor/skillset_select_control.gd" id="24_4y57l"]
 [ext_resource type="PackedScene" uid="uid://b5vkgg46x06pf" path="res://src/battle/editor/skillset_select_button.tscn" id="25_envfv"]
 [ext_resource type="PackedScene" path="res://src/battle/debug_overlay.tscn" id="debug_overlay"]
+[ext_resource type="Script" path="res://src/battle/screen_background.gd" id="screen_background"]
 
 [sub_resource type="Environment" id="Environment_njvnp"]
 background_mode = 3
@@ -104,6 +105,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("GradientTexture2D_1dnhu")
+script = ExtResource("screen_background")
 
 [node name="LoadRom" parent="." unique_id=801972973 instance=ExtResource("9_pbg35")]
 visible = false

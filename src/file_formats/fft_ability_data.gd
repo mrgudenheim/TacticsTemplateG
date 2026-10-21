@@ -332,7 +332,6 @@ func set_action() -> void:
 	ability_action.animation_charging_id = animation_charging_id
 	ability_action.animation_executing_id = animation_executing_id
 	
-	ability_action.vfx_data = vfx_data
 	ability_action.vfx_id = vfx_data.vfx_id
 	ability_action.vfx_name = vfx_data.unique_name
 

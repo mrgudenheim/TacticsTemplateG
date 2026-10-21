@@ -10,7 +10,6 @@ signal data_updated(unit: Unit)
 signal ability_assigned(name: String)
 signal ability_completed()
 signal primary_weapon_assigned(item_unique_name: String)
-signal image_changed(new_image: ImageTexture)
 signal knocked_out(unit: Unit)
 signal spritesheet_changed(new_spritesheet: ImageTexture)
 @warning_ignore("unused_signal")
@@ -330,7 +329,22 @@ func _ready() -> void:
 		initialize_unit()
 
 
+## Register this unit's sprite materials under `char_body`'s instance id so effects can
+## recolour them. `_enter_tree`, not `_ready`: the scenario editor takes units out of the tree
+## and back, and `_exit_tree` unregisters.
+func _enter_tree() -> void:
+	if char_body == null or animation_manager == null:
+		return
+	var sprites: UnitSpritesManager = animation_manager.unit_sprites_manager
+	if sprites != null:
+		sprites.bind_tint_surface(char_body.get_instance_id())
+
+
 func _exit_tree() -> void:
+	# Unconditional: a dead unit left registered leaks its materials, and its reused instance
+	# id would recolour some other object.
+	if animation_manager != null and animation_manager.unit_sprites_manager != null:
+		animation_manager.unit_sprites_manager.unbind_tint_surface()
 	if global_battle_manager != null and is_queued_for_deletion():
 		var unit_index: int = global_battle_manager.units.find(self)
 		for action_instance: ActionInstance in actions_data.values():
@@ -384,7 +398,9 @@ func initialize_unit() -> void:
 	eff_material.set_shader_parameter("sprite_texture", eff_frame_grid)
 	eff_material.set_shader_parameter("palette_colors", GameData.get_spritesheet_data("eff").color_palette.slice(0 * 16, 1 * 16))
 	eff_material.set_shader_parameter("depth_mode", VfxConstants.DepthMode.UNIT)
-	animation_manager.unit_sprites_manager.sprite_effect.material_override = eff_material
+	# Through the manager, not onto the Sprite3D, so this per-unit duplicate is what gets
+	# registered for tinting rather than the scene's shared material.
+	animation_manager.unit_sprites_manager.set_effect_material(eff_material)
 
 	#animation_manager.item_spr = RomReader.sprs[RomReader.file_records["ITEM.BIN"].type_index]
 	
@@ -638,6 +654,8 @@ func equip_ability(slot: AbilitySlot, ability: Ability) -> void:
 
 
 func equip_skillset(skillset_idx: int, new_skillset: Skillset) -> void:
+	if new_skillset == null:
+		return
 	skillsets_names[skillset_idx] = new_skillset.unique_name
 	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
 	set_available_actions(all_passive_effects)
@@ -722,6 +740,8 @@ func update_actions(battle_manager: BattleManager) -> void:
 	# set_available_actions(get_all_passive_effects())
 	for action: Action in actions:
 		var modified_action: Action = Action.get_modified_action(action, self)
+		if modified_action == null:
+			continue
 		var new_action_instance: ActionInstance = ActionInstance.new(modified_action, self, battle_manager)
 		actions_data[modified_action.unique_name] = new_action_instance
 		
@@ -737,7 +757,9 @@ func update_actions(battle_manager: BattleManager) -> void:
 func set_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
 	actions.clear()
 	actions.append(move_action)
-	actions.append(get_attack_action())
+	var attack_action: Action = get_attack_action()
+	if attack_action != null:
+		actions.append(attack_action)
 	actions.append_array(get_skillset_actions()) # TODO move to skillset ability
 
 	for passive_effect: PassiveEffect in all_passive_effects:
@@ -1118,8 +1140,12 @@ func use_ability(pos: Vector3) -> void:
 	#new_vfx_location.name = "VfxLocation"
 	#get_parent().add_child(new_vfx_location)
 	var action_instance: ActionInstance = ActionInstance.new(action_data, self, global_battle_manager)
-	if is_instance_valid(action_instance.action.vfx_data):
-		action_instance.show_vfx(pos)
+	# The raycast gives a point, not a unit, hence the `_at` variant. `char_body`, not `self`:
+	# a Unit is never positioned, so `self` would spawn the cast at the world origin.
+	if global_battle_manager != null and global_battle_manager.effects_playback != null \
+			and char_body != null:
+		global_battle_manager.effects_playback.play_action_vfx_at(
+			char_body, pos, action_instance.action)
 	
 	# TODO implement proper timeout for abilities that execute using an infinite loop animation
 	# this implementation can overwrite can_move when in the middle of another ability
@@ -1343,7 +1369,9 @@ func set_job(new_job_name: String) -> void:
 	set_sprite_by_job(new_job_name)
 	
 	# skillsets_names.fill("")
-	equip_skillset(0, GameData.get_skillset(job_data.skillset_unique_name))
+	var job_skillset: Skillset = GameData.get_skillset(job_data.skillset_unique_name)
+	if job_skillset != null:
+		equip_skillset(0, job_skillset)
 	
 	job_nickname = job_data.display_name
 	
@@ -1364,18 +1392,14 @@ func set_job(new_job_name: String) -> void:
 func set_ability(new_action_name: String) -> void:
 	active_ability_name = new_action_name
 	action_data = GameData.get_action(new_action_name)
-	
-	# if not action_data.vfx_data.is_initialized:
-	# 	action_data.vfx_data.init_from_file()
-	
-	image_changed.emit(GameData.get_texture(action_data.vfx_name))
-	#debug_menu.sprite_viewer.texture = ImageTexture.create_from_image(action_data.vfx_data.vfx_spr.spritesheet)
 	ability_assigned.emit(new_action_name)
 
 
 func set_primary_weapon(new_weapon_unique_name: String) -> void:
 	equip_slots[0].item_unique_name = new_weapon_unique_name
 	primary_weapon = GameData.get_item(new_weapon_unique_name)
+	if primary_weapon == null:
+		return
 	#animation_manager.weapon_id = new_weapon_id
 	var weapon_palette_id: int = primary_weapon.wep_frame_palette
 	var weapon_eff_id: int = primary_weapon.wep_eff_palette
@@ -1531,6 +1555,8 @@ func get_native_passive_effects(exclude_passives: PackedStringArray = []) -> Arr
 	if global_battle_manager != null:
 		native_passive_effects.append_array(global_battle_manager.global_passive_effects)
 
+	# Any source above can yield null when its name is not indexed; drop those before dereferencing.
+	native_passive_effects = native_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return passive_effect != null)
 	native_passive_effects = native_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return passive_effect.effect_range == 0)
 	native_passive_effects = native_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return not exclude_passives.has(passive_effect.unique_name))
 	
@@ -1666,6 +1692,14 @@ func modulate_sprite_color(new_modulate_color: Color) -> void:
 
 func set_sprite_tint(tint: Vector3) -> void:
 	animation_manager.unit_sprites_manager.set_tint(tint)
+
+
+## The id this unit's sprite materials are registered under, or 0 while out of the tree.
+## Pass it to `TintedSurfaces.update_stack`, `update_layer` or `remove_layer` to colour the unit.
+func tint_surface_token() -> int:
+	if animation_manager == null or animation_manager.unit_sprites_manager == null:
+		return 0
+	return animation_manager.unit_sprites_manager.tint_surface_token()
 
 
 func set_submerged_depth(new_depth: int) -> void:

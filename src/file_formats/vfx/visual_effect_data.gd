@@ -329,7 +329,7 @@ func init_from_file() -> void:
 	section_start = section_offsets[section_num]
 	timer_data_bytes = vfx_bytes.slice(section_start, section_offsets[section_num + 1])
 
-	# Phase timing from TIMELINES section header (matches godot-learning)
+	# Phase timing from TIMELINES section header
 	phase1_duration = timer_data_bytes.decode_u16(4)
 	# var target_switching_delay: int = timer_data_bytes.decode_u16(6) # unused?
 	phase2_offset = timer_data_bytes.decode_u16(10)

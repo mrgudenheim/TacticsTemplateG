@@ -19,7 +19,6 @@ var seqs: Dictionary[String, Seq] = {} # [unique_name (eg. filename without exte
 var maps_gltf: Dictionary[String, Node] = {}
 var maps_data: Dictionary[String, MapData] = {} # var map_tiles: Dictionary[Vector2i, Array] = {} # Array[TerrainTile], palettes, animations
 var map_tile_meshes: Dictionary[TerrainTile.SlopeType, ArrayMesh] = {}
-var vfx: Dictionary[String, VisualEffectData] = {}
 var shared_vfx_data: TrapEffectData
 var projectiles_gltf: Dictionary[String, Node] = {}
 var items: Dictionary[String, ItemData] = {} # [unique_name, ItemData]
@@ -43,7 +42,6 @@ var shp_paths: Dictionary[String, String] = {}
 var seq_paths: Dictionary[String, String] = {}
 var map_gltf_paths: Dictionary[String, String] = {}
 var map_data_paths: Dictionary[String, String] = {}
-var vfx_data_paths: Dictionary[String, String] = {}
 var item_paths: Dictionary[String, String] = {}
 var status_effect_paths: Dictionary[String, String] = {}
 var job_paths: Dictionary[String, String] = {}
@@ -67,21 +65,26 @@ func _ready() -> void:
 
 
 func _get_saved_data_paths() -> Dictionary [String, String]:
+	var paths: Dictionary[String, String] = {"IMPORT_PATH": "", "ROM_PATH": "", "EXPORT_PATH": ""}
 	var file: FileAccess = FileAccess.open(DATA_PATH_CONFIG, FileAccess.READ)
 	if file == null:
 		var err: Error = FileAccess.get_open_error()
-		push_error(err)
-		return {
-			"IMPORT_PATH" : "",
-			"ROM_PATH" : "",
-			"EXPORT_PATH" : "",
-		}
+		if err != ERR_FILE_NOT_FOUND:
+			push_error("Cannot read data path configuration: " + error_string(err))
+		return paths
 
-	var file_text: String = file.get_as_text()
-	var untyped_dict : Dictionary = JSON.parse_string(file_text)
-	var typed_dict : Dictionary[String, String] = {}
-	typed_dict.assign(untyped_dict)
-	return typed_dict
+	var json: JSON = JSON.new()
+	if json.parse(file.get_as_text()) != OK or not json.data is Dictionary:
+		push_warning("Invalid data path configuration; using empty paths without overwriting the file")
+		return paths
+	for key: String in paths:
+		if not json.data.has(key):
+			continue
+		if json.data[key] is String:
+			paths[key] = json.data[key]
+		else:
+			push_warning("Ignoring non-string data path: " + key)
+	return paths
 
 
 func save_data_paths() -> void:
@@ -97,7 +100,6 @@ func clear_data() -> void:
 	maps_gltf = {}
 	maps_data = {}
 	map_tile_meshes = {}
-	vfx = {}
 	projectiles_gltf = {}
 	items = {} 
 	status_effects = {} 
@@ -118,7 +120,6 @@ func clear_data() -> void:
 	seq_paths.clear()
 	map_gltf_paths.clear()
 	map_data_paths.clear()
-	vfx_data_paths.clear()
 	item_paths.clear()
 	status_effect_paths.clear()
 	job_paths.clear()
@@ -215,8 +216,6 @@ func index_data(directory_path: String) -> void:
 		elif file_path.ends_with("animation_data.tres"):
 			var new_animation_data: AnimationData = ResourceLoader.load(file_path, "AnimationData")
 			animation_layer_priorities = new_animation_data.animation_layer_priorities.duplicate()
-		elif file_path.to_lower().ends_with(".vfx_data.tres"):
-			vfx_data_paths[file_path.get_file().trim_suffix(".vfx_data.tres")] = file_path
 		elif file_path.to_lower().ends_with("shared_vfx.data.tres"):
 			shared_vfx_data = ResourceLoader.load(file_path, "TrapEffectData")
 		elif file_path.ends_with(".projectile.glb"):
@@ -233,11 +232,22 @@ func index_data(directory_path: String) -> void:
 	data_indexed.emit()
 
 
+## An empty name means the data has none (a job without a skillset, a unit without a
+## weapon), so it is not reported. A non-empty name that is not indexed is bad data.
+func _report_missing(kind: String, unique_name: String) -> void:
+	if unique_name.is_empty():
+		return
+	push_error("GameData: no indexed %s named \"%s\" (is the import path set and indexed?)" % [kind, unique_name])
+
+
 ## Lazy loading functions
 func get_shp(unique_name: String) -> Shp:
 	if shps.has(unique_name):
 		return shps[unique_name]
 	
+	if not shp_paths.has(unique_name):
+		_report_missing("shp", unique_name)
+		return null
 	var file_path: String = shp_paths[unique_name]
 	var new_shp: Shp = ResourceLoader.load(file_path, "Shp")
 	new_shp.is_initialized = true
@@ -249,6 +259,9 @@ func get_seq(unique_name: String) -> Seq:
 	if seqs.has(unique_name):
 		return seqs[unique_name]
 	
+	if not seq_paths.has(unique_name):
+		_report_missing("seq", unique_name)
+		return null
 	var file_path: String = seq_paths[unique_name]
 	var new_seq: Seq = ResourceLoader.load(file_path, "Seq")
 	new_seq.is_initialized = true
@@ -260,6 +273,9 @@ func get_map_gltf(unique_name: String) -> Node:
 	if maps_gltf.has(unique_name):
 		return maps_gltf[unique_name]
 	
+	if not map_gltf_paths.has(unique_name):
+		_report_missing("map_gltf", unique_name)
+		return null
 	var file_path: String = map_gltf_paths[unique_name]
 	maps_gltf[unique_name] = GltfManager.import_gltf(file_path)
 	return maps_gltf[unique_name]
@@ -269,6 +285,9 @@ func get_map_gltf_mesh(unique_name: String) -> MeshInstance3D:
 	#if maps_gltf.has(unique_name):
 		#return maps_gltf[unique_name]
 	
+	if not map_gltf_paths.has(unique_name):
+		_report_missing("map_gltf", unique_name)
+		return null
 	var file_path: String = map_gltf_paths[unique_name]
 	var mesh_instance: MeshInstance3D = GltfManager.import_gltf_mesh(file_path)
 	return mesh_instance
@@ -278,6 +297,9 @@ func get_map_data(unique_name: String) -> MapData:
 	if maps_data.has(unique_name):
 		return maps_data[unique_name]
 	
+	if not map_data_paths.has(unique_name):
+		_report_missing("map_data", unique_name)
+		return null
 	var file_path: String = map_data_paths[unique_name]
 	var new_map_data: MapData = ResourceLoader.load(file_path, "MapData")
 	var mesh_instance: MeshInstance3D = get_map_gltf_mesh(new_map_data.unique_name)
@@ -287,21 +309,13 @@ func get_map_data(unique_name: String) -> MapData:
 	return maps_data[unique_name]
 
 
-func get_vfx_data(unique_name: String) -> VisualEffectData:
-	if vfx.has(unique_name):
-		return vfx[unique_name]
-	
-	var file_path: String = vfx_data_paths[unique_name]
-	var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")
-	new_vfx.texture = get_texture(new_vfx.unique_name)
-	vfx[unique_name] = new_vfx
-	return vfx[unique_name]
-
-
 func get_item(unique_name: String) -> ItemData:
 	if items.has(unique_name):
 		return items[unique_name]
 	
+	if not item_paths.has(unique_name):
+		_report_missing("item", unique_name)
+		return null
 	var file_path: String = item_paths[unique_name]
 	var file_text: String = FileAccess.get_file_as_string(file_path)
 	items[unique_name] = ItemData.create_from_json(file_text)
@@ -312,6 +326,9 @@ func get_status_effect(unique_name: String) -> StatusEffect:
 	if status_effects.has(unique_name):
 		return status_effects[unique_name]
 	
+	if not status_effect_paths.has(unique_name):
+		_report_missing("status_effect", unique_name)
+		return null
 	var file_path: String = status_effect_paths[unique_name]
 	status_effects[unique_name] = ResourceLoader.load(file_path, "StatusEffect")
 	return status_effects[unique_name]
@@ -321,6 +338,9 @@ func get_job(unique_name: String) -> JobData:
 	if jobs_data.has(unique_name):
 		return jobs_data[unique_name]
 	
+	if not job_paths.has(unique_name):
+		_report_missing("job", unique_name)
+		return null
 	var file_path: String = job_paths[unique_name]
 	var file_text: String = FileAccess.get_file_as_string(file_path)
 	jobs_data[unique_name] = JobData.create_from_json(file_text)
@@ -331,6 +351,9 @@ func get_skillset(unique_name: String) -> Skillset:
 	if skillsets.has(unique_name):
 		return skillsets[unique_name]
 	
+	if not skillset_paths.has(unique_name):
+		_report_missing("skillset", unique_name)
+		return null
 	var file_path: String = skillset_paths[unique_name]
 	skillsets[unique_name] = ResourceLoader.load(file_path, "Skillset")
 	return skillsets[unique_name]
@@ -340,11 +363,12 @@ func get_action(unique_name: String) -> Action:
 	if actions.has(unique_name):
 		return actions[unique_name]
 	
+	if not action_paths.has(unique_name):
+		_report_missing("action", unique_name)
+		return null
 	var file_path: String = action_paths[unique_name]
 	var file_text: String = FileAccess.get_file_as_string(file_path)
 	var new_action: Action = Action.create_from_json(file_text)
-	if new_action.vfx_name != "":
-		new_action.vfx_data = get_vfx_data(new_action.vfx_name)
 	actions[unique_name] = new_action
 	return actions[unique_name]
 
@@ -353,6 +377,9 @@ func get_triggered_action(unique_name: String) -> TriggeredAction:
 	if triggered_actions.has(unique_name):
 		return triggered_actions[unique_name]
 	
+	if not triggered_action_paths.has(unique_name):
+		_report_missing("triggered_action", unique_name)
+		return null
 	var file_path: String = triggered_action_paths[unique_name]
 	var file_text: String = FileAccess.get_file_as_string(file_path)
 	triggered_actions[unique_name] = TriggeredAction.create_from_json(file_text)
@@ -363,6 +390,9 @@ func get_passive_effect(unique_name: String) -> PassiveEffect:
 	if passive_effects.has(unique_name):
 		return passive_effects[unique_name]
 	
+	if not passive_effect_paths.has(unique_name):
+		_report_missing("passive_effect", unique_name)
+		return null
 	var file_path: String = passive_effect_paths[unique_name]
 	var file_text: String = FileAccess.get_file_as_string(file_path)
 	passive_effects[unique_name] = PassiveEffect.create_from_json(file_text)
@@ -373,6 +403,9 @@ func get_ability(unique_name: String) -> Ability:
 	if abilities.has(unique_name):
 		return abilities[unique_name]
 	
+	if not ability_paths.has(unique_name):
+		_report_missing("ability", unique_name)
+		return null
 	var file_path: String = ability_paths[unique_name]
 	var file_text: String = FileAccess.get_file_as_string(file_path)
 	abilities[unique_name] = Ability.create_from_json(file_text)
@@ -383,6 +416,9 @@ func get_scenario(unique_name: String) -> Scenario:
 	if scenarios.has(unique_name):
 		return scenarios[unique_name]
 	
+	if not scenario_paths.has(unique_name):
+		_report_missing("scenario", unique_name)
+		return null
 	var file_path: String = scenario_paths[unique_name]
 	var file_text: String = FileAccess.get_file_as_string(file_path)
 	scenarios[unique_name] = Scenario.create_from_json(file_text)
@@ -393,6 +429,9 @@ func get_texture(unique_name: String) -> Texture2D:
 	if textures.has(unique_name):
 		return textures[unique_name]
 	
+	if not texture_paths.has(unique_name):
+		_report_missing("texture", unique_name)
+		return null
 	var file_path: String = texture_paths[unique_name]
 	var new_image: Image = Image.load_from_file(file_path)
 	textures[unique_name] = ImageTexture.create_from_image(new_image)
@@ -403,6 +442,9 @@ func get_spritesheet_data(unique_name: String) -> UnitSpritesheetData:
 	if unit_spritesheets_data.has(unique_name):
 		return unit_spritesheets_data[unique_name]
 	
+	if not unit_spritesheet_data_paths.has(unique_name):
+		_report_missing("unit_spritesheet_data", unique_name)
+		return null
 	var file_path: String = unit_spritesheet_data_paths[unique_name]
 	unit_spritesheets_data[unique_name] = ResourceLoader.load(file_path, "UnitSpritesheetData")
 	return unit_spritesheets_data[unique_name]
@@ -417,8 +459,6 @@ func load_all_data() -> void:
 		get_map_gltf(file_name)
 	for file_name: String in map_data_paths.keys():
 		get_map_data(file_name)
-	for file_name: String in vfx_data_paths.keys():
-		get_vfx_data(file_name)
 	for file_name: String in item_paths.keys():
 		get_item(file_name)
 	for file_name: String in status_effect_paths.keys():
