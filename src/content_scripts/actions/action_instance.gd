@@ -728,7 +728,7 @@ func apply_standard() -> void:
 		return
 
 	# pay costs
-	user.mp -= action.mp_cost
+	user.stats[Unit.StatType.MP].add_value(-action.mp_cost)
 
 	# wait for triggered actions
 	if allow_triggering_actions:
