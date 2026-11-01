@@ -61,7 +61,7 @@ func _init(new_formula_text: String = "0.0", new_values: PackedFloat64Array = [1
 	reverse_sign = new_reverse_sign
 
 
-func get_result(user: Unit, target: Unit, element: Action.ElementTypes) -> float:
+func get_result(user: UnitData, target: UnitData, element: Action.ElementTypes) -> float:
 	var result: float = get_base_value(user, target)
 	
 	match user_faith_modifier:
@@ -85,7 +85,7 @@ func get_result(user: Unit, target: Unit, element: Action.ElementTypes) -> float
 	return result
 
 
-func get_expression_result(user: Unit, target: Unit) -> float:
+func get_expression_result(user: UnitData, target: UnitData) -> float:
 	var expression: Expression = Expression.new()
 	var error: Error = expression.parse(formula_text, ["user", "target", "values"])
 	if error != OK:
@@ -99,7 +99,7 @@ func get_expression_result(user: Unit, target: Unit) -> float:
 	return 0.0
 
 
-func get_base_value(user: Unit, target: Unit) -> float:
+func get_base_value(user: UnitData, target: UnitData) -> float:
 	var base_value: float = values[0]
 	base_value = get_expression_result(user, target)
 			
@@ -109,15 +109,15 @@ func get_base_value(user: Unit, target: Unit) -> float:
 	return base_value
 
 
-func faith_modify(value: float, unit: Unit) -> float:
+func faith_modify(value: float, unit: UnitData) -> float:
 	return value * unit.faith / 100.0
 
 
-func unfaith_modify(value: float, unit: Unit) -> float:
+func unfaith_modify(value: float, unit: UnitData) -> float:
 	return value * (100 - unit.faith) / 100.0
 
 
-func zodiac_modify(value: float, user: Unit, target: Unit) -> float:
+func zodiac_modify(value: float, user: UnitData, target: UnitData) -> float:
 	# TODO user vs target zodiac compatability
 	if user.zodiac != target.zodiac:
 		value = value * 1.25
@@ -125,7 +125,7 @@ func zodiac_modify(value: float, user: Unit, target: Unit) -> float:
 	return value
 
 
-func element_modify(value: float, user: Unit, target: Unit, element: Action.ElementTypes) -> float:
+func element_modify(value: float, user: UnitData, target: UnitData, element: Action.ElementTypes) -> float:
 	if target.elemental_cancel.has(element):
 		return 0.0
 	

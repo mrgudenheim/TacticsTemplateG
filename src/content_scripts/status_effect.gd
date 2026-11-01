@@ -124,7 +124,13 @@ static func get_status_id_array(status_bitflags: PackedByteArray) -> PackedStrin
 	return status_array
 
 
-func get_ai_score(user: Unit, target: Unit, remove: bool = false) -> float:
+func get_passive_effect() -> PassiveEffect:
+	if passive_effect_name != "" and GameData.passive_effect_paths.has(passive_effect_name):
+		passive_effect = GameData.get_passive_effect(passive_effect_name)
+	return passive_effect
+
+
+func get_ai_score(user: UnitData, target: UnitData, remove: bool = false) -> float:
 	var score: float = 0.0
 	if not remove and target.immune_statuses.has(unique_name):
 		return 0.0
@@ -134,7 +140,7 @@ func get_ai_score(user: Unit, target: Unit, remove: bool = false) -> float:
 		return 0.0
 	
 	score = ai_score_formula.get_base_value(user, target)
-	if target.team == user.team:
+	if target.team_idx == user.team_idx:
 		score = -score
 	
 	if not remove and current_statuses.size() >= num_allowed: # re-applying existing status

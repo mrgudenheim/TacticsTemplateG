@@ -122,7 +122,7 @@ func _spawn_unit(pos: Vector3, job_name: String, palette: int) -> Unit:
 	units_container.add_child(unit)
 	unit.initialize_unit()
 	unit.char_body.global_position = pos + Vector3(0, 0.25, 0)
-	unit.stat_basis = Unit.StatBasis.MALE
+	unit.stat_basis = UnitData.StatBasis.MALE
 	unit.set_job(job_name)
 	unit.set_sprite_palette(palette)
 	unit.update_unit_facing(Vector3.FORWARD)

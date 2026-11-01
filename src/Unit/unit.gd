@@ -23,60 +23,31 @@ signal reached_tile() # emited in use_move
 signal completed_move(this_unit: Unit, tile_moved: int) # emited in use_move
 signal turn_started(this_unit: Unit)
 signal turn_ended(this_unit: Unit)
-signal unit_input_event(unit_data: Unit, event: InputEvent)
+signal unit_input_event(unit_actor: Unit, event: InputEvent)
 signal paths_updated()
 
-enum StatBasis {
-	MALE,
-	FEMALE,
-	OTHER,
-	MONSTER,
-}
+const StatBasis = UnitData.StatBasis
+const Gender = UnitData.Gender
+const StatType = UnitData.StatType
+const Facings = UnitData.Facings
+const FACING_VECTORS: Dictionary[UnitData.Facings, Vector3] = UnitData.FACING_VECTORS
 
-enum Gender {
-	MALE,
-	FEMALE,
-	OTHER,
-	MONSTER,
-}
+static var unit_scene: PackedScene = null
 
-enum StatType {
-	HP,
-	HP_MAX,
-	MP,
-	MP_MAX,
-	CT,
-	MOVE,
-	JUMP,
-	SPEED,
-	PHYSICAL_ATTACK,
-	MAGIC_ATTACK,
-	BRAVE,
-	FAITH,
-	EXP,
-	LEVEL,
-}
-
-enum Facings {
-	NORTH,
-	EAST,
-	SOUTH,
-	WEST,
-}
-
-static var unit_scene: PackedScene = load("uid://dkudrb304m7t1")
-
-const FACING_VECTORS: Dictionary[Facings, Vector3] = {
-	Facings.NORTH: Vector3.BACK,
-	Facings.EAST: Vector3.RIGHT,
-	Facings.SOUTH: Vector3.FORWARD,
-	Facings.WEST: Vector3.LEFT,
-}
+var data: UnitData = UnitData.new()
+var _has_bound_external_data: bool = false
+var _scene_resources_initialized: bool = false
+var _rendered_sprite_name: String = ""
+var _rendered_palette_id: int = -1
 
 var global_battle_manager: BattleManager
 var team: Team
 var is_controlled_by_me: bool = false # for multiplayer games
-var is_ai_controlled: bool = false
+var is_ai_controlled: bool:
+	get:
+		return data.is_ai_controlled
+	set(value):
+		data.is_ai_controlled = value
 var ai_controller: UnitAi = UnitAi.new()
 
 @export var char_body: CharacterBody3D
@@ -97,168 +68,248 @@ var ai_controller: UnitAi = UnitAi.new()
 
 var is_defeated: bool:
 	get:
-		return current_statuses.any(func(status: StatusEffect) -> bool: return status.counts_as_ko) # returns false when no statuses
+		return data.is_defeated
 
 var is_ct_frozen: bool:
 	get:
-		return current_statuses.any(func(status: StatusEffect) -> bool: return status.freezes_ct) # returns false when no statuses
+		return data.is_ct_frozen
 
-@export var unit_nickname: String = "Unit Nickname"
-@export var job_nickname: String = "Job Nickname"
-@export var job_name: String = ""
+var unit_nickname: String:
+	get:
+		return data.display_name
+	set(value):
+		data.display_name = value
+var job_nickname: String:
+	get:
+		if data.job_data != null:
+			return data.job_data.display_name
+		return "Job Nickname"
+	set(_value):
+		pass
+var job_name: String:
+	get:
+		return data.job_unique_name
+	set(value):
+		data.job_unique_name = value
 
 var character_id: int = 0
 var unit_index_formation: int = 0
-var stat_basis: StatBasis = StatBasis.MALE
-var gender: Gender = Gender.MALE
+var stat_basis: UnitData.StatBasis:
+	get:
+		return data.stat_basis
+	set(value):
+		data.stat_basis = value
+var gender: UnitData.Gender:
+	get:
+		return data.gender
+	set(value):
+		data.gender = value
 var job_id: int = 0
-var job_data: JobData
-var sprite_palette_id: int = 0
+var job_data: JobData:
+	get:
+		return data.job_data
+	set(value):
+		data.job_data = value
+var sprite_palette_id: int:
+	get:
+		return data.palette_id
+	set(value):
+		data.palette_id = value
 var sprite_palette_id_override: int = -1
-var team_id: int = 0
+var team_id: int:
+	get:
+		return data.team_idx
+	set(value):
+		data.team_idx = value
 var player_control: bool = true
 
-var immortal: bool = false
-var immune_knockback: bool = false
+var immortal: bool:
+	get:
+		return data.immortal
+	set(value):
+		data.immortal = value
+var immune_knockback: bool:
+	get:
+		return data.immune_knockback
+	set(value):
+		data.immune_knockback = value
 var game_over_trigger: bool = false
 var type_id: int = 0 # male, female, monster
 var death_counter: int = 3
-var zodiac: String = "Ares"
+var zodiac: String:
+	get:
+		return data.zodiac
+	set(value):
+		data.zodiac = value
 
 var innate_ability_ids: PackedInt32Array = []
-var skillsets_names: PackedStringArray = []
+var skillsets_names: PackedStringArray:
+	get:
+		return data.skillsets_names
+	set(value):
+		data.skillsets_names = value
 # var skillsets: Array[Skillset] = []
 
-var equipable_item_types: Array[ItemData.ItemType] = []
-var primary_weapon: ItemData
-var equip_slots: Array[EquipmentSlot] = [
-	EquipmentSlot.new("RH", [ItemData.SlotType.WEAPON, ItemData.SlotType.SHIELD]),
-	EquipmentSlot.new("LH", [ItemData.SlotType.WEAPON, ItemData.SlotType.SHIELD]),
-	EquipmentSlot.new("Head", [ItemData.SlotType.HEADGEAR]),
-	EquipmentSlot.new("Body", [ItemData.SlotType.ARMOR]),
-	EquipmentSlot.new("Accesory", [ItemData.SlotType.ACCESSORY]),
-]
+var equipable_item_types: Array[ItemData.ItemType]:
+	get:
+		return data.equipable_item_types
+	set(value):
+		data.equipable_item_types = value
+var primary_weapon: ItemData:
+	get:
+		return data.primary_weapon
+	set(value):
+		data.primary_weapon = value
+var equip_slots: Array[EquipmentSlot]:
+	get:
+		return data.equip_slots
+	set(value):
+		data.equip_slots = value
 
-var ability_slots: Array[AbilitySlot] = [
-	# AbilitySlot.new("Skillset 1", [Ability.SlotType.SKILLSET]),
-	# AbilitySlot.new("Skillset 2", [Ability.SlotType.SKILLSET]),
-	AbilitySlot.new("Reaction", [Ability.SlotType.REACTION]),
-	AbilitySlot.new("Support", [Ability.SlotType.SUPPORT]),
-	AbilitySlot.new("Movement", [Ability.SlotType.MOVEMENT]),
-]
+var ability_slots: Array[AbilitySlot]:
+	get:
+		return data.ability_slots
+	set(value):
+		data.ability_slots = value
 
-var stats: Dictionary[StatType, StatValue] = {
-	StatType.HP_MAX : StatValue.new(0, 999, 150),
-	StatType.HP : StatValue.new(0, 150, 100),
-	StatType.MP_MAX : StatValue.new(0, 999, 100),
-	StatType.MP : StatValue.new(0, 100, 70),
-	StatType.CT : StatValue.new(0, 999, 25),
-	StatType.MOVE : StatValue.new(0, 100, 3),
-	StatType.JUMP : StatValue.new(0, 100, 3),
-	StatType.SPEED : StatValue.new(0, 100, 10),
-	StatType.PHYSICAL_ATTACK : StatValue.new(0, 100, 11),
-	StatType.MAGIC_ATTACK : StatValue.new(0, 100, 12),
-	StatType.BRAVE : StatValue.new(0, 100, 70),
-	StatType.FAITH : StatValue.new(0, 100, 65),
-	StatType.EXP : StatValue.new(0, 999, 99),
-	StatType.LEVEL : StatValue.new(0, 99, 20),
-}
+var stats: Dictionary[UnitData.StatType, StatValue]:
+	get:
+		return data.stats
+	set(value):
+		data.stats = value
 
-var stats_raw: Dictionary[StatType, float] = {
-	StatType.HP_MAX : 0.0, 
-	StatType.MP_MAX : 0.0, 
-	StatType.SPEED : 0.0, 
-	StatType.PHYSICAL_ATTACK : 0.0, 
-	StatType.MAGIC_ATTACK : 0.0, 
-}
+var stats_raw: Dictionary[UnitData.StatType, float]:
+	get:
+		return data.stats_raw
+	set(value):
+		data.stats_raw = value
 
 
 var unit_exp: int = 0:
-	get: return stats[StatType.EXP].current_value
+	get: return data.unit_exp
 var level: int = 0:
-	get: return stats[StatType.LEVEL].current_value
+	get: return data.stats[StatType.LEVEL].current_value
 
 var brave: int = 70:
-	get: return stats[StatType.BRAVE].modified_value
+	get: return data.brave
 var faith: int = 70:
-	get: return stats[StatType.FAITH].modified_value
+	get: return data.faith
 
 var ct_current: int = 0:
-	get: return stats[StatType.CT].current_value
+	get: return data.ct_current
 var ct_max: int = 100:
-	get: return stats[StatType.CT].max_value
+	get: return data.ct_max
 
 var hp_max: int = 100:
-	get: return stats[StatType.HP_MAX].modified_value
+	get: return data.hp_max
 var hp: int = 70:
-	get: return stats[StatType.HP].current_value
+	get: return data.hp
 var mp_max: int = 100:
-	get: return stats[StatType.MP_MAX].modified_value
+	get: return data.mp_max
 var mp: int = 70:
-	get: return stats[StatType.MP].current_value
+	get: return data.mp
 
 var physical_attack: int = 5:
-	get: return stats[StatType.PHYSICAL_ATTACK].modified_value
+	get: return data.physical_attack
 var magical_attack: int = 5:
-	get: return stats[StatType.MAGIC_ATTACK].modified_value
+	get: return data.magical_attack
 var speed: int = 5:
-	get: return stats[StatType.SPEED].modified_value
+	get: return data.speed
 var move: int = 5:
-	get: return stats[StatType.MOVE].modified_value
+	get: return data.move
 var jump: int = 3:
-	get: return stats[StatType.JUMP].modified_value
+	get: return data.jump
 
-var always_statuses: PackedStringArray = []
-var immune_statuses: PackedStringArray = []
-var start_statuses: PackedStringArray = []
+var always_statuses: PackedStringArray:
+	get: return data.always_statuses
+	set(value): data.always_statuses = value
+var immune_statuses: PackedStringArray:
+	get: return data.immune_statuses
+	set(value): data.immune_statuses = value
+var start_statuses: PackedStringArray:
+	get: return data.start_statuses
+	set(value): data.start_statuses = value
 
 # TODO clean up unit status stuff
-var current_statuses: Array[StatusEffect] = [] # entry will be duplicate of status definition with modified values (duration_left, delayed action, etc)
-var current_status_ids: PackedStringArray = []:
-	get:
-		var status_unique_names: PackedStringArray = []
-		for status: StatusEffect in current_statuses:
-			if not status_unique_names.has(status.unique_name):
-				status_unique_names.append(status.unique_name)
-		return status_unique_names
+var current_statuses: Array[StatusEffect]:
+	get: return data.current_statuses
+	set(value): data.current_statuses = value
+var current_status_ids: PackedStringArray:
+	get: return data.current_status_ids
 #var current_statuses2: Dictionary[StatusEffect, int] = {}
 
-var learned_abilities: Array = []
-var job_levels: Dictionary[JobData, int] = {}
-var job_jp: Dictionary[JobData, int] = {}
+var learned_abilities: Array:
+	get: return data.learned_abilities
+	set(value): data.learned_abilities = value
+var job_levels: Dictionary[JobData, int]:
+	get: return data.job_levels
+	set(value): data.job_levels = value
+var job_jp: Dictionary[JobData, int]:
+	get: return data.job_jp
+	set(value): data.job_jp = value
 
-var charging_abilities_ids: PackedInt32Array = []
-var charging_abilities_remaining_ct: PackedInt32Array = [] # TODO this should be tracked per ability?
+var charging_abilities_ids: PackedInt32Array:
+	get: return data.charging_abilities_ids
+	set(value): data.charging_abilities_ids = value
+var charging_abilities_remaining_ct: PackedInt32Array:
+	get: return data.charging_abilities_remaining_ct
+	set(value): data.charging_abilities_remaining_ct = value
 var sprite_id: int = 0
 var sprite_file_idx: int = 0
-var sprite_file_name: String = "sprite_file_name.spr"
+var sprite_file_name: String:
+	get: return data.spritesheeet_file_name
+	set(value): data.spritesheeet_file_name = value
 var portrait_palette_id: int = 0
 var unit_id: int = 0
 var special_job_skillset_id: int = 0
 
-@export var elemental_absorb: Array[Action.ElementTypes] = []
-@export var elemental_cancel: Array[Action.ElementTypes] = []
-@export var elemental_half: Array[Action.ElementTypes] = []
-@export var elemental_weakness: Array[Action.ElementTypes] = []
-@export var elemental_strengthen: Array[Action.ElementTypes] = []
+var elemental_absorb: Array[Action.ElementTypes]:
+	get: return data.elemental_absorb
+	set(value): data.elemental_absorb = value
+var elemental_cancel: Array[Action.ElementTypes]:
+	get: return data.elemental_cancel
+	set(value): data.elemental_cancel = value
+var elemental_half: Array[Action.ElementTypes]:
+	get: return data.elemental_half
+	set(value): data.elemental_half = value
+var elemental_weakness: Array[Action.ElementTypes]:
+	get: return data.elemental_weakness
+	set(value): data.elemental_weakness = value
+var elemental_strengthen: Array[Action.ElementTypes]:
+	get: return data.elemental_strengthen
+	set(value): data.elemental_strengthen = value
 
 var can_move: bool = true
 
 #var map_position: Vector2i
-var tile_position: TerrainTile
-var prohibited_terrain: Array[int] = [] # TileTerrain.surface_type_id
-var terrain_costs: Dictionary[int, int] = {} # [TileTerrain.surface_type_id, cost]
-var ignore_height: bool = false
+var tile_position: TerrainTile:
+	get:
+		return data.current_tile
+	set(value):
+		data.current_tile = value
+		if global_battle_manager != null and value != null:
+			data.sync_tile_coords_from_map(global_battle_manager.total_map_tiles)
+var prohibited_terrain: Array[int]:
+	get: return data.prohibited_terrain
+	set(value): data.prohibited_terrain = value
+var terrain_costs: Dictionary[int, int]:
+	get: return data.terrain_costs
+	set(value): data.terrain_costs = value
+var ignore_height: bool:
+	get: return data.ignore_height
+	set(value): data.ignore_height = value
 
 var map_paths: Dictionary[TerrainTile, TerrainTile]
 var path_costs: Dictionary[TerrainTile, float]
 var paths_set: bool = false
 @export var tile_highlights: Node3D
-var facing: Facings = Facings.NORTH
+var facing: UnitData.Facings:
+	get: return data.facing_direction
+	set(value): data.facing_direction = value
 var is_back_facing: bool = false
 var facing_vector: Vector3 = Vector3.FORWARD:
 	get:
-		return FACING_VECTORS[facing]
+		return data.facing_vector
 
 var is_in_air: bool = false
 var is_traveling_path: bool = false
@@ -273,10 +324,18 @@ var active_action: ActionInstance
 @export var wait_action: Action
 @export var actions: Array[Action] = []
 var actions_data: Dictionary[String, ActionInstance] = {}
-@export var move_points_start: int = 1
-@export var move_points_remaining: int = 1
-@export var action_points_start: int = 1
-@export var action_points_remaining: int = 1
+var move_points_start: int:
+	get: return data.move_points_start
+	set(value): data.move_points_start = value
+var move_points_remaining: int:
+	get: return data.move_points_remaining
+	set(value): data.move_points_remaining = value
+var action_points_start: int:
+	get: return data.action_points_start
+	set(value): data.action_points_start = value
+var action_points_remaining: int:
+	get: return data.action_points_remaining
+	set(value): data.action_points_remaining = value
 @export var is_ending_turn: bool = false
 
 @export var current_animation_id_fwd: int = 6 # set based on current action
@@ -294,14 +353,16 @@ var submerged_depth: int = 0
 
 
 static func instantiate() -> Unit:
+	if unit_scene == null:
+		unit_scene = load("uid://dkudrb304m7t1")
 	return unit_scene.instantiate()
 
 
-func _ready() -> void:
-	stats[StatType.HP_MAX].value_changed.connect(stats[StatType.HP].update_max_from_clamped_value)
-	stats[StatType.MP_MAX].value_changed.connect(stats[StatType.MP].update_max_from_clamped_value)
-	stats[StatType.HP].value_changed.connect(hp_changed)
+func _init() -> void:
+	data.initialize_defaults()
 
+
+func _ready() -> void:
 	var hp_bar: StatBar = add_stat_bar(StatType.HP)
 	hp_bar.show_value = true
 	
@@ -325,9 +386,18 @@ func _ready() -> void:
 	add_to_group("Units")
 
 	if not GameData.is_ready:
-		GameData.data_indexed.connect(initialize_unit)
+		GameData.data_indexed.connect(_on_game_data_indexed)
 	else:
+		_on_game_data_indexed()
+
+
+func _on_game_data_indexed() -> void:
+	_init_scene_resources()
+	if not _has_bound_external_data:
 		initialize_unit()
+	else:
+		_refresh_all_visuals_from_data()
+		_on_data_changed(data)
 
 
 func _exit_tree() -> void:
@@ -339,7 +409,7 @@ func _exit_tree() -> void:
 			global_battle_manager.units.remove_at(unit_index)
 
 
-func add_stat_bar(stat_type: StatType) -> StatBar:
+func add_stat_bar(stat_type: UnitData.StatType) -> StatBar:
 	var new_stat_bar: StatBar = StatBar.instantiate()
 	new_stat_bar.set_stat(str(StatType.keys()[stat_type]), stats[stat_type])
 	stat_bars_container.add_child(new_stat_bar)
@@ -359,25 +429,25 @@ func update_stat_bars_scale(camera_zoom: float) -> void:
 	stat_bars_position.scale = Vector2.ONE * 3.775 / camera_zoom
 
 
-func initialize_unit() -> void:
+func _init_scene_resources() -> void:
+	if _scene_resources_initialized:
+		return
+	_scene_resources_initialized = true
 	debug_menu.populate_options()
 
 	move_action = GameData.get_action("move")
 	wait_action = GameData.get_action("wait")
 	
-	#animation_manager.wep_spr = RomReader.sprs[RomReader.file_records["WEP.SPR"].type_index]
 	animation_manager.wep_texture = GameData.get_texture("wep")
 	animation_manager.wep_spritesheet_data = GameData.get_spritesheet_data("wep")
 	animation_manager.wep_shp = GameData.get_shp("wep1")
 	animation_manager.wep_seq = GameData.get_seq("wep1")
 	
-	#animation_manager.eff_spr = RomReader.sprs[RomReader.file_records["EFF.SPR"].type_index]
 	animation_manager.eff_texture = GameData.get_texture("eff")
 	animation_manager.eff_spritesheet_data = GameData.get_spritesheet_data("eff")
 	animation_manager.eff_shp = GameData.get_shp("eff1")
 	animation_manager.eff_seq = GameData.get_seq("eff1")
 	
-	#animation_manager.unit_sprites_manager.sprite_effect.texture = animation_manager.eff_spr.create_frame_grid_texture(0, 0, 0, 0, 0)
 	var eff_frame_grid: ImageTexture = GameData.get_spritesheet_data("eff").create_frame_grid_texture(0, 0, 0, 0)
 	animation_manager.unit_sprites_manager.sprite_effect.texture = eff_frame_grid
 	var eff_material: ShaderMaterial = animation_manager.unit_sprites_manager.sprite_effect.material_override.duplicate()
@@ -386,13 +456,16 @@ func initialize_unit() -> void:
 	eff_material.set_shader_parameter("depth_mode", VfxConstants.DepthMode.UNIT)
 	animation_manager.unit_sprites_manager.sprite_effect.material_override = eff_material
 
-	#animation_manager.item_spr = RomReader.sprs[RomReader.file_records["ITEM.BIN"].type_index]
-	
 	animation_manager.unit_sprites_manager.sprite_item.texture = GameData.get_texture("items")
 	
-	#animation_manager.other_spr = RomReader.sprs[RomReader.file_records["OTHER.SPR"].type_index]
 	animation_manager.other_texture = GameData.get_texture("other")
 	animation_manager.other_shp = GameData.get_shp("other")
+
+
+func initialize_unit() -> void:
+	_init_scene_resources()
+	if _has_bound_external_data:
+		return
 
 	skillsets_names.resize(2)
 	skillsets_names.fill("")
@@ -413,6 +486,112 @@ func initialize_unit() -> void:
 	unit_nickname = GameData.names["all_no_empty"][random_name_idx]
 
 	initialized.emit()
+
+
+func bind_unit_data(new_data: UnitData) -> void:
+	_has_bound_external_data = true
+	if data != null and data != new_data:
+		if data.data_changed.is_connected(_on_data_changed):
+			data.data_changed.disconnect(_on_data_changed)
+		if data.statuses_changed.is_connected(_on_statuses_changed):
+			data.statuses_changed.disconnect(_on_statuses_changed)
+		if data.appearance_changed.is_connected(_on_appearance_changed):
+			data.appearance_changed.disconnect(_on_appearance_changed)
+		if data.primary_weapon_changed.is_connected(_on_primary_weapon_changed):
+			data.primary_weapon_changed.disconnect(_on_primary_weapon_changed)
+		if data.stats.has(StatType.HP) and data.stats[StatType.HP].value_changed.is_connected(hp_changed):
+			data.stats[StatType.HP].value_changed.disconnect(hp_changed)
+
+	data = new_data
+	data.passive_context_getter = _get_passive_context
+	data.auto_apply_hp_threshold_statuses = false
+	data.ensure_initialized()
+
+	if not data.data_changed.is_connected(_on_data_changed):
+		data.data_changed.connect(_on_data_changed)
+	if not data.statuses_changed.is_connected(_on_statuses_changed):
+		data.statuses_changed.connect(_on_statuses_changed)
+	if not data.appearance_changed.is_connected(_on_appearance_changed):
+		data.appearance_changed.connect(_on_appearance_changed)
+	if not data.primary_weapon_changed.is_connected(_on_primary_weapon_changed):
+		data.primary_weapon_changed.connect(_on_primary_weapon_changed)
+	if not data.stats[StatType.HP].value_changed.is_connected(hp_changed):
+		data.stats[StatType.HP].value_changed.connect(hp_changed)
+
+	if stat_bars_container != null and stat_bars_container.get_child_count() >= 3:
+		var stat_bars: Array[Node] = stat_bars_container.get_children()
+		(stat_bars[0] as StatBar).set_stat(str(StatType.keys()[StatType.HP]), data.stats[StatType.HP])
+		(stat_bars[1] as StatBar).set_stat(str(StatType.keys()[StatType.MP]), data.stats[StatType.MP])
+		(stat_bars[2] as StatBar).set_stat(str(StatType.keys()[StatType.CT]), data.stats[StatType.CT])
+
+	if GameData.is_ready:
+		_init_scene_resources()
+		_refresh_all_visuals_from_data()
+		_on_data_changed(data)
+		initialized.emit()
+
+
+func _get_passive_context() -> Dictionary:
+	if global_battle_manager == null:
+		return {}
+	var units_data_list: Array[UnitData] = []
+	for battle_unit: Unit in global_battle_manager.units:
+		if is_instance_valid(battle_unit) and battle_unit.data != null:
+			units_data_list.append(battle_unit.data)
+	return {
+		"units_data": units_data_list,
+		"global_passives": global_battle_manager.global_passive_effects,
+	}
+
+
+func _refresh_all_visuals_from_data() -> void:
+	var clean_sprite: String = data.spritesheeet_file_name.to_lower().trim_suffix(".spr")
+	if clean_sprite != "" and (GameData.unit_spritesheet_data_paths.has(clean_sprite) or GameData.unit_spritesheets_data.has(clean_sprite)):
+		set_sprite_by_file_name(clean_sprite)
+	_rendered_palette_id = data.palette_id
+	if _rendered_sprite_name != "":
+		update_spritesheet_grid_texture()
+	_apply_weapon_visuals()
+	if data.primary_weapon != null and data.primary_weapon.unique_name != "":
+		primary_weapon_assigned.emit(data.primary_weapon.unique_name)
+	update_unit_facing(FACING_VECTORS[data.facing_direction])
+	if global_battle_manager != null and global_battle_manager.camera_controller != null:
+		update_animation_facing(global_battle_manager.camera_controller.camera_facing_vector)
+	update_status_visuals()
+
+
+func _on_data_changed(_unit_data: UnitData) -> void:
+	if not _scene_resources_initialized:
+		return
+	var all_passive_effects: Array[PassiveEffect] = data.get_all_passive_effects()
+	update_triggered_actions(all_passive_effects)
+	set_available_actions(all_passive_effects)
+	data_updated.emit(self)
+
+
+func _on_statuses_changed(_unit_data: UnitData) -> void:
+	if not _scene_resources_initialized:
+		return
+	update_status_visuals()
+
+
+func _on_appearance_changed(_unit_data: UnitData) -> void:
+	if not _scene_resources_initialized:
+		return
+	var clean_sprite: String = data.spritesheeet_file_name.to_lower().trim_suffix(".spr")
+	if clean_sprite != _rendered_sprite_name and (GameData.unit_spritesheet_data_paths.has(clean_sprite) or GameData.unit_spritesheets_data.has(clean_sprite)):
+		set_sprite_by_file_name(clean_sprite)
+	elif data.palette_id != _rendered_palette_id:
+		_rendered_palette_id = data.palette_id
+		if sprite_palette_id_override == -1 and _rendered_sprite_name != "":
+			update_spritesheet_grid_texture()
+
+
+func _on_primary_weapon_changed(weapon_unique_name: String) -> void:
+	if not _scene_resources_initialized:
+		return
+	_apply_weapon_visuals()
+	primary_weapon_assigned.emit(weapon_unique_name)
 
 
 func _physics_process(delta: float) -> void:
@@ -456,192 +635,61 @@ func _process(_delta: float) -> void:
 	set_base_animation_ptr_id(current_animation_id_fwd)
 
 
-static func generate_leveled_raw_stats(stat_basis_to_use: StatBasis, final_level: int, job: JobData, new_stats_raw: Dictionary[Unit.StatType, float], use_rom: bool = false) -> void:
-	generate_level_zero_raw_stats(stat_basis_to_use, new_stats_raw, use_rom)
-	
-	for curent_level: int in range(1, final_level + 1):
-		grow_raw_stats(curent_level, job, new_stats_raw)
+static func generate_leveled_raw_stats(stat_basis_to_use: UnitData.StatBasis, final_level: int, job: JobData, new_stats_raw: Dictionary[UnitData.StatType, float], use_rom: bool = false) -> void:
+	UnitData.generate_leveled_raw_stats(stat_basis_to_use, final_level, job, new_stats_raw, use_rom)
 
 
-static func generate_level_zero_raw_stats(stat_basis_to_use: StatBasis, new_stats_raw: Dictionary[Unit.StatType, float], use_rom: bool = false) -> void:
-	new_stats_raw[StatType.HP_MAX] = generate_level_zero_raw_stat("HP_MAX", stat_basis_to_use, use_rom)
-	new_stats_raw[StatType.MP_MAX] = generate_level_zero_raw_stat("MP_MAX", stat_basis_to_use, use_rom)
-	new_stats_raw[StatType.SPEED] = generate_level_zero_raw_stat("SPEED", stat_basis_to_use, use_rom)
-	new_stats_raw[StatType.PHYSICAL_ATTACK] = generate_level_zero_raw_stat("PHYSICAL_ATTACK", stat_basis_to_use, use_rom)
-	new_stats_raw[StatType.MAGIC_ATTACK] = generate_level_zero_raw_stat("MAGIC_ATTACK", stat_basis_to_use, use_rom)
+static func generate_level_zero_raw_stats(stat_basis_to_use: UnitData.StatBasis, new_stats_raw: Dictionary[UnitData.StatType, float], use_rom: bool = false) -> void:
+	UnitData.generate_level_zero_raw_stats(stat_basis_to_use, new_stats_raw, use_rom)
 
 
-# TODO is this correct for MONSTERs and LUCAVI?
-static func generate_level_zero_raw_stat(stat_name: String, stat_basis_to_use: StatBasis, use_rom: bool = false) -> int:
-	var raw_stat: int = -1
-	if not use_rom:
-		var stat_range: Vector2i = GameData.initial_unit_data.initial_unit_raw_stats[stat_basis_to_use][stat_name]
-		raw_stat = randi_range(stat_range.x , stat_range.y)
-		return raw_stat
-	
-	var stat_idx: int = -1
-	if stat_name == "HP_MAX": stat_idx = 0
-	elif stat_name == "MP_MAX": stat_idx = 1
-	elif stat_name == "SPEED": stat_idx = 2
-	elif stat_name == "PHYSICAL_ATTACK": stat_idx = 3
-	elif stat_name == "MAGIC_ATTACK": stat_idx = 4
-	
-	raw_stat = RomReader.scus_data.unit_base_datas[stat_basis_to_use][stat_idx] * 16384
-	raw_stat += randi_range(0, RomReader.scus_data.unit_base_stats_mods[stat_basis_to_use][stat_idx] * 16384)
-	return raw_stat
+static func generate_level_zero_raw_stat(stat_name: String, stat_basis_to_use: UnitData.StatBasis, use_rom: bool = false) -> int:
+	return UnitData.generate_level_zero_raw_stat(stat_name, stat_basis_to_use, use_rom)
 
 
-static func grow_raw_stats(current_level: int, current_job: JobData, new_stats_raw: Dictionary[Unit.StatType, float]) -> void:
-	new_stats_raw[StatType.HP_MAX] += new_stats_raw[StatType.HP_MAX] / (current_job.hp_growth + current_level)
-	new_stats_raw[StatType.MP_MAX] += new_stats_raw[StatType.MP_MAX] / (current_job.mp_growth + current_level)
-	new_stats_raw[StatType.SPEED] += new_stats_raw[StatType.SPEED] / (current_job.speed_growth + current_level)
-	new_stats_raw[StatType.PHYSICAL_ATTACK] += new_stats_raw[StatType.PHYSICAL_ATTACK] / (current_job.pa_growth + current_level)
-	new_stats_raw[StatType.MAGIC_ATTACK] += new_stats_raw[StatType.MAGIC_ATTACK] / (current_job.ma_growth + current_level)
+static func grow_raw_stats(current_level: int, current_job: JobData, new_stats_raw: Dictionary[UnitData.StatType, float]) -> void:
+	UnitData.grow_raw_stats(current_level, current_job, new_stats_raw)
 
 
-# TODO is this correct for MONSTERs?
 static func calc_battle_stats(
-		current_job: JobData, 
-		new_stats_raw: Dictionary[Unit.StatType, float], 
-		new_stats: Dictionary[Unit.StatType, StatValue],
+		current_job: JobData,
+		new_stats_raw: Dictionary[UnitData.StatType, float],
+		new_stats: Dictionary[UnitData.StatType, StatValue],
 		set_to_max: bool = true,
 		use_larger_values: bool = false) -> void:
-	var base_hp: int = roundi(new_stats_raw[StatType.HP_MAX] * current_job.hp_multiplier / 0x190000)
-	# if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(animation_manager.global_seq.file_name): # lucavi
-	if use_larger_values:
-		new_stats[StatType.HP_MAX].max_value = 99999
-		base_hp = base_hp * 100
-	new_stats[StatType.HP_MAX].base_value = base_hp
-	new_stats[StatType.HP_MAX].set_value(new_stats[StatType.HP_MAX].base_value)
-	
-	var base_mp: int = roundi(new_stats_raw[StatType.MP_MAX] * current_job.mp_multiplier / 0x190000)
-	# if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(animation_manager.global_seq.file_name): # lucavi
-	if use_larger_values:
-		new_stats[StatType.MP_MAX].max_value = 99999
-		base_mp = base_mp * 100
-	new_stats[StatType.MP_MAX].base_value = base_mp
-	new_stats[StatType.MP_MAX].set_value(new_stats[StatType.MP_MAX].base_value)
-	
-	new_stats[StatType.SPEED].base_value = roundi(new_stats_raw[StatType.SPEED] * current_job.speed_multiplier / 0x190000)
-	new_stats[StatType.SPEED].set_value(new_stats[StatType.SPEED].base_value)
-	
-	new_stats[StatType.PHYSICAL_ATTACK].base_value = roundi(new_stats_raw[StatType.PHYSICAL_ATTACK] * current_job.pa_multiplier / 0x190000)
-	new_stats[StatType.PHYSICAL_ATTACK].set_value(new_stats[StatType.PHYSICAL_ATTACK].base_value)
-	
-	new_stats[StatType.MAGIC_ATTACK].base_value = roundi(new_stats_raw[StatType.MAGIC_ATTACK] * current_job.ma_multiplier / 0x190000)
-	new_stats[StatType.MAGIC_ATTACK].set_value(new_stats[StatType.MAGIC_ATTACK].base_value)
-	
-	new_stats[StatType.MOVE].base_value = current_job.move
-	new_stats[StatType.MOVE].set_value(new_stats[StatType.MOVE].base_value)
-	
-	new_stats[StatType.JUMP].base_value = current_job.jump
-	new_stats[StatType.JUMP].set_value(new_stats[StatType.JUMP].base_value)
-
-	# if global_battle_manager != null:
-	# 	if not global_battle_manager.battle_is_running:
-	# 		new_stats[StatType.HP].set_value(new_stats[StatType.HP].max_value)
-	# 		new_stats[StatType.MP].set_value(new_stats[StatType.MP].max_value)
-	
-	if set_to_max:
-		new_stats[StatType.HP].set_value(new_stats[StatType.HP].max_value)
-		new_stats[StatType.MP].set_value(new_stats[StatType.MP].max_value)
+	UnitData.calc_battle_stats(current_job, new_stats_raw, new_stats, set_to_max, use_larger_values)
 
 
 func generate_random_abilities() -> void:
-	var random_reaction_name: String = GameData.ability_paths.keys().filter(func(ability_name: String) -> bool: return GameData.get_ability(ability_name).slot_type == Ability.SlotType.REACTION).pick_random()
-	var random_reaction: Ability = GameData.get_ability(random_reaction_name)
-
-	var random_support_name: String = GameData.ability_paths.keys().filter(func(ability_name: String) -> bool: return GameData.get_ability(ability_name).slot_type == Ability.SlotType.SUPPORT).pick_random()
-	var random_support: Ability = GameData.get_ability(random_support_name)
-	
-	var random_movement_name: String = GameData.ability_paths.keys().filter(func(ability_name: String) -> bool: return GameData.get_ability(ability_name).slot_type == Ability.SlotType.MOVEMENT).pick_random()
-	var random_movement: Ability = GameData.get_ability(random_movement_name)
-
-	ability_slots[0].ability_unique_name = random_reaction.unique_name
-	ability_slots[1].ability_unique_name =  random_support.unique_name
-	ability_slots[2].ability_unique_name =  random_movement.unique_name
-
-	update_passive_effects()
+	data.generate_random_abilities()
 
 
 func update_equipable_item_types(all_passive_effects: Array[PassiveEffect]) -> void:
-	equipable_item_types = []
-	
-	for passive_effect: PassiveEffect in all_passive_effects:
-		equipable_item_types.append_array(passive_effect.added_equipment_types_equipable)
-	
-	equipable_item_types.append_array(job_data.equippable_item_types) # TODO job equipable item types should be in passive effect
+	data.update_equipable_item_types(all_passive_effects)
 
 
-# TODO generate equipment https://ffhacktics.com/wiki/Calculate/Store_ENTD_Unit_Equipment
 func generate_equipment() -> void:
-	#if not ["TYPE1.SEQ", "TYPE3.SEQ"].has(animation_manager.global_seq.file_name): # monsters don't have equipment
-		#return
-	
-	equip_slots[0].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.WEAPON, level) # RH
-	equip_slots[1].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.SHIELD, level) # LH
-	equip_slots[2].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.HEADGEAR, level) # headgear
-	equip_slots[3].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.ARMOR, level) # armor
-	equip_slots[4].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.ACCESSORY, level, true) # accessory
-	
-	set_primary_weapon(equip_slots[0].item_unique_name)
-	
-	update_passive_effects()
+	data.generate_equipment()
 
 
 func set_equipment_slot(slot: EquipmentSlot, item: ItemData) -> void:
-	slot.item_unique_name = item.unique_name
-	if slot.equipment_slot_name == "RH":
-		set_primary_weapon(item.unique_name) # TODO update weapon data (palette, texture, eff_palette) correctly for either hand?
-	
-	update_passive_effects()
+	data.set_equipment_slot(slot, item)
 
 
 func update_stat_modifiers(all_passive_effects: Array[PassiveEffect]) -> void:
-	# remove all to start fresh
-	for stat_type: StatType in StatType.values():
-		if not stats[stat_type].modifiers.is_empty():
-			stats[stat_type].modifiers.clear()
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		for stat_type: StatType in passive_effect.stat_modifiers.keys():
-			stats[stat_type].add_modifier(passive_effect.stat_modifiers[stat_type], false)
-	
-	for stat_type: StatType in StatType.values():
-		stats[stat_type].value_changed.emit(stats[stat_type])
+	data.update_stat_modifiers(all_passive_effects)
 
 
 func get_item_unique_name_for_slot(slot_type: ItemData.SlotType, item_level: int, random: bool = false) -> String:
-	# var valid_items: Array[ItemData] = []
-	var valid_items_names: Array[String] = []
-	valid_items_names.assign(GameData.item_paths.keys().filter(func(item_name: String) -> bool: 
-		var item: ItemData = GameData.get_item(item_name)
-		var slot_type_is_valid: bool = item.slot_type == slot_type
-		var level_is_valid: bool = item.min_level <= item_level
-		var type_is_valid: bool = equipable_item_types.has(item.item_type) # TODO allow forcing specifc type based on ability requirements
-		return slot_type_is_valid and level_is_valid and type_is_valid))
-	var item_unique_name: String = ""
-	if not valid_items_names.is_empty():
-		if random:
-			item_unique_name = valid_items_names.pick_random()
-		else:
-			valid_items_names.sort_custom(func(item_a_name: String, item_b_name: String) -> bool: return GameData.get_item(item_a_name).min_level > GameData.get_item(item_b_name).min_level)
-			item_unique_name = valid_items_names[0] # pick highest level item
-			#item = valid_items.pick_random()
-	return item_unique_name
+	return data.get_item_unique_name_for_slot(slot_type, item_level, random)
 
 
 func equip_ability(slot: AbilitySlot, ability: Ability) -> void:
-	slot.ability_unique_name = ability.unique_name
-
-	update_passive_effects()
+	data.equip_ability(slot, ability)
 
 
 func equip_skillset(skillset_idx: int, new_skillset: Skillset) -> void:
-	skillsets_names[skillset_idx] = new_skillset.unique_name
-	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
-	set_available_actions(all_passive_effects)
-	data_updated.emit(self)
+	data.equip_skillset(skillset_idx, new_skillset)
 
 
 func update_triggered_actions(all_passive_effects: Array[PassiveEffect]) -> void:
@@ -660,26 +708,11 @@ func update_triggered_actions(all_passive_effects: Array[PassiveEffect]) -> void
 
 
 func update_elemental_affinity(all_passive_effects: Array[PassiveEffect]) -> void:
-	elemental_absorb.clear()
-	elemental_cancel.clear()
-	elemental_half.clear()
-	elemental_strengthen.clear()
-	elemental_weakness.clear()
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		elemental_absorb = append_element_array_unique(elemental_absorb, passive_effect.element_absorb)
-		elemental_cancel = append_element_array_unique(elemental_cancel, passive_effect.element_cancel)
-		elemental_half = append_element_array_unique(elemental_half, passive_effect.element_half)
-		elemental_strengthen = append_element_array_unique(elemental_strengthen, passive_effect.element_strengthen)
-		elemental_weakness = append_element_array_unique(elemental_weakness, passive_effect.element_weakness)
+	data.update_elemental_affinity(all_passive_effects)
 
 
 func append_element_array_unique(current_array: Array[Action.ElementTypes], array_to_append: Array[Action.ElementTypes]) -> Array[Action.ElementTypes]:
-	for element: Action.ElementTypes in array_to_append:
-		if not current_array.has(element):
-			current_array.append(element)
-	
-	return current_array
+	return data.append_element_array_unique(current_array, array_to_append)
 
 
 func start_turn(battle_manager: BattleManager) -> void:
@@ -735,37 +768,15 @@ func update_actions(battle_manager: BattleManager) -> void:
 
 
 func set_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
-	actions.clear()
-	actions.append(move_action)
-	actions.append(get_attack_action())
-	actions.append_array(get_skillset_actions()) # TODO move to skillset ability
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		for action: Action in passive_effect.added_actions:
-			if not actions.has(action):
-				actions.append(action)
-	
-	actions.append(wait_action)
+	actions = data.get_available_actions(move_action, wait_action, all_passive_effects)
 
 
 func get_skillsets() -> Array[Skillset]:
-	var skillsets: Array[Skillset] = []
-	for skillset_name: String in skillsets_names:
-		if skillset_name != null and not skillset_name.is_empty():
-			skillsets.append(GameData.get_skillset(skillset_name))
-	
-	return skillsets
+	return data.get_skillsets()
 
 
 func get_skillset_actions() -> Array[Action]:
-	var action_list: Array[Action] = []
-	for skillset: Skillset in get_skillsets():
-		for ability_name: String in skillset.ability_names:
-			var ability_is_action: bool = not [Ability.SlotType.REACTION, Ability.SlotType.SUPPORT, Ability.SlotType.MOVEMENT].has(GameData.get_ability(ability_name).slot_type)
-			if ability_is_action and GameData.action_paths.has(ability_name):
-				var new_action: Action = GameData.get_action(ability_name)
-				action_list.append(new_action)
-	return action_list
+	return data.get_skillset_actions()
 
 
 func clear_action_buttons(battle_manager: BattleManager) -> void:
@@ -864,106 +875,39 @@ func hp_changed(clamped_value: StatValue) -> void:
 
 
 func add_status(new_status: StatusEffect, ignore_immunity: bool = false) -> void:
-	if not ignore_immunity and immune_statuses.has(new_status.unique_name): # prevent application based on immune statuses
+	var applied: bool = data.apply_status(new_status, ignore_immunity)
+	if not applied:
 		return
 	
-	for status_prevents_id: String in new_status.status_cant_stack: # prevent application based on flags
-		if current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_prevents_id):
-			return
-	
-	var existing_statuses: Array[StatusEffect] = current_statuses.filter(func(status: StatusEffect) -> bool: return status.status_id == new_status.status_id) # TODO use filter to allow for multiple of the same status, ex. double charging
-	if existing_statuses.size() >= new_status.num_allowed:
-		var temp_statuses: Array[StatusEffect] = existing_statuses.filter(func(status: StatusEffect) -> bool: return status.duration_type != StatusEffect.DurationType.PERMANENT)
-		if not temp_statuses.is_empty():
-			remove_status(temp_statuses[0]) # remove oldest temp status
-		else:
-			return # if already has max stack of status and they are all permanent
-	
-	current_statuses.append(new_status)
 	# use action_on_apply
-	if new_status.action_on_apply != "":
+	if new_status.action_on_apply != "" and global_battle_manager != null:
 		var action_instance: ActionInstance = ActionInstance.new(GameData.get_action(new_status.action_on_apply), self, global_battle_manager)
 		action_instance.submitted_targets = [tile_position] # TODO allow other targeting for status actions on turn end
 		await action_instance.use()
-	
-	for status_cancelled_id: String in new_status.status_cancels:
-		remove_status_id(status_cancelled_id)
-	
-	update_status_visuals()
-	update_passive_effects()
 
 
 func remove_status_id(status_removed_unique_name: String) -> void:
-	var statuses_to_remove: Array[StatusEffect] = []
-	statuses_to_remove.append_array(current_statuses.filter(func(status: StatusEffect) -> bool: return status.unique_name == status_removed_unique_name and status.duration_type != StatusEffect.DurationType.PERMANENT))
-	for status: StatusEffect in statuses_to_remove:
-		remove_status(status)
+	data.remove_status_id(status_removed_unique_name)
 
 
 func remove_status(status_removed: StatusEffect, remove_permanent: bool = false) -> void:
-	if status_removed.duration_type == StatusEffect.DurationType.PERMANENT and not remove_permanent:
-		push_error("Trying to removing Always status: " + status_removed.status_effect_name)
-		return
-	
-	for stat: StatType in status_removed.passive_effect.stat_modifiers.keys():
-		stats[stat].remove_modifier(status_removed.passive_effect.stat_modifiers[stat])
-	current_statuses.erase(status_removed)
-	update_status_visuals()
-	update_passive_effects()
+	data.remove_status(status_removed, remove_permanent)
 
 
 func get_nullify_statuses() -> Array[StatusEffect]:
-	return current_statuses.filter(func(status: StatusEffect) -> bool: return status.passive_effect.nullify_targeted)
+	return data.get_nullify_statuses()
 
 
 func update_permanent_statuses(all_passive_effects: Array[PassiveEffect]) -> void:
-	always_statuses.clear()
-	for passive_effect: PassiveEffect in all_passive_effects:
-		always_statuses.append_array(passive_effect.status_always)
-	
-	for status_unique_name: String in GameData.status_effect_paths.keys():
-		if immune_statuses.has(status_unique_name):
-			continue
-		
-		var num_should_have: int = 0
-
-		# check passive sources: equipment, job, abilities, statuses
-		for passive_effect: PassiveEffect in all_passive_effects:
-			num_should_have += passive_effect.status_always.count(status_unique_name)
-		
-		var current_permanent: Array[StatusEffect] = current_statuses.filter(func(status: StatusEffect) -> bool: return status.unique_name == status_unique_name and status.duration_type == StatusEffect.DurationType.PERMANENT)
-		var num_has: int = current_permanent.size()
-		var change: int = num_should_have - num_has
-		
-		if change == 0:
-			continue
-		elif change > 0:
-			for counter: int in change:
-				var new_status: StatusEffect = GameData.get_status_effect(status_unique_name).duplicate()
-				new_status.duration_type = StatusEffect.DurationType.PERMANENT
-				await add_status(new_status)
-		elif change < 0:
-			for counter: int in -change:
-				var status_to_remove: StatusEffect = current_permanent[-counter - 1] # remove most recent permanent stack
-				remove_status(status_to_remove, true)
+	data.update_permanent_statuses(all_passive_effects)
 
 
 func update_immune_statuses(all_passive_effects: Array[PassiveEffect]) -> void:
-	immune_statuses.clear()
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		immune_statuses.append_array(passive_effect.status_immune)
-	
-	#for status: StatusEffect in current_statuses:
-		#if immune_statuses.has(status.unique_name):
-			#remove_status(status, true)
+	data.update_immune_statuses(all_passive_effects)
 
 
 func update_start_statuses(all_passive_effects: Array[PassiveEffect]) -> void:
-	start_statuses.clear()
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		start_statuses.append_array(passive_effect.status_start)
+	data.update_start_statuses(all_passive_effects)
 
 
 func update_status_visuals() -> void:
@@ -1338,27 +1282,18 @@ func hide_debug_menu() -> void:
 
 
 func set_job(new_job_name: String) -> void:
-	job_name = new_job_name
-	job_data = GameData.get_job(new_job_name)
-	set_sprite_by_job(new_job_name)
-	
-	# skillsets_names.fill("")
-	equip_skillset(0, GameData.get_skillset(job_data.skillset_unique_name))
-	
-	job_nickname = job_data.display_name
-	
-	if animation_manager.global_spritesheet_data.is_flying:
-		idle_walk_animation_id = 0x0c
-		walk_to_animation_id = 0x1e
-		current_idle_animation_id = idle_walk_animation_id
-		set_base_animation_ptr_id(idle_walk_animation_id)
-	else:
-		idle_walk_animation_id = 0x06
-		walk_to_animation_id = 0x18
-		current_idle_animation_id = idle_walk_animation_id
-		set_base_animation_ptr_id(idle_walk_animation_id)
-	
-	update_passive_effects()
+	data.set_job(new_job_name)
+	if animation_manager != null and animation_manager.global_spritesheet_data != null:
+		if animation_manager.global_spritesheet_data.is_flying:
+			idle_walk_animation_id = 0x0c
+			walk_to_animation_id = 0x1e
+			current_idle_animation_id = idle_walk_animation_id
+			set_base_animation_ptr_id(idle_walk_animation_id)
+		else:
+			idle_walk_animation_id = 0x06
+			walk_to_animation_id = 0x18
+			current_idle_animation_id = idle_walk_animation_id
+			set_base_animation_ptr_id(idle_walk_animation_id)
 
 
 func set_ability(new_action_name: String) -> void:
@@ -1374,9 +1309,12 @@ func set_ability(new_action_name: String) -> void:
 
 
 func set_primary_weapon(new_weapon_unique_name: String) -> void:
-	equip_slots[0].item_unique_name = new_weapon_unique_name
-	primary_weapon = GameData.get_item(new_weapon_unique_name)
-	#animation_manager.weapon_id = new_weapon_id
+	data.set_primary_weapon(new_weapon_unique_name)
+
+
+func _apply_weapon_visuals() -> void:
+	if animation_manager == null or primary_weapon == null:
+		return
 	var weapon_palette_id: int = primary_weapon.wep_frame_palette
 	var weapon_eff_id: int = primary_weapon.wep_eff_palette
 	var weapon_grid_texture: ImageTexture = animation_manager.wep_spritesheet_data.create_frame_grid_texture(
@@ -1385,15 +1323,9 @@ func set_primary_weapon(new_weapon_unique_name: String) -> void:
 	animation_manager.unit_sprites_manager.sprite_weapon.material_override.set_shader_parameter("palette_colors", GameData.get_spritesheet_data("wep").color_palette.slice(weapon_palette_id * 16, (weapon_palette_id + 1) * 16))
 	animation_manager.unit_sprites_manager.sprite_effect.material_override.set_shader_parameter("palette_colors", GameData.get_spritesheet_data("eff").color_palette.slice(weapon_eff_id * 16, (weapon_eff_id + 1) * 16))
 
-	# attack_action = primary_weapon.weapon_attack_action
-	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
-	set_available_actions(all_passive_effects)
-	primary_weapon_assigned.emit(new_weapon_unique_name)
-
 
 func get_attack_action() -> Action:
-	# TODO handle two swords? other abilities?
-	return equip_slots[0].get_item().get_attack_action()
+	return data.get_attack_action()
 
 
 # https://ffhacktics.com/wiki/Determine_Status_Bubble_Parameters
@@ -1441,136 +1373,28 @@ func cycle_status_icons() -> void:
 
 
 func get_evade(evade_source: EvadeData.EvadeSource, evade_type: EvadeData.EvadeType, evade_direction: EvadeData.Directions) -> int:
-	var evade: int = 0
-	
-	for evade_data: EvadeData in job_data.evade_datas:
-		if (evade_data.source == evade_source 
-				and evade_data.type == evade_type
-				and evade_data.directions.has(evade_direction)):
-			evade += evade_data.value
-	
-	for equip_slot: EquipmentSlot in equip_slots:
-		for evade_data: EvadeData in equip_slot.get_item().evade_datas:
-			if (evade_data.source == evade_source 
-					and evade_data.type == evade_type
-					and evade_data.directions.has(evade_direction)):
-				evade += evade_data.value
-	
-	# TODO evade from passive effects (Statuses, R/S/M)
-
-	return evade
+	return data.get_evade(evade_source, evade_type, evade_direction)
 
 
 func get_evade_values(evade_type: EvadeData.EvadeType, evade_direction: EvadeData.Directions) -> Dictionary[EvadeData.EvadeSource, int]:
-	var evade_values: Dictionary[EvadeData.EvadeSource, int] = {}
-	for evade_source: EvadeData.EvadeSource in EvadeData.EvadeSource.values():
-		var evade_value: int = get_evade(evade_source, evade_type, evade_direction)
-		evade_values[evade_source] = evade_value
-	
-	return evade_values
+	return data.get_evade_values(evade_type, evade_direction)
 
 
 func update_passive_effects(exclude_passives: PackedStringArray = []) -> void:
-	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects(exclude_passives)
-
-	update_permanent_statuses(all_passive_effects)
-	update_immune_statuses(all_passive_effects)
-	update_start_statuses(all_passive_effects)
-
-	# update passives in case statuses changed
-	all_passive_effects = get_all_passive_effects(exclude_passives)
-	update_stat_modifiers(all_passive_effects)
-	update_elemental_affinity(all_passive_effects)
-	update_triggered_actions(all_passive_effects)
-	update_equipable_item_types(all_passive_effects)
-
-	update_prohibited_terrain(all_passive_effects)
-	update_terrain_costs(all_passive_effects)
-	set_available_actions(all_passive_effects)
-
-	if global_battle_manager != null:
-		if not global_battle_manager.battle_is_running:
-			stats[StatType.HP].set_value(stats[StatType.HP].max_value) # TODO only set hp = max hp when updating unit not in battle, update on passive effects
-			stats[StatType.MP].set_value(stats[StatType.MP].max_value)
-
-	data_updated.emit(self)
+	var refill_hp_mp: bool = (global_battle_manager != null and not global_battle_manager.battle_is_running)
+	data.update_passive_effects(exclude_passives, refill_hp_mp)
 
 
 func get_all_passive_effects(exclude_passives: PackedStringArray = []) -> Array[PassiveEffect]:
-	var all_passive_effects: Array[PassiveEffect] = []
-	
-	var native_passive_effects: Array[PassiveEffect] = get_native_passive_effects(exclude_passives)
-	var other_passive_effects: Array[PassiveEffect] = get_passive_effects_from_others(exclude_passives)
-	all_passive_effects.append_array(native_passive_effects)
-	all_passive_effects.append_array(other_passive_effects)
-	
-	# all_passive_effects.filter(func(passive_effect): return not exclude_passives.has(passive_effect.unique_name))
-
-	return all_passive_effects
+	return data.get_all_passive_effects(exclude_passives)
 
 
 func get_native_passive_effects(exclude_passives: PackedStringArray = []) -> Array[PassiveEffect]:
-	var native_passive_effects: Array[PassiveEffect] = []
-	# TODO should all Objects that have PassiveEffect be changed to store Array[PassiveEffect]
-	# all_passive_effects.append_array(ability.passive_effects) 
-	
-	if job_data != null:
-		native_passive_effects.append_array(job_data.get_passive_effects())
-		for ability: Ability in job_data.innate_abilities:
-			native_passive_effects.append(ability.get_passive_effect())
-	
-	for ability_slot: AbilitySlot in ability_slots:
-		native_passive_effects.append(ability_slot.get_ability().get_passive_effect())
-	
-	for equipment_slot: EquipmentSlot in equip_slots:
-		native_passive_effects.append(equipment_slot.get_item().get_passive_effect())
-	
-	for status: StatusEffect in current_statuses:
-		native_passive_effects.append(status.passive_effect)
-	
-	if global_battle_manager != null:
-		native_passive_effects.append_array(global_battle_manager.global_passive_effects)
-
-	native_passive_effects = native_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return passive_effect.effect_range == 0)
-	native_passive_effects = native_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return not exclude_passives.has(passive_effect.unique_name))
-	
-	return native_passive_effects
+	return data.get_native_passive_effects(exclude_passives)
 
 
 func get_passive_effects_from_others(exclude_passives: PackedStringArray = []) -> Array[PassiveEffect]:
-	var shared_passive_effects: Array[PassiveEffect] = []
-	
-	if global_battle_manager != null:
-		for unit: Unit in global_battle_manager.units:
-			var unit_passives: Array[PassiveEffect] = unit.get_native_passive_effects()
-			for passive_effect: PassiveEffect in unit_passives:
-				if passive_effect.effect_range == 0:
-					continue
-				
-				if not passive_effect.unit_team_filter.is_empty():
-					if not passive_effect.unit_team_filter.has(PassiveEffect.FilterTeam.FRIENDLY) and unit.team == self.team:
-						continue
-					elif not passive_effect.unit_team_filter.has(PassiveEffect.FilterTeam.ENEMY) and unit.team != self.team:
-						continue
-				
-				if not passive_effect.unit_basis_filter.is_empty():
-					if not passive_effect.unit_basis_filter.has(stat_basis):
-						continue
-				
-				var relative_position: Vector2i = (tile_position.location - unit.tile_position.location).abs()
-				var distance_to_unit: int = relative_position.x + relative_position.y
-				if distance_to_unit > passive_effect.effect_range:
-					continue
-				
-				var relative_height: float = absf(tile_position.height_mid - unit.tile_position.height_mid)
-				if relative_height > passive_effect.vertical_tolerance:
-					continue
-				
-				shared_passive_effects.append(passive_effect)
-	
-	shared_passive_effects = shared_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return not exclude_passives.has(passive_effect.unique_name))
-	
-	return shared_passive_effects
+	return data.get_passive_effects_from_others(exclude_passives)
 
 
 func show_popup_text(text: String) -> void:
@@ -1598,11 +1422,12 @@ func set_sprite_by_file_idx(new_sprite_file_idx: int) -> void:
 
 
 func set_sprite_by_file_name(new_sprite_file_name: String) -> void:
-	#var new_sprite_file_idx: int = RomReader.file_records[new_sprite_file_name].type_index
-	#set_sprite_by_file_idx(new_sprite_file_idx)
-	
+	if new_sprite_file_name.is_empty():
+		return
 	sprite_file_name = new_sprite_file_name
-	#debug_menu.sprite_options.select(new_sprite_file_idx)
+	_rendered_sprite_name = new_sprite_file_name
+	if animation_manager == null:
+		return
 	on_sprite_selected(new_sprite_file_name)
 	var num_sp2s: int = min(0, (GameData.get_texture(new_sprite_file_name).get_height() - 488)) / 256
 	if new_sprite_file_name == "wep":
@@ -1611,7 +1436,8 @@ func set_sprite_by_file_name(new_sprite_file_name: String) -> void:
 		animation_manager.unit_sprites_manager.sprite_primary.vframes = 16 + (16 * num_sp2s)
 	update_spritesheet_grid_texture()
 	
-	debug_menu.anim_id_spin.value = current_idle_animation_id
+	if debug_menu != null:
+		debug_menu.anim_id_spin.value = current_idle_animation_id
 
 
 func set_sprite_by_id(new_sprite_id: int) -> void:
@@ -1637,18 +1463,18 @@ func set_sprite_by_job(new_job_name: String) -> void:
 	if (new_job_data.job_id >= 0x4a and new_job_data.job_id <= 0x5a or new_job_data.job_id == 0x5d) and stat_basis == StatBasis.FEMALE:
 		sprite_name = sprite_name.replace("_m", "_w")
 	set_sprite_by_file_name(sprite_name)
-	if job_data.default_palette_idx != -1:
-		set_sprite_palette(job_data.default_palette_idx)
+	if data.palette_id >= 0:
+		set_sprite_palette(data.palette_id)
+	elif new_job_data.default_palette_idx != -1:
+		set_sprite_palette(new_job_data.default_palette_idx)
 	else:
 		set_sprite_palette(randi_range(0, 4))
 
 
 func set_sprite_palette(new_palette_id: int) -> void:
-	if new_palette_id == sprite_palette_id:
-		return
-	
 	sprite_palette_id = new_palette_id
-	if sprite_palette_id_override == -1: # don't update grid texture if palette is still being overridden
+	_rendered_palette_id = new_palette_id
+	if sprite_palette_id_override == -1 and animation_manager != null: # don't update grid texture if palette is still being overridden
 		update_spritesheet_grid_texture()
 
 
@@ -1677,10 +1503,12 @@ func set_submerged_depth(new_depth: int) -> void:
 
 
 func update_spritesheet_grid_texture() -> void:
+	if animation_manager == null or sprite_file_name.is_empty():
+		return
 	var new_spritesheet_data: UnitSpritesheetData = GameData.get_spritesheet_data(sprite_file_name)
 	var palette_idx_final: int = sprite_palette_id_override
 	if sprite_palette_id_override < 0:
-		palette_idx_final = sprite_palette_id
+		palette_idx_final = max(0, sprite_palette_id)
 	var new_grid_texture: Texture2D = new_spritesheet_data.create_frame_grid_texture(
 		0, animation_manager.other_type_index, 0, submerged_depth
 	)
@@ -1714,9 +1542,15 @@ func on_sprite_selected(new_spritesheet_name: String) -> void:
 	if shp.file_name == "type2":
 		if animation_manager.wep_shp.file_name != "wep2":
 			animation_manager.wep_shp = GameData.get_shp("wep2")
-			set_primary_weapon(primary_weapon.unique_name) # get new texture based on wep2.shp
+			_apply_weapon_visuals() # get new texture based on wep2.shp
 			animation_changed = true
 		animation_manager.wep_seq = GameData.get_seq("wep2")
+	else:
+		if animation_manager.wep_shp.file_name != "wep1":
+			animation_manager.wep_shp = GameData.get_shp("wep1")
+			_apply_weapon_visuals() # get new texture based on wep1.shp
+			animation_changed = true
+		animation_manager.wep_seq = GameData.get_seq("wep1")
 	
 	var seq: Seq = GameData.get_spritesheet_data(new_spritesheet_name).get_seq()
 	if shp != animation_manager.global_shp or seq != animation_manager.global_seq:
@@ -1739,36 +1573,11 @@ func on_sprite_selected(new_spritesheet_name: String) -> void:
 
 
 func update_prohibited_terrain(all_passive_effects: Array[PassiveEffect]) -> void:
-	var new_prohibited_terrain: Array[int] = []
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		for terrain_id: int in passive_effect.add_prohibited_terrain:
-			if not new_prohibited_terrain.has(terrain_id):
-				new_prohibited_terrain.append(terrain_id)
-	
-	for passive_effect: PassiveEffect in all_passive_effects:
-		for terrain_id: int in passive_effect.remove_prohibited_terrain:
-			if new_prohibited_terrain.has(terrain_id):
-				new_prohibited_terrain.erase(terrain_id)
-	
-	prohibited_terrain = new_prohibited_terrain
+	data.update_prohibited_terrain(all_passive_effects)
 
 
 func update_terrain_costs(all_passive_effects: Array[PassiveEffect]) -> void:
-	var new_terrain_costs: Dictionary[int, int] = {}
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		for terrain_id: int in passive_effect.terrain_cost_modifiers.keys():
-			var current_cost: int = 1
-			if new_terrain_costs.has(terrain_id):
-				current_cost = new_terrain_costs[terrain_id]
-			
-			new_terrain_costs[terrain_id] = passive_effect.terrain_cost_modifiers[terrain_id].apply(current_cost)
-	
-	for terrain_id: int in new_terrain_costs.keys():
-		new_terrain_costs[terrain_id] = max(0, new_terrain_costs[terrain_id]) # move is never negative
-
-	terrain_costs = new_terrain_costs
+	data.update_terrain_costs(all_passive_effects)
 
 
 func set_position_to_tile() -> void:

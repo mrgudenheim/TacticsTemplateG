@@ -456,9 +456,8 @@ func update_unit_dragging(unit: Unit, event: InputEvent) -> void:
 func export_scenario() -> void:
 	scenario.units_data.clear()
 	for unit: Unit in battle_manager.units:
-		var new_unit_data: UnitData = UnitData.new()
-		new_unit_data.init_from_unit(unit)
-		scenario.units_data.append(new_unit_data)
+		unit.data.sync_tile_coords_from_map(battle_manager.total_map_tiles)
+		scenario.units_data.append(unit.data.duplicate_persistent())
 	Utilities.save_json(scenario)
 	RomReader.scenarios[scenario.unique_name] = scenario
 

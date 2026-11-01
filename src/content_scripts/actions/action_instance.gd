@@ -229,7 +229,7 @@ func get_ai_score() -> int:
 		var total_status_score: float = 0.0
 		for status_id: String in action.target_status_list:
 			var status: StatusEffect = GameData.get_status_effect(status_id)
-			var status_score: float = status.get_ai_score(user, target, action.will_remove_target_status)
+			var status_score: float = status.get_ai_score(user.data, target.data, action.will_remove_target_status)
 			if action.target_status_list_type == Action.StatusListType.ALL:
 				status_score = status_score * action.target_status_chance
 			elif action.target_status_list_type == Action.StatusListType.EACH:
@@ -425,25 +425,25 @@ func get_total_hit_chance(target: Unit, evade_direction: EvadeData.Directions) -
 			return 0
 
 	if not action.required_target_stat_basis.is_empty():
-		var required_basis: Array[Unit.StatBasis] = action.required_target_stat_basis.duplicate()
+		var required_basis: Array[UnitData.StatBasis] = action.required_target_stat_basis.duplicate()
 		for passive_effect: PassiveEffect in user_passive_effects:
 			required_basis.append_array(passive_effect.add_applicable_target_stat_bases)
 
 		if not required_basis.has(target.stat_basis):
 			return 0
 	
-	var base_hit_chance: float = action.base_hit_formula.get_result(user, target, action.element)
+	var base_hit_chance: float = action.base_hit_formula.get_result(user.data, target.data, action.element)
 	var modified_hit_chance: float = base_hit_chance
 	if action.passive_power_modifier_applies_to_hit_chance:
 		for passive_effect: PassiveEffect in user_passive_effects:
-			modified_hit_chance = passive_effect.power_modifier_user.apply(roundi(modified_hit_chance), user)
+			modified_hit_chance = passive_effect.power_modifier_user.apply(roundi(modified_hit_chance), user.data)
 		for passive_effect: PassiveEffect in target_passive_effects:
-			modified_hit_chance = passive_effect.power_modifier_targeted.apply(roundi(modified_hit_chance), target)
+			modified_hit_chance = passive_effect.power_modifier_targeted.apply(roundi(modified_hit_chance), target.data)
 	else:
 		for passive_effect: PassiveEffect in user_passive_effects:
-			modified_hit_chance = passive_effect.hit_chance_modifier_user.apply(roundi(modified_hit_chance), user)
+			modified_hit_chance = passive_effect.hit_chance_modifier_user.apply(roundi(modified_hit_chance), user.data)
 		for passive_effect: PassiveEffect in target_passive_effects:
-			modified_hit_chance = passive_effect.hit_chance_modifier_targeted.apply(roundi(modified_hit_chance), target)
+			modified_hit_chance = passive_effect.hit_chance_modifier_targeted.apply(roundi(modified_hit_chance), target.data)
 
 	var evade_values: Dictionary[EvadeData.EvadeSource, int] = target.get_evade_values(action.applicable_evasion_type, evade_direction)
 	
@@ -476,13 +476,13 @@ func get_total_hit_chance(target: Unit, evade_direction: EvadeData.Directions) -
 func get_evade_direction(origin_tile: TerrainTile, target: Unit) -> EvadeData.Directions:
 	var relative_position: Vector2i = origin_tile.location - target.tile_position.location
 	var relative_facing_position: Vector2i = relative_position
-	if target.facing == Unit.Facings.NORTH:
+	if target.facing == UnitData.Facings.NORTH:
 		pass # relative position is already correct for North facing
-	elif target.facing == Unit.Facings.EAST:
+	elif target.facing == UnitData.Facings.EAST:
 		relative_facing_position = Vector2i(-relative_position.y, relative_position.x)
-	elif target.facing == Unit.Facings.SOUTH:
+	elif target.facing == UnitData.Facings.SOUTH:
 		relative_facing_position = -relative_position
-	elif target.facing == Unit.Facings.WEST:
+	elif target.facing == UnitData.Facings.WEST:
 		relative_facing_position = Vector2i(relative_position.y, -relative_position.x)
 	
 	# check target facing, check x>y
@@ -660,20 +660,20 @@ func apply_standard() -> void:
 			show_shared_vfx(action.target_shared_vfx_handler_id, target_unit)
 
 			for effect: ActionEffect in action.target_effects:
-				var effect_value: int = roundi(effect.base_power_formula.get_result(user, target_unit, action.element))
+				var effect_value: int = roundi(effect.base_power_formula.get_result(user.data, target_unit.data, action.element))
 				if not action.passive_power_modifier_applies_to_hit_chance:
 					# TODO check all passive_effects on user and target
 					# TODO check ignores_statuses
 					for status: StatusEffect in user.current_statuses:
-						effect_value = status.passive_effect.power_modifier_user.apply(effect_value)
+						effect_value = status.get_passive_effect().power_modifier_user.apply(effect_value)
 					for status: StatusEffect in target_unit.current_statuses:
-						effect_value = status.passive_effect.power_modifier_targeted.apply(effect_value)
+						effect_value = status.get_passive_effect().power_modifier_targeted.apply(effect_value)
 				
 				effect.apply(user, target_unit, effect_value)
 				
-				if action.set_target_animation_on_hit and [Unit.StatType.HP, Unit.StatType.MP].has(effect.effect_stat_type) and effect_value < 0:
+				if action.set_target_animation_on_hit and [UnitData.StatType.HP, UnitData.StatType.MP].has(effect.effect_stat_type) and effect_value < 0:
 					target_unit.animate_take_hit()
-				elif action.set_target_animation_on_hit and [Unit.StatType.HP, Unit.StatType.MP].has(effect.effect_stat_type) and effect_value > 0:
+				elif action.set_target_animation_on_hit and [UnitData.StatType.HP, UnitData.StatType.MP].has(effect.effect_stat_type) and effect_value > 0:
 					target_unit.animate_recieve_heal()
 			
 			# apply status
@@ -701,7 +701,7 @@ func apply_standard() -> void:
 	
 	# apply effects to user
 	for effect: ActionEffect in action.user_effects:
-		var effect_value: int = roundi(effect.base_power_formula.get_result(user, user, action.element))
+		var effect_value: int = roundi(effect.base_power_formula.get_result(user.data, user.data, action.element))
 		effect.apply(user, user, effect_value)
 	
 	# apply status to user
@@ -728,7 +728,7 @@ func apply_standard() -> void:
 		return
 
 	# pay costs
-	user.stats[Unit.StatType.MP].add_value(-action.mp_cost)
+	user.stats[UnitData.StatType.MP].add_value(-action.mp_cost)
 
 	# wait for triggered actions
 	if allow_triggering_actions:

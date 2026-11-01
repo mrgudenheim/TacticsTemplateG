@@ -3,7 +3,7 @@ extends Resource
 
 @export var base_power_formula: FormulaData = FormulaData.new("0.0", [5, 0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, true, true)
 @export var type: EffectType = EffectType.UNIT_STAT
-@export var effect_stat_type: Unit.StatType = Unit.StatType.HP
+@export var effect_stat_type: UnitData.StatType = UnitData.StatType.HP
 @export var show_ui: bool = true
 @export var transfer_to_user: bool = false # absorb, steal
 @export var apply_to_user: bool = false
@@ -24,7 +24,7 @@ enum EffectType {
 
 func _init(
 	new_type: EffectType = EffectType.UNIT_STAT, 
-	new_effect_stat: Unit.StatType = Unit.StatType.HP, 
+	new_effect_stat: UnitData.StatType = UnitData.StatType.HP, 
 	new_show_ui: bool = true, 
 	new_transfer_to_user: bool = false, 
 	new_set_value: bool = false,
@@ -37,11 +37,11 @@ func _init(
 
 
 func get_value(user: Unit, target: Unit, element: Action.ElementTypes) -> int:
-	return roundi(base_power_formula.get_result(user, target, element))
+	return roundi(base_power_formula.get_result(user.data, target.data, element))
 
 
 func get_ai_value(user: Unit, target: Unit, element: Action.ElementTypes) -> int:
-	var nominal_value: int = roundi(base_power_formula.get_result(user, target, element))
+	var nominal_value: int = roundi(base_power_formula.get_result(user.data, target.data, element))
 	var is_friendly: bool = target.team == user.team
 	var ai_value: int = nominal_value
 	
@@ -66,7 +66,7 @@ func set_effect_label() -> void:
 	label = EffectType.keys()[type]
 	
 	if type == EffectType.UNIT_STAT:
-		label = Unit.StatType.keys()[effect_stat_type]
+		label = UnitData.StatType.keys()[effect_stat_type]
 	if type == EffectType.CURRENCY:
 		label = "Gold"
 
@@ -156,7 +156,7 @@ static func create_from_dictionary(property_dict: Dictionary) -> ActionEffect:
 		elif property_name == "type":
 			new_action_effect.type = EffectType[property_dict[property_name]]
 		elif property_name == "effect_stat_type":
-			new_action_effect.effect_stat_type = Unit.StatType[property_dict[property_name]]
+			new_action_effect.effect_stat_type = UnitData.StatType[property_dict[property_name]]
 		else:
 			new_action_effect.set(property_name, property_dict[property_name])
 

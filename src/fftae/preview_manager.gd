@@ -62,7 +62,7 @@ func add_unit() -> void:
 	#preview_viewport.subviewport.add_child(new_unit)
 	preview_viewport2.add_child(new_unit)
 	new_unit.initialize_unit()
-	new_unit.facing = Unit.Facings.SOUTH
+	new_unit.facing = UnitData.Facings.SOUTH
 	new_unit.position += Vector3.DOWN * 0.5
 	#new_unit.char_body.rotation_degrees = Vector3.ZERO
 	new_unit.animation_manager.rotation_degrees = Vector3.ZERO
@@ -134,10 +134,10 @@ func _on_submerged_options_item_selected(index: int) -> void:
 
 func _on_face_right_check_toggled(toggled_on: bool) -> void:
 	if toggled_on:
-		unit.facing = Unit.Facings.EAST
+		unit.facing = UnitData.Facings.EAST
 		unit.update_animation_facing(Vector3(-1, 0, -1))
 	else:
-		unit.facing = Unit.Facings.SOUTH
+		unit.facing = UnitData.Facings.SOUTH
 		unit.update_animation_facing(Vector3(-1, 0, -1))
 	#unit.animation_manager._on_face_right_check_toggled(toggled_on)
 

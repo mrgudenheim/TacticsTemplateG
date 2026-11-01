@@ -26,11 +26,17 @@ const STAT_BAR_TSCN: PackedScene = preload("uid://d2jb1kiyb35fa")
 		tint_progress = new_value
 
 
+var _bound_stat: StatValue = null
+
+
 static func instantiate() -> StatBar:
 	return STAT_BAR_TSCN.instantiate()
 
 
 func set_stat(stat_name: String, stat: StatValue) -> void:
+	if _bound_stat != null and _bound_stat != stat and _bound_stat.value_changed.is_connected(update_stat):
+		_bound_stat.value_changed.disconnect(update_stat)
+	_bound_stat = stat
 	name_label.text = stat_name
 	update_stat(stat)
 	

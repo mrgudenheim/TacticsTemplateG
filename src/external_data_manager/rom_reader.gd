@@ -988,14 +988,14 @@ func export_data_tables(save_path: String) -> void:
 		"PHYSICAL_ATTACK" : 3,
 		"MAGIC_ATTACK" : 4,
 	}
-	for stat_basis_name: String in Unit.StatBasis.keys():
+	for stat_basis_name: String in UnitData.StatBasis.keys():
 		var initial_stats: Dictionary[String, Vector2i] = {}
 		for stat_name: String in stat_name_lookup.keys():
 			var stat_idx: int = stat_name_lookup[stat_name]
 			
 			var stat_range: Vector2i = Vector2i.ZERO
-			stat_range.x = RomReader.scus_data.unit_base_datas[Unit.StatBasis[stat_basis_name]][stat_idx] * 16384
-			stat_range.y = stat_range.x + (RomReader.scus_data.unit_base_stats_mods[Unit.StatBasis[stat_basis_name]][stat_idx] * 16384)
+			stat_range.x = RomReader.scus_data.unit_base_datas[UnitData.StatBasis[stat_basis_name]][stat_idx] * 16384
+			stat_range.y = stat_range.x + (RomReader.scus_data.unit_base_stats_mods[UnitData.StatBasis[stat_basis_name]][stat_idx] * 16384)
 			initial_stats[stat_name] = stat_range
 		initial_unit_raw_stats.append(initial_stats)
 	initial_unit_data.initial_unit_raw_stats = initial_unit_raw_stats
@@ -1010,11 +1010,11 @@ func export_data_tables(save_path: String) -> void:
 		"LH_weapon" : 10,
 		"LH_shield" : 11,
 	}
-	for stat_basis_name: String in Unit.StatBasis.keys():
+	for stat_basis_name: String in UnitData.StatBasis.keys():
 		var initial_equipment: Dictionary[String, String] = {}
 		for slot_name: String in equipment_slot_name_lookup.keys():
 			var slot_idx: int = equipment_slot_name_lookup[slot_name]
-			var item_idx: int = RomReader.scus_data.unit_base_datas[Unit.StatBasis[stat_basis_name]][slot_idx]
+			var item_idx: int = RomReader.scus_data.unit_base_datas[UnitData.StatBasis[stat_basis_name]][slot_idx]
 			var item_name: String = RomReader.items_array[0].unique_name
 			if item_idx != 255:
 				item_name = RomReader.items_array[item_idx].unique_name

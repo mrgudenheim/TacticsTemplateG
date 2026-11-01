@@ -313,7 +313,10 @@ func get_status_effect(unique_name: String) -> StatusEffect:
 		return status_effects[unique_name]
 	
 	var file_path: String = status_effect_paths[unique_name]
-	status_effects[unique_name] = ResourceLoader.load(file_path, "StatusEffect")
+	var loaded_status: StatusEffect = ResourceLoader.load(file_path, "StatusEffect")
+	if loaded_status != null and loaded_status.passive_effect_name != "" and passive_effect_paths.has(loaded_status.passive_effect_name):
+		loaded_status.passive_effect = get_passive_effect(loaded_status.passive_effect_name)
+	status_effects[unique_name] = loaded_status
 	return status_effects[unique_name]
 
 

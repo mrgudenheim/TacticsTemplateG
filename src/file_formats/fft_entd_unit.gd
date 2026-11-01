@@ -140,6 +140,7 @@ func _init(bytes: PackedByteArray) -> void:
 
 func get_unit_data() -> UnitData:
 	var unit_data: UnitData = UnitData.new()
+	unit_data.initialize_defaults()
 
 	# TODO get name based on special, male, female, or monster
 	if name_idx != 0xFF:
@@ -154,14 +155,17 @@ func get_unit_data() -> UnitData:
 		unit_data.level = randi_range(0, 50)
 
 	if gender == 4:
-		unit_data.gender = Unit.Gender.MALE
+		unit_data.gender = UnitData.Gender.MALE
 	elif gender == 2:
-		unit_data.gender = Unit.Gender.FEMALE
+		unit_data.gender = UnitData.Gender.FEMALE
 	elif gender == 1:
-		unit_data.gender = Unit.Gender.MONSTER
+		unit_data.gender = UnitData.Gender.MONSTER
+	unit_data.stat_basis = int(unit_data.gender) as UnitData.StatBasis
+	unit_data._stat_basis_overridden = false
 	
 	unit_data.zodiac = "zodiac" # TODO should zodiac be derived from birthday?
 	unit_data.job_unique_name = RomReader.jobs_data.keys()[main_job]
+	unit_data.job_data = RomReader.jobs_data.values()[main_job]
 	unit_data.team_idx = team_color_idx
 	unit_data.controller = 1 if is_player_controlled else 0 # 0 = AI, 1 = Player 1, etc.
 	
@@ -178,66 +182,21 @@ func get_unit_data() -> UnitData:
 	
 	
 	if initial_direction == 0:
-		unit_data.facing_direction = Unit.Facings.SOUTH
+		unit_data.facing_direction = UnitData.Facings.SOUTH
 	elif initial_direction == 1:
-		unit_data.facing_direction = Unit.Facings.EAST
+		unit_data.facing_direction = UnitData.Facings.EAST
 	elif initial_direction == 2:
-		unit_data.facing_direction = Unit.Facings.NORTH
+		unit_data.facing_direction = UnitData.Facings.NORTH
 	elif initial_direction == 3:
-		unit_data.facing_direction = Unit.Facings.WEST
+		unit_data.facing_direction = UnitData.Facings.WEST
 
 	# job levels
 	# jp per job
 	# abilities learned
 
-	# Stats
-	unit_data.stats = {
-		Unit.StatType.HP_MAX : StatValue.new(0, 999, 150),
-		Unit.StatType.HP : StatValue.new(0, 150, 100),
-		Unit.StatType.MP_MAX : StatValue.new(0, 999, 100),
-		Unit.StatType.MP : StatValue.new(0, 100, 70),
-		Unit.StatType.CT : StatValue.new(0, 999, 25),
-		Unit.StatType.MOVE : StatValue.new(0, 100, 3),
-		Unit.StatType.JUMP : StatValue.new(0, 100, 3),
-		Unit.StatType.SPEED : StatValue.new(0, 100, 10),
-		Unit.StatType.PHYSICAL_ATTACK : StatValue.new(0, 100, 11),
-		Unit.StatType.MAGIC_ATTACK : StatValue.new(0, 100, 12),
-		Unit.StatType.BRAVE : StatValue.new(0, 100, 70),
-		Unit.StatType.FAITH : StatValue.new(0, 100, 65),
-		Unit.StatType.EXP : StatValue.new(0, 999, 99),
-		Unit.StatType.LEVEL : StatValue.new(0, 99, 20),
-	}
-	unit_data.stats_raw = {
-		Unit.StatType.HP_MAX : 0.0, 
-		Unit.StatType.MP_MAX : 0.0, 
-		Unit.StatType.SPEED : 0.0, 
-		Unit.StatType.PHYSICAL_ATTACK : 0.0, 
-		Unit.StatType.MAGIC_ATTACK : 0.0, 
-	}
-
-	unit_data.stats[Unit.StatType.HP_MAX].value_changed.connect(unit_data.stats[Unit.StatType.HP].update_max_from_clamped_value)
-	unit_data.stats[Unit.StatType.MP_MAX].value_changed.connect(unit_data.stats[Unit.StatType.MP].update_max_from_clamped_value)
-	# TODO unit_data.stats[Unit.StatType.HP].value_changed.connect(hp_changed)
-	# TODO connect stat bars?
-
-	unit_data.stats[Unit.StatType.LEVEL].set_value(unit_data.level)
-	Unit.generate_leveled_raw_stats(unit_data.gender as Unit.StatBasis, unit_data.level, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
-	var use_higher_stat_values: bool = false
-	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(unit_data.spritesheeet_file_name): # lucavi
-		use_higher_stat_values = true
-	Unit.calc_battle_stats(RomReader.jobs_data.values()[main_job], unit_data.stats_raw, unit_data.stats, true, use_higher_stat_values)
-
-	unit_data.stats[Unit.StatType.BRAVE].set_value(brave)
-	unit_data.stats[Unit.StatType.FAITH].set_value(faith)
-
-	# equipment
-	unit_data.equip_slots = [
-		EquipmentSlot.new("RH", [ItemData.SlotType.WEAPON, ItemData.SlotType.SHIELD]),
-		EquipmentSlot.new("LH", [ItemData.SlotType.WEAPON, ItemData.SlotType.SHIELD]),
-		EquipmentSlot.new("Head", [ItemData.SlotType.HEADGEAR]),
-		EquipmentSlot.new("Body", [ItemData.SlotType.ARMOR]),
-		EquipmentSlot.new("Accesory", [ItemData.SlotType.ACCESSORY]),
-	]
+	unit_data.recalculate_stats_for_level(unit_data.level, true, true, true)
+	unit_data.stats[UnitData.StatType.BRAVE].set_value(brave)
+	unit_data.stats[UnitData.StatType.FAITH].set_value(faith)
 
 	# TODO if equipment value == 0xFE, get random leveled equipment
 	unit_data.equip_slots[0].item_unique_name = get_item_name(unit_data, 0, equipment_right_hand)
@@ -250,15 +209,6 @@ func get_unit_data() -> UnitData:
 	# if primary_skillset == 0xFF, ability_slots[0] set by main job
 	unit_data.skillsets_names = ["", ""]
 	unit_data.skillsets_names[0] = RomReader.jobs_data.values()[main_job].skillset_unique_name
-
-	# abilities
-	unit_data.ability_slots = [
-		#AbilitySlot.new("Skillset 1", [Ability.SlotType.SKILLSET]),
-		#AbilitySlot.new("Skillset 2", [Ability.SlotType.SKILLSET]),
-		AbilitySlot.new("Reaction", [Ability.SlotType.REACTION]),
-		AbilitySlot.new("Support", [Ability.SlotType.SUPPORT]),
-		AbilitySlot.new("Movement", [Ability.SlotType.MOVEMENT]),
-	]
 
 	# TODO if ability value == 0x01FE, get random ability
 	unit_data.ability_slots[0].ability_unique_name = get_ability_name(unit_data, 0, reaction)

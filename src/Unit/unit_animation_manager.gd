@@ -7,7 +7,7 @@ signal animation_frame_loaded(delay: float, frame_num: int)
 signal processing_opcode(index: int)
 
 #@export var ui_manager: UiManager
-@export var unit_data: Unit
+@export var unit_actor: Unit
 @export var unit_sprites_manager: UnitSpritesManager
 #var animation_timer: float = 0
 var is_framerate_dependent: bool = false
@@ -186,7 +186,7 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 	# handle LoadFrameWait
 	if not seq_part.is_opcode:
 		var new_frame_id: int = seq_part.parameters[0]
-		var frame_id_offset: int = get_animation_frame_offset(unit_data.primary_weapon.item_type, fft_animation.shp, fft_animation.back_face_offset)
+		var frame_id_offset: int = get_animation_frame_offset(unit_actor.primary_weapon.item_type, fft_animation.shp, fft_animation.back_face_offset)
 		new_frame_id = new_frame_id + frame_id_offset + opcode_frame_offset
 		
 		## clear the frame to prevent weird and inconsistent ghosting issues
@@ -233,14 +233,14 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 		elif seq_part.opcode_name.begins_with("Move"):
 			var position_offset: Vector3 = Vector3.ZERO
 			if seq_part.opcode_name == "MoveUnitFB":
-				position_offset = unit_data.facing_vector * seq_part.parameters[0]
+				position_offset = unit_actor.facing_vector * seq_part.parameters[0]
 			elif seq_part.opcode_name == "MoveUnitDU":
 				position_offset = Vector3(0, -seq_part.parameters[0], 0)
 			elif seq_part.opcode_name == "MoveUnitRL":
-				position_offset = unit_data.facing_vector.rotated(Vector3.UP, deg_to_rad(-90)) * seq_part.parameters[0]
+				position_offset = unit_actor.facing_vector.rotated(Vector3.UP, deg_to_rad(-90)) * seq_part.parameters[0]
 			elif seq_part.opcode_name == "MoveUnitRLDUFB":
-				var position_offset_fb: Vector3 = unit_data.facing_vector * seq_part.parameters[2]
-				var position_offset_rl: Vector3 = unit_data.facing_vector.rotated(Vector3.UP, deg_to_rad(-90)) * seq_part.parameters[0]
+				var position_offset_fb: Vector3 = unit_actor.facing_vector * seq_part.parameters[2]
+				var position_offset_rl: Vector3 = unit_actor.facing_vector.rotated(Vector3.UP, deg_to_rad(-90)) * seq_part.parameters[0]
 				var position_offset_du: Vector3 = Vector3(0, -seq_part.parameters[1], 0)
 				position_offset = position_offset_fb + position_offset_rl + position_offset_du
 			elif seq_part.opcode_name == "MoveUp1":
@@ -252,13 +252,13 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 			elif seq_part.opcode_name == "MoveDown2":
 				position_offset = Vector3(0, -2, 0)
 			elif seq_part.opcode_name == "MoveBackward1":
-				position_offset = unit_data.facing_vector * -1
+				position_offset = unit_actor.facing_vector * -1
 			elif seq_part.opcode_name == "MoveBackward2":
-				position_offset = unit_data.facing_vector * -2
+				position_offset = unit_actor.facing_vector * -2
 			elif seq_part.opcode_name == "MoveForward1":
-				position_offset = unit_data.facing_vector * 1
+				position_offset = unit_actor.facing_vector * 1
 			elif seq_part.opcode_name == "MoveForward2":
-				position_offset = unit_data.facing_vector * 2
+				position_offset = unit_actor.facing_vector * 2
 			else:
 				push_warning("can't interpret " + seq_part.opcode_name)
 				
@@ -297,19 +297,19 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 				#
 				#if item_index <= 187: # load crystal
 					#item_frame_id = item_index - 179
-					#unit_data.debug_menu.other_type_options.select(2) # to update ui
+					#unit_actor.debug_menu.other_type_options.select(2) # to update ui
 					##other_type_index = 2 # to set v_offset is correct
 				#elif item_index == 188: # load chest 1
 					#item_frame_id = 15
-					#unit_data.debug_menu.other_type_options.select(0)
+					#unit_actor.debug_menu.other_type_options.select(0)
 					##other_type_index = 0
 				#elif item_index == 189: # load chest 2
 					#item_frame_id = 16
-					#unit_data.debug_menu.other_type_options.select(0)
+					#unit_actor.debug_menu.other_type_options.select(0)
 					##other_type_index = 0
 			
 			#var assembled_image: Image = item_sheet_type.get_assembled_frame(
-					#item_frame_id, item_image, global_animation_ptr_id, unit_data.debug_menu.other_type_options.selected, unit_data.primary_weapon.wep_frame_v_offset, unit_data.submerged_depth)
+					#item_frame_id, item_image, global_animation_ptr_id, unit_actor.debug_menu.other_type_options.selected, unit_actor.primary_weapon.wep_frame_v_offset, unit_actor.submerged_depth)
 			var target_sprite: Sprite3D = unit_sprites_manager.sprite_item
 			# item graphics start on 3rd row of ITEM.BIN, item graphic id does not count the blank 16th column, so need to add extra based on the row
 			@warning_ignore("integer_division")
@@ -538,12 +538,12 @@ func _on_animation_h_slider_value_changed(value: int) -> void:
 
 
 func _on_palette_spin_box_value_changed(value: int) -> void:
-	unit_data.set_sprite_palette(value)
+	unit_actor.set_sprite_palette(value)
 
 
 func _on_submerged_options_item_selected(index: int) -> void:
-	unit_data.set_submerged_depth(index)
-	#unit_sprites_manager.sprite_primary.texture = unit_data.
+	unit_actor.set_submerged_depth(index)
+	#unit_sprites_manager.sprite_primary.texture = unit_actor.
 	#_on_animation_changed()
 
 

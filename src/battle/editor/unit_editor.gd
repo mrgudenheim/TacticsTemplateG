@@ -48,6 +48,7 @@ signal skillset_select_pressed(unit: Unit, skillset_slot_idx: int)
 
 @export var unit_scene: PackedScene
 var unit: Unit
+var unit_data: UnitData
 
 
 func _ready() -> void:
@@ -55,36 +56,45 @@ func _ready() -> void:
 
 
 func setup(new_unit: Unit) -> void:
+	setup_from_data(new_unit.data, new_unit)
+
+
+func setup_from_data(new_data: UnitData, bound_unit: Unit = null) -> void:
 	if unit != null:
 		if unit.data_updated.is_connected(update_ui):
 			unit.data_updated.disconnect(update_ui)
+	if unit_data != null:
+		if unit_data.data_changed.is_connected(update_ui_from_data):
+			unit_data.data_changed.disconnect(update_ui_from_data)
 
-	unit = new_unit
-	if new_unit.job_data == null:
-		new_unit.set_job_id(0x01) # TODO set initial job correctly
+	unit = bound_unit
+	unit_data = new_data
+	unit_data.ensure_initialized()
+	if unit_data.job_data == null:
+		unit_data.set_job(GameData.job_paths.keys()[0])
 	
-	unit_name_line_edit.text = new_unit.unit_nickname
-	job_button.text = new_unit.job_data.display_name
+	unit_name_line_edit.text = unit_data.display_name
+	job_button.text = unit_data.job_data.display_name
 	
 	palette_option_button.clear()
 	@warning_ignore("integer_division")
-	for palette_idx: int in GameData.get_spritesheet_data(new_unit.sprite_file_name).color_palette.size() / 16:
+	for palette_idx: int in GameData.get_spritesheet_data(unit_data.spritesheeet_file_name).color_palette.size() / 16:
 		palette_option_button.add_item(str(palette_idx))
-	palette_option_button.select(new_unit.sprite_palette_id)
+	palette_option_button.select(unit_data.palette_id)
 
-	if new_unit.is_ai_controlled:
+	if unit_data.is_ai_controlled:
 		controller_option_button.select(0)
 	else:
 		controller_option_button.select(1)
 
-	hp_bar.set_stat(str(Unit.StatType.keys()[Unit.StatType.HP]), new_unit.stats[Unit.StatType.HP])
+	hp_bar.set_stat(str(UnitData.StatType.keys()[UnitData.StatType.HP]), unit_data.stats[UnitData.StatType.HP])
 	hp_bar.name_label.position.x = 5
 	hp_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	hp_bar.value_label.position.x = hp_bar.size.x - hp_bar.value_label.size.x - 5
 	hp_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	# hp_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
 	
-	mp_bar.set_stat(str(Unit.StatType.keys()[Unit.StatType.MP]), new_unit.stats[Unit.StatType.MP])
+	mp_bar.set_stat(str(UnitData.StatType.keys()[UnitData.StatType.MP]), unit_data.stats[UnitData.StatType.MP])
 	mp_bar.fill_color = Color.INDIAN_RED
 	mp_bar.name_label.position.x = 5
 	mp_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -92,7 +102,7 @@ func setup(new_unit: Unit) -> void:
 	mp_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	# mp_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
 
-	ct_bar.set_stat(str(Unit.StatType.keys()[Unit.StatType.CT]), new_unit.stats[Unit.StatType.CT])
+	ct_bar.set_stat(str(UnitData.StatType.keys()[UnitData.StatType.CT]), unit_data.stats[UnitData.StatType.CT])
 	ct_bar.fill_color = Color.WEB_GREEN
 	ct_bar.name_label.position.x = 5
 	ct_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -103,14 +113,17 @@ func setup(new_unit: Unit) -> void:
 	# clear connections for when panel is reused
 	# hook up buttons to update Unit data
 	Utilities.disconnect_all_connections(unit_name_line_edit.text_submitted)
-	unit_name_line_edit.text_submitted.connect(func(new_name: String) -> void: new_unit.unit_nickname = new_name)
+	unit_name_line_edit.text_submitted.connect(func(new_name: String) -> void: unit_data.display_name = new_name)
 	
 	Utilities.disconnect_all_connections(level_spinbox.value_changed)
-	level_spinbox.value_changed.connect(func(new_value: int) -> void: update_level(new_unit, new_value))
+	level_spinbox.value_changed.connect(func(new_value: float) -> void: update_level(unit, roundi(new_value)))
 	# TODO update gender - sprite and stats
 
 	Utilities.disconnect_all_connections(job_button.pressed)
-	job_button.pressed.connect(func() -> void: job_select_pressed.emit(new_unit))
+	job_button.pressed.connect(func() -> void:
+		if unit != null:
+			job_select_pressed.emit(unit)
+	)
 	
 	Utilities.disconnect_all_connections(palette_option_button.item_selected)
 	palette_option_button.item_selected.connect(set_palette)
@@ -123,35 +136,43 @@ func setup(new_unit: Unit) -> void:
 	
 	# on unit data changed:
 	# TODO remove invalid equipment?
-	new_unit.data_updated.connect(update_ui)
+	unit_data.data_changed.connect(update_ui_from_data)
 
-	update_ui(new_unit)
+	update_ui_from_data(unit_data)
 
 
 func update_ui(new_unit: Unit) -> void:
+	update_ui_from_data(new_unit.data)
+
+
+func update_ui_from_data(current_data: UnitData) -> void:
 	# update_stat_label(level_label, unit, Unit.StatType.LEVEL)
 	var atlas_texture: AtlasTexture = sprite_button.texture_normal
-	var unit_sprite: Sprite3D = new_unit.animation_manager.unit_sprites_manager.sprite_primary
-	atlas_texture.atlas = unit_sprite.texture
-	var spritesheet_data: UnitSpritesheetData = GameData.get_spritesheet_data(new_unit.sprite_file_name)
+	var spritesheet_data: UnitSpritesheetData = GameData.get_spritesheet_data(current_data.spritesheeet_file_name)
+	if unit != null and unit.animation_manager != null:
+		var unit_sprite: Sprite3D = unit.animation_manager.unit_sprites_manager.sprite_primary
+		atlas_texture.atlas = unit_sprite.texture
+	else:
+		atlas_texture.atlas = spritesheet_data.create_frame_grid_texture(0, 0, 0, 0)
 
-	sprite_button.material.set_shader_parameter("palette_colors", spritesheet_data.color_palette.slice(new_unit.sprite_palette_id * 16, (new_unit.sprite_palette_id + 1) * 16))
+	var pal_idx: int = max(0, current_data.palette_id)
+	sprite_button.material.set_shader_parameter("palette_colors", spritesheet_data.color_palette.slice(pal_idx * 16, (pal_idx + 1) * 16))
 
-	job_button.text = new_unit.job_data.display_name
-	level_spinbox.value = new_unit.stats[Unit.StatType.LEVEL].get_modified_value()
+	job_button.text = current_data.job_data.display_name
+	level_spinbox.value = current_data.stats[UnitData.StatType.LEVEL].get_modified_value()
 
-	team_option_button.select(new_unit.team_id)
+	team_option_button.select(current_data.team_idx)
 	
-	update_stat_label(pa_label, new_unit, Unit.StatType.PHYSICAL_ATTACK)
-	update_stat_label(ma_label, new_unit, Unit.StatType.MAGIC_ATTACK)
-	update_stat_label(brave_label, new_unit, Unit.StatType.BRAVE)
-	update_stat_label(faith_label, new_unit, Unit.StatType.FAITH)
-	update_stat_label(move_label, new_unit, Unit.StatType.MOVE)
-	update_stat_label(jump_label, new_unit, Unit.StatType.JUMP)
-	update_stat_label(speed_label, new_unit, Unit.StatType.SPEED)
+	update_stat_label_from_data(pa_label, current_data, UnitData.StatType.PHYSICAL_ATTACK)
+	update_stat_label_from_data(ma_label, current_data, UnitData.StatType.MAGIC_ATTACK)
+	update_stat_label_from_data(brave_label, current_data, UnitData.StatType.BRAVE)
+	update_stat_label_from_data(faith_label, current_data, UnitData.StatType.FAITH)
+	update_stat_label_from_data(move_label, current_data, UnitData.StatType.MOVE)
+	update_stat_label_from_data(jump_label, current_data, UnitData.StatType.JUMP)
+	update_stat_label_from_data(speed_label, current_data, UnitData.StatType.SPEED)
 
 	# update evade
-	var unit_passive_effects: Array[PassiveEffect] = new_unit.get_all_passive_effects()
+	var unit_passive_effects: Array[PassiveEffect] = current_data.get_all_passive_effects()
 
 	for evade_type: EvadeData.EvadeType in EvadeData.EvadeType.values():
 		# skip EvadeType.NONE
@@ -162,14 +183,14 @@ func update_ui(new_unit: Unit) -> void:
 		var label_idx: int = evade_type * (EvadeData.Directions.keys().size() + EvadeData.EvadeSource.keys().size() + 2)
 		label_idx += 1 # skip first column of labels
 		for evade_direction: EvadeData.Directions in EvadeData.Directions.values():
-			var evade_factor: int = get_total_evade_factor(new_unit, unit_passive_effects, evade_type, evade_direction)
+			var evade_factor: int = get_total_evade_factor_from_data(current_data, unit_passive_effects, evade_type, evade_direction)
 			var evade_value_label: Label = evade_grid.get_child(label_idx)
 			evade_value_label.text = str(evade_factor) + "%"
 			
 			label_idx += 1
 
 		label_idx += 1 # skip empty spacer column
-		var source_evade_values: Dictionary[EvadeData.EvadeSource, int] = new_unit.get_evade_values(evade_type, EvadeData.Directions.FRONT)
+		var source_evade_values: Dictionary[EvadeData.EvadeSource, int] = current_data.get_evade_values(evade_type, EvadeData.Directions.FRONT)
 		for evade_source: EvadeData.EvadeSource in source_evade_values.keys():
 			var evade_value_label: Label = evade_grid.get_child(label_idx)
 			evade_value_label.text = str(source_evade_values[evade_source]) + "%"
@@ -181,14 +202,17 @@ func update_ui(new_unit: Unit) -> void:
 	for child_idx: int in range(0, equipment_labels.size()):
 		equipment_labels[child_idx].queue_free()
 
-	for equip_slot: EquipmentSlot in new_unit.equip_slots:
+	for equip_slot: EquipmentSlot in current_data.equip_slots:
 		var new_slot_label: Label = Label.new()
 		new_slot_label.text = equip_slot.equipment_slot_name
 		equipment_grid.add_child(new_slot_label)
 
 		var new_item_button: Button = Button.new()
 		new_item_button.text = equip_slot.get_item().display_name
-		new_item_button.pressed.connect(func() -> void: item_select_pressed.emit(new_unit, equip_slot))
+		new_item_button.pressed.connect(func() -> void:
+			if unit != null:
+				item_select_pressed.emit(unit, equip_slot)
+		)
 		new_item_button.custom_minimum_size = Vector2(60, 0)
 		equipment_grid.add_child(new_item_button)
 
@@ -198,13 +222,13 @@ func update_ui(new_unit: Unit) -> void:
 		ability_labels[child_idx].queue_free()
 
 	# update skillsets
-	for skillset_slot_idx: int in new_unit.skillsets_names.size():
+	for skillset_slot_idx: int in current_data.skillsets_names.size():
 		var new_slot_label: Label = Label.new()
 		new_slot_label.text = "Skillset " + str(skillset_slot_idx + 1)
 		ability_grid.add_child(new_slot_label)
 
 		var skillset_display_name: String = ""
-		var skillset_uname: String = new_unit.skillsets_names[skillset_slot_idx]
+		var skillset_uname: String = current_data.skillsets_names[skillset_slot_idx]
 		if not skillset_uname.is_empty():
 			if GameData.skillset_paths.has(skillset_uname):
 				skillset_display_name = GameData.get_skillset(skillset_uname).display_name
@@ -213,18 +237,24 @@ func update_ui(new_unit: Unit) -> void:
 
 		var new_skillset_button: Button = Button.new()
 		new_skillset_button.text = skillset_display_name
-		new_skillset_button.pressed.connect(func() -> void: skillset_select_pressed.emit(new_unit, skillset_slot_idx))
+		new_skillset_button.pressed.connect(func() -> void:
+			if unit != null:
+				skillset_select_pressed.emit(unit, skillset_slot_idx)
+		)
 		ability_grid.add_child(new_skillset_button)
 
 	# update abilities
-	for ability_slot: AbilitySlot in new_unit.ability_slots:
+	for ability_slot: AbilitySlot in current_data.ability_slots:
 		var new_slot_label: Label = Label.new()
 		new_slot_label.text = ability_slot.ability_slot_name
 		ability_grid.add_child(new_slot_label)
 
 		var new_ability_button: Button = Button.new()
 		new_ability_button.text = ability_slot.get_ability().display_name
-		new_ability_button.pressed.connect(func() -> void: ability_select_pressed.emit(new_unit, ability_slot))
+		new_ability_button.pressed.connect(func() -> void:
+			if unit != null:
+				ability_select_pressed.emit(unit, ability_slot)
+		)
 		# TODO implement ability select buttons
 		ability_grid.add_child(new_ability_button)
 	
@@ -235,22 +265,22 @@ func update_ui(new_unit: Unit) -> void:
 	
 	# update innate abilities
 	var innate_abilities_names: PackedStringArray = []
-	for ability: Ability in new_unit.job_data.innate_abilities:
+	for ability: Ability in current_data.job_data.innate_abilities:
 		innate_abilities_names.append(ability.display_name)
 	#for passive_effect: PassiveEffect in unit.get_all_passive_effects(): # TODO allow giving innate abilities from passive effects?
 		#innate_abilities_names.append(passive_effect.innate_abilities)
 	
 	update_passive_effect_list_label("Innate: ", innate_abilities_names)
 	
-	update_passive_effect_list_label("Weak: ", get_elements_text(new_unit.elemental_weakness))
-	update_passive_effect_list_label("Resist: ", get_elements_text(new_unit.elemental_half))
-	update_passive_effect_list_label("Immune: ", get_elements_text(new_unit.elemental_cancel))
-	update_passive_effect_list_label("Absorb: ", get_elements_text(new_unit.elemental_absorb))
-	update_passive_effect_list_label("Strengthen: ", get_elements_text(new_unit.elemental_strengthen))
+	update_passive_effect_list_label("Weak: ", get_elements_text(current_data.elemental_weakness))
+	update_passive_effect_list_label("Resist: ", get_elements_text(current_data.elemental_half))
+	update_passive_effect_list_label("Immune: ", get_elements_text(current_data.elemental_cancel))
+	update_passive_effect_list_label("Absorb: ", get_elements_text(current_data.elemental_absorb))
+	update_passive_effect_list_label("Strengthen: ", get_elements_text(current_data.elemental_strengthen))
 	
-	update_passive_effect_list_label("Always: ", new_unit.always_statuses)
-	update_passive_effect_list_label("Starting: ", new_unit.start_statuses)
-	update_passive_effect_list_label("Immune: ", new_unit.immune_statuses)
+	update_passive_effect_list_label("Always: ", current_data.always_statuses)
+	update_passive_effect_list_label("Starting: ", current_data.start_statuses)
+	update_passive_effect_list_label("Immune: ", current_data.immune_statuses)
 	
 	
 	# update innate abilities
@@ -258,7 +288,7 @@ func update_ui(new_unit: Unit) -> void:
 	for child_idx: int in range(0, innate_ability_labels.size()):
 		innate_ability_labels[child_idx].queue_free()
 
-	for ability: Ability in new_unit.job_data.innate_abilities:
+	for ability: Ability in current_data.job_data.innate_abilities:
 		var new_ability_label: Label = Label.new()
 		new_ability_label.text = ability.display_name
 		innate_ability_container.add_child(new_ability_label)
@@ -268,27 +298,27 @@ func update_ui(new_unit: Unit) -> void:
 	for child_idx: int in range(1, current_status_labels.size()):
 		current_status_labels[child_idx].queue_free()
 
-	for status_name: String in new_unit.always_statuses:
+	for status_name: String in current_data.always_statuses:
 		var new_status_label: Label = Label.new()
 		new_status_label.text = "Always " + status_name
 		status_affinity_container.add_child(new_status_label)
 	
-	for status_name: String in new_unit.start_statuses:
+	for status_name: String in current_data.start_statuses:
 		var new_status_label: Label = Label.new()
 		new_status_label.text = "Start " + status_name
 		status_affinity_container.add_child(new_status_label)
 	
-	for status_name: String in new_unit.immune_statuses:
+	for status_name: String in current_data.immune_statuses:
 		var new_status_label: Label = Label.new()
 		new_status_label.text = "Immune " + status_name
 		status_affinity_container.add_child(new_status_label)
 	
 	# update element affinities
-	update_element_list(weak_elements_label, "Weak: ", new_unit.elemental_weakness)
-	update_element_list(resist_elements_label, "Resist: ", new_unit.elemental_half)
-	update_element_list(immune_elements_label, "Immune: ", new_unit.elemental_cancel)
-	update_element_list(absorb_elements_label, "Absorb: ", new_unit.elemental_absorb)
-	update_element_list(strengthen_elements_label, "Strengthen: ", new_unit.elemental_strengthen)
+	update_element_list(weak_elements_label, "Weak: ", current_data.elemental_weakness)
+	update_element_list(resist_elements_label, "Resist: ", current_data.elemental_half)
+	update_element_list(immune_elements_label, "Immune: ", current_data.elemental_cancel)
+	update_element_list(absorb_elements_label, "Absorb: ", current_data.elemental_absorb)
+	update_element_list(strengthen_elements_label, "Strengthen: ", current_data.elemental_strengthen)
 
 
 func update_element_list(affinity_list_label: Label, label_start: String, affinity_list: Array[Action.ElementTypes]) -> void:
@@ -314,16 +344,24 @@ func update_passive_effect_list_label(starting_text: String, text_list: PackedSt
 		passive_effect_container.add_child(new_label)
 
 
-func update_stat_label(stat_label: Label, new_unit: Unit, stat_type: Unit.StatType) -> void:
-	var stat_name: String = Unit.StatType.find_key(stat_type).to_pascal_case()
-	var stat: StatValue = new_unit.stats[stat_type]
+func update_stat_label(stat_label: Label, new_unit: Unit, stat_type: UnitData.StatType) -> void:
+	update_stat_label_from_data(stat_label, new_unit.data, stat_type)
+
+
+func update_stat_label_from_data(stat_label: Label, current_data: UnitData, stat_type: UnitData.StatType) -> void:
+	var stat_name: String = UnitData.StatType.find_key(stat_type).to_pascal_case()
+	var stat: StatValue = current_data.stats[stat_type]
 	var stat_value: int = stat.get_modified_value()
 	# stat_label.text = stat_name + ": " + str(roundi(stat_value)) + "/" + str(roundi(stat.max_value))
 	stat_label.text = stat_name + ": " + str(roundi(stat_value)) # + "/" + str(roundi(stat.max_value))
 
 
 func get_total_evade_factor(new_unit: Unit, unit_passive_effects: Array[PassiveEffect], evade_type: EvadeData.EvadeType, evade_direction: EvadeData.Directions) -> int:
-	var evade_values: Dictionary[EvadeData.EvadeSource, int] = new_unit.get_evade_values(evade_type, evade_direction)
+	return get_total_evade_factor_from_data(new_unit.data, unit_passive_effects, evade_type, evade_direction)
+
+
+func get_total_evade_factor_from_data(current_data: UnitData, unit_passive_effects: Array[PassiveEffect], evade_type: EvadeData.EvadeType, evade_direction: EvadeData.Directions) -> int:
+	var evade_values: Dictionary[EvadeData.EvadeSource, int] = current_data.get_evade_values(evade_type, evade_direction)
 
 	var total_evade_factor: float = 1.0
 	var evade_factors: Dictionary[EvadeData.EvadeSource, float] = {}
@@ -350,9 +388,17 @@ func set_palette(new_palette_idx: int) -> void:
 	if unit != null:
 		unit.set_sprite_palette(new_palette_idx)
 		unit.data_updated.emit(unit)
+	elif unit_data != null:
+		unit_data.palette_id = new_palette_idx
+		unit_data.appearance_changed.emit(unit_data)
+		unit_data.data_changed.emit(unit_data)
 
 
 func set_team(new_team_idx: int) -> void:
+	if unit_data != null:
+		unit_data.team_idx = new_team_idx
+	if unit == null or unit.global_battle_manager == null:
+		return
 	unit.team_id = new_team_idx
 	
 	if new_team_idx >= unit.global_battle_manager.teams.size():
@@ -367,18 +413,13 @@ func set_team(new_team_idx: int) -> void:
 
 
 func set_controller(new_controller_idx: int) -> void:
-	if new_controller_idx == 0:
-		unit.is_ai_controlled = true
-	else:
-		unit.is_ai_controlled = false
+	if unit_data != null:
+		unit_data.is_ai_controlled = (new_controller_idx == 0)
+	if unit != null:
+		unit.is_ai_controlled = (new_controller_idx == 0)
 		# TODO handle multiple player teams
 
 
-func update_level(new_unit: Unit, new_level: int) -> void:
-	new_unit.stats[Unit.StatType.LEVEL].set_value(new_level)
-	Unit.generate_leveled_raw_stats(new_unit.stat_basis, new_level, new_unit.job_data, new_unit.stats_raw)
-	
-	var use_higher_stat_values: bool = false
-	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(new_unit.animation_manager.global_seq.file_name): # lucavi
-		use_higher_stat_values = true
-	Unit.calc_battle_stats(new_unit.job_data, new_unit.stats_raw, new_unit.stats, true, use_higher_stat_values)
+func update_level(_new_unit: Unit, new_level: int) -> void:
+	if unit_data != null:
+		unit_data.recalculate_stats_for_level(new_level)

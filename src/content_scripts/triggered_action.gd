@@ -52,7 +52,7 @@ var action: Action
 
 # requirements to trigger - user data
 @export var required_status_id: PackedStringArray = [] # will not trigger if unit does not have any of these flags (can trigger if empty)
-@export var user_stat_thresholds: Dictionary[Unit.StatType, int] = {} # will only trigger if each of user's stat (modified_value) is >= the threshold - ex. MP >= 0
+@export var user_stat_thresholds: Dictionary[UnitData.StatType, int] = {} # will only trigger if each of user's stat (modified_value) is >= the threshold - ex. MP >= 0
 
 # requirements to trigger - action data
 @export var only_trigger_if_usable: bool = true
@@ -118,7 +118,7 @@ func process_triggered_action(triggered_action_data: TriggeredActionInstance) ->
 	if not Utilities.has_any_elements(user.current_status_ids, required_status_id):
 		return
 	
-	for stat_type: Unit.StatType in user_stat_thresholds.keys():
+	for stat_type: UnitData.StatType in user_stat_thresholds.keys():
 		if user.stats[stat_type].modified_value < user_stat_thresholds[stat_type]:
 			return
 
@@ -198,7 +198,7 @@ func process_triggered_action(triggered_action_data: TriggeredActionInstance) ->
 
 func check_if_triggered(user: Unit, target: Unit, element: Action.ElementTypes = Action.ElementTypes.NONE) -> bool:
 	var is_triggered: bool = false
-	var trigger_chance: float = trigger_chance_formula.get_result(user, target, element)
+	var trigger_chance: float = trigger_chance_formula.get_result(user.data, target.data, element)
 	is_triggered = randi() % 100 < trigger_chance
 	
 	return is_triggered
@@ -304,7 +304,7 @@ static func create_from_dictonary(property_dict: Dictionary) -> TriggeredAction:
 			var new_formula_data: FormulaData = FormulaData.create_from_dictionary(property_dict[property_name])
 			new_triggered_action.set(property_name, new_formula_data)
 		elif property_name == "user_stat_thresholds":
-			var new_dictionary: Dictionary[Unit.StatType, int] = {}
+			var new_dictionary: Dictionary[UnitData.StatType, int] = {}
 			var json_dict: Dictionary = property_dict[property_name]
 			for key: String in json_dict.keys():
 				new_dictionary[key.to_int()] = roundi(json_dict[key])
