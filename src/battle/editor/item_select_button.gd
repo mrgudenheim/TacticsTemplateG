@@ -40,11 +40,11 @@ func update_ui(new_item_data: ItemData) -> void:
 	wp_label.text = "WP: " + str(new_item_data.weapon_power)
 	list.add_child(wp_label)
 	
-	for stat_type: Unit.StatType in passive_effect.stat_modifiers.keys():
+	for stat_type: UnitActor.StatType in passive_effect.stat_modifiers.keys():
 		var stat_modifier: Modifier = passive_effect.stat_modifiers[stat_type]
 		var modifier_label: Label = Label.new()
-		# modifier_label.text = Unit.StatType.keys()[stat_type] + ": +" + str(roundi(stat_modifier.value_formula.values[0]))
-		modifier_label.text = Unit.StatType.keys()[stat_type] + ": " + stat_modifier.formula_text.trim_prefix("value").remove_chars(" ")
+		# modifier_label.text = UnitActor.StatType.keys()[stat_type] + ": +" + str(roundi(stat_modifier.value_formula.values[0]))
+		modifier_label.text = UnitActor.StatType.keys()[stat_type] + ": " + stat_modifier.formula_text.trim_prefix("value").remove_chars(" ")
 		list.add_child(modifier_label)
 
 	## update evade

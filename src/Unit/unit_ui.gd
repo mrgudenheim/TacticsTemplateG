@@ -1,7 +1,7 @@
 class_name UnitUi
 extends Control
 
-@export var unit: Unit
+@export var unit: UnitActor
 @export var unit_char_body: CharacterBody3D
 @export var offset: Vector2 = Vector2.DOWN
 var camera: Camera3D

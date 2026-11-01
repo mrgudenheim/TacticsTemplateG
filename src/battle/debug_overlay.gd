@@ -107,7 +107,7 @@ func _build_tiles_tab() -> void:
 	depth_option.add_item("Fixed Back", 3)
 	depth_option.add_item("Fixed 16", 4)
 	depth_option.add_item("Pull Forward 16", 5)
-	depth_option.add_item("Unit", 6)
+	depth_option.add_item("UnitActor", 6)
 	depth_option.add_item("Tile Overlay", 7)
 	depth_option.select(7)
 	depth_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL

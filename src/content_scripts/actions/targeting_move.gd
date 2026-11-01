@@ -23,7 +23,7 @@ func start_targeting(action_instance: ActionInstance) -> void:
 	if not action_instance.battle_manager.map_input_event.is_connected(action_instance.on_map_input_event):
 		action_instance.battle_manager.map_input_event.connect(action_instance.on_map_input_event)
 	
-	for unit: Unit in action_instance.battle_manager.units:
+	for unit: UnitActor in action_instance.battle_manager.units:
 		if not unit.unit_input_event.is_connected(action_instance.on_unit_hovered):
 			unit.unit_input_event.connect(action_instance.on_unit_hovered)
 	
@@ -35,7 +35,7 @@ func stop_targeting(action_instance: ActionInstance) -> void:
 	if action_instance.battle_manager.map_input_event.is_connected(action_instance.on_map_input_event):
 		action_instance.battle_manager.map_input_event.disconnect(action_instance.on_map_input_event)
 	
-	for unit: Unit in action_instance.battle_manager.units:
+	for unit: UnitActor in action_instance.battle_manager.units:
 		if unit.unit_input_event.is_connected(action_instance.on_unit_hovered):
 			unit.unit_input_event.disconnect(action_instance.on_unit_hovered)
 	
@@ -88,9 +88,9 @@ func target_tile(tile: TerrainTile, action_instance: ActionInstance, event: Inpu
 				await action_instance.queue_use()
 				return
 
-# TODO allow cost based on Unit Move value or action range value, allow vertical jumping or horizontal leapint to use a parameter or unit stat
+# TODO allow cost based on UnitActor Move value or action range value, allow vertical jumping or horizontal leapint to use a parameter or unit stat
 ## map_tiles is Dictionary[Vector2i, Array[TerrainTile]], returns path to every tile
-func get_map_paths(user: Unit, map_tiles: Dictionary[Vector2i, Array], units: Array[Unit], max_cost: int = 9999) -> Dictionary[TerrainTile, TerrainTile]:
+func get_map_paths(user: UnitActor, map_tiles: Dictionary[Vector2i, Array], units: Array[UnitActor], max_cost: int = 9999) -> Dictionary[TerrainTile, TerrainTile]:
 	user.map_paths.clear()
 	user.path_costs.clear()
 	
@@ -105,8 +105,8 @@ func get_map_paths(user: Unit, map_tiles: Dictionary[Vector2i, Array], units: Ar
 	var max_frame_time_ms: float = 1000.0 / 60.0
 	var start_time: int = Time.get_ticks_msec()
 	
-	var unit_tiles: Dictionary[TerrainTile, Unit] = {}
-	for unit: Unit in units:
+	var unit_tiles: Dictionary[TerrainTile, UnitActor] = {}
+	for unit: UnitActor in units:
 		if unit == user or unit.is_defeated:
 			continue
 		unit_tiles[unit.tile_position] = unit
@@ -165,7 +165,7 @@ func get_map_path(start_tile: TerrainTile, target_tile_instance: TerrainTile, ca
 	return path
 
 
-func get_map_path_neighbors(user: Unit, current_tile: TerrainTile, map_tiles: Dictionary[Vector2i, Array], unit_tiles: Dictionary[TerrainTile, Unit]) -> Array[TerrainTile]:
+func get_map_path_neighbors(user: UnitActor, current_tile: TerrainTile, map_tiles: Dictionary[Vector2i, Array], unit_tiles: Dictionary[TerrainTile, UnitActor]) -> Array[TerrainTile]:
 	var neighbors: Array[TerrainTile]
 	const ADJACENT_OFFSETS: Array[Vector2i] = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
 	
@@ -193,7 +193,7 @@ func get_map_path_neighbors(user: Unit, current_tile: TerrainTile, map_tiles: Di
 	return neighbors
 
 
-func get_leaping_neighbors(user: Unit, current_tile: TerrainTile, map_tiles: Dictionary[Vector2i, Array], unit_tiles: Dictionary[TerrainTile, Unit], offset_direction: Vector2i, walk_neighbors: Array[TerrainTile]) -> Array[TerrainTile]:
+func get_leaping_neighbors(user: UnitActor, current_tile: TerrainTile, map_tiles: Dictionary[Vector2i, Array], unit_tiles: Dictionary[TerrainTile, UnitActor], offset_direction: Vector2i, walk_neighbors: Array[TerrainTile]) -> Array[TerrainTile]:
 	var leap_neighbors: Array[TerrainTile] = []
 	@warning_ignore("integer_division")
 	var max_leap_distance: int = user.jump / 2

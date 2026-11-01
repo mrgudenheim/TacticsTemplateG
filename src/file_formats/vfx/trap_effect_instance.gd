@@ -32,7 +32,7 @@ const FLASH_EMITTER_INDICES: PackedInt32Array = [1, 9, 11]
 const FLASH_PALETTE_ID: int = 10
 var _emitter_palette: Dictionary[int, int] = {} # emitter_index -> palette_id
 
-# Unit sprite white flash
+# UnitActor sprite white flash
 var _palette_controller: TrapPaletteController
 
 # --- Mesh pool + renderer ---
@@ -75,7 +75,7 @@ func initialize() -> void:
 ## Start the effect. handler_id selects which emitter group to fire.
 ## element_id selects the dust palette (0-8). direction is attacker→target vector.
 ## target_unit enables white flash on the unit sprite if provided.
-func play(handler_id: int, element_id: int, direction: Vector3 = Vector3.ZERO, target_unit: Unit = null) -> void:
+func play(handler_id: int, element_id: int, direction: Vector3 = Vector3.ZERO, target_unit: UnitActor = null) -> void:
 	if not _initialized:
 		push_error("TrapEffectInstance.play() called before initialize()")
 		return
@@ -522,7 +522,7 @@ func _spawn_handler_sparkles(trap_data: TrapEffectData) -> void:
 		handler.active_sparkle_count += 1
 
 
-static func _get_sprite_height(unit: Unit) -> float:
+static func _get_sprite_height(unit: UnitActor) -> float:
 	if unit != null and unit.animation_manager != null \
 			and unit.animation_manager.global_spr != null:
 		return float(unit.animation_manager.global_spr.graphic_height)

@@ -7,7 +7,7 @@ signal animation_frame_loaded(delay: float, frame_num: int)
 signal processing_opcode(index: int)
 
 #@export var ui_manager: UiManager
-@export var unit_data: Unit
+@export var unit_data: UnitActor
 @export var unit_sprites_manager: UnitSpritesManager
 #var animation_timer: float = 0
 var is_framerate_dependent: bool = false

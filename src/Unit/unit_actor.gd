@@ -1,29 +1,29 @@
-class_name Unit
+class_name UnitActor
 extends Node3D
 
 # https://ffhacktics.com/wiki/Miscellaneous_Unit_Data
 # https://ffhacktics.com/wiki/Battle_Stats
 
 signal initialized()
-signal data_updated(unit: Unit)
+signal data_updated(unit: UnitActor)
 
 signal ability_assigned(name: String)
 signal ability_completed()
 signal primary_weapon_assigned(item_unique_name: String)
 signal image_changed(new_image: ImageTexture)
-signal knocked_out(unit: Unit)
+signal knocked_out(unit: UnitActor)
 signal spritesheet_changed(new_spritesheet: ImageTexture)
 @warning_ignore("unused_signal")
-signal targeted_pre_action(this_unit: Unit, action_instance: ActionInstance) # emited in action_instance
+signal targeted_pre_action(this_unit: UnitActor, action_instance: ActionInstance) # emited in action_instance
 @warning_ignore("unused_signal")
-signal targeted_post_action(this_unit: Unit, action_instance: ActionInstance) # emited in action_instance
+signal targeted_post_action(this_unit: UnitActor, action_instance: ActionInstance) # emited in action_instance
 @warning_ignore("unused_signal")
 signal reached_tile() # emited in use_move
 @warning_ignore("unused_signal")
-signal completed_move(this_unit: Unit, tile_moved: int) # emited in use_move
-signal turn_started(this_unit: Unit)
-signal turn_ended(this_unit: Unit)
-signal unit_input_event(unit_data: Unit, event: InputEvent)
+signal completed_move(this_unit: UnitActor, tile_moved: int) # emited in use_move
+signal turn_started(this_unit: UnitActor)
+signal turn_ended(this_unit: UnitActor)
+signal unit_input_event(unit_data: UnitActor, event: InputEvent)
 signal paths_updated()
 
 enum StatBasis {
@@ -103,7 +103,7 @@ var is_ct_frozen: bool:
 	get:
 		return current_statuses.any(func(status: StatusEffect) -> bool: return status.freezes_ct) # returns false when no statuses
 
-@export var unit_nickname: String = "Unit Nickname"
+@export var unit_nickname: String = "UnitActor Nickname"
 @export var job_nickname: String = "Job Nickname"
 @export var job_name: String = ""
 
@@ -293,7 +293,7 @@ var actions_data: Dictionary[String, ActionInstance] = {}
 var submerged_depth: int = 0
 
 
-static func instantiate() -> Unit:
+static func instantiate() -> UnitActor:
 	return unit_scene.instantiate()
 
 
@@ -456,14 +456,14 @@ func _process(_delta: float) -> void:
 	set_base_animation_ptr_id(current_animation_id_fwd)
 
 
-static func generate_leveled_raw_stats(stat_basis_to_use: StatBasis, final_level: int, job: JobData, new_stats_raw: Dictionary[Unit.StatType, float], use_rom: bool = false) -> void:
+static func generate_leveled_raw_stats(stat_basis_to_use: StatBasis, final_level: int, job: JobData, new_stats_raw: Dictionary[UnitActor.StatType, float], use_rom: bool = false) -> void:
 	generate_level_zero_raw_stats(stat_basis_to_use, new_stats_raw, use_rom)
 	
 	for curent_level: int in range(1, final_level + 1):
 		grow_raw_stats(curent_level, job, new_stats_raw)
 
 
-static func generate_level_zero_raw_stats(stat_basis_to_use: StatBasis, new_stats_raw: Dictionary[Unit.StatType, float], use_rom: bool = false) -> void:
+static func generate_level_zero_raw_stats(stat_basis_to_use: StatBasis, new_stats_raw: Dictionary[UnitActor.StatType, float], use_rom: bool = false) -> void:
 	new_stats_raw[StatType.HP_MAX] = generate_level_zero_raw_stat("HP_MAX", stat_basis_to_use, use_rom)
 	new_stats_raw[StatType.MP_MAX] = generate_level_zero_raw_stat("MP_MAX", stat_basis_to_use, use_rom)
 	new_stats_raw[StatType.SPEED] = generate_level_zero_raw_stat("SPEED", stat_basis_to_use, use_rom)
@@ -491,7 +491,7 @@ static func generate_level_zero_raw_stat(stat_name: String, stat_basis_to_use: S
 	return raw_stat
 
 
-static func grow_raw_stats(current_level: int, current_job: JobData, new_stats_raw: Dictionary[Unit.StatType, float]) -> void:
+static func grow_raw_stats(current_level: int, current_job: JobData, new_stats_raw: Dictionary[UnitActor.StatType, float]) -> void:
 	new_stats_raw[StatType.HP_MAX] += new_stats_raw[StatType.HP_MAX] / (current_job.hp_growth + current_level)
 	new_stats_raw[StatType.MP_MAX] += new_stats_raw[StatType.MP_MAX] / (current_job.mp_growth + current_level)
 	new_stats_raw[StatType.SPEED] += new_stats_raw[StatType.SPEED] / (current_job.speed_growth + current_level)
@@ -502,8 +502,8 @@ static func grow_raw_stats(current_level: int, current_job: JobData, new_stats_r
 # TODO is this correct for MONSTERs?
 static func calc_battle_stats(
 		current_job: JobData, 
-		new_stats_raw: Dictionary[Unit.StatType, float], 
-		new_stats: Dictionary[Unit.StatType, StatValue],
+		new_stats_raw: Dictionary[UnitActor.StatType, float], 
+		new_stats: Dictionary[UnitActor.StatType, StatValue],
 		set_to_max: bool = true,
 		use_larger_values: bool = false) -> void:
 	var base_hp: int = roundi(new_stats_raw[StatType.HP_MAX] * current_job.hp_multiplier / 0x190000)
@@ -1541,7 +1541,7 @@ func get_passive_effects_from_others(exclude_passives: PackedStringArray = []) -
 	var shared_passive_effects: Array[PassiveEffect] = []
 	
 	if global_battle_manager != null:
-		for unit: Unit in global_battle_manager.units:
+		for unit: UnitActor in global_battle_manager.units:
 			var unit_passives: Array[PassiveEffect] = unit.get_native_passive_effects()
 			for passive_effect: PassiveEffect in unit_passives:
 				if passive_effect.effect_range == 0:
@@ -1775,7 +1775,7 @@ func set_position_to_tile() -> void:
 	char_body.global_position = Vector3(tile_position.location.x + 0.5, tile_position.get_world_position().y + 0.25, tile_position.location.y + 0.5)
 
 
-func update_map_paths(map_tiles: Dictionary[Vector2i, Array], units: Array[Unit], max_cost: int = 9999) -> void:
+func update_map_paths(map_tiles: Dictionary[Vector2i, Array], units: Array[UnitActor], max_cost: int = 9999) -> void:
 	paths_set = false
 	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
 	update_prohibited_terrain(all_passive_effects)
@@ -1791,6 +1791,6 @@ func update_map_paths(map_tiles: Dictionary[Vector2i, Array], units: Array[Unit]
 func _on_character_body_3d_input_event(_camera: Node, event: InputEvent, _event_position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
 	unit_input_event.emit(self, event)
 
-	# show Unit preview ui - hp, mp, evade, equipment, statuses, status immunities, element affinity, etc. portrait/mini sprite?
+	# show UnitActor preview ui - hp, mp, evade, equipment, statuses, status immunities, element affinity, etc. portrait/mini sprite?
 	if Input.is_action_just_pressed("secondary_action"):
 		unit_battle_details_ui.visible = !unit_battle_details_ui.visible

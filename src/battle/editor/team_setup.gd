@@ -3,10 +3,10 @@ extends Container
 
 signal need_new_unit(team: Team)
 
-signal unit_job_select_pressed(unit: Unit)
-signal unit_item_select_pressed(unit: Unit, slot: EquipmentSlot)
-signal unit_ability_select_pressed(unit: Unit, slot: AbilitySlot)
-signal unit_skillset_select_pressed(unit: Unit, skillset_idx: int)
+signal unit_job_select_pressed(unit: UnitActor)
+signal unit_item_select_pressed(unit: UnitActor, slot: EquipmentSlot)
+signal unit_ability_select_pressed(unit: UnitActor, slot: AbilitySlot)
+signal unit_skillset_select_pressed(unit: UnitActor, skillset_idx: int)
 
 @export var team: Team
 @export var unit_list: Container
@@ -23,7 +23,7 @@ func setup(new_team: Team, is_random: bool = false) -> void:
 	name = team.team_name
 
 	if not is_random:
-		for unit: Unit in team.units:
+		for unit: UnitActor in team.units:
 			add_unit_editor(unit)
 
 		num_units_spinbox.value = team.units.size()
@@ -48,7 +48,7 @@ func on_num_units_changed(new_value: int) -> void:
 			unit_panels.remove_at(-1)
 
 
-func add_unit_editor(new_unit: Unit) -> void:
+func add_unit_editor(new_unit: UnitActor) -> void:
 	if new_unit.team != team:
 		return
 	

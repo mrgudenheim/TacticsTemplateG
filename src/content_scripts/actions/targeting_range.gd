@@ -44,7 +44,7 @@ func get_potential_targets(action_instance: ActionInstance) -> Array[TerrainTile
 						var collider: Object = Raycaster.raycast(action_instance.user.tile_position.get_world_position() + Vector3.UP, tile.get_world_position() + Vector3.UP) # TODO adjust for different height sprites: chicken, frog, Altima
 						if is_instance_valid(collider):
 							if collider is CharacterBody3D:
-								var intersected_unit: Unit = collider.get_parent_node_3d()
+								var intersected_unit: UnitActor = collider.get_parent_node_3d()
 								if intersected_unit.tile_position != tile:
 									continue
 						# TODO fix raycast?
@@ -72,7 +72,7 @@ func start_targeting(action_instance: ActionInstance) -> void:
 		if not action_instance.battle_manager.map_input_event.is_connected(action_instance.on_map_input_event):
 			action_instance.battle_manager.map_input_event.connect(action_instance.on_map_input_event)
 		
-		for unit: Unit in action_instance.battle_manager.units:
+		for unit: UnitActor in action_instance.battle_manager.units:
 			if not unit.unit_input_event.is_connected(action_instance.on_unit_hovered):
 				unit.unit_input_event.connect(action_instance.on_unit_hovered)
 		
@@ -94,7 +94,7 @@ func stop_targeting(action_instance: ActionInstance) -> void:
 	if action_instance.battle_manager.map_input_event.is_connected(action_instance.on_map_input_event):
 		action_instance.battle_manager.map_input_event.disconnect(action_instance.on_map_input_event)
 	
-	for unit: Unit in action_instance.battle_manager.units:
+	for unit: UnitActor in action_instance.battle_manager.units:
 		if unit.unit_input_event.is_connected(action_instance.on_unit_hovered):
 			unit.unit_input_event.disconnect(action_instance.on_unit_hovered)
 	
@@ -131,7 +131,7 @@ func target_tile(tile: TerrainTile, action_instance: ActionInstance, event: Inpu
 		
 		# show target previews
 		for preview_tile: TerrainTile in action_instance.preview_targets:
-			for unit: Unit in action_instance.battle_manager.units:
+			for unit: UnitActor in action_instance.battle_manager.units:
 				if unit.tile_position == preview_tile and (unit.get_nullify_statuses().is_empty() or unit.get_nullify_statuses().any(
 						func(status: StatusEffect) -> bool: return action_instance.action.will_remove_target_status and action_instance.action.target_status_list.has(status.unique_name))): # ignore action unless it would remove nullify
 					action_instance.show_result_preview(unit)
@@ -198,7 +198,7 @@ func get_aoe_targets(action_instance: ActionInstance, tile_target: TerrainTile) 
 						var collider: Object = Raycaster.raycast(tile_target.get_world_position() + Vector3.UP, tile.get_world_position() + Vector3.UP) # TODO adjust for different height sprites: chicken, frog, Altima
 						if is_instance_valid(collider):
 							if collider is CharacterBody3D:
-								var intersected_unit: Unit = collider.get_parent_node_3d()
+								var intersected_unit: UnitActor = collider.get_parent_node_3d()
 								if intersected_unit.tile_position != tile:
 									continue
 						# TODO fix raycast?

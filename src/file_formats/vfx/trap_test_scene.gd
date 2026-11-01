@@ -28,7 +28,7 @@ extends Node3D
 @export var element_color_rect: ColorRect
 
 var target_world_pos: Vector3 = Vector3(2.5, 0, 1.5)
-var test_unit: Unit
+var test_unit: UnitActor
 var _impact_direction: Vector3 = Vector3(1, 0, 0)
 
 var _trap_instance: TrapEffectInstance
@@ -80,11 +80,11 @@ func _load_map() -> void:
 
 
 func _spawn_squire() -> void:
-	test_unit = Unit.instantiate()
+	test_unit = UnitActor.instantiate()
 	units_container.add_child(test_unit)
 	test_unit.initialize_unit()
 	test_unit.char_body.global_position = target_world_pos + Vector3(0, 0.25, 0)
-	test_unit.stat_basis = Unit.StatBasis.MALE
+	test_unit.stat_basis = UnitActor.StatBasis.MALE
 	test_unit.set_job("squire_06") # Squire
 	test_unit.set_sprite_palette(0)
 	test_unit.update_unit_facing(Vector3.FORWARD)
@@ -207,7 +207,7 @@ func _on_play_pressed() -> void:
 
 	# Pass target_unit for hit flash (handler 2), spell charge height (handler 4),
 	# and all-emitter mode (handler 0)
-	var flash_unit: Unit = test_unit if handler_id in [0, 2, 4, 18] else null
+	var flash_unit: UnitActor = test_unit if handler_id in [0, 2, 4, 18] else null
 	_trap_instance.play(handler_id, elem_idx, _impact_direction, flash_unit)
 
 

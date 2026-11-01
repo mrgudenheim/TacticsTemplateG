@@ -24,7 +24,7 @@ extends Control
 @export var ability_select_control: AbilitySelectControl
 @export var skillset_select_control: SkillsetSelectControl
 
-@export var unit_dragged: Unit
+@export var unit_dragged: UnitActor
 @export var tile_highlight: Node3D
 @export var unit_editor: UnitEditor
 
@@ -156,7 +156,7 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 
 	battle_manager.set_unit_statbars_visible(battle_manager.show_statbar_check.button_pressed)
 	await get_tree().process_frame
-	var first_unit: Unit = battle_manager.units[0]
+	var first_unit: UnitActor = battle_manager.units[0]
 	for unit_idx: int in battle_manager.units.size():
 		if not battle_manager.units[unit_idx].is_queued_for_deletion():
 			first_unit = battle_manager.units[unit_idx]
@@ -194,7 +194,7 @@ func populate_option_lists() -> void:
 	skillset_select_control.populate_list()
 
 
-func setup_job_select(unit: Unit) -> void:
+func setup_job_select(unit: UnitActor) -> void:
 	job_select_control.visible = true
 	for job_select_button: JobSelectButton in job_select_control.job_select_buttons:
 		job_select_button.selected.connect(func(new_job: JobData) -> void: update_unit_job(unit, new_job))
@@ -206,7 +206,7 @@ func desetup_job_select() -> void:
 		Utilities.disconnect_all_connections(job_select_button.selected)
 
 
-func setup_item_select(unit: Unit, slot: EquipmentSlot) -> void:
+func setup_item_select(unit: UnitActor, slot: EquipmentSlot) -> void:
 	item_select_control.visible = true
 	for item_select_button: ItemSelectButton in item_select_control.item_select_buttons:
 		if item_select_button.sprite_rect.texture.atlas == null:
@@ -231,7 +231,7 @@ func desetup_item_select() -> void:
 		Utilities.disconnect_all_connections(item_select_button.selected)
 
 
-func setup_ability_select(unit: Unit, slot: AbilitySlot) -> void:
+func setup_ability_select(unit: UnitActor, slot: AbilitySlot) -> void:
 	ability_select_control.visible = true
 	for ability_select_button: AbilitySelectButton in ability_select_control.ability_select_buttons:
 		if slot.slot_types.has(ability_select_button.ability_data.slot_type):
@@ -247,7 +247,7 @@ func desetup_ability_select() -> void:
 		Utilities.disconnect_all_connections(ability_select_button.selected)
 
 
-func setup_skillset_select(unit: Unit, skillset_idx: int) -> void:
+func setup_skillset_select(unit: UnitActor, skillset_idx: int) -> void:
 	skillset_select_control.visible = true
 	for skillset_select_button: SkillsetSelectButton in skillset_select_control.skillset_select_buttons:
 		skillset_select_button.visible = true
@@ -266,23 +266,23 @@ func desetup_skillset_select() -> void:
 		Utilities.disconnect_all_connections(skillset_select_button.selected)
 
 
-func update_unit_job(unit: Unit, new_job: JobData) -> void:
+func update_unit_job(unit: UnitActor, new_job: JobData) -> void:
 	unit.set_job(new_job.unique_name)
 	# TODO update stats (apply multipliers, redo growths, etc.)
 	desetup_job_select()
 
 
-func update_unit_equipment(unit: Unit, slot: EquipmentSlot, new_item: ItemData) -> void:
+func update_unit_equipment(unit: UnitActor, slot: EquipmentSlot, new_item: ItemData) -> void:
 	unit.set_equipment_slot(slot, new_item)
 	desetup_item_select()
 
 
-func update_unit_ability(unit: Unit, slot: AbilitySlot, new_ability: Ability) -> void:
+func update_unit_ability(unit: UnitActor, slot: AbilitySlot, new_ability: Ability) -> void:
 	unit.equip_ability(slot, new_ability)
 	desetup_ability_select()
 
 
-func update_unit_skillset(unit: Unit, skillset_idx: int, new_skillset: Skillset) -> void:
+func update_unit_skillset(unit: UnitActor, skillset_idx: int, new_skillset: Skillset) -> void:
 	unit.equip_skillset(skillset_idx, new_skillset)
 	desetup_skillset_select()
 
@@ -331,12 +331,12 @@ func update_map(new_map_chunk_settings: MapChunkSettingsUi) -> void:
 	show_all_tiles(show_map_tiles_check.button_pressed)
 
 
-func update_unit_positions(units: Array[Unit]) -> void:
+func update_unit_positions(units: Array[UnitActor]) -> void:
 	if battle_manager.total_map_tiles.is_empty():
 		push_warning("[ScenarioEditor] No map tiles loaded — cannot position units")
 		return
 	var valid_tiles: Array[TerrainTile] = battle_manager.get_stand_tiles()
-	for unit: Unit in units:
+	for unit: UnitActor in units:
 		var existing_tile_idx: int = valid_tiles.find_custom(func(tile: TerrainTile) -> bool: return unit.tile_position.location == tile.location)
 		if existing_tile_idx >= 0:
 			unit.tile_position = valid_tiles[existing_tile_idx]
@@ -431,7 +431,7 @@ func adjust_height(tab_idx: int) -> void:
 		battle_setup_container.offset_bottom = 0
 
 
-func update_unit_dragging(unit: Unit, event: InputEvent) -> void:
+func update_unit_dragging(unit: UnitActor, event: InputEvent) -> void:
 	if event.is_action_pressed("primary_action") and unit_dragged == null:
 		unit_dragged = unit # TODO only drag one unit at a time
 		unit_editor.setup(unit)
@@ -455,7 +455,7 @@ func update_unit_dragging(unit: Unit, event: InputEvent) -> void:
 
 func export_scenario() -> void:
 	scenario.units_data.clear()
-	for unit: Unit in battle_manager.units:
+	for unit: UnitActor in battle_manager.units:
 		var new_unit_data: UnitData = UnitData.new()
 		new_unit_data.init_from_unit(unit)
 		scenario.units_data.append(new_unit_data)

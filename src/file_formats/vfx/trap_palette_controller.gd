@@ -3,7 +3,7 @@ extends RefCounted
 ## Tick-based white flash state machine for TRAP particle effects.
 ## PSX timing: 8 interpolation steps at 60Hz = ~133ms. At 30Hz: 4 steps = ~133ms.
 
-var _target_unit: Unit = null
+var _target_unit: UnitActor = null
 var _step: int = -1
 var _done: bool = true
 
@@ -11,7 +11,7 @@ const FADE_STEPS: int = 4
 const TINT_PER_STEP: float = 1.0 / FADE_STEPS  # 0.25
 
 
-func start(target_unit: Unit) -> void:
+func start(target_unit: UnitActor) -> void:
 	_target_unit = target_unit
 	_step = 0
 	_done = false

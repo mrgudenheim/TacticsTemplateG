@@ -11,7 +11,7 @@ func use(action_instance: ActionInstance) -> void:
 	action_instance.action_completed.emit(action_instance.battle_manager)
 
 
-func walk_to_tile(user: Unit, to_tile: TerrainTile) -> void:
+func walk_to_tile(user: UnitActor, to_tile: TerrainTile) -> void:
 	var distance_to_move: float = user.tile_position.location.distance_to(to_tile.location)
 	var immediate_path: Vector3 = to_tile.get_world_position() - user.tile_position.get_world_position()
 	if distance_to_move > 1.1: # TODO is leaping the only case where moving more than 1 distance at a time?
@@ -33,7 +33,7 @@ func walk_to_tile(user: Unit, to_tile: TerrainTile) -> void:
 	user.reached_tile.emit()
 
 
-func process_physics_move(user: Unit, target_position: Vector3) -> void:
+func process_physics_move(user: UnitActor, target_position: Vector3) -> void:
 	var speed: float = 4.0
 	var current_xy: Vector2 = Vector2(user.char_body.global_position.x, user.char_body.global_position.z)
 	var target_xy: Vector2 = Vector2(target_position.x, target_position.z)
@@ -65,7 +65,7 @@ func process_physics_move(user: Unit, target_position: Vector3) -> void:
 	#return false
 
 
-func travel_path(user: Unit, path: Array[TerrainTile]) -> void:
+func travel_path(user: UnitActor, path: Array[TerrainTile]) -> void:
 	user.is_traveling_path = true
 	var initial_pos: Vector2i = user.tile_position.location
 	for tile: TerrainTile in path:

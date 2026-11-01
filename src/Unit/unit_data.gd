@@ -3,22 +3,22 @@ extends Resource
 
 @export var display_name: String = "display name"
 @export var level: int = 0
-@export var gender: Unit.Gender = Unit.Gender.MALE # male, female, other, monster
+@export var gender: UnitActor.Gender = UnitActor.Gender.MALE # male, female, other, monster
 @export var zodiac: String = "zodiac" # TODO should zodiac be derived from birthday?
 @export var job_unique_name: String = "job_unique_name"
 @export var team_idx: int = 0
 @export var controller: int = 0 # 0 = AI, 1 = Player 1, etc.
 @export var spritesheeet_file_name: String = "spritesheeet_file_name.spr" # TODO get sprite file name?
 @export var palette_id: int = 0
-@export var facing_direction: Unit.Facings = Unit.Facings.NORTH # north, south, east, west
+@export var facing_direction: UnitActor.Facings = UnitActor.Facings.NORTH # north, south, east, west
 
 # job levels
 # jp per job
 # abilities learned
 
 # Stats
-@export var stats: Dictionary[Unit.StatType, StatValue] = {}
-@export var stats_raw: Dictionary[Unit.StatType, float] = {}
+@export var stats: Dictionary[UnitActor.StatType, StatValue] = {}
+@export var stats_raw: Dictionary[UnitActor.StatType, float] = {}
 
 # equipment
 @export var equip_slots: Array[EquipmentSlot] = []
@@ -56,16 +56,16 @@ static func create_from_dictionary(property_dict: Dictionary) -> UnitData:
 			new_unit_data.set(property_name, new_equip_slots)
 		elif property_name == "stats_raw":
 			var dict: Dictionary = property_dict[property_name]
-			var new_stats_raw: Dictionary[Unit.StatType, float] = {}
+			var new_stats_raw: Dictionary[UnitActor.StatType, float] = {}
 			for stat_type: String in dict.keys():
-				new_stats_raw[Unit.StatType[stat_type]] = dict[stat_type]
+				new_stats_raw[UnitActor.StatType[stat_type]] = dict[stat_type]
 			new_unit_data.set(property_name, new_stats_raw)
 		elif property_name == "stats":
 			var dict: Dictionary = property_dict[property_name]
-			var new_stats: Dictionary[Unit.StatType, StatValue] = {}
+			var new_stats: Dictionary[UnitActor.StatType, StatValue] = {}
 			for stat_type: String in dict.keys():
 				var new_clamped_value: StatValue = StatValue.create_from_dictionary(dict[stat_type])
-				new_stats[Unit.StatType[stat_type]] = new_clamped_value
+				new_stats[UnitActor.StatType[stat_type]] = new_clamped_value
 			new_unit_data.set(property_name, new_stats)
 		else:
 			new_unit_data.set(property_name, property_dict[property_name])
@@ -88,7 +88,7 @@ func to_dictionary() -> Dictionary:
 	return Utilities.object_properties_to_dictionary(self, properties_to_exclude)
 
 
-func init_from_unit(unit: Unit) -> void:
+func init_from_unit(unit: UnitActor) -> void:
 	display_name = unit.unit_nickname
 	level = unit.level
 	gender = unit.gender # male, female, other, monster

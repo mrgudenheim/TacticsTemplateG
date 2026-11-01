@@ -6,7 +6,7 @@ var team_name: String = "[Team Name]"
 var inventory: PackedInt32Array = []
 var currency: int = 100
 
-var units: Array[Unit] = []
+var units: Array[UnitActor] = []
 
 #@export var end_conditions: Array[EndCondition] = []
 @export var end_conditions: Dictionary[EndCondition, bool] = {}

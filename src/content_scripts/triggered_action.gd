@@ -52,7 +52,7 @@ var action: Action
 
 # requirements to trigger - user data
 @export var required_status_id: PackedStringArray = [] # will not trigger if unit does not have any of these flags (can trigger if empty)
-@export var user_stat_thresholds: Dictionary[Unit.StatType, int] = {} # will only trigger if each of user's stat (modified_value) is >= the threshold - ex. MP >= 0
+@export var user_stat_thresholds: Dictionary[UnitActor.StatType, int] = {} # will only trigger if each of user's stat (modified_value) is >= the threshold - ex. MP >= 0
 
 # requirements to trigger - action data
 @export var only_trigger_if_usable: bool = true
@@ -69,12 +69,12 @@ var action: Action
 
 # assorted data
 class TriggeredActionInstance:
-	var user: Unit
+	var user: UnitActor
 	var tiles_moved: int = 0
 	var initiating_action_instance: ActionInstance
 
 
-func connect_trigger(unit: Unit) -> void:
+func connect_trigger(unit: UnitActor) -> void:
 	match trigger_timing:
 		TriggerTiming.MOVED:
 			if not unit.completed_move.is_connected(moved_trigger):
@@ -93,32 +93,32 @@ func connect_trigger(unit: Unit) -> void:
 				unit.turn_ended.connect(self_trigger)
 
 
-func moved_trigger(user: Unit, moved_tiles: int) -> void:
+func moved_trigger(user: UnitActor, moved_tiles: int) -> void:
 	var new_triggered_action_data: TriggeredActionInstance = TriggeredActionInstance.new()
 	new_triggered_action_data.user = user
 	new_triggered_action_data.tiles_moved = moved_tiles
 	await process_triggered_action(new_triggered_action_data)
 
 
-func action_trigger(user: Unit, action_instance_targeted_by: ActionInstance) -> void:
+func action_trigger(user: UnitActor, action_instance_targeted_by: ActionInstance) -> void:
 	var new_triggered_action_data: TriggeredActionInstance = TriggeredActionInstance.new()
 	new_triggered_action_data.user = user
 	new_triggered_action_data.initiating_action_instance = action_instance_targeted_by
 	await process_triggered_action(new_triggered_action_data)
 
 
-func self_trigger(user: Unit) -> void:	
+func self_trigger(user: UnitActor) -> void:	
 	var new_triggered_action_data: TriggeredActionInstance = TriggeredActionInstance.new()
 	new_triggered_action_data.user = user
 	await process_triggered_action(new_triggered_action_data)
 
 
 func process_triggered_action(triggered_action_data: TriggeredActionInstance) -> void:
-	var user: Unit = triggered_action_data.user
+	var user: UnitActor = triggered_action_data.user
 	if not Utilities.has_any_elements(user.current_status_ids, required_status_id):
 		return
 	
-	for stat_type: Unit.StatType in user_stat_thresholds.keys():
+	for stat_type: UnitActor.StatType in user_stat_thresholds.keys():
 		if user.stats[stat_type].modified_value < user_stat_thresholds[stat_type]:
 			return
 
@@ -133,7 +133,7 @@ func process_triggered_action(triggered_action_data: TriggeredActionInstance) ->
 
 	var initiator_data: ActionInstance = triggered_action_data.initiating_action_instance
 	var has_initiator_data: bool = initiator_data != null
-	var initiator: Unit = triggered_action_data.user
+	var initiator: UnitActor = triggered_action_data.user
 	if has_initiator_data:
 		initiator = initiator_data.user
 
@@ -162,7 +162,7 @@ func process_triggered_action(triggered_action_data: TriggeredActionInstance) ->
 
 		# TODO check excessive hp recovered
 		# if excessive_hp_recovery_threshold != 0:
-		# 	var excess_hp = action_hp_recovered + user.stats[Unit.StatType.HP].modified_value - user.stats[Unit.StatType.HP_MAX].modified_value
+		# 	var excess_hp = action_hp_recovered + user.stats[UnitActor.StatType.HP].modified_value - user.stats[UnitActor.StatType.HP_MAX].modified_value
 		# 	if excess_hp < excessive_hp_recovery_threshold:
 		# 		return
 	
@@ -196,7 +196,7 @@ func process_triggered_action(triggered_action_data: TriggeredActionInstance) ->
 			push_warning("Invalid targeting type for triggered action: " + new_action_instance.action.display_name)
 
 
-func check_if_triggered(user: Unit, target: Unit, element: Action.ElementTypes = Action.ElementTypes.NONE) -> bool:
+func check_if_triggered(user: UnitActor, target: UnitActor, element: Action.ElementTypes = Action.ElementTypes.NONE) -> bool:
 	var is_triggered: bool = false
 	var trigger_chance: float = trigger_chance_formula.get_result(user, target, element)
 	is_triggered = randi() % 100 < trigger_chance
@@ -304,7 +304,7 @@ static func create_from_dictonary(property_dict: Dictionary) -> TriggeredAction:
 			var new_formula_data: FormulaData = FormulaData.create_from_dictionary(property_dict[property_name])
 			new_triggered_action.set(property_name, new_formula_data)
 		elif property_name == "user_stat_thresholds":
-			var new_dictionary: Dictionary[Unit.StatType, int] = {}
+			var new_dictionary: Dictionary[UnitActor.StatType, int] = {}
 			var json_dict: Dictionary = property_dict[property_name]
 			for key: String in json_dict.keys():
 				new_dictionary[key.to_int()] = roundi(json_dict[key])

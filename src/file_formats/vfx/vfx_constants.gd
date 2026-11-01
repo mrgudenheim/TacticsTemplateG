@@ -76,7 +76,7 @@ const DEPTH_BIAS_PULL_16: float = 16.0 * DEPTH_BIAS_SCALE  ## 6.0 world units (P
 const DEPTH_BIAS_FIXED_FRONT: float = 100.0  ## Large forward shift — always near camera (PSX: bucket 8)
 const DEPTH_BIAS_FIXED_BACK: float = -100.0  ## Large backward shift — always far (PSX: bucket 382)
 const DEPTH_BIAS_FIXED_16: float = 80.0      ## Near front but behind FIXED_FRONT (PSX: bucket 16)
-const DEPTH_BIAS_UNIT: float = 0.1           ## Unit sprite: slightly in front of its tile
+const DEPTH_BIAS_UNIT: float = 0.1           ## UnitActor sprite: slightly in front of its tile
 const DEPTH_BIAS_SHADOW: float = 0.1         ## Shadow: slightly in front of its tile
 const DEPTH_BIAS_TILE_OVERLAY: float = 0.05  ## Tile highlights: between tile and unit
 

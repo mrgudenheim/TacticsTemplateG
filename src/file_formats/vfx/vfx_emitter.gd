@@ -1,7 +1,7 @@
 class_name VfxEmitter
 extends Resource
 
-## Unit conversion constants (FFT raw → Godot units)
+## UnitActor conversion constants (FFT raw → Godot units)
 ## These match godot-learning/tools/transform_for_godot.py
 const POSITION_DIVISOR: float = 28.0           ## FFT world units → Godot tile units
 const VELOCITY_DIVISOR: float = 14336.0        ## raw → Godot units/frame

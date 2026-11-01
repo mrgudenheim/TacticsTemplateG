@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://6pc8u8p185nd" path="res://src/battle/editor/unit_editor.gd" id="1_fwwrv"]
 [ext_resource type="PackedScene" uid="uid://d2jb1kiyb35fa" path="res://src/Unit/stat_bar.tscn" id="2_3o4pl"]
-[ext_resource type="PackedScene" uid="uid://dkudrb304m7t1" path="res://src/Unit/unit.tscn" id="2_k0plo"]
+[ext_resource type="PackedScene" uid="uid://dkudrb304m7t1" path="res://src/Unit/unit_actor.tscn" id="2_k0plo"]
 [ext_resource type="Shader" uid="uid://cp6kt2paa88bq" path="res://src/battle/editor/ui_palette.gdshader" id="3_ryng8"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jftex"]

@@ -13,7 +13,7 @@ extends RefCounted
 # TODO should there just be an EffectResult structure?
 
 # used for debugging?
-var unit: Unit
+var unit: UnitActor
 var action_instance: ActionInstance
 
 

@@ -49,7 +49,7 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "monster_talk"
-	new_passive_effect.add_applicable_target_stat_bases = [Unit.StatBasis.MONSTER]
+	new_passive_effect.add_applicable_target_stat_bases = [UnitActor.StatBasis.MONSTER]
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
 	new_passive_effect = PassiveEffect.new()
@@ -97,14 +97,14 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "monster_skill"
 	new_passive_effect.effect_range = 3
-	new_passive_effect.unit_basis_filter = [Unit.StatBasis.MONSTER]
+	new_passive_effect.unit_basis_filter = [UnitActor.StatBasis.MONSTER]
 	new_passive_effect.added_actions_names = ["choco_ball"] # TODO change to 'learned' flag for each job's unique action?
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "move+1"
-	var stat_modifier_dict: Dictionary[Unit.StatType, Modifier] = {
-		Unit.StatType.MOVE: Modifier.new("value + 1", Modifier.ModifierType.ADD),
+	var stat_modifier_dict: Dictionary[UnitActor.StatType, Modifier] = {
+		UnitActor.StatType.MOVE: Modifier.new("value + 1", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
@@ -112,7 +112,7 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "move+2"
 	stat_modifier_dict = {
-		Unit.StatType.MOVE: Modifier.new("value + 2", Modifier.ModifierType.ADD),
+		UnitActor.StatType.MOVE: Modifier.new("value + 2", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
@@ -120,7 +120,7 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "move+3"
 	stat_modifier_dict = {
-		Unit.StatType.MOVE: Modifier.new("value + 3", Modifier.ModifierType.ADD),
+		UnitActor.StatType.MOVE: Modifier.new("value + 3", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
@@ -128,7 +128,7 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "jump+1"
 	stat_modifier_dict = {
-		Unit.StatType.JUMP: Modifier.new("value + 1", Modifier.ModifierType.ADD),
+		UnitActor.StatType.JUMP: Modifier.new("value + 1", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
@@ -136,7 +136,7 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "jump+2"
 	stat_modifier_dict = {
-		Unit.StatType.JUMP: Modifier.new("value + 2", Modifier.ModifierType.ADD),
+		UnitActor.StatType.JUMP: Modifier.new("value + 2", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
@@ -144,7 +144,7 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "jump+3"
 	stat_modifier_dict = {
-		Unit.StatType.JUMP: Modifier.new("value + 3", Modifier.ModifierType.ADD),
+		UnitActor.StatType.JUMP: Modifier.new("value + 3", Modifier.ModifierType.ADD),
 	}
 	new_passive_effect.stat_modifiers = stat_modifier_dict
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
@@ -451,7 +451,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.set_target_animation_on_hit = false
 	new_action.ends_turn = true
 	var new_effect: ActionEffect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.CT
+	new_effect.effect_stat_type = UnitActor.StatType.CT
 	new_effect.base_power_formula = FormulaData.new("(target.action_points_remaining * 10) + (target.move_points_remaining * 10)", [3], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -470,7 +470,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.MP
+	new_effect.effect_stat_type = UnitActor.StatType.MP
 	# TODO get mp used based off of action? Maybe from TriggeredAction data?
 	new_effect.base_power_formula = FormulaData.new("10.0", [10], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
@@ -481,7 +481,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.BRAVE
+	new_effect.effect_stat_type = UnitActor.StatType.BRAVE
 	new_effect.base_power_formula = FormulaData.new("3.0", [3], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -510,7 +510,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.ignore_passives.erase("attack_up")
 	new_action.ignore_passives.erase("defense_up")
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.effect_stat_type = UnitActor.StatType.HP
 	# TODO use correct formula for Counter Tackle
 	new_effect.base_power_formula = FormulaData.new("user.hp_max * 0.04", [4.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, true, true)
 	new_action.target_effects.append(new_effect)
@@ -521,7 +521,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.CT
+	new_effect.effect_stat_type = UnitActor.StatType.CT
 	new_effect.base_power_formula = FormulaData.new("100.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -532,7 +532,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.description = "Removes remaining HP from target when Dead status is added"
 	new_action.status_prevents_use_any = []
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.effect_stat_type = UnitActor.StatType.HP
 	new_effect.base_power_formula = FormulaData.new("target.hp", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -570,7 +570,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.FAITH
+	new_effect.effect_stat_type = UnitActor.StatType.FAITH
 	new_effect.base_power_formula = FormulaData.new("3.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -591,7 +591,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description	
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.effect_stat_type = UnitActor.StatType.HP
 	new_effect.base_power_formula = FormulaData.new("target.hp_max", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -601,7 +601,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description	
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.MAGIC_ATTACK
+	new_effect.effect_stat_type = UnitActor.StatType.MAGIC_ATTACK
 	new_effect.base_power_formula = FormulaData.new("1.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -612,7 +612,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.description = abilities[new_action.unique_name].description
 	new_action.applicable_evasion_type = EvadeData.EvadeType.PHYSICAL
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.effect_stat_type = UnitActor.StatType.HP
 	new_effect.base_power_formula = FormulaData.new("user.hp_max", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -622,7 +622,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.EXP
+	new_effect.effect_stat_type = UnitActor.StatType.EXP
 	new_effect.base_power_formula = FormulaData.new("12.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -632,7 +632,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.effect_stat_type = UnitActor.StatType.HP
 	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -642,7 +642,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.EXP # TODO move get jp - implement jp
+	new_effect.effect_stat_type = UnitActor.StatType.EXP # TODO move get jp - implement jp
 	new_effect.base_power_formula = FormulaData.new("8.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -652,7 +652,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.MP
+	new_effect.effect_stat_type = UnitActor.StatType.MP
 	new_effect.base_power_formula = FormulaData.new("target.mp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -662,7 +662,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.MP
+	new_effect.effect_stat_type = UnitActor.StatType.MP
 	new_effect.base_power_formula = FormulaData.new("target.mp_max", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -672,7 +672,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.PHYSICAL_ATTACK
+	new_effect.effect_stat_type = UnitActor.StatType.PHYSICAL_ATTACK
 	new_effect.base_power_formula = FormulaData.new("1.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -682,7 +682,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = "Applies damage from Poison status"
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.effect_stat_type = UnitActor.StatType.HP
 	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -692,7 +692,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = "Heals HP from Regeneration status"
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.effect_stat_type = UnitActor.StatType.HP
 	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -716,7 +716,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.will_remove_target_status = true
 	new_action.status_prevents_use_any.erase("dead")
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.effect_stat_type = UnitActor.StatType.HP
 	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -726,7 +726,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.SPEED
+	new_effect.effect_stat_type = UnitActor.StatType.SPEED
 	new_effect.base_power_formula = FormulaData.new("1.0", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
@@ -750,7 +750,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.will_remove_target_status = true
 	new_action.status_prevents_use_any.erase("dead")
 	new_effect = ActionEffect.new()
-	new_effect.effect_stat_type = Unit.StatType.HP
+	new_effect.effect_stat_type = UnitActor.StatType.HP
 	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()

@@ -6,7 +6,7 @@ extends PanelContainer
 @export var preview_viewport2: SubViewport
 @export var preview_rect: TextureRect
 @export var unit_tscn: PackedScene
-@export var unit: Unit
+@export var unit: UnitActor
 
 @export var weapon_options: OptionButton
 @export var item_options: OptionButton
@@ -58,11 +58,11 @@ func add_unit() -> void:
 	if is_instance_valid(unit):
 		unit.queue_free()
 	
-	var new_unit: Unit = unit_tscn.instantiate()
+	var new_unit: UnitActor = unit_tscn.instantiate()
 	#preview_viewport.subviewport.add_child(new_unit)
 	preview_viewport2.add_child(new_unit)
 	new_unit.initialize_unit()
-	new_unit.facing = Unit.Facings.SOUTH
+	new_unit.facing = UnitActor.Facings.SOUTH
 	new_unit.position += Vector3.DOWN * 0.5
 	#new_unit.char_body.rotation_degrees = Vector3.ZERO
 	new_unit.animation_manager.rotation_degrees = Vector3.ZERO
@@ -97,7 +97,7 @@ func _on_weapon_options_item_selected(index: int) -> void:
 func _on_other_type_selected(index: int) -> void:
 	#unit.animation_manager._on_weapon_options_item_selected(index)
 	#unit.animation_manager.weapon_id = index
-	unit.animation_manager.other_type_index = index # TODO other_type_index should probably be var on Unit, set by status?
+	unit.animation_manager.other_type_index = index # TODO other_type_index should probably be var on UnitActor, set by status?
 	#unit.debug_menu.weapon_options.select(index)
 
 
@@ -134,10 +134,10 @@ func _on_submerged_options_item_selected(index: int) -> void:
 
 func _on_face_right_check_toggled(toggled_on: bool) -> void:
 	if toggled_on:
-		unit.facing = Unit.Facings.EAST
+		unit.facing = UnitActor.Facings.EAST
 		unit.update_animation_facing(Vector3(-1, 0, -1))
 	else:
-		unit.facing = Unit.Facings.SOUTH
+		unit.facing = UnitActor.Facings.SOUTH
 		unit.update_animation_facing(Vector3(-1, 0, -1))
 	#unit.animation_manager._on_face_right_check_toggled(toggled_on)
 

@@ -2,7 +2,7 @@ class_name BattleManager
 extends Node3D
 
 signal map_input_event(action_instance: ActionInstance, camera: Camera3D, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) # TODO should action_instance be removed from signal?
-signal unit_created(new_unit: Unit)
+signal unit_created(new_unit: UnitActor)
 signal delayed_action_completed
 
 const SCALE: float = 1.0 / FftMapData.TILE_SIDE_LENGTH
@@ -32,7 +32,7 @@ var current_cursor_map_position: Vector3
 @export var action_menu: Control
 @export var action_button_list: BoxContainer
 @export var units_container: Node3D
-@export var units: Array[Unit] = []
+@export var units: Array[UnitActor] = []
 @export var teams: Array[Team] = []
 @export var controller: UnitControllerRT
 @export var battle_is_running: bool = false
@@ -40,7 +40,7 @@ var current_cursor_map_position: Vector3
 @export var battle_end_panel: Control
 @export var post_battle_messages: Control
 @export var start_new_battle_button: Button
-@export var active_unit: Unit
+@export var active_unit: UnitActor
 @export var game_state_container: Container
 @export var game_state_label: Label
 @export var scenario_editor: ScenarioEditor
@@ -110,7 +110,7 @@ func toggle_debug_ui() -> void:
 		game_state_container.visible = false
 		battle_view.reparent(scenario_editor.battle_subviewport)
 		
-		for unit: Unit in units:
+		for unit: UnitActor in units:
 			if not unit.unit_input_event.is_connected(scenario_editor.update_unit_dragging):
 				unit.unit_input_event.connect(scenario_editor.update_unit_dragging)
 		
@@ -121,7 +121,7 @@ func toggle_debug_ui() -> void:
 		if scenario_editor.tile_highlight != null:
 			scenario_editor.tile_highlight.queue_free()
 		
-		for unit: Unit in units:
+		for unit: UnitActor in units:
 			unit.unit_input_event.disconnect(scenario_editor.update_unit_dragging)
 
 		battle_view.reparent(self)
@@ -192,7 +192,7 @@ func start_battle() -> void:
 	if scenario_editor.tile_highlight != null:
 		scenario_editor.tile_highlight.queue_free()
 	
-	for unit: Unit in units:
+	for unit: UnitActor in units:
 		unit.unit_input_event.disconnect(scenario_editor.update_unit_dragging)
 	
 	battle_view.reparent(self)
@@ -256,7 +256,7 @@ func start_battle() -> void:
 			##var rand_job: int = team_1_job_ids.pick_random()
 			##while [0x2c, 0x31].has(rand_job): # prevent jobs without idle frames - 0x2c (Alma2) and 0x31 (Ajora) do not have walking frames
 				##rand_job = randi_range(0x01, 0x8d)
-			##var new_unit: Unit = spawn_unit(get_random_stand_terrain_tile(), rand_job, team1)
+			##var new_unit: UnitActor = spawn_unit(get_random_stand_terrain_tile(), rand_job, team1)
 			##new_unit.is_ai_controlled = false
 		##
 		##for random_unit: int in units_per_team:
@@ -264,7 +264,7 @@ func start_battle() -> void:
 			###var rand_job: int = randi_range(0x5e, 0x8d) # monsters
 			##while [0x2c, 0x31].has(rand_job): # prevent jobs without idle frames - 0x2c (Alma2) and 0x31 (Ajora) do not have walking frames
 				##rand_job = randi_range(0x01, 0x8d)
-			##var new_unit: Unit = spawn_unit(get_random_stand_terrain_tile(), rand_job, team2)
+			##var new_unit: UnitActor = spawn_unit(get_random_stand_terrain_tile(), rand_job, team2)
 			###new_unit.is_ai_controlled = false
 	#
 	#await update_units_pathfinding()
@@ -281,7 +281,7 @@ func add_test_teams_to_map() -> void:
 	################## unit 1
 	#var spawn_tile: TerrainTile = total_map_tiles[Vector2i(1, 1)][0] # [Vector2i(x, y)][layer]
 	#var job_id: int = 0x05 # 0x05 is Delita holy knight
-	#var new_unit: Unit = spawn_unit(spawn_tile, job_id, teams[0]) 
+	#var new_unit: UnitActor = spawn_unit(spawn_tile, job_id, teams[0]) 
 	#new_unit.is_ai_controlled = false
 	#new_unit.set_primary_weapon(0x1d) # item_id - 0x1d is ice brand
 	#
@@ -292,9 +292,9 @@ func add_test_teams_to_map() -> void:
 	#new_unit.equip_ability(new_unit.ability_slots[3], RomReader.abilities["abandon"]) # support
 	#new_unit.equip_ability(new_unit.ability_slots[4], RomReader.abilities["move_get_hp"]) # movement
 	#
-	#new_unit.generate_raw_stats(Unit.StatBasis.MALE) # StatBasis Options: MALE, FEMALE, OTHER, MONSTER
+	#new_unit.generate_raw_stats(UnitActor.StatBasis.MALE) # StatBasis Options: MALE, FEMALE, OTHER, MONSTER
 	#var level: int = 40
-	#new_unit.stats[Unit.StatType.LEVEL].set_value(level)
+	#new_unit.stats[UnitActor.StatType.LEVEL].set_value(level)
 	#new_unit.generate_leveled_stats(level, new_unit.job_data)
 	#new_unit.generate_battle_stats(new_unit.job_data)
 	#
@@ -318,9 +318,9 @@ func add_test_teams_to_map() -> void:
 	#new_unit.equip_ability(new_unit.ability_slots[3], RomReader.abilities["attack_up"]) # support
 	#new_unit.equip_ability(new_unit.ability_slots[4], RomReader.abilities["move+1"]) # movement
 	#
-	#new_unit.generate_raw_stats(Unit.StatBasis.MALE) # StatBasis Options: MALE, FEMALE, OTHER, MONSTER
+	#new_unit.generate_raw_stats(UnitActor.StatBasis.MALE) # StatBasis Options: MALE, FEMALE, OTHER, MONSTER
 	#level = 40
-	#new_unit.stats[Unit.StatType.LEVEL].set_value(level)
+	#new_unit.stats[UnitActor.StatType.LEVEL].set_value(level)
 	#new_unit.generate_leveled_stats(level, new_unit.job_data)
 	#new_unit.generate_battle_stats(new_unit.job_data)
 	#
@@ -333,21 +333,21 @@ func add_test_teams_to_map() -> void:
 	
 	# add player unit
 	#var random_tile: TerrainTile = get_random_stand_terrain_tile()
-	#var new_unit: Unit = spawn_unit(random_tile, 0x05, teams[0]) # 0x05 is Delita holy knight
+	#var new_unit: UnitActor = spawn_unit(random_tile, 0x05, teams[0]) # 0x05 is Delita holy knight
 	#new_unit.is_ai_controlled = false
 	#new_unit.set_primary_weapon(0x1d) # ice brand
 	
-	# var new_ramza: Unit = spawn_unit(get_random_stand_terrain_tile(), 0x01, teams[0])
+	# var new_ramza: UnitActor = spawn_unit(get_random_stand_terrain_tile(), 0x01, teams[0])
 	
 	# add non-player unit
-	# var new_unit2: Unit = spawn_unit(get_random_stand_terrain_tile(), 0x07, teams[1]) # 0x07 is Algus
+	# var new_unit2: UnitActor = spawn_unit(get_random_stand_terrain_tile(), 0x07, teams[1]) # 0x07 is Algus
 	# new_unit2.set_primary_weapon(0x4e) # crossbow
 	
 	## set up what to do when target unit is knocked out
 	#new_unit2.knocked_out.connect(load_random_map_delay)
 	#new_unit2.knocked_out.connect(increment_counter)
 	
-	#var new_unit3: Unit = spawn_unit(get_random_stand_terrain_tile(), 0x11, teams[1]) # 0x11 is Gafgorian dark knight
+	#var new_unit3: UnitActor = spawn_unit(get_random_stand_terrain_tile(), 0x11, teams[1]) # 0x11 is Gafgorian dark knight
 	#new_unit3.set_primary_weapon(0x17) # blood sword
 	
 	#var specific_jobs: PackedInt32Array = [
@@ -420,7 +420,7 @@ func add_test_teams_to_map() -> void:
 	#test_triggered_action.action_idx = -1 # primary attack special case
 	#test_triggered_action.trigger_chance_formula.values = [1.0]
 	#test_triggered_action.trigger_chance_formula.formula = FormulaData.Formulas.BRAVExV1
-	#test_triggered_action.user_stat_thresholds = { Unit.StatType.HP : 5 }
+	#test_triggered_action.user_stat_thresholds = { UnitActor.StatType.HP : 5 }
 	#test_triggered_action.targeting = TriggeredAction.TargetingTypes.INITIATOR
 	#test_triggered_action.name = "Test Trigger"
 	#
@@ -452,22 +452,22 @@ func add_test_teams_to_map() -> void:
 		#unit.is_ai_controlled = false
 
 
-func spawn_random_unit(team: Team) -> Unit:
+func spawn_random_unit(team: Team) -> UnitActor:
 	var rand_job_name: String = GameData.job_paths.keys().pick_random()
 	var rand_job: JobData = GameData.get_job(rand_job_name)
 	while [0x2c, 0x31].has(rand_job.job_id): # prevent jobs without idle frames - 0x2c (Alma2) and 0x31 (Ajora) do not have walking frames
 		rand_job_name = GameData.job_paths.keys().pick_random()
 		rand_job = GameData.get_job(rand_job_name)
 	var tile_location: TerrainTile = get_random_stand_terrain_tile()
-	var new_unit: Unit = spawn_unit(tile_location, rand_job.unique_name, team)
+	var new_unit: UnitActor = spawn_unit(tile_location, rand_job.unique_name, team)
 	new_unit.is_ai_controlled = false
 	
 	unit_created.emit(new_unit)
 	return new_unit
 
 
-func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level: int = 40) -> Unit:
-	var new_unit: Unit = Unit.instantiate()
+func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level: int = 40) -> UnitActor:
+	var new_unit: UnitActor = UnitActor.instantiate()
 	units_container.add_child(new_unit)
 	new_unit.global_battle_manager = self
 	units.append(new_unit)
@@ -478,20 +478,20 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	var new_job_data: JobData = GameData.get_job(job_name)
 	var job_id: int = new_job_data.job_id
 	if job_id < 0x5e: # non-monster
-		new_unit.stat_basis = [Unit.StatBasis.MALE, Unit.StatBasis.FEMALE].pick_random()
+		new_unit.stat_basis = [UnitActor.StatBasis.MALE, UnitActor.StatBasis.FEMALE].pick_random()
 	else:
-		new_unit.stat_basis = Unit.StatBasis.MONSTER
+		new_unit.stat_basis = UnitActor.StatBasis.MONSTER
 	new_unit.set_job(job_name)
 	# if new_job_data.default_palette_idx == -1:
 	# 	new_unit.set_sprite_palette(clampi(teams.find(team), 0, 8))
 	new_unit.update_unit_facing([Vector3.FORWARD, Vector3.BACK, Vector3.LEFT, Vector3.RIGHT].pick_random())
-	new_unit.stats[Unit.StatType.LEVEL].set_value(level)
-	Unit.generate_leveled_raw_stats(new_unit.stat_basis, level, new_unit.job_data, new_unit.stats_raw)
+	new_unit.stats[UnitActor.StatType.LEVEL].set_value(level)
+	UnitActor.generate_leveled_raw_stats(new_unit.stat_basis, level, new_unit.job_data, new_unit.stats_raw)
 	
 	var use_higher_stat_values: bool = false
 	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(new_unit.animation_manager.global_seq.file_name): # lucavi
 		use_higher_stat_values = true
-	Unit.calc_battle_stats(new_unit.job_data, new_unit.stats_raw, new_unit.stats, true, use_higher_stat_values)
+	UnitActor.calc_battle_stats(new_unit.job_data, new_unit.stats_raw, new_unit.stats, true, use_higher_stat_values)
 	
 	camera_controller.rotated.connect(new_unit.char_body.set_rotation_degrees) # have sprite update as camera rotates
 	new_unit.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
@@ -525,8 +525,8 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	return new_unit
 
 
-func spawn_unit_from_unit_data(unit_data: UnitData) -> Unit:
-	var new_unit: Unit = Unit.instantiate()
+func spawn_unit_from_unit_data(unit_data: UnitData) -> UnitActor:
+	var new_unit: UnitActor = UnitActor.instantiate()
 	units_container.add_child(new_unit)
 	new_unit.global_battle_manager = self
 	units.append(new_unit)
@@ -550,26 +550,26 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> Unit:
 	# 	new_unit.tile_position = total_map_tiles.values()[0][0]
 
 	new_unit.set_position_to_tile()
-	# new_unit.update_unit_facing(Unit.FacingVectors[Unit.Facings[unit_data.facing_direction]])
+	# new_unit.update_unit_facing(UnitActor.FacingVectors[UnitActor.Facings[unit_data.facing_direction]])
 	#new_unit.set_job_id(RomReader.jobs_data[unit_data.job_unique_name].job_id)
 	new_unit.set_job(unit_data.job_unique_name)
 	new_unit.set_sprite_by_file_name(unit_data.spritesheeet_file_name)
 	new_unit.set_sprite_palette(unit_data.palette_id)
-	new_unit.update_unit_facing(Unit.FACING_VECTORS[unit_data.facing_direction])
-	# new_unit.gender = Unit.Gender[unit_data.gender]
+	new_unit.update_unit_facing(UnitActor.FACING_VECTORS[unit_data.facing_direction])
+	# new_unit.gender = UnitActor.Gender[unit_data.gender]
 	new_unit.gender = unit_data.gender
 	new_unit.level = unit_data.level
 	new_unit.stats_raw = unit_data.stats_raw
 	new_unit.stats = unit_data.stats
-	new_unit.stats[Unit.StatType.HP_MAX].value_changed.connect(new_unit.stats[Unit.StatType.HP].update_max_from_clamped_value)
-	new_unit.stats[Unit.StatType.MP_MAX].value_changed.connect(new_unit.stats[Unit.StatType.MP].update_max_from_clamped_value)
-	new_unit.stats[Unit.StatType.HP].value_changed.connect(new_unit.hp_changed)
+	new_unit.stats[UnitActor.StatType.HP_MAX].value_changed.connect(new_unit.stats[UnitActor.StatType.HP].update_max_from_clamped_value)
+	new_unit.stats[UnitActor.StatType.MP_MAX].value_changed.connect(new_unit.stats[UnitActor.StatType.MP].update_max_from_clamped_value)
+	new_unit.stats[UnitActor.StatType.HP].value_changed.connect(new_unit.hp_changed)
 
 	var stat_bars: Array[StatBar] = []
 	stat_bars.assign(new_unit.stat_bars_container.get_children())
-	stat_bars[0].set_stat(str(Unit.StatType.keys()[Unit.StatType.HP]), new_unit.stats[Unit.StatType.HP])
-	stat_bars[1].set_stat(str(Unit.StatType.keys()[Unit.StatType.MP]), new_unit.stats[Unit.StatType.MP])
-	stat_bars[2].set_stat(str(Unit.StatType.keys()[Unit.StatType.CT]), new_unit.stats[Unit.StatType.CT])
+	stat_bars[0].set_stat(str(UnitActor.StatType.keys()[UnitActor.StatType.HP]), new_unit.stats[UnitActor.StatType.HP])
+	stat_bars[1].set_stat(str(UnitActor.StatType.keys()[UnitActor.StatType.MP]), new_unit.stats[UnitActor.StatType.MP])
+	stat_bars[2].set_stat(str(UnitActor.StatType.keys()[UnitActor.StatType.CT]), new_unit.stats[UnitActor.StatType.CT])
 	
 	camera_controller.rotated.connect(new_unit.char_body.set_rotation_degrees) # have sprite update as camera rotates
 	new_unit.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
@@ -616,7 +616,7 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> Unit:
 
 
 func update_units_pathfinding() -> void:
-	#for unit: Unit in units:
+	#for unit: UnitActor in units:
 		#var max_move_cost: int = 9999
 		#if unit != active_unit:
 			#max_move_cost = unit.move_current # stop pathfinding early for non-active units, only need potential move targets, not path to every possible tile
@@ -650,7 +650,7 @@ func process_clock_tick() -> void:
 	game_state_label.text = "processing new clock tick"
 
 	# increment status ticks
-	for unit: Unit in units:
+	for unit: UnitActor in units:
 		var statuses_to_remove: Array[StatusEffect] = []
 		for status: StatusEffect in unit.current_statuses:
 			safe_to_load_map = false
@@ -690,12 +690,12 @@ func process_clock_tick() -> void:
 		for status: StatusEffect in statuses_to_remove:
 			unit.remove_status(status)
 
-	for unit: Unit in units: # increment each units ct by speed
+	for unit: UnitActor in units: # increment each units ct by speed
 		if not unit.is_ct_frozen: # check status that prevent ct gain (stop, sleep, etc.)
 			var ct_gain: int = unit.speed
 			for passive_effect: PassiveEffect in unit.get_all_passive_effects():
 				ct_gain = passive_effect.ct_gain_modifier.apply(ct_gain)
-			unit.stats[Unit.StatType.CT].add_value(ct_gain)
+			unit.stats[UnitActor.StatType.CT].add_value(ct_gain)
 
 	# execute unit turns in PriorityQueue order until all units have CT < 100
 	while true:
@@ -703,7 +703,7 @@ func process_clock_tick() -> void:
 		if ready_queue.is_empty():
 			break
 		
-		var unit: Unit = ready_queue.pop()
+		var unit: UnitActor = ready_queue.pop()
 		
 		safe_to_load_map = false
 		await start_units_turn(unit) # process statuses on turn start and update actions
@@ -741,7 +741,7 @@ func process_clock_tick() -> void:
 func get_ready_turn_queue() -> PriorityQueue:
 	var queue: PriorityQueue = PriorityQueue.new()
 	for idx: int in units.size():
-		var unit: Unit = units[idx]
+		var unit: UnitActor = units[idx]
 		if not is_instance_valid(unit):
 			continue
 		
@@ -764,7 +764,7 @@ func check_end_conditions() -> bool:
 	return false
 
 
-func start_units_turn(unit: Unit) -> void:
+func start_units_turn(unit: UnitActor) -> void:
 	controller.unit = unit
 	active_unit = unit
 	
@@ -777,7 +777,7 @@ func start_units_turn(unit: Unit) -> void:
 # TODO handle event timeline
 #func process_next_event() -> void:
 	#event_num = (event_num + 1) % units.size()
-	#var new_unit: Unit = units[event_num]
+	#var new_unit: UnitActor = units[event_num]
 	#controller.unit = new_unit
 	#phantom_camera.follow_target = new_unit.char_body
 	#
@@ -811,7 +811,7 @@ func get_random_stand_terrain_tile() -> TerrainTile:
 	var potential_tiles: Array[TerrainTile] = get_stand_tiles()
 	var random_valid_tile: TerrainTile = potential_tiles.pick_random()
 	
-	while units.any(func(unit: Unit) -> bool: return unit.tile_position == random_valid_tile):
+	while units.any(func(unit: UnitActor) -> bool: return unit.tile_position == random_valid_tile):
 		potential_tiles.erase(random_valid_tile)
 		random_valid_tile = potential_tiles.pick_random()
 	
@@ -830,7 +830,7 @@ func get_stand_tiles() -> Array[TerrainTile]:
 
 
 func set_unit_statbars_visible(statbar_is_visible: bool) -> void:
-	for unit: Unit in units:
+	for unit: UnitActor in units:
 		unit.set_stat_bar_visiblity(statbar_is_visible)
 
 
@@ -842,7 +842,7 @@ func clear_maps() -> void:
 
 
 func clear_units() -> void:
-	for unit: Unit in units:
+	for unit: UnitActor in units:
 		unit.queue_free()
 	
 	units.clear()
@@ -850,7 +850,7 @@ func clear_units() -> void:
 		#child.queue_free()
 
 
-func increment_counter(unit: Unit) -> void:
+func increment_counter(unit: UnitActor) -> void:
 	var knocked_out_icon: Image = unit.animation_manager.global_shp.get_assembled_frame(0x17, unit.animation_manager.global_spr.spritesheet, 0, 0, 0, 0)
 	knocked_out_icon = knocked_out_icon.get_region(Rect2i(40, 50, 40, 40))
 	

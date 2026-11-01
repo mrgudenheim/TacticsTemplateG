@@ -29,8 +29,8 @@ extends Node3D
 
 var target_world_pos: Vector3 = Vector3(2.5, 0, 1.5)
 var attacker_world_pos: Vector3 = Vector3(2.5, 0, 1.5)
-var target_unit: Unit
-var attacker_unit: Unit
+var target_unit: UnitActor
+var attacker_unit: UnitActor
 var _direction: Vector3 = Vector3(1, 0, 0)
 var _distance: float = 5.0
 
@@ -117,12 +117,12 @@ func _spawn_attacker_unit() -> void:
 	attacker_unit = _spawn_unit(attacker_world_pos, "squire_06", 3) # Squire, palette 3 (different color)
 
 
-func _spawn_unit(pos: Vector3, job_name: String, palette: int) -> Unit:
-	var unit: Unit = Unit.instantiate()
+func _spawn_unit(pos: Vector3, job_name: String, palette: int) -> UnitActor:
+	var unit: UnitActor = UnitActor.instantiate()
 	units_container.add_child(unit)
 	unit.initialize_unit()
 	unit.char_body.global_position = pos + Vector3(0, 0.25, 0)
-	unit.stat_basis = Unit.StatBasis.MALE
+	unit.stat_basis = UnitActor.StatBasis.MALE
 	unit.set_job(job_name)
 	unit.set_sprite_palette(palette)
 	unit.update_unit_facing(Vector3.FORWARD)

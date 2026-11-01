@@ -154,11 +154,11 @@ func get_unit_data() -> UnitData:
 		unit_data.level = randi_range(0, 50)
 
 	if gender == 4:
-		unit_data.gender = Unit.Gender.MALE
+		unit_data.gender = UnitActor.Gender.MALE
 	elif gender == 2:
-		unit_data.gender = Unit.Gender.FEMALE
+		unit_data.gender = UnitActor.Gender.FEMALE
 	elif gender == 1:
-		unit_data.gender = Unit.Gender.MONSTER
+		unit_data.gender = UnitActor.Gender.MONSTER
 	
 	unit_data.zodiac = "zodiac" # TODO should zodiac be derived from birthday?
 	unit_data.job_unique_name = RomReader.jobs_data.keys()[main_job]
@@ -178,13 +178,13 @@ func get_unit_data() -> UnitData:
 	
 	
 	if initial_direction == 0:
-		unit_data.facing_direction = Unit.Facings.SOUTH
+		unit_data.facing_direction = UnitActor.Facings.SOUTH
 	elif initial_direction == 1:
-		unit_data.facing_direction = Unit.Facings.EAST
+		unit_data.facing_direction = UnitActor.Facings.EAST
 	elif initial_direction == 2:
-		unit_data.facing_direction = Unit.Facings.NORTH
+		unit_data.facing_direction = UnitActor.Facings.NORTH
 	elif initial_direction == 3:
-		unit_data.facing_direction = Unit.Facings.WEST
+		unit_data.facing_direction = UnitActor.Facings.WEST
 
 	# job levels
 	# jp per job
@@ -192,43 +192,43 @@ func get_unit_data() -> UnitData:
 
 	# Stats
 	unit_data.stats = {
-		Unit.StatType.HP_MAX : StatValue.new(0, 999, 150),
-		Unit.StatType.HP : StatValue.new(0, 150, 100),
-		Unit.StatType.MP_MAX : StatValue.new(0, 999, 100),
-		Unit.StatType.MP : StatValue.new(0, 100, 70),
-		Unit.StatType.CT : StatValue.new(0, 999, 25),
-		Unit.StatType.MOVE : StatValue.new(0, 100, 3),
-		Unit.StatType.JUMP : StatValue.new(0, 100, 3),
-		Unit.StatType.SPEED : StatValue.new(0, 100, 10),
-		Unit.StatType.PHYSICAL_ATTACK : StatValue.new(0, 100, 11),
-		Unit.StatType.MAGIC_ATTACK : StatValue.new(0, 100, 12),
-		Unit.StatType.BRAVE : StatValue.new(0, 100, 70),
-		Unit.StatType.FAITH : StatValue.new(0, 100, 65),
-		Unit.StatType.EXP : StatValue.new(0, 999, 99),
-		Unit.StatType.LEVEL : StatValue.new(0, 99, 20),
+		UnitActor.StatType.HP_MAX : StatValue.new(0, 999, 150),
+		UnitActor.StatType.HP : StatValue.new(0, 150, 100),
+		UnitActor.StatType.MP_MAX : StatValue.new(0, 999, 100),
+		UnitActor.StatType.MP : StatValue.new(0, 100, 70),
+		UnitActor.StatType.CT : StatValue.new(0, 999, 25),
+		UnitActor.StatType.MOVE : StatValue.new(0, 100, 3),
+		UnitActor.StatType.JUMP : StatValue.new(0, 100, 3),
+		UnitActor.StatType.SPEED : StatValue.new(0, 100, 10),
+		UnitActor.StatType.PHYSICAL_ATTACK : StatValue.new(0, 100, 11),
+		UnitActor.StatType.MAGIC_ATTACK : StatValue.new(0, 100, 12),
+		UnitActor.StatType.BRAVE : StatValue.new(0, 100, 70),
+		UnitActor.StatType.FAITH : StatValue.new(0, 100, 65),
+		UnitActor.StatType.EXP : StatValue.new(0, 999, 99),
+		UnitActor.StatType.LEVEL : StatValue.new(0, 99, 20),
 	}
 	unit_data.stats_raw = {
-		Unit.StatType.HP_MAX : 0.0, 
-		Unit.StatType.MP_MAX : 0.0, 
-		Unit.StatType.SPEED : 0.0, 
-		Unit.StatType.PHYSICAL_ATTACK : 0.0, 
-		Unit.StatType.MAGIC_ATTACK : 0.0, 
+		UnitActor.StatType.HP_MAX : 0.0, 
+		UnitActor.StatType.MP_MAX : 0.0, 
+		UnitActor.StatType.SPEED : 0.0, 
+		UnitActor.StatType.PHYSICAL_ATTACK : 0.0, 
+		UnitActor.StatType.MAGIC_ATTACK : 0.0, 
 	}
 
-	unit_data.stats[Unit.StatType.HP_MAX].value_changed.connect(unit_data.stats[Unit.StatType.HP].update_max_from_clamped_value)
-	unit_data.stats[Unit.StatType.MP_MAX].value_changed.connect(unit_data.stats[Unit.StatType.MP].update_max_from_clamped_value)
-	# TODO unit_data.stats[Unit.StatType.HP].value_changed.connect(hp_changed)
+	unit_data.stats[UnitActor.StatType.HP_MAX].value_changed.connect(unit_data.stats[UnitActor.StatType.HP].update_max_from_clamped_value)
+	unit_data.stats[UnitActor.StatType.MP_MAX].value_changed.connect(unit_data.stats[UnitActor.StatType.MP].update_max_from_clamped_value)
+	# TODO unit_data.stats[UnitActor.StatType.HP].value_changed.connect(hp_changed)
 	# TODO connect stat bars?
 
-	unit_data.stats[Unit.StatType.LEVEL].set_value(unit_data.level)
-	Unit.generate_leveled_raw_stats(unit_data.gender as Unit.StatBasis, unit_data.level, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
+	unit_data.stats[UnitActor.StatType.LEVEL].set_value(unit_data.level)
+	UnitActor.generate_leveled_raw_stats(unit_data.gender as UnitActor.StatBasis, unit_data.level, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
 	var use_higher_stat_values: bool = false
 	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(unit_data.spritesheeet_file_name): # lucavi
 		use_higher_stat_values = true
-	Unit.calc_battle_stats(RomReader.jobs_data.values()[main_job], unit_data.stats_raw, unit_data.stats, true, use_higher_stat_values)
+	UnitActor.calc_battle_stats(RomReader.jobs_data.values()[main_job], unit_data.stats_raw, unit_data.stats, true, use_higher_stat_values)
 
-	unit_data.stats[Unit.StatType.BRAVE].set_value(brave)
-	unit_data.stats[Unit.StatType.FAITH].set_value(faith)
+	unit_data.stats[UnitActor.StatType.BRAVE].set_value(brave)
+	unit_data.stats[UnitActor.StatType.FAITH].set_value(faith)
 
 	# equipment
 	unit_data.equip_slots = [

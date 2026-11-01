@@ -124,7 +124,7 @@ static func get_status_id_array(status_bitflags: PackedByteArray) -> PackedStrin
 	return status_array
 
 
-func get_ai_score(user: Unit, target: Unit, remove: bool = false) -> float:
+func get_ai_score(user: UnitActor, target: UnitActor, remove: bool = false) -> float:
 	var score: float = 0.0
 	if not remove and target.immune_statuses.has(unique_name):
 		return 0.0

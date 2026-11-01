@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://cxr41bg8c7dir" path="res://src/fftae/row_frame.tscn" id="4_omu1g"]
 [ext_resource type="Script" uid="uid://b64ivxoaj2sr1" path="res://src/fftae/ui_manager.gd" id="5_1m40y"]
 [ext_resource type="Script" uid="uid://c7jtka1a8nsqu" path="res://src/fftae/preview_manager.gd" id="6_4j3la"]
-[ext_resource type="PackedScene" uid="uid://dkudrb304m7t1" path="res://src/Unit/unit.tscn" id="7_fg5ho"]
+[ext_resource type="PackedScene" uid="uid://dkudrb304m7t1" path="res://src/Unit/unit_actor.tscn" id="7_fg5ho"]
 [ext_resource type="Script" uid="uid://c1qnswnanl7v4" path="res://src/fftae/subviewport_camera_controller.gd" id="8_fg5ho"]
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_fg5ho"]

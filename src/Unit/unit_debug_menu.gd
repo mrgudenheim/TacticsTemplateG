@@ -1,7 +1,7 @@
 class_name UnitDebugMenu
 extends Control
 
-@export var unit: Unit
+@export var unit: UnitActor
 @export var unit_char_body: CharacterBody3D
 @export var animation_manager: UnitAnimationManager
 

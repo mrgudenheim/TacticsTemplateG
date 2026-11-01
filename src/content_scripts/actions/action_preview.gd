@@ -2,7 +2,7 @@ class_name ActionPreview
 extends Control
 
 @export var label: Label
-@export var unit: Unit
+@export var unit: UnitActor
 var camera: Camera3D
 
 func _ready() -> void:
