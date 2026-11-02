@@ -4,6 +4,13 @@ signal data_indexed
 signal message(message: String)
 signal import_progress(current_value: int, max_value: int)
 
+enum Directions {
+	NORTH,
+	EAST,
+	SOUTH,
+	WEST,
+}
+
 const DATA_PATH_CONFIG: String = "user://external_data_paths.cfg"
 var external_data_paths: Dictionary [String, String] = {
 	"IMPORT_PATH" : "",
