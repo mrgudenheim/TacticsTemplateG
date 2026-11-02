@@ -8,76 +8,14 @@ signal initialized()
 signal data_updated(unit: UnitActor)
 
 signal ability_assigned(name: String)
-signal ability_completed()
 signal primary_weapon_assigned(item_unique_name: String)
 signal image_changed(new_image: ImageTexture)
-signal knocked_out(unit: UnitActor)
 signal spritesheet_changed(new_spritesheet: ImageTexture)
-@warning_ignore("unused_signal")
-signal targeted_pre_action(this_unit: UnitActor, action_instance: ActionInstance) # emited in action_instance
-@warning_ignore("unused_signal")
-signal targeted_post_action(this_unit: UnitActor, action_instance: ActionInstance) # emited in action_instance
-@warning_ignore("unused_signal")
-signal reached_tile() # emited in use_move
-@warning_ignore("unused_signal")
-signal completed_move(this_unit: UnitActor, tile_moved: int) # emited in use_move
-signal turn_started(this_unit: UnitActor)
-signal turn_ended(this_unit: UnitActor)
 signal unit_input_event(unit_data: UnitActor, event: InputEvent)
-signal paths_updated()
-
-enum StatBasis {
-	MALE,
-	FEMALE,
-	OTHER,
-	MONSTER,
-}
-
-enum Gender {
-	MALE,
-	FEMALE,
-	OTHER,
-	MONSTER,
-}
-
-enum StatType {
-	HP,
-	HP_MAX,
-	MP,
-	MP_MAX,
-	CT,
-	MOVE,
-	JUMP,
-	SPEED,
-	PHYSICAL_ATTACK,
-	MAGIC_ATTACK,
-	BRAVE,
-	FAITH,
-	EXP,
-	LEVEL,
-}
-
-enum Facings {
-	NORTH,
-	EAST,
-	SOUTH,
-	WEST,
-}
 
 static var unit_scene: PackedScene = load("uid://dkudrb304m7t1")
 
-const FACING_VECTORS: Dictionary[Facings, Vector3] = {
-	Facings.NORTH: Vector3.BACK,
-	Facings.EAST: Vector3.RIGHT,
-	Facings.SOUTH: Vector3.FORWARD,
-	Facings.WEST: Vector3.LEFT,
-}
-
 var global_battle_manager: BattleManager
-var team: Team
-var is_controlled_by_me: bool = false # for multiplayer games
-var is_ai_controlled: bool = false
-var ai_controller: UnitAi = UnitAi.new()
 
 @export var char_body: CharacterBody3D
 @export var animation_manager: UnitAnimationManager
@@ -95,170 +33,10 @@ var ai_controller: UnitAi = UnitAi.new()
 		set_icon(icon_id)
 @export var debug_menu: UnitDebugMenu
 
-var is_defeated: bool:
-	get:
-		return current_statuses.any(func(status: StatusEffect) -> bool: return status.counts_as_ko) # returns false when no statuses
-
-var is_ct_frozen: bool:
-	get:
-		return current_statuses.any(func(status: StatusEffect) -> bool: return status.freezes_ct) # returns false when no statuses
-
-@export var unit_nickname: String = "UnitActor Nickname"
-@export var job_nickname: String = "Job Nickname"
-@export var job_name: String = ""
-
-var character_id: int = 0
-var unit_index_formation: int = 0
-var stat_basis: StatBasis = StatBasis.MALE
-var gender: Gender = Gender.MALE
-var job_id: int = 0
-var job_data: JobData
-var sprite_palette_id: int = 0
-var sprite_palette_id_override: int = -1
-var team_id: int = 0
-var player_control: bool = true
-
-var immortal: bool = false
-var immune_knockback: bool = false
-var game_over_trigger: bool = false
-var type_id: int = 0 # male, female, monster
-var death_counter: int = 3
-var zodiac: String = "Ares"
-
-var innate_ability_ids: PackedInt32Array = []
-var skillsets_names: PackedStringArray = []
-# var skillsets: Array[Skillset] = []
-
-var equipable_item_types: Array[ItemData.ItemType] = []
-var primary_weapon: ItemData
-var equip_slots: Array[EquipmentSlot] = [
-	EquipmentSlot.new("RH", [ItemData.SlotType.WEAPON, ItemData.SlotType.SHIELD]),
-	EquipmentSlot.new("LH", [ItemData.SlotType.WEAPON, ItemData.SlotType.SHIELD]),
-	EquipmentSlot.new("Head", [ItemData.SlotType.HEADGEAR]),
-	EquipmentSlot.new("Body", [ItemData.SlotType.ARMOR]),
-	EquipmentSlot.new("Accesory", [ItemData.SlotType.ACCESSORY]),
-]
-
-var ability_slots: Array[AbilitySlot] = [
-	# AbilitySlot.new("Skillset 1", [Ability.SlotType.SKILLSET]),
-	# AbilitySlot.new("Skillset 2", [Ability.SlotType.SKILLSET]),
-	AbilitySlot.new("Reaction", [Ability.SlotType.REACTION]),
-	AbilitySlot.new("Support", [Ability.SlotType.SUPPORT]),
-	AbilitySlot.new("Movement", [Ability.SlotType.MOVEMENT]),
-]
-
-var stats: Dictionary[StatType, StatValue] = {
-	StatType.HP_MAX : StatValue.new(0, 999, 150),
-	StatType.HP : StatValue.new(0, 150, 100),
-	StatType.MP_MAX : StatValue.new(0, 999, 100),
-	StatType.MP : StatValue.new(0, 100, 70),
-	StatType.CT : StatValue.new(0, 999, 25),
-	StatType.MOVE : StatValue.new(0, 100, 3),
-	StatType.JUMP : StatValue.new(0, 100, 3),
-	StatType.SPEED : StatValue.new(0, 100, 10),
-	StatType.PHYSICAL_ATTACK : StatValue.new(0, 100, 11),
-	StatType.MAGIC_ATTACK : StatValue.new(0, 100, 12),
-	StatType.BRAVE : StatValue.new(0, 100, 70),
-	StatType.FAITH : StatValue.new(0, 100, 65),
-	StatType.EXP : StatValue.new(0, 999, 99),
-	StatType.LEVEL : StatValue.new(0, 99, 20),
-}
-
-var stats_raw: Dictionary[StatType, float] = {
-	StatType.HP_MAX : 0.0, 
-	StatType.MP_MAX : 0.0, 
-	StatType.SPEED : 0.0, 
-	StatType.PHYSICAL_ATTACK : 0.0, 
-	StatType.MAGIC_ATTACK : 0.0, 
-}
-
-
-var unit_exp: int = 0:
-	get: return stats[StatType.EXP].current_value
-var level: int = 0:
-	get: return stats[StatType.LEVEL].current_value
-
-var brave: int = 70:
-	get: return stats[StatType.BRAVE].modified_value
-var faith: int = 70:
-	get: return stats[StatType.FAITH].modified_value
-
-var ct_current: int = 0:
-	get: return stats[StatType.CT].current_value
-var ct_max: int = 100:
-	get: return stats[StatType.CT].max_value
-
-var hp_max: int = 100:
-	get: return stats[StatType.HP_MAX].modified_value
-var hp: int = 70:
-	get: return stats[StatType.HP].current_value
-var mp_max: int = 100:
-	get: return stats[StatType.MP_MAX].modified_value
-var mp: int = 70:
-	get: return stats[StatType.MP].current_value
-
-var physical_attack: int = 5:
-	get: return stats[StatType.PHYSICAL_ATTACK].modified_value
-var magical_attack: int = 5:
-	get: return stats[StatType.MAGIC_ATTACK].modified_value
-var speed: int = 5:
-	get: return stats[StatType.SPEED].modified_value
-var move: int = 5:
-	get: return stats[StatType.MOVE].modified_value
-var jump: int = 3:
-	get: return stats[StatType.JUMP].modified_value
-
-var always_statuses: PackedStringArray = []
-var immune_statuses: PackedStringArray = []
-var start_statuses: PackedStringArray = []
-
-# TODO clean up unit status stuff
-var current_statuses: Array[StatusEffect] = [] # entry will be duplicate of status definition with modified values (duration_left, delayed action, etc)
-var current_status_ids: PackedStringArray = []:
-	get:
-		var status_unique_names: PackedStringArray = []
-		for status: StatusEffect in current_statuses:
-			if not status_unique_names.has(status.unique_name):
-				status_unique_names.append(status.unique_name)
-		return status_unique_names
-#var current_statuses2: Dictionary[StatusEffect, int] = {}
-
-var learned_abilities: Array = []
-var job_levels: Dictionary[JobData, int] = {}
-var job_jp: Dictionary[JobData, int] = {}
-
-var charging_abilities_ids: PackedInt32Array = []
-var charging_abilities_remaining_ct: PackedInt32Array = [] # TODO this should be tracked per ability?
-var sprite_id: int = 0
-var sprite_file_idx: int = 0
-var sprite_file_name: String = "sprite_file_name.spr"
-var portrait_palette_id: int = 0
-var unit_id: int = 0
-var special_job_skillset_id: int = 0
-
-@export var elemental_absorb: Array[Action.ElementTypes] = []
-@export var elemental_cancel: Array[Action.ElementTypes] = []
-@export var elemental_half: Array[Action.ElementTypes] = []
-@export var elemental_weakness: Array[Action.ElementTypes] = []
-@export var elemental_strengthen: Array[Action.ElementTypes] = []
-
 var can_move: bool = true
 
-#var map_position: Vector2i
-var tile_position: TerrainTile
-var prohibited_terrain: Array[int] = [] # TileTerrain.surface_type_id
-var terrain_costs: Dictionary[int, int] = {} # [TileTerrain.surface_type_id, cost]
-var ignore_height: bool = false
-
-var map_paths: Dictionary[TerrainTile, TerrainTile]
-var path_costs: Dictionary[TerrainTile, float]
-var paths_set: bool = false
 @export var tile_highlights: Node3D
-var facing: Facings = Facings.NORTH
 var is_back_facing: bool = false
-var facing_vector: Vector3 = Vector3.FORWARD:
-	get:
-		return FACING_VECTORS[facing]
 
 var is_in_air: bool = false
 var is_traveling_path: bool = false
@@ -267,17 +45,6 @@ var active_ability_name: String = ""
 var action_data: Action
 
 var active_action: ActionInstance
-#@export var action_instance: ActionInstance
-@export var move_action: Action
-# @export var attack_action: Action
-@export var wait_action: Action
-@export var actions: Array[Action] = []
-var actions_data: Dictionary[String, ActionInstance] = {}
-@export var move_points_start: int = 1
-@export var move_points_remaining: int = 1
-@export var action_points_start: int = 1
-@export var action_points_remaining: int = 1
-@export var is_ending_turn: bool = false
 
 @export var current_animation_id_fwd: int = 6 # set based on current action
 @export var current_idle_animation_id: int = 6 # set based on status (critical, knocked out, etc.)
@@ -289,7 +56,6 @@ var actions_data: Dictionary[String, ActionInstance] = {}
 @export var knocked_out_animation_id: int = 0x34
 @export var heal_animation_id: int = 0x36
 @export var mid_jump_animation: int = 0x3e
-
 var submerged_depth: int = 0
 
 
@@ -1313,30 +1079,6 @@ func hide_debug_menu() -> void:
 	debug_menu.visible = false
 
 
-# func set_job_id(new_job_id: int) -> void:
-# 	job_id = new_job_id
-# 	job_data = RomReader.scus_data.jobs_data[job_id]
-# 	set_sprite_by_job_id(new_job_id)
-	
-# 	skillsets.clear()
-# 	skillsets.append(RomReader.scus_data.skillsets_data[job_data.skillset_id])
-	
-# 	job_nickname = job_data.display_name
-	
-# 	if animation_manager.global_spr.flying_flag:
-# 		idle_walk_animation_id = 0x0c
-# 		walk_to_animation_id = 0x1e
-# 		current_idle_animation_id = idle_walk_animation_id
-# 		set_base_animation_ptr_id(idle_walk_animation_id)
-# 	else:
-# 		idle_walk_animation_id = 0x06
-# 		walk_to_animation_id = 0x18
-# 		current_idle_animation_id = idle_walk_animation_id
-# 		set_base_animation_ptr_id(idle_walk_animation_id)
-	
-# 	update_passive_effects()
-
-
 func set_job(new_job_name: String) -> void:
 	job_name = new_job_name
 	job_data = GameData.get_job(new_job_name)
@@ -1617,16 +1359,6 @@ func set_sprite_by_file_name(new_sprite_file_name: String) -> void:
 func set_sprite_by_id(new_sprite_id: int) -> void:
 	var new_sprite_file_idx: int = RomReader.spr_id_file_idxs[new_sprite_id]
 	set_sprite_by_file_idx(new_sprite_file_idx)
-
-
-# func set_sprite_by_job_id(new_job_id: int) -> void:
-# 	var job_id_data: JobData = RomReader.scus_data.jobs_data[job_id]
-# 	var new_sprite_id: int = job_id_data.sprite_id
-# 	if new_job_id >= 0x4a and new_job_id <= 0x5d and stat_basis == StatBasis.FEMALE:
-# 		new_sprite_id += 1
-# 	set_sprite_by_id(new_sprite_id)
-# 	if new_job_id >= 0x5e: # monster
-# 		set_sprite_palette(job_data.monster_palette_id)
 
 
 func set_sprite_by_job(new_job_name: String) -> void:
