@@ -200,6 +200,7 @@ func get_option_button_index_by_string(option_button: OptionButton, search_text:
 			return idx
 	return -1 # text not found
 
+
 ## returns either the original start_time_msec if not waiting for a new frame or the time after waiting for the new frame. Default msec_allowed_per_frame = 17 for 60 fps.
 func enforce_max_frame_time(start_time_msec: int, msec_allowed_per_frame: int = 17) -> int:
 	var delta_time_msec: int = Time.get_ticks_msec() - start_time_msec
@@ -208,3 +209,7 @@ func enforce_max_frame_time(start_time_msec: int, msec_allowed_per_frame: int = 
 		start_time_msec = Time.get_ticks_msec()
 	
 	return start_time_msec
+
+
+func wait_for_delay(delay_sec: float) -> void:
+	await get_tree().create_timer(delay_sec).timeout
