@@ -38,6 +38,7 @@ var weapon_is_direct: bool = false
 var weapon_is_arc: bool = false
 #@export var weapon_targeting_strategy: TargetingStrategy
 
+@export var action_names: PackedStringArray = []
 @export var weapon_attack_action_name: String = ""
 var weapon_attack_action: Action
 @export var is_dual_wieldable: bool = false
@@ -129,6 +130,7 @@ enum ItemType {
 }
 
 # In SCUS data tables
+# TODO split class into FftItemData and ItemData
 func _init(idx: int = -1) -> void:
 	if idx == -1:
 		return
@@ -424,8 +426,12 @@ func set_item_attributes(item_attribute: ScusData.ItemAttribute) -> void:
 	emit_changed()
 
 
-func get_attack_action() -> Action:
-	return GameData.get_action(weapon_attack_action_name)
+func get_actions() -> Array[Action]:
+	var action_list: Array[Action] = []
+	for action_name: String in action_names:
+		action_list.append(GameData.get_action(action_name))
+
+	return action_list
 
 
 func get_passive_effect() -> PassiveEffect:
