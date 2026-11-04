@@ -34,9 +34,9 @@ func _start() -> void:
 	if map_node:
 		var map_data: MapData = map_node.map_data
 		for tile: TerrainTile in map_data.terrain_tiles:
-			if tile.location == Vector2i(1, 1):
+			if tile.xz_location == Vector2i(1, 1):
 				origin_world_pos = tile.get_world_position()
-			elif tile.location == Vector2i(3, 1):
+			elif tile.xz_location == Vector2i(3, 1):
 				target_world_pos = tile.get_world_position()
 
 	# Load and play effect

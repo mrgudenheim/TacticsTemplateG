@@ -18,7 +18,7 @@ const SLOPE_TYPE_CODE: Dictionary[SlopeType, int] = {
 
 # https://ffhacktics.com/wiki/Maps/Mesh#Terrain
 @export var layer: int = 0
-@export var location: Vector2i = Vector2i.ZERO
+@export var xz_location: Vector2i = Vector2i.ZERO
 @export var surface_type_id: int = 0
 @export var height_bottom: int = 0 # For sloped tiles, the height of the bottom of the slope
 @export var depth: int = 0
@@ -44,7 +44,7 @@ func get_world_position(use_bottom_height: bool = false) -> Vector3:
 	var height_position: float = height_mid + depth
 	if use_bottom_height:
 		height_position = height_bottom + depth
-	var tile_position: Vector3 = Vector3(location.x, height_position, location.y)
+	var tile_position: Vector3 = Vector3(xz_location.x, height_position, xz_location.y)
 	var tile_world_position: Vector3 = tile_position * Vector3(1, FftMapData.HEIGHT_SCALE, 1)
 	tile_world_position += Vector3(0.5, 0, 0.5)
 	

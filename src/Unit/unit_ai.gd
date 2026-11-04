@@ -99,7 +99,7 @@ func choose_action(unit: UnitActor) -> void:
 		var best_move: TerrainTile
 		if move_action_instance.is_usable() and not move_action_instance.potential_targets.is_empty() and not non_move_actions.is_empty():
 			var original_tile: TerrainTile = unit.tile_position
-			var original_tile_location: Vector2i = original_tile.location
+			var original_tile_location: Vector2i = original_tile.xz_location
 			for potential_move: TerrainTile in move_action_instance.potential_targets: # TODO handle ai score for auto targeting
 				unit.tile_position = potential_move
 				

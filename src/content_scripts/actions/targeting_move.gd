@@ -171,7 +171,7 @@ func get_map_path_neighbors(user: UnitActor, current_tile: TerrainTile, map_tile
 	
 	# check adjacent tiles
 	for offset: Vector2i in ADJACENT_OFFSETS:
-		var potential_xy: Vector2i = current_tile.location + offset
+		var potential_xy: Vector2i = current_tile.xz_location + offset
 		if map_tiles.has(potential_xy):
 			for tile: TerrainTile in map_tiles[potential_xy]:
 				if tile.no_walk == 1:
@@ -202,11 +202,11 @@ func get_leaping_neighbors(user: UnitActor, current_tile: TerrainTile, map_tiles
 		return leap_neighbors
 	
 	for leap_distance: int in range(1, max_leap_distance + 1):
-		var potential_xy: Vector2i = current_tile.location + (offset_direction * (leap_distance + 1))
+		var potential_xy: Vector2i = current_tile.xz_location + (offset_direction * (leap_distance + 1))
 		if map_tiles.has(potential_xy):
 			var intermediate_tiles: Array[TerrainTile] = []
 			for intermediate_distance: int in range(1, leap_distance + 1):
-				var intermediate_xy: Vector2i = current_tile.location + (offset_direction * intermediate_distance)
+				var intermediate_xy: Vector2i = current_tile.xz_location + (offset_direction * intermediate_distance)
 				if map_tiles.has(intermediate_xy):
 					intermediate_tiles.append_array(map_tiles[intermediate_xy])
 			for tile: TerrainTile in map_tiles[potential_xy]:
@@ -243,7 +243,7 @@ func get_leaping_neighbors(user: UnitActor, current_tile: TerrainTile, map_tiles
 
 func get_move_cost(from_tile: TerrainTile, to_tile: TerrainTile, terrain_costs: Dictionary[int, int]) -> float:
 	var cost: float = 0
-	cost = from_tile.location.distance_to(to_tile.location) # handle leaping cost
+	cost = from_tile.xz_location.distance_to(to_tile.xz_location) # handle leaping cost
 	
 	if terrain_costs.has(to_tile.surface_type_id):
 		cost += terrain_costs[to_tile.surface_type_id] - 1 # subtract 1 because terrain_costs already includes cost for assumed distance of 1

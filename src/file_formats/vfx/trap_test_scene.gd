@@ -67,7 +67,7 @@ func _load_map() -> void:
 
 	# Find tile for placement
 	for tile: TerrainTile in map_data.terrain_tiles:
-		if tile.location == Vector2i(2, 1):
+		if tile.xz_location == Vector2i(2, 1):
 			target_world_pos = tile.get_world_position()
 
 	# Adjust Y for Y-mirror: vertex transform gives new_y = mesh_aabb.end.y - old_y

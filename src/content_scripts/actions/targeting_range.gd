@@ -13,14 +13,14 @@ func get_potential_targets(action_instance: ActionInstance) -> Array[TerrainTile
 	var potential_targets: Array[TerrainTile] = []
 	#action_instance.user.get_map_paths(action_instance.battle_manager.total_map_tiles, action_instance.battle_manager.units)
 	
-	var min_tile_pos: Vector2i = action_instance.user.tile_position.location - Vector2i(action_instance.action.max_targeting_range, action_instance.action.max_targeting_range)
-	var max_tile_pos: Vector2i = action_instance.user.tile_position.location + Vector2i(action_instance.action.max_targeting_range, action_instance.action.max_targeting_range)
+	var min_tile_pos: Vector2i = action_instance.user.terrain_tile_position.xz_location - Vector2i(action_instance.action.max_targeting_range, action_instance.action.max_targeting_range)
+	var max_tile_pos: Vector2i = action_instance.user.terrain_tile_position.xz_location + Vector2i(action_instance.action.max_targeting_range, action_instance.action.max_targeting_range)
 	
 	for map_x: int in range(min_tile_pos.x, max_tile_pos.x + 1):
 		for map_y: int in range(min_tile_pos.y, max_tile_pos.y + 1):
 			var map_pos: Vector2i = Vector2i(map_x, map_y)
 			if action_instance.battle_manager.total_map_tiles.has(map_pos):
-				var relative_pos: Vector2i = map_pos - action_instance.user.tile_position.location
+				var relative_pos: Vector2i = map_pos - action_instance.user.terrain_tile_position.xz_location
 				var distance_xy: int = abs(relative_pos.x) + abs(relative_pos.y)
 				
 				if action_instance.action.targeting_linear:
@@ -154,24 +154,24 @@ func get_aoe_targets(action_instance: ActionInstance, tile_target: TerrainTile) 
 	var aoe_targets: Array[TerrainTile] = []
 	#action_instance.user.get_map_paths(action_instance.battle_manager.total_map_tiles, action_instance.battle_manager.units)
 	
-	var target_relative_user: Vector2i = tile_target.location - action_instance.user.tile_position.location
+	var target_relative_user: Vector2i = tile_target.xz_location - action_instance.user.terrain_tile_position.xz_location
 	
 	if action_instance.action.aoe_targeting_linear:
 		if target_relative_user.x != 0 and target_relative_user.y != 0:
 			aoe_targets.append(tile_target)
 			return aoe_targets
 	
-	var min_tile_pos: Vector2i = tile_target.location - Vector2i(action_instance.action.area_of_effect_range, action_instance.action.area_of_effect_range)
-	var max_tile_pos: Vector2i = tile_target.location + Vector2i(action_instance.action.area_of_effect_range, action_instance.action.area_of_effect_range)
+	var min_tile_pos: Vector2i = tile_target.xz_location - Vector2i(action_instance.action.area_of_effect_range, action_instance.action.area_of_effect_range)
+	var max_tile_pos: Vector2i = tile_target.xz_location + Vector2i(action_instance.action.area_of_effect_range, action_instance.action.area_of_effect_range)
 	
 	for map_x: int in range(min_tile_pos.x, max_tile_pos.x + 1):
 		for map_y: int in range(min_tile_pos.y, max_tile_pos.y + 1):
 			var map_pos: Vector2i = Vector2i(map_x, map_y)
 			if action_instance.battle_manager.total_map_tiles.has(map_pos):
-				var relative_pos_target: Vector2i = map_pos - tile_target.location
+				var relative_pos_target: Vector2i = map_pos - tile_target.xz_location
 				#if action_instance.action.aoe_targeting_linear:
-				var relative_pos_user: Vector2i = map_pos - action_instance.user.tile_position.location
-				#var target_relative_user: Vector2i = tile_target.location - action_instance.user.tile_position.location
+				var relative_pos_user: Vector2i = map_pos - action_instance.user.terrain_tile_position.xz_location
+				#var target_relative_user: Vector2i = tile_target.location - action_instance.user.terrain_tile_position.location
 				
 				var distance_xy: int = abs(relative_pos_target.x) + abs(relative_pos_target.y)
 				

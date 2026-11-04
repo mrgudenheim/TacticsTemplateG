@@ -58,15 +58,15 @@ static func get_tiles_center(tile_array: Array[TerrainTile]) -> Vector2:
 	var min_tile_location: Vector2i = Vector2i.ZERO
 	var max_tile_location: Vector2i = Vector2i.ZERO
 	for tile: TerrainTile in tile_array:
-		if tile.location.x > max_tile_location.x:
-			max_tile_location.x = tile.location.x
-		if tile.location.y > max_tile_location.y:
-			max_tile_location.y = tile.location.y
+		if tile.xz_location.x > max_tile_location.x:
+			max_tile_location.x = tile.xz_location.x
+		if tile.xz_location.y > max_tile_location.y:
+			max_tile_location.y = tile.xz_location.y
 		
-		if tile.location.x < min_tile_location.x:
-			min_tile_location.x = tile.location.x
-		if tile.location.y < min_tile_location.y:
-			min_tile_location.y = tile.location.y
+		if tile.xz_location.x < min_tile_location.x:
+			min_tile_location.x = tile.xz_location.x
+		if tile.xz_location.y < min_tile_location.y:
+			min_tile_location.y = tile.xz_location.y
 	
 	var tiles_center: Vector2 = (max_tile_location -  min_tile_location) / 2.0
 	return tiles_center
@@ -146,40 +146,40 @@ func flag_polygons_to_hide() -> void:
 		
 		var tile_height_position: float = get_tile_height_position(tile)
 		
-		if tile_heights.has(tile.location):
-			tile_heights[tile.location].append(tile_height_position)
+		if tile_heights.has(tile.xz_location):
+			tile_heights[tile.xz_location].append(tile_height_position)
 		else:
-			tile_heights[tile.location] = [tile_height_position]
+			tile_heights[tile.xz_location] = [tile_height_position]
 		
 		# if first tile considered in the row
-		if not row_mins.has(tile.location.y):
-			row_mins[tile.location.y] = Vector2(tile.location.x, tile_height_position)
-			row_maxes[tile.location.y] = Vector2(tile.location.x, tile_height_position)
+		if not row_mins.has(tile.xz_location.y):
+			row_mins[tile.xz_location.y] = Vector2(tile.xz_location.x, tile_height_position)
+			row_maxes[tile.xz_location.y] = Vector2(tile.xz_location.x, tile_height_position)
 		else:
-			if tile.location.x < row_mins[tile.location.y].x:
-				row_mins[tile.location.y] = Vector2(tile.location.x, tile_height_position)
-			elif tile.location.x == row_mins[tile.location.y].x and tile_height_position > row_mins[tile.location.y].y:
-				row_mins[tile.location.y] = Vector2(tile.location.x, tile_height_position)
+			if tile.xz_location.x < row_mins[tile.xz_location.y].x:
+				row_mins[tile.xz_location.y] = Vector2(tile.xz_location.x, tile_height_position)
+			elif tile.xz_location.x == row_mins[tile.xz_location.y].x and tile_height_position > row_mins[tile.xz_location.y].y:
+				row_mins[tile.xz_location.y] = Vector2(tile.xz_location.x, tile_height_position)
 			
-			if tile.location.x > row_maxes[tile.location.y].x:
-				row_maxes[tile.location.y] = Vector2(tile.location.x, tile_height_position)
-			elif tile.location.x == row_maxes[tile.location.y].x and tile_height_position > row_maxes[tile.location.y].y:
-				row_maxes[tile.location.y] = Vector2(tile.location.x, tile_height_position)
+			if tile.xz_location.x > row_maxes[tile.xz_location.y].x:
+				row_maxes[tile.xz_location.y] = Vector2(tile.xz_location.x, tile_height_position)
+			elif tile.xz_location.x == row_maxes[tile.xz_location.y].x and tile_height_position > row_maxes[tile.xz_location.y].y:
+				row_maxes[tile.xz_location.y] = Vector2(tile.xz_location.x, tile_height_position)
 
 		# if first tile considered in the column
-		if not column_mins.has(tile.location.x):
-			column_mins[tile.location.x] = Vector2(tile.location.y, tile_height_position)
-			column_maxes[tile.location.x] = Vector2(tile.location.y, tile_height_position)
+		if not column_mins.has(tile.xz_location.x):
+			column_mins[tile.xz_location.x] = Vector2(tile.xz_location.y, tile_height_position)
+			column_maxes[tile.xz_location.x] = Vector2(tile.xz_location.y, tile_height_position)
 		else:
-			if tile.location.y < column_mins[tile.location.x].x:
-				column_mins[tile.location.x] = Vector2(tile.location.y, tile_height_position)
-			elif tile.location.y == column_mins[tile.location.x].x and tile_height_position > column_mins[tile.location.x].y:
-				column_mins[tile.location.x] = Vector2(tile.location.y, tile_height_position)
+			if tile.xz_location.y < column_mins[tile.xz_location.x].x:
+				column_mins[tile.xz_location.x] = Vector2(tile.xz_location.y, tile_height_position)
+			elif tile.xz_location.y == column_mins[tile.xz_location.x].x and tile_height_position > column_mins[tile.xz_location.x].y:
+				column_mins[tile.xz_location.x] = Vector2(tile.xz_location.y, tile_height_position)
 
-			if tile.location.y > column_maxes[tile.location.x].x:
-				column_maxes[tile.location.x] = Vector2(tile.location.y, tile_height_position)
-			elif tile.location.y == column_maxes[tile.location.x].x and tile_height_position > column_maxes[tile.location.x].y:
-				column_maxes[tile.location.x] = Vector2(tile.location.y, tile_height_position)
+			if tile.xz_location.y > column_maxes[tile.xz_location.x].x:
+				column_maxes[tile.xz_location.x] = Vector2(tile.xz_location.y, tile_height_position)
+			elif tile.xz_location.y == column_maxes[tile.xz_location.x].x and tile_height_position > column_maxes[tile.xz_location.x].y:
+				column_maxes[tile.xz_location.x] = Vector2(tile.xz_location.y, tile_height_position)
 
 	for location: Vector2i in tile_heights.keys():
 		tile_heights[location].sort()
@@ -382,7 +382,7 @@ func get_transformed_tiles(translation: Vector2 = Vector2.ZERO, scale: Vector2 =
 			continue
 
 		var transformed_tile: TerrainTile = tile.duplicate()
-		transformed_tile.location = Vector2i((tile_transform * Vector2(tile.location)).round())
+		transformed_tile.xz_location = Vector2i((tile_transform * Vector2(tile.xz_location)).round())
 		transformed_tile.rotation_degrees += rotation_degrees
 		
 		if transformed_tile.rotation_degrees == 90.0 or transformed_tile.rotation_degrees == 270.0:

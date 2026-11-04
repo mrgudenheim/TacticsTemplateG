@@ -899,7 +899,7 @@ func get_terrain(terrain_bytes: PackedByteArray) -> Array[TerrainTile]:
 				var tile: TerrainTile = TerrainTile.new()
 				# tile.bytes = tile_data
 				tile.layer = layer
-				tile.location = Vector2i(x, z)
+				tile.xz_location = Vector2i(x, z)
 				tile.surface_type_id = tile_data.decode_u8(0) & 0b0011_1111 # right 6 bits are the surface type
 				tile.height_bottom = tile_data.decode_u8(2) # For sloped tiles, the height of the bottom of the slope
 				tile.depth = tile_data.decode_u8(3) >> 5 # left 3 bits are bepth
@@ -926,7 +926,7 @@ func get_terrain(terrain_bytes: PackedByteArray) -> Array[TerrainTile]:
 					0x96, 0x66, 0x69, 0x99:
 						tile.slope_type = TerrainTile.SlopeType.HIGH_CORNERS
 					_:
-						push_warning("error determining slope type id: " + str(tile.location))
+						push_warning("error determining slope type id: " + str(tile.xz_location))
 				
 				if tile.slope_height == 0:
 					tile.slope_type = TerrainTile.SlopeType.FLAT

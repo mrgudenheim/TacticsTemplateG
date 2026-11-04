@@ -178,13 +178,13 @@ func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
 			tile.height_bottom += map_chunk.corner_position.y
 			tile.height_mid = tile.height_bottom + (tile.slope_height / 2.0)
 			
-			if not total_map_tiles.has(tile.location):
-				total_map_tiles[tile.location] = []
+			if not total_map_tiles.has(tile.xz_location):
+				total_map_tiles[tile.xz_location] = []
 			# sort tiles by ascending height
-			var tile_level: int = total_map_tiles[tile.location].bsearch_custom(tile, 
+			var tile_level: int = total_map_tiles[tile.xz_location].bsearch_custom(tile, 
 				func(tile_a: TerrainTile, tile_b: TerrainTile) -> bool: return tile_a.height_mid > tile_b.height_mid
 			)
-			total_map_tiles[tile.location].insert(tile_level, tile)
+			total_map_tiles[tile.xz_location].insert(tile_level, tile)
 
 
 func start_battle() -> void:
@@ -474,7 +474,7 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	new_unit.initialize_unit()
 	new_unit.tile_position = tile_position
 	#new_unit.char_body.global_position = Vector3(tile_position.location.x + 0.5, randi_range(15, 20), tile_position.location.y + 0.5)
-	new_unit.char_body.global_position = Vector3(tile_position.location.x + 0.5, tile_position.get_world_position().y + 0.25, tile_position.location.y + 0.5)
+	new_unit.char_body.global_position = Vector3(tile_position.xz_location.x + 0.5, tile_position.get_world_position().y + 0.25, tile_position.xz_location.y + 0.5)
 	var new_job_data: JobData = GameData.get_job(job_name)
 	var job_id: int = new_job_data.job_id
 	if job_id < 0x5e: # non-monster

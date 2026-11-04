@@ -86,15 +86,15 @@ func _load_map() -> void:
 	for tile: TerrainTile in _terrain_tiles:
 		if tile.no_cursor == 1:
 			continue
-		min_loc = Vector2i(mini(min_loc.x, tile.location.x), mini(min_loc.y, tile.location.y))
-		max_loc = Vector2i(maxi(max_loc.x, tile.location.x), maxi(max_loc.y, tile.location.y))
+		min_loc = Vector2i(mini(min_loc.x, tile.xz_location.x), mini(min_loc.y, tile.xz_location.y))
+		max_loc = Vector2i(maxi(max_loc.x, tile.xz_location.x), maxi(max_loc.y, tile.xz_location.y))
 	var center_loc := Vector2i((min_loc.x + max_loc.x) / 2, (min_loc.y + max_loc.y) / 2)
 	var best_target_tile: TerrainTile = null
 	var best_dist: float = INF
 	for tile: TerrainTile in _terrain_tiles:
 		if tile.no_cursor == 1:
 			continue
-		var diff: Vector2i = tile.location - center_loc
+		var diff: Vector2i = tile.xz_location - center_loc
 		var d: float = float(diff.x * diff.x + diff.y * diff.y)
 		if d < best_dist:
 			best_dist = d

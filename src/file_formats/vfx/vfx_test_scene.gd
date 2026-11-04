@@ -121,9 +121,9 @@ func _load_map() -> void:
 
 	# Find tile positions
 	for tile: TerrainTile in map_data.terrain_tiles:
-		if tile.location == Vector2i(1, 1):
+		if tile.xz_location == Vector2i(1, 1):
 			origin_world_pos = tile.get_world_position()
-		elif tile.location == Vector2i(3, 1):
+		elif tile.xz_location == Vector2i(3, 1):
 			target_world_pos = tile.get_world_position()
 
 	# Position markers slightly above tiles

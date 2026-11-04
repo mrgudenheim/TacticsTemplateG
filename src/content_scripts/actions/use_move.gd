@@ -12,7 +12,7 @@ func use(action_instance: ActionInstance) -> void:
 
 
 func walk_to_tile(user: UnitActor, to_tile: TerrainTile) -> void:
-	var distance_to_move: float = user.tile_position.location.distance_to(to_tile.location)
+	var distance_to_move: float = user.tile_position.location.distance_to(to_tile.xz_location)
 	var immediate_path: Vector3 = to_tile.get_world_position() - user.tile_position.get_world_position()
 	if distance_to_move > 1.1: # TODO is leaping the only case where moving more than 1 distance at a time?
 		user.char_body.velocity.y = 1.1 * distance_to_move # hop over intermediate tiles

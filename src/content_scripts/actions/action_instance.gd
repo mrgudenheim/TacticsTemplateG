@@ -399,8 +399,8 @@ func face_target() -> void:
 		push_warning(action.display_name + ": no submitted targets")
 		return
 	
-	if submitted_targets[0] != user.tile_position:
-		var direction_to_target: Vector2i = submitted_targets[0].location - user.tile_position.location
+	if submitted_targets[0] != user.terrain_tile_position:
+		var direction_to_target: Vector2i = submitted_targets[0].xz_location - user.terrain_tile_position.xz_location
 		user.update_unit_facing(Vector3(direction_to_target.x, 0, direction_to_target.y))
 
 
@@ -473,8 +473,8 @@ func get_total_hit_chance(target: UnitActor, evade_direction: EvadeData.Directio
 	return roundi(total_hit_chance)
 
 
-func get_evade_direction(origin_tile: TerrainTile, target: UnitActor) -> EvadeData.Directions:
-	var relative_position: Vector2i = origin_tile.location - target.tile_position.location
+func get_evade_direction(origin_tile: TerrainTile, target: UnitData) -> EvadeData.Directions:
+	var relative_position: Vector2i = origin_tile.xz_location - target.terrain_tile_position.xz_location
 	var relative_facing_position: Vector2i = relative_position
 	if target.facing == UnitActor.Facings.NORTH:
 		pass # relative position is already correct for North facing
@@ -629,8 +629,8 @@ func apply_standard() -> void:
 	if not submitted_targets.is_empty():
 		if action.animation_executing_ids_alternate.size() != 0 and action.use_weapon_animation:
 			mod_animation_executing_id = action.animation_executing_id
-			var angle_to_target: float = ((submitted_targets[0].height_mid - user.tile_position.height_mid) 
-					/ (submitted_targets[0].location - user.tile_position.location).length())
+			var angle_to_target: float = ((submitted_targets[0].height_mid - user.terrain_tile_position.height_mid) 
+					/ (submitted_targets[0].xz_location - user.terrain_tile_position.xz_location).length())
 			if angle_to_target > 0.51:
 				mod_animation_executing_id = action.animation_executing_ids_alternate[0]
 			elif angle_to_target < -0.51:
