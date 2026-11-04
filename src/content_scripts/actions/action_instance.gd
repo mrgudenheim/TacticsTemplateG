@@ -5,7 +5,7 @@ signal action_completed(battle_manager: BattleManager)
 signal tile_hovered(tile: TerrainTile, action_instance: ActionInstance)
 
 var action: Action
-var user: UnitActor
+var user: UnitData
 var battle_manager: BattleManager
 
 var potential_targets: Array[TerrainTile]
@@ -22,7 +22,7 @@ var potential_targets_are_set: bool = false
 var action_preview_scene: PackedScene = preload("uid://c8f4elqq81b37")
 var action_previews: Array[ActionPreview] = []
 
-func _init(new_action: Action, new_user: UnitActor, new_battle_manager: BattleManager) -> void:
+func _init(new_action: Action, new_user: UnitData, new_battle_manager: BattleManager) -> void:
 	action = new_action
 	user = new_user
 	battle_manager = new_battle_manager
@@ -166,12 +166,12 @@ func stop_targeting() -> void:
 	action.targeting_strategy.stop_targeting(self)
 
 
-func get_target_units(target_tiles: Array[TerrainTile]) -> Array[UnitActor]:
-	var target_units: Array[UnitActor] = []
+func get_target_units(target_tiles: Array[TerrainTile]) -> Array[UnitData]:
+	var target_units: Array[UnitData] = []
 	for target_tile: TerrainTile in target_tiles:
-		var units_on_tile: Array[UnitActor] = battle_manager.units.filter(func(unit: UnitActor) -> bool: return unit.tile_position == target_tile)
+		var units_on_tile: Array[UnitData] = battle_manager.units.filter(func(unit: UnitData) -> bool: return unit.terrain_tile_position == target_tile)
 		
-		for unit: UnitActor in units_on_tile:
+		for unit: UnitData in units_on_tile:
 			if unit.get_nullify_statuses().is_empty(): # TODO check all passives not just statuses
 				target_units.append(unit)
 				continue
@@ -212,15 +212,15 @@ func get_ai_score() -> int:
 
 
 	var ai_score: int = 0
-	var target_units: Array[UnitActor] = get_target_units(preview_targets)
+	var target_units: Array[UnitData] = get_target_units(preview_targets)
 	
-	for target: UnitActor in target_units:
+	for target: UnitData in target_units:
 		var target_score: float = 0.0
 		for action_effect: ActionEffect in action.target_effects:
 			var effect_value: int = action_effect.get_ai_value(user, target, action.element)
 			target_score += effect_value
 		
-		var evade_direction: EvadeData.Directions = get_evade_direction(user.tile_position, target)
+		var evade_direction: EvadeData.Directions = get_evade_direction(user.terrain_tile_position, target)
 		var hit_chance_value: int = get_total_hit_chance(target, evade_direction)
 		hit_chance_value = clamp(hit_chance_value, 0, 100)
 		target_score = target_score * (hit_chance_value / 100.0)
@@ -245,7 +245,7 @@ func get_ai_score() -> int:
 	return ai_score
 
 
-func show_result_preview(target: UnitActor) -> ActionPreview:
+func show_result_preview(target: UnitData) -> ActionPreview:
 	var hit_chance_text: String = get_hit_chance_text(target)
 	var effects_text: String = get_effects_text(target)
 	var statuses_text: String = get_statuses_text(target)
@@ -260,7 +260,7 @@ func show_result_preview(target: UnitActor) -> ActionPreview:
 	
 	var preview: ActionPreview = action_preview_scene.instantiate()
 	preview.label.text = total_preview_text
-	preview.unit = target
+	preview.unit = target.unit_actor
 	target.char_body.add_child(preview)
 	
 	action_previews.append(preview)
@@ -268,16 +268,16 @@ func show_result_preview(target: UnitActor) -> ActionPreview:
 	return preview
 
 
-func get_hit_chance_text(target: UnitActor) -> String:
+func get_hit_chance_text(target: UnitData) -> String:
 	# hit chance preview
-	var evade_direction: EvadeData.Directions = get_evade_direction(user.tile_position, target)
+	var evade_direction: EvadeData.Directions = get_evade_direction(user.terrain_tile_position, target)
 	var hit_chance_value: int = get_total_hit_chance(target, evade_direction)
 	var hit_chance_text: String = str(hit_chance_value) + "% Hit"
 	
 	return hit_chance_text
 
 
-func get_effects_text(target: UnitActor) -> String:
+func get_effects_text(target: UnitData) -> String:
 	# effect preview
 	var all_effects_text: PackedStringArray = []
 	for action_effect: ActionEffect in action.target_effects:
@@ -289,7 +289,7 @@ func get_effects_text(target: UnitActor) -> String:
 	return total_effect_text
 
 
-func get_statuses_text(target: UnitActor) -> String:
+func get_statuses_text(target: UnitData) -> String:
 	# status preview
 	if action.target_status_list.is_empty():
 		return ""
@@ -314,7 +314,7 @@ func get_statuses_text(target: UnitActor) -> String:
 	return total_status_text
 
 
-func get_secondary_actions_text(_target: UnitActor) -> String:
+func get_secondary_actions_text(_target: UnitData) -> String:
 	# TODO show effects and statuses from secondary actions?
 	if action.secondary_actions2.is_empty():
 		return ""
@@ -404,7 +404,7 @@ func face_target() -> void:
 		user.update_unit_facing(Vector3(direction_to_target.x, 0, direction_to_target.y))
 
 
-func get_total_hit_chance(target: UnitActor, evade_direction: EvadeData.Directions) -> int:
+func get_total_hit_chance(target: UnitData, evade_direction: EvadeData.Directions) -> int:
 	var user_passive_effects: Array[PassiveEffect] = user.get_all_passive_effects(action.ignore_passives)
 	var target_passive_effects: Array[PassiveEffect] = target.get_all_passive_effects(action.ignore_passives)
 	
@@ -425,7 +425,7 @@ func get_total_hit_chance(target: UnitActor, evade_direction: EvadeData.Directio
 			return 0
 
 	if not action.required_target_stat_basis.is_empty():
-		var required_basis: Array[UnitActor.StatBasis] = action.required_target_stat_basis.duplicate()
+		var required_basis: Array[UnitData.StatBasis] = action.required_target_stat_basis.duplicate()
 		for passive_effect: PassiveEffect in user_passive_effects:
 			required_basis.append_array(passive_effect.add_applicable_target_stat_bases)
 
@@ -476,13 +476,13 @@ func get_total_hit_chance(target: UnitActor, evade_direction: EvadeData.Directio
 func get_evade_direction(origin_tile: TerrainTile, target: UnitData) -> EvadeData.Directions:
 	var relative_position: Vector2i = origin_tile.xz_location - target.terrain_tile_position.xz_location
 	var relative_facing_position: Vector2i = relative_position
-	if target.facing == UnitActor.Facings.NORTH:
+	if target.facing == GameData.Directions.NORTH:
 		pass # relative position is already correct for North facing
-	elif target.facing == UnitActor.Facings.EAST:
+	elif target.facing == GameData.Directions.EAST:
 		relative_facing_position = Vector2i(-relative_position.y, relative_position.x)
-	elif target.facing == UnitActor.Facings.SOUTH:
+	elif target.facing == GameData.Directions.SOUTH:
 		relative_facing_position = -relative_position
-	elif target.facing == UnitActor.Facings.WEST:
+	elif target.facing == GameData.Directions.WEST:
 		relative_facing_position = Vector2i(relative_position.y, -relative_position.x)
 	
 	# check target facing, check x>y
@@ -497,7 +497,7 @@ func get_evade_direction(origin_tile: TerrainTile, target: UnitData) -> EvadeDat
 	return evade_direction
 
 
-func get_evade_values(target: UnitActor, evade_direction: EvadeData.Directions) -> Dictionary[EvadeData.EvadeSource, int]:
+func get_evade_values(target: UnitData, evade_direction: EvadeData.Directions) -> Dictionary[EvadeData.EvadeSource, int]:
 	var evade_values: Dictionary[EvadeData.EvadeSource, int] = {}
 	for evade_source: int in EvadeData.EvadeSource.size():
 		var evade_value: int = target.get_evade(evade_source, action.applicable_evasion_type, evade_direction)
@@ -545,7 +545,7 @@ func show_vfx(position: Vector3) -> Node3D:
 	vfx_instance.position = position
 	parent_node.add_child(vfx_instance)
 
-	var origin_pos: Vector3 = user.tile_position.get_world_position()
+	var origin_pos: Vector3 = user.terrain_tile_position.get_world_position()
 	vfx_instance.initialize(action.vfx_data, position, origin_pos)
 	return vfx_instance
 
@@ -575,7 +575,7 @@ func show_projectile(target_unit: UnitActor, new_projectile_type: ProjectileEffe
 	battle_manager.projectile_instance.play(origin, target, new_projectile_type)
 
 
-func apply_status(unit: UnitActor, status_list: Array[String], status_list_type: Action.StatusListType, status_list_chance: int, will_remove_status: bool) -> void:
+func apply_status(unit: UnitData, status_list: Array[String], status_list_type: Action.StatusListType, status_list_chance: int, will_remove_status: bool) -> void:
 	if status_list_type == Action.StatusListType.ALL:
 		var status_success: bool = randi_range(0, 99) < status_list_chance
 		if status_success:
@@ -616,10 +616,10 @@ func apply_status(unit: UnitActor, status_list: Array[String], status_list_type:
 
 
 func apply_standard() -> void:
-	var target_units: Array[UnitActor] = get_target_units(submitted_targets)
+	var target_units: Array[UnitData] = get_target_units(submitted_targets)
 	
 	if allow_triggering_actions:
-		for target: UnitActor in target_units:
+		for target: UnitData in target_units:
 			for connection: Dictionary in target.targeted_pre_action.get_connections():
 				await connection["callable"].call(target, self)
 	
@@ -636,7 +636,7 @@ func apply_standard() -> void:
 			elif angle_to_target < -0.51:
 				mod_animation_executing_id = action.animation_executing_ids_alternate[1]
 	
-	show_shared_vfx(action.user_shared_vfx_handler_id, user)
+	show_shared_vfx(action.user_shared_vfx_handler_id, user.unit_actor)
 	user.get_tree().create_timer(2.0).timeout.connect(func() -> void: if is_instance_valid(battle_manager): battle_manager.trap_instance.stop(), CONNECT_ONE_SHOT)
 	await user.animate_start_action(action.animation_start_id, action.animation_charging_id)
 	
@@ -644,20 +644,19 @@ func apply_standard() -> void:
 	
 	await user.get_tree().create_timer(0.2).timeout # TODO delay should be based on effect/vfx data? 
 	
-	# TODO show vfx, including rock, arrow, bolt...
-	
+	# show vfx, including rock, arrow, bolt...
 	var vfx_locations: Array[Node3D] = []
 	# apply effects to targets
-	for target_unit: UnitActor in target_units:
+	for target_unit: UnitData in target_units:
 		if action.vfx_data != null:
 			#vfx_data.vfx_completed.connect(func(): vfx_completed = true, CONNECT_ONE_SHOT)
-			vfx_locations.append(show_vfx(target_unit.tile_position.get_world_position()))
-		show_projectile(target_unit, action.projectile_type)
-		var evade_direction: EvadeData.Directions = get_evade_direction(user.tile_position, target_unit)
+			vfx_locations.append(show_vfx(target_unit.terrain_tile_position.get_world_position()))
+		show_projectile(target_unit.unit_actor, action.projectile_type)
+		var evade_direction: EvadeData.Directions = get_evade_direction(user.terrain_tile_position, target_unit)
 		var total_hit_chance: int = get_total_hit_chance(target_unit, evade_direction)
 		var hit_success: bool = randi_range(0, 99) < total_hit_chance
 		if hit_success:
-			show_shared_vfx(action.target_shared_vfx_handler_id, target_unit)
+			show_shared_vfx(action.target_shared_vfx_handler_id, target_unit.unit_actor)
 
 			for effect: ActionEffect in action.target_effects:
 				var effect_value: int = roundi(effect.base_power_formula.get_result(user, target_unit, action.element))
@@ -671,9 +670,9 @@ func apply_standard() -> void:
 				
 				effect.apply(user, target_unit, effect_value)
 				
-				if action.set_target_animation_on_hit and [UnitActor.StatType.HP, UnitActor.StatType.MP].has(effect.effect_stat_type) and effect_value < 0:
+				if action.set_target_animation_on_hit and [UnitData.StatType.HP, UnitData.StatType.MP].has(effect.effect_stat_type) and effect_value < 0:
 					target_unit.animate_take_hit()
-				elif action.set_target_animation_on_hit and [UnitActor.StatType.HP, UnitActor.StatType.MP].has(effect.effect_stat_type) and effect_value > 0:
+				elif action.set_target_animation_on_hit and [UnitData.StatType.HP, UnitData.StatType.MP].has(effect.effect_stat_type) and effect_value > 0:
 					target_unit.animate_recieve_heal()
 			
 			# apply status
@@ -694,7 +693,7 @@ func apply_standard() -> void:
 					else:
 						rng -= secondary_action.chance
 		else:
-			animate_evade(target_unit, evade_direction, user.tile_position.location)
+			animate_evade(target_unit.unit_actor, evade_direction, user.terrain_tile_position.location)
 			
 			target_unit.show_popup_text("Missed!") # TODO or "Guarded"
 			#push_warning(display_name + " missed")
@@ -719,20 +718,20 @@ func apply_standard() -> void:
 			await user.get_tree().process_frame
 	else:
 		await user.get_tree().create_timer(0.5).timeout # TODO show based on vfx timing data? (attacks use vfx 0xFFFF?)
-	for target_unit: UnitActor in target_units:
+	for target_unit: UnitData in target_units:
 		if is_instance_valid(target_unit):
-			target_unit.return_to_idle_from_hit()
+			target_unit.unit_actor.return_to_idle_from_hit()
 	vfx_locations.clear()
 
 	if not is_instance_valid(user):
 		return
 
 	# pay costs
-	user.stats[UnitActor.StatType.MP].add_value(-action.mp_cost)
+	user.stats[UnitData.StatType.MP].add_value(-action.mp_cost)
 
 	# wait for triggered actions
 	if allow_triggering_actions:
-		for target: UnitActor in target_units:
+		for target: UnitData in target_units:
 			if is_instance_valid(target):
 				for connection: Dictionary in target.targeted_post_action.get_connections():
 					await connection["callable"].call(target, self)

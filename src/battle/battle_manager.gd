@@ -32,7 +32,7 @@ var current_cursor_map_position: Vector3
 @export var action_menu: Control
 @export var action_button_list: BoxContainer
 @export var units_container: Node3D
-@export var units: Array[UnitActor] = []
+@export var units: Array[UnitData] = []
 @export var teams: Array[Team] = []
 @export var controller: UnitControllerRT
 @export var battle_is_running: bool = false
@@ -40,7 +40,7 @@ var current_cursor_map_position: Vector3
 @export var battle_end_panel: Control
 @export var post_battle_messages: Control
 @export var start_new_battle_button: Button
-@export var active_unit: UnitActor
+@export var active_unit: UnitData
 @export var game_state_container: Container
 @export var game_state_label: Label
 @export var scenario_editor: ScenarioEditor
@@ -110,9 +110,9 @@ func toggle_debug_ui() -> void:
 		game_state_container.visible = false
 		battle_view.reparent(scenario_editor.battle_subviewport)
 		
-		for unit: UnitActor in units:
-			if not unit.unit_input_event.is_connected(scenario_editor.update_unit_dragging):
-				unit.unit_input_event.connect(scenario_editor.update_unit_dragging)
+		for unit: UnitData in units:
+			if not unit.unit_actor.unit_input_event.is_connected(scenario_editor.update_unit_dragging):
+				unit.unit_actor.unit_input_event.connect(scenario_editor.update_unit_dragging)
 		
 		camera_controller.follow_node = null
 		controller.unit = null
@@ -121,14 +121,14 @@ func toggle_debug_ui() -> void:
 		if scenario_editor.tile_highlight != null:
 			scenario_editor.tile_highlight.queue_free()
 		
-		for unit: UnitActor in units:
-			unit.unit_input_event.disconnect(scenario_editor.update_unit_dragging)
+		for unit: UnitData in units:
+			unit.unit_actor.unit_input_event.disconnect(scenario_editor.update_unit_dragging)
 
 		battle_view.reparent(self)
 
 		if active_unit != null:
 			camera_controller.follow_node = active_unit.char_body
-			controller.unit = active_unit
+			controller.unit = active_unit.unit_actor
 		else:
 			camera_controller.follow_node = null
 
@@ -192,8 +192,8 @@ func start_battle() -> void:
 	if scenario_editor.tile_highlight != null:
 		scenario_editor.tile_highlight.queue_free()
 	
-	for unit: UnitActor in units:
-		unit.unit_input_event.disconnect(scenario_editor.update_unit_dragging)
+	for unit: UnitData in units:
+		unit.unit_actor.unit_input_event.disconnect(scenario_editor.update_unit_dragging)
 	
 	battle_view.reparent(self)
 	# get list of units again; reparenting temporarily removes the unit from the tree and Units auto remove themselves from the Array when they leave the tree
@@ -201,8 +201,8 @@ func start_battle() -> void:
 	set_unit_statbars_visible(show_statbar_check.button_pressed)
 	game_state_container.visible = true
 	
-	camera_controller.follow_node = units[0].char_body
-	controller.unit = units[0]
+	camera_controller.follow_node = units[0].unit_actor.char_body
+	controller.unit = units[0].unit_actor
 	#controller.rotate_camera(1) # HACK workaround for bug where controls are off until camera is rotated
 	
 	if not battle_is_running:
@@ -478,14 +478,14 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	var new_job_data: JobData = GameData.get_job(job_name)
 	var job_id: int = new_job_data.job_id
 	if job_id < 0x5e: # non-monster
-		new_unit.stat_basis = [UnitActor.StatBasis.MALE, UnitActor.StatBasis.FEMALE].pick_random()
+		new_unit.stat_basis = [UnitData.StatBasis.MALE, UnitData.StatBasis.FEMALE].pick_random()
 	else:
-		new_unit.stat_basis = UnitActor.StatBasis.MONSTER
+		new_unit.stat_basis = UnitData.StatBasis.MONSTER
 	new_unit.set_job(job_name)
 	# if new_job_data.default_palette_idx == -1:
 	# 	new_unit.set_sprite_palette(clampi(teams.find(team), 0, 8))
 	new_unit.update_unit_facing([Vector3.FORWARD, Vector3.BACK, Vector3.LEFT, Vector3.RIGHT].pick_random())
-	new_unit.stats[UnitActor.StatType.LEVEL].set_value(level)
+	new_unit.stats[UnitData.StatType.LEVEL].set_value(level)
 	UnitActor.generate_leveled_raw_stats(new_unit.stat_basis, level, new_unit.job_data, new_unit.stats_raw)
 	
 	var use_higher_stat_values: bool = false
@@ -555,21 +555,21 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> UnitActor:
 	new_unit.set_job(unit_data.job_unique_name)
 	new_unit.set_sprite_by_file_name(unit_data.spritesheeet_file_name)
 	new_unit.set_sprite_palette(unit_data.palette_id)
-	new_unit.update_unit_facing(UnitActor.FACING_VECTORS[unit_data.facing_direction])
+	new_unit.update_unit_facing(UnitData.FACING_VECTORS[unit_data.facing_direction])
 	# new_unit.gender = UnitActor.Gender[unit_data.gender]
 	new_unit.gender = unit_data.gender
 	new_unit.level = unit_data.level
 	new_unit.stats_raw = unit_data.stats_raw
 	new_unit.stats = unit_data.stats
-	new_unit.stats[UnitActor.StatType.HP_MAX].value_changed.connect(new_unit.stats[UnitActor.StatType.HP].update_max_from_clamped_value)
-	new_unit.stats[UnitActor.StatType.MP_MAX].value_changed.connect(new_unit.stats[UnitActor.StatType.MP].update_max_from_clamped_value)
-	new_unit.stats[UnitActor.StatType.HP].value_changed.connect(new_unit.hp_changed)
+	new_unit.stats[UnitData.StatType.HP_MAX].value_changed.connect(new_unit.stats[UnitData.StatType.HP].update_max_from_clamped_value)
+	new_unit.stats[UnitData.StatType.MP_MAX].value_changed.connect(new_unit.stats[UnitData.StatType.MP].update_max_from_clamped_value)
+	new_unit.stats[UnitData.StatType.HP].value_changed.connect(new_unit.hp_changed)
 
 	var stat_bars: Array[StatBar] = []
 	stat_bars.assign(new_unit.stat_bars_container.get_children())
-	stat_bars[0].set_stat(str(UnitActor.StatType.keys()[UnitActor.StatType.HP]), new_unit.stats[UnitActor.StatType.HP])
-	stat_bars[1].set_stat(str(UnitActor.StatType.keys()[UnitActor.StatType.MP]), new_unit.stats[UnitActor.StatType.MP])
-	stat_bars[2].set_stat(str(UnitActor.StatType.keys()[UnitActor.StatType.CT]), new_unit.stats[UnitActor.StatType.CT])
+	stat_bars[0].set_stat(str(UnitData.StatType.keys()[UnitData.StatType.HP]), new_unit.stats[UnitData.StatType.HP])
+	stat_bars[1].set_stat(str(UnitData.StatType.keys()[UnitData.StatType.MP]), new_unit.stats[UnitData.StatType.MP])
+	stat_bars[2].set_stat(str(UnitData.StatType.keys()[UnitData.StatType.CT]), new_unit.stats[UnitData.StatType.CT])
 	
 	camera_controller.rotated.connect(new_unit.char_body.set_rotation_degrees) # have sprite update as camera rotates
 	new_unit.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
@@ -650,7 +650,7 @@ func process_clock_tick() -> void:
 	game_state_label.text = "processing new clock tick"
 
 	# increment status ticks
-	for unit: UnitActor in units:
+	for unit: UnitData in units:
 		var statuses_to_remove: Array[StatusEffect] = []
 		for status: StatusEffect in unit.current_statuses:
 			safe_to_load_map = false
@@ -690,12 +690,12 @@ func process_clock_tick() -> void:
 		for status: StatusEffect in statuses_to_remove:
 			unit.remove_status(status)
 
-	for unit: UnitActor in units: # increment each units ct by speed
+	for unit: UnitData in units: # increment each units ct by speed
 		if not unit.is_ct_frozen: # check status that prevent ct gain (stop, sleep, etc.)
 			var ct_gain: int = unit.speed
 			for passive_effect: PassiveEffect in unit.get_all_passive_effects():
 				ct_gain = passive_effect.ct_gain_modifier.apply(ct_gain)
-			unit.stats[UnitActor.StatType.CT].add_value(ct_gain)
+			unit.stats[UnitData.StatType.CT].add_value(ct_gain)
 
 	# execute unit turns in PriorityQueue order until all units have CT < 100
 	while true:
@@ -703,7 +703,7 @@ func process_clock_tick() -> void:
 		if ready_queue.is_empty():
 			break
 		
-		var unit: UnitActor = ready_queue.pop()
+		var unit: UnitData = ready_queue.pop()
 		
 		safe_to_load_map = false
 		await start_units_turn(unit) # process statuses on turn start and update actions
@@ -711,10 +711,10 @@ func process_clock_tick() -> void:
 		if not battle_is_running:
 			return
 		
-		if not unit.is_defeated:
-			if not unit.is_ai_controlled:
+		if not unit.is_defeated():
+			if not unit.controller == UnitData.Controller.AI:
 				safe_to_load_map = true
-			
+
 			# wait for player controlled turn
 			while not unit.is_ending_turn:
 				await get_tree().process_frame
@@ -741,13 +741,13 @@ func process_clock_tick() -> void:
 func get_ready_turn_queue() -> PriorityQueue:
 	var queue: PriorityQueue = PriorityQueue.new()
 	for idx: int in units.size():
-		var unit: UnitActor = units[idx]
+		var unit: UnitData = units[idx]
 		if not is_instance_valid(unit):
 			continue
 		
-		if unit.ct_current >= 100 and not unit.is_ct_frozen:
+		if unit.stats[UnitData.StatType.CT].current_value >= 100 and not unit.is_ct_frozen():
 			# negative CT pops highest CT first; index breaks ties
-			var priority: float = -float(unit.ct_current) + (float(idx) * 0.0001)
+			var priority: float = -float(unit.stats[UnitData.StatType.CT].current_value) + (float(idx) * 0.0001)
 			queue.push(unit, priority)
 	
 	return queue
@@ -764,14 +764,14 @@ func check_end_conditions() -> bool:
 	return false
 
 
-func start_units_turn(unit: UnitActor) -> void:
-	controller.unit = unit
+func start_units_turn(unit: UnitData) -> void:
+	controller.unit = unit.unit_actor
 	active_unit = unit
 	
 	if not unit.is_defeated:
-		camera_controller.follow_node = unit.char_body
+		camera_controller.follow_node = unit.unit_actor.char_body
 	
-	await unit.start_turn(self)
+	await unit.start_turn()
 
 
 # TODO handle event timeline
@@ -811,7 +811,7 @@ func get_random_stand_terrain_tile() -> TerrainTile:
 	var potential_tiles: Array[TerrainTile] = get_stand_tiles()
 	var random_valid_tile: TerrainTile = potential_tiles.pick_random()
 	
-	while units.any(func(unit: UnitActor) -> bool: return unit.tile_position == random_valid_tile):
+	while units.any(func(unit: UnitData) -> bool: return unit.terrain_tile_position == random_valid_tile):
 		potential_tiles.erase(random_valid_tile)
 		random_valid_tile = potential_tiles.pick_random()
 	
@@ -830,8 +830,8 @@ func get_stand_tiles() -> Array[TerrainTile]:
 
 
 func set_unit_statbars_visible(statbar_is_visible: bool) -> void:
-	for unit: UnitActor in units:
-		unit.set_stat_bar_visiblity(statbar_is_visible)
+	for unit: UnitData in units:
+		unit.unit_actor.set_stat_bar_visiblity(statbar_is_visible)
 
 
 func clear_maps() -> void:
@@ -842,16 +842,16 @@ func clear_maps() -> void:
 
 
 func clear_units() -> void:
-	for unit: UnitActor in units:
-		unit.queue_free()
+	for unit: UnitData in units:
+		unit.unit_actor.queue_free()
 	
 	units.clear()
 	#for child: Node in units_container.get_children():
 		#child.queue_free()
 
 
-func increment_counter(unit: UnitActor) -> void:
-	var knocked_out_icon: Image = unit.animation_manager.global_shp.get_assembled_frame(0x17, unit.animation_manager.global_spr.spritesheet, 0, 0, 0, 0)
+func increment_counter(unit: UnitData) -> void:
+	var knocked_out_icon: Image = unit.unit_actor.animation_manager.global_shp.get_assembled_frame(0x17, unit.unit_actor.animation_manager.global_spr.spritesheet, 0, 0, 0, 0)
 	knocked_out_icon = knocked_out_icon.get_region(Rect2i(40, 50, 40, 40))
 	
 	var icon_rect: TextureRect = TextureRect.new()

@@ -39,16 +39,16 @@ func get_potential_targets(action_instance: ActionInstance) -> Array[TerrainTile
 					if action_instance.action.targeting_top_down and tile.height_mid < min_height:
 						continue
 					
-					var distance_vert: float = tile.height_mid - action_instance.user.tile_position.height_mid # TODO should vert tolerance count to top surface of water?
+					var distance_vert: float = tile.height_mid - action_instance.user.terrain_tile_position.height_mid # TODO should vert tolerance count to top surface of water?
 					if action_instance.action.targeting_los:
-						var collider: Object = Raycaster.raycast(action_instance.user.tile_position.get_world_position() + Vector3.UP, tile.get_world_position() + Vector3.UP) # TODO adjust for different height sprites: chicken, frog, Altima
+						var collider: Object = Raycaster.raycast(action_instance.user.terrain_tile_position.get_world_position() + Vector3.UP, tile.get_world_position() + Vector3.UP) # TODO adjust for different height sprites: chicken, frog, Altima
 						if is_instance_valid(collider):
 							if collider is CharacterBody3D:
-								var intersected_unit: UnitActor = collider.get_parent_node_3d()
-								if intersected_unit.tile_position != tile:
+								var intersected_unit: UnitData = collider.get_parent_node_3d()
+								if intersected_unit.terrain_tile_position != tile:
 									continue
 						# TODO fix raycast?
-					if action_instance.action.cant_target_self and tile == action_instance.user.tile_position:
+					if action_instance.action.cant_target_self and tile == action_instance.user.terrain_tile_position:
 						continue
 					elif distance_xy >= action_instance.action.min_targeting_range and distance_xy <= action_instance.action.max_targeting_range:
 						if not action_instance.action.has_vertical_tolerance_from_user:
@@ -72,7 +72,7 @@ func start_targeting(action_instance: ActionInstance) -> void:
 		if not action_instance.battle_manager.map_input_event.is_connected(action_instance.on_map_input_event):
 			action_instance.battle_manager.map_input_event.connect(action_instance.on_map_input_event)
 		
-		for unit: UnitActor in action_instance.battle_manager.units:
+		for unit: UnitData in action_instance.battle_manager.units:
 			if not unit.unit_input_event.is_connected(action_instance.on_unit_hovered):
 				unit.unit_input_event.connect(action_instance.on_unit_hovered)
 		
@@ -80,7 +80,7 @@ func start_targeting(action_instance: ActionInstance) -> void:
 			action_instance.tile_hovered.connect(target_tile)
 		
 	else: # TODO auto targeting for reactions and all enimies/allies for dance/sing?
-		action_instance.preview_targets.append(action_instance.user.tile_position)
+		action_instance.preview_targets.append(action_instance.user.terrain_tile_position)
 		action_instance.submitted_targets = action_instance.preview_targets
 		await action_instance.queue_use()
 
@@ -94,7 +94,7 @@ func stop_targeting(action_instance: ActionInstance) -> void:
 	if action_instance.battle_manager.map_input_event.is_connected(action_instance.on_map_input_event):
 		action_instance.battle_manager.map_input_event.disconnect(action_instance.on_map_input_event)
 	
-	for unit: UnitActor in action_instance.battle_manager.units:
+	for unit: UnitData in action_instance.battle_manager.units:
 		if unit.unit_input_event.is_connected(action_instance.on_unit_hovered):
 			unit.unit_input_event.disconnect(action_instance.on_unit_hovered)
 	
@@ -131,8 +131,8 @@ func target_tile(tile: TerrainTile, action_instance: ActionInstance, event: Inpu
 		
 		# show target previews
 		for preview_tile: TerrainTile in action_instance.preview_targets:
-			for unit: UnitActor in action_instance.battle_manager.units:
-				if unit.tile_position == preview_tile and (unit.get_nullify_statuses().is_empty() or unit.get_nullify_statuses().any(
+			for unit: UnitData in action_instance.battle_manager.units:
+				if unit.terrain_tile_position == preview_tile and (unit.get_nullify_statuses().is_empty() or unit.get_nullify_statuses().any(
 						func(status: StatusEffect) -> bool: return action_instance.action.will_remove_target_status and action_instance.action.target_status_list.has(status.unique_name))): # ignore action unless it would remove nullify
 					action_instance.show_result_preview(unit)
 					break
@@ -198,11 +198,11 @@ func get_aoe_targets(action_instance: ActionInstance, tile_target: TerrainTile) 
 						var collider: Object = Raycaster.raycast(tile_target.get_world_position() + Vector3.UP, tile.get_world_position() + Vector3.UP) # TODO adjust for different height sprites: chicken, frog, Altima
 						if is_instance_valid(collider):
 							if collider is CharacterBody3D:
-								var intersected_unit: UnitActor = collider.get_parent_node_3d()
-								if intersected_unit.tile_position != tile:
+								var intersected_unit: UnitData = collider.get_parent_node_3d()
+								if intersected_unit.terrain_tile_position != tile:
 									continue
 						# TODO fix raycast?
-					if action_instance.action.cant_hit_user and tile == action_instance.user.tile_position:
+					if action_instance.action.cant_hit_user and tile == action_instance.user.terrain_tile_position:
 						continue
 					elif distance_xy <= action_instance.action.area_of_effect_range:
 						if not action_instance.action.aoe_has_vertical_tolerance:

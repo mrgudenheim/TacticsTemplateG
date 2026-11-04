@@ -27,16 +27,16 @@ enum Strategy {
 	FLEE,
 }
 
-func choose_action(unit: UnitActor) -> void:
-	unit.global_battle_manager.game_state_label.text = unit.job_nickname + "-" + unit.unit_nickname + " AI choosing action"
+func choose_action(unit: UnitData) -> void:
+	unit.battle_manager.game_state_label.text = unit.job_data.display_name + "-" + unit.display_name + " AI choosing action"
 	
-	if Vector2i(floori(unit.char_body.position.x), floori(unit.char_body.position.z)) != unit.tile_position.location:
-		push_error("UnitActor position not equal to char body position")
+	if Vector2i(floori(unit.char_body.position.x), floori(unit.char_body.position.z)) != unit.terrain_tile_position.location:
+		push_error("UnitData position not equal to char body position")
 	
 	wait_action_instance = unit.actions_data[unit.wait_action.unique_name]
 	
 	if strategy == Strategy.END_TURN:
-		await wait_for_delay(unit)
+		await Utilities.wait_for_delay(action_delay)
 		wait_action_instance.start_targeting()
 		await wait_action_instance.action_completed
 		return
@@ -48,7 +48,7 @@ func choose_action(unit: UnitActor) -> void:
 	if eligible_actions.size() > 1:
 		eligible_actions.erase(wait_action_instance) # don't choose to wait if another action is eligible
 	else:
-		await wait_for_delay(unit)
+		await Utilities.wait_for_delay(action_delay)
 		wait_action_instance.start_targeting()
 		await wait_action_instance.action_completed
 		return
@@ -98,10 +98,10 @@ func choose_action(unit: UnitActor) -> void:
 		
 		var best_move: TerrainTile
 		if move_action_instance.is_usable() and not move_action_instance.potential_targets.is_empty() and not non_move_actions.is_empty():
-			var original_tile: TerrainTile = unit.tile_position
+			var original_tile: TerrainTile = unit.terrain_tile_position
 			var original_tile_location: Vector2i = original_tile.xz_location
 			for potential_move: TerrainTile in move_action_instance.potential_targets: # TODO handle ai score for auto targeting
-				unit.tile_position = potential_move
+				unit.terrain_tile_position = potential_move
 				
 				for action_instance: ActionInstance in non_move_actions:
 					@warning_ignore("redundant_await") # inherited targeting strategies may be coroutines
@@ -124,17 +124,17 @@ func choose_action(unit: UnitActor) -> void:
 					
 					action_instance.stop_targeting()
 			
-			unit.tile_position = original_tile
-			if unit.tile_position.location != original_tile_location:
-				push_error("UnitActor position not reset during ai consideration")
-			if Vector2i(floori(unit.char_body.position.x), floori(unit.char_body.position.z)) != unit.tile_position.location:
-				push_error("UnitActor position not equal to char body position")
+			unit.terrain_tile_position = original_tile
+			if unit.terrain_tile_position.location != original_tile_location:
+				push_error("UnitData position not reset during ai consideration")
+			if Vector2i(floori(unit.char_body.position.x), floori(unit.char_body.position.z)) != unit.terrain_tile_position.location:
+				push_error("UnitData position not equal to char body position")
 		
 		if best_move != null:
 			move_action_instance.start_targeting() # TODO refactor using actions with specific target
-			await wait_for_delay(unit)
+			await Utilities.wait_for_delay(action_delay)
 			move_action_instance.tile_hovered.emit(best_move, move_action_instance, simulated_input)
-			await wait_for_delay(unit)
+			await Utilities.wait_for_delay(action_delay)
 			#if not move_action_instance.preview_targets.is_empty(): # TODO fix why move does not have targets sometimes
 			var simulated_input_action: InputEventAction = InputEventAction.new()
 			simulated_input_action.action = "primary_action"
@@ -153,7 +153,7 @@ func choose_action(unit: UnitActor) -> void:
 			var shortest_path_target: TerrainTile
 			for other_unit: UnitActor in unit.global_battle_manager.units:
 				if other_unit.team != unit.team and not other_unit.is_defeated: # if enemy
-					var other_unit_xy: Vector2i = other_unit.tile_position.location
+					var other_unit_xy: Vector2i = other_unit.terrain_tile_position.location
 					var adjacent_tiles: Array[TerrainTile] = []
 					var adjacent_directions: Array[Vector2i] = [
 						Vector2i.LEFT,
@@ -166,7 +166,7 @@ func choose_action(unit: UnitActor) -> void:
 						if unit.global_battle_manager.total_map_tiles.keys().has(adjacent_xy):
 							adjacent_tiles.append_array(unit.global_battle_manager.total_map_tiles[adjacent_xy])
 					
-					if adjacent_tiles.has(unit.tile_position): # if already next to enemy, wait
+					if adjacent_tiles.has(unit.terrain_tile_position): # if already next to enemy, wait
 						await action_targeted(unit, wait_action_instance)
 						return
 					
@@ -208,7 +208,7 @@ func choose_action(unit: UnitActor) -> void:
 		var chosen_action: ActionInstance = eligible_actions.pick_random()
 		await action_targeted(unit, chosen_action) # random target
 
-func action_targeted(unit: UnitActor, chosen_action: ActionInstance, target: TerrainTile = null, hover_target: TerrainTile = null) -> void:
+func action_targeted(unit: UnitData, chosen_action: ActionInstance, target: TerrainTile = null, hover_target: TerrainTile = null) -> void:
 	#chosen_action.show_potential_targets() # TODO fix move targeting when updating paths/pathfinding is takes longer than delay (large maps with 10+ units)
 	@warning_ignore("redundant_await") # inherited targeting strategies may be coroutines
 	chosen_action.potential_targets = await chosen_action.action.targeting_strategy.get_potential_targets(chosen_action)
@@ -216,14 +216,14 @@ func action_targeted(unit: UnitActor, chosen_action: ActionInstance, target: Ter
 	if chosen_action.action.auto_target:
 		await chosen_action.action_completed
 	else:
-		await wait_for_delay(unit)
+		await Utilities.wait_for_delay(action_delay)
 		if target == null:
 			target = chosen_action.potential_targets.pick_random() # random target
 		if hover_target == null:
 			hover_target = target
 		var simulated_input: InputEvent = InputEventMouseMotion.new()
 		chosen_action.tile_hovered.emit(hover_target, chosen_action, simulated_input)
-		await wait_for_delay(unit)
+		await Utilities.wait_for_delay(action_delay)
 		if not chosen_action.preview_targets.is_empty(): # TODO fix why move does not have targets sometimes
 			var simulated_input_action: InputEventAction = InputEventAction.new()
 			simulated_input_action.action = "primary_action"
@@ -233,7 +233,3 @@ func action_targeted(unit: UnitActor, chosen_action: ActionInstance, target: Ter
 			chosen_action.stop_targeting()
 			wait_action_instance.start_targeting()
 			await wait_action_instance.action_completed
-
-
-func wait_for_delay(unit: UnitActor) -> void:
-	await unit.get_tree().create_timer(action_delay).timeout

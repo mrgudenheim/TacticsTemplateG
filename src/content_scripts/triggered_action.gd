@@ -52,7 +52,7 @@ var action: Action
 
 # requirements to trigger - user data
 @export var required_status_id: PackedStringArray = [] # will not trigger if unit does not have any of these flags (can trigger if empty)
-@export var user_stat_thresholds: Dictionary[UnitActor.StatType, int] = {} # will only trigger if each of user's stat (modified_value) is >= the threshold - ex. MP >= 0
+@export var user_stat_thresholds: Dictionary[UnitData.StatType, int] = {} # will only trigger if each of user's stat (modified_value) is >= the threshold - ex. MP >= 0
 
 # requirements to trigger - action data
 @export var only_trigger_if_usable: bool = true
@@ -69,12 +69,12 @@ var action: Action
 
 # assorted data
 class TriggeredActionInstance:
-	var user: UnitActor
+	var user: UnitData
 	var tiles_moved: int = 0
 	var initiating_action_instance: ActionInstance
 
 
-func connect_trigger(unit: UnitActor) -> void:
+func connect_trigger(unit: UnitData) -> void:
 	match trigger_timing:
 		TriggerTiming.MOVED:
 			if not unit.completed_move.is_connected(moved_trigger):
@@ -93,32 +93,32 @@ func connect_trigger(unit: UnitActor) -> void:
 				unit.turn_ended.connect(self_trigger)
 
 
-func moved_trigger(user: UnitActor, moved_tiles: int) -> void:
+func moved_trigger(user: UnitData, moved_tiles: int) -> void:
 	var new_triggered_action_data: TriggeredActionInstance = TriggeredActionInstance.new()
 	new_triggered_action_data.user = user
 	new_triggered_action_data.tiles_moved = moved_tiles
 	await process_triggered_action(new_triggered_action_data)
 
 
-func action_trigger(user: UnitActor, action_instance_targeted_by: ActionInstance) -> void:
+func action_trigger(user: UnitData, action_instance_targeted_by: ActionInstance) -> void:
 	var new_triggered_action_data: TriggeredActionInstance = TriggeredActionInstance.new()
 	new_triggered_action_data.user = user
 	new_triggered_action_data.initiating_action_instance = action_instance_targeted_by
 	await process_triggered_action(new_triggered_action_data)
 
 
-func self_trigger(user: UnitActor) -> void:	
+func self_trigger(user: UnitData) -> void:	
 	var new_triggered_action_data: TriggeredActionInstance = TriggeredActionInstance.new()
 	new_triggered_action_data.user = user
 	await process_triggered_action(new_triggered_action_data)
 
 
 func process_triggered_action(triggered_action_data: TriggeredActionInstance) -> void:
-	var user: UnitActor = triggered_action_data.user
+	var user: UnitData = triggered_action_data.user
 	if not Utilities.has_any_elements(user.current_status_ids, required_status_id):
 		return
 	
-	for stat_type: UnitActor.StatType in user_stat_thresholds.keys():
+	for stat_type: UnitData.StatType in user_stat_thresholds.keys():
 		if user.stats[stat_type].modified_value < user_stat_thresholds[stat_type]:
 			return
 
@@ -133,7 +133,7 @@ func process_triggered_action(triggered_action_data: TriggeredActionInstance) ->
 
 	var initiator_data: ActionInstance = triggered_action_data.initiating_action_instance
 	var has_initiator_data: bool = initiator_data != null
-	var initiator: UnitActor = triggered_action_data.user
+	var initiator: UnitData = triggered_action_data.user
 	if has_initiator_data:
 		initiator = initiator_data.user
 
@@ -185,18 +185,18 @@ func process_triggered_action(triggered_action_data: TriggeredActionInstance) ->
 		TargetingTypes.ACTION:
 			new_action_instance.start_targeting() # TODO await targeting selection of triggered action
 		TargetingTypes.SELF:
-			var target_tile: TerrainTile = triggered_action_data.user.tile_position
+			var target_tile: TerrainTile = triggered_action_data.user.terrain_tile_position
 			new_action_instance.submitted_targets = new_action_instance.action.targeting_strategy.get_aoe_targets(new_action_instance, target_tile)
 			await new_action_instance.queue_use()
 		TargetingTypes.INITIATOR:
-			var target_tile: TerrainTile = initiator.tile_position
+			var target_tile: TerrainTile = initiator.terrain_tile_position
 			new_action_instance.submitted_targets = new_action_instance.action.targeting_strategy.get_aoe_targets(new_action_instance, target_tile)
 			await new_action_instance.queue_use()
 		_:
 			push_warning("Invalid targeting type for triggered action: " + new_action_instance.action.display_name)
 
 
-func check_if_triggered(user: UnitActor, target: UnitActor, element: Action.ElementTypes = Action.ElementTypes.NONE) -> bool:
+func check_if_triggered(user: UnitData, target: UnitData, element: Action.ElementTypes = Action.ElementTypes.NONE) -> bool:
 	var is_triggered: bool = false
 	var trigger_chance: float = trigger_chance_formula.get_result(user, target, element)
 	is_triggered = randi() % 100 < trigger_chance
@@ -304,7 +304,7 @@ static func create_from_dictonary(property_dict: Dictionary) -> TriggeredAction:
 			var new_formula_data: FormulaData = FormulaData.create_from_dictionary(property_dict[property_name])
 			new_triggered_action.set(property_name, new_formula_data)
 		elif property_name == "user_stat_thresholds":
-			var new_dictionary: Dictionary[UnitActor.StatType, int] = {}
+			var new_dictionary: Dictionary[UnitData.StatType, int] = {}
 			var json_dict: Dictionary = property_dict[property_name]
 			for key: String in json_dict.keys():
 				new_dictionary[key.to_int()] = roundi(json_dict[key])

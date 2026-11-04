@@ -41,7 +41,7 @@ func _init(new_formula_text: String = "value + 0.0", new_type: ModifierType = Mo
 	formula_text = new_formula_text
 
 
-func get_expression_result(value: float, user: UnitActor, target: UnitActor) -> float:
+func get_expression_result(value: float, user: UnitData, target: UnitData) -> float:
 	var expression: Expression = Expression.new()
 	var error: Error = expression.parse(formula_text, ["user", "target", "value"])
 	if error != OK:
@@ -55,7 +55,7 @@ func get_expression_result(value: float, user: UnitActor, target: UnitActor) -> 
 	return 0.0
 
 
-func apply(to_value: int, user: UnitActor = null, target: UnitActor = null) -> int:
+func apply(to_value: int, user: UnitData = null, target: UnitData = null) -> int:
 	# var formula_result: float = value_formula.get_base_value(user, target)
 	var formula_result: float = get_expression_result(to_value, user, target)
 	return roundi(formula_result)

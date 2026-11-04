@@ -5,6 +5,8 @@ signal initialized()
 signal data_updated(unit_data: UnitData)
 signal knocked_out(unit_data: UnitData)
 signal ability_completed()
+signal statuses_updated()
+signal actions_updated(unit_data: UnitData)
 @warning_ignore("unused_signal")
 signal targeted_pre_action(unit_data: UnitData, action_instance: ActionInstance) # emited in action_instance
 @warning_ignore("unused_signal")
@@ -64,6 +66,11 @@ enum Zodiac {
 	SERPENTARIUS,
 }
 
+enum Controller {
+	AI,
+	PLAYER,
+}
+
 const FACING_VECTORS: Dictionary[GameData.Directions, Vector3] = {
 	GameData.Directions.NORTH: Vector3.BACK,
 	GameData.Directions.EAST: Vector3.RIGHT,
@@ -77,13 +84,13 @@ const FACING_VECTORS: Dictionary[GameData.Directions, Vector3] = {
 @export var stat_basis: StatBasis = StatBasis.MALE
 @export var zodiac: UnitData.Zodiac = UnitData.Zodiac.ARIES
 @export var job_unique_name: String = "job_unique_name"
-@export var controller: int = 0 # 0 = AI, 1 = Player 1, etc.
+@export var controller: UnitData.Controller = UnitData.Controller.AI # 0 = AI, 1 = Player, etc.
 @export var spritesheeet_file_name: String = "spritesheeet_file_name.spr" # TODO get sprite file name?
 @export var palette_id: int = 0
 @export var palette_id_override: int = -1
 @export var facing_direction: GameData.Directions = GameData.Directions.NORTH
 
-@export var tile_position: Vector3i = Vector3i.ONE * -999 # tile_position.get_world_position?
+@export var tile_position: Vector3i = Vector3i.ONE * -999 # tile_position.get_world_position? (x, y_level, z)
 @export var prohibited_terrain: Array[int] = [] # TileTerrain.surface_type_id
 @export var terrain_costs: Dictionary[int, int] = {} # [TileTerrain.surface_type_id, cost]
 var ignore_height: bool = false
@@ -97,7 +104,8 @@ var paths_set: bool = false
 @export var job_current_jp: Dictionary[String, int] = {}
 @export var abilities_learned: PackedStringArray = []
 
-@export var team: Team
+@export var team_id: String = "team_id"
+var team: Team
 
 var ai_controller: UnitAi = UnitAi.new()
 var job_data: JobData
@@ -170,7 +178,11 @@ var move_action: Action
 var wait_action: Action
 var actions: Array[Action] = []
 var actions_data: Dictionary[String, ActionInstance] = {}
+var active_action: ActionInstance
 
+var game_data: GameData
+var battle_manager: BattleManager
+var unit_actor: UnitActor
 
 static func create_from_dictionary(property_dict: Dictionary) -> UnitData:
 	var new_unit_data: UnitData = UnitData.new()
@@ -195,16 +207,16 @@ static func create_from_dictionary(property_dict: Dictionary) -> UnitData:
 			new_unit_data.set(property_name, new_equip_slots)
 		elif property_name == "stats_raw":
 			var dict: Dictionary = property_dict[property_name]
-			var new_stats_raw: Dictionary[UnitActor.StatType, float] = {}
+			var new_stats_raw: Dictionary[StatType, float] = {}
 			for stat_type: String in dict.keys():
-				new_stats_raw[UnitActor.StatType[stat_type]] = dict[stat_type]
+				new_stats_raw[StatType[stat_type]] = dict[stat_type]
 			new_unit_data.set(property_name, new_stats_raw)
 		elif property_name == "stats":
 			var dict: Dictionary = property_dict[property_name]
-			var new_stats: Dictionary[UnitActor.StatType, StatValue] = {}
+			var new_stats: Dictionary[StatType, StatValue] = {}
 			for stat_type: String in dict.keys():
 				var new_clamped_value: StatValue = StatValue.create_from_dictionary(dict[stat_type])
-				new_stats[UnitActor.StatType[stat_type]] = new_clamped_value
+				new_stats[StatType[stat_type]] = new_clamped_value
 			new_unit_data.set(property_name, new_stats)
 		else:
 			new_unit_data.set(property_name, property_dict[property_name])

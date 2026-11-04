@@ -3,7 +3,7 @@ extends Resource
 
 @export var base_power_formula: FormulaData = FormulaData.new("0.0", [5, 0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, true, true)
 @export var type: EffectType = EffectType.UNIT_STAT
-@export var effect_stat_type: UnitActor.StatType = UnitActor.StatType.HP
+@export var effect_stat_type: UnitData.StatType = UnitData.StatType.HP
 @export var show_ui: bool = true
 @export var transfer_to_user: bool = false # absorb, steal
 @export var apply_to_user: bool = false
@@ -24,7 +24,7 @@ enum EffectType {
 
 func _init(
 	new_type: EffectType = EffectType.UNIT_STAT, 
-	new_effect_stat: UnitActor.StatType = UnitActor.StatType.HP, 
+	new_effect_stat: UnitData.StatType = UnitData.StatType.HP, 
 	new_show_ui: bool = true, 
 	new_transfer_to_user: bool = false, 
 	new_set_value: bool = false,
@@ -36,11 +36,11 @@ func _init(
 	set_value = new_set_value
 
 
-func get_value(user: UnitActor, target: UnitActor, element: Action.ElementTypes) -> int:
+func get_value(user: UnitData, target: UnitData, element: Action.ElementTypes) -> int:
 	return roundi(base_power_formula.get_result(user, target, element))
 
 
-func get_ai_value(user: UnitActor, target: UnitActor, element: Action.ElementTypes) -> int:
+func get_ai_value(user: UnitData, target: UnitData, element: Action.ElementTypes) -> int:
 	var nominal_value: int = roundi(base_power_formula.get_result(user, target, element))
 	var is_friendly: bool = target.team == user.team
 	var ai_value: int = nominal_value
@@ -66,7 +66,7 @@ func set_effect_label() -> void:
 	label = EffectType.keys()[type]
 	
 	if type == EffectType.UNIT_STAT:
-		label = UnitActor.StatType.keys()[effect_stat_type]
+		label = UnitData.StatType.keys()[effect_stat_type]
 	if type == EffectType.CURRENCY:
 		label = "Gold"
 
@@ -84,7 +84,7 @@ func get_text(value: int) -> String:
 	return text
 
 
-func apply_value(apply_unit: UnitActor, value: int) -> int:
+func apply_value(apply_unit: UnitData, value: int) -> int:
 	match type:
 		EffectType.UNIT_STAT:
 			if set_value:
@@ -114,8 +114,8 @@ func apply_value(apply_unit: UnitActor, value: int) -> int:
 	
 	return value
 
-func apply(user: UnitActor, target: UnitActor, value: int) -> int:
-	var apply_unit: UnitActor = target
+func apply(user: UnitData, target: UnitData, value: int) -> int:
+	var apply_unit: UnitData = target
 	if apply_to_user:
 		apply_unit = user
 	
@@ -156,7 +156,7 @@ static func create_from_dictionary(property_dict: Dictionary) -> ActionEffect:
 		elif property_name == "type":
 			new_action_effect.type = EffectType[property_dict[property_name]]
 		elif property_name == "effect_stat_type":
-			new_action_effect.effect_stat_type = UnitActor.StatType[property_dict[property_name]]
+			new_action_effect.effect_stat_type = UnitData.StatType[property_dict[property_name]]
 		else:
 			new_action_effect.set(property_name, property_dict[property_name])
 
