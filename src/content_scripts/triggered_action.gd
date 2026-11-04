@@ -86,8 +86,8 @@ func connect_trigger(unit: UnitData) -> void:
 			if not unit.targeted_post_action.is_connected(action_trigger):
 				unit.targeted_post_action.connect(action_trigger)
 		TriggerTiming.TURN_START:
-			if not unit.turn_ended.is_connected(self_trigger):
-				unit.turn_ended.connect(self_trigger)
+			if not unit.turn_started.is_connected(self_trigger):
+				unit.turn_started.connect(self_trigger)
 		TriggerTiming.TURN_END:
 			if not unit.turn_ended.is_connected(self_trigger):
 				unit.turn_ended.connect(self_trigger)
