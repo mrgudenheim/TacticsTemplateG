@@ -367,7 +367,7 @@ func init_derived_properties(new_battle_manager: BattleManager, create_unit_acto
 
 
 	if create_unit_actor:
-		unit_actor = UnitActor.new()
+		unit_actor = UnitActor.instantiate()
 		unit_actor.bind_unit_data(self)
 
 
