@@ -347,6 +347,10 @@ func is_ct_frozen() -> bool:
 	return current_statuses.any(func(status: StatusEffect) -> bool: return status.freezes_ct) # returns false when no statuses
 
 
+func get_nullify_statuses() -> Array[StatusEffect]:
+	return current_statuses.filter(func(status: StatusEffect) -> bool: return status.passive_effect.nullify_targeted)
+
+
 # TODO should these be triggered actions on the statuses?
 func process_hp_changed(stat_value: StatValue) -> void:	
 	@warning_ignore("integer_division")
@@ -918,3 +922,31 @@ func equip_item(slot: EquipmentSlot, item: ItemData) -> void:
 	slot.item_unique_name = item.unique_name
 	
 	update_passive_effects()
+
+
+func set_job(new_job_name: String) -> void:
+	job_unique_name = new_job_name
+	job_data = GameData.get_job(new_job_name)
+	
+	var new_skillset: Skillset = GameData.get_skillset(job_data.skillset_unique_name)
+	
+	# if the new job's skillset is already equipped in a different slot, swap it to the first slot
+	var skillset_current_slot_idx: int = skillsets_names.find(new_skillset.unique_name)
+	if skillset_current_slot_idx > 0:
+		skillsets_names[skillset_current_slot_idx] = skillsets_names[0]
+
+	equip_skillset(0, GameData.get_skillset(job_data.skillset_unique_name))
+	update_passive_effects()
+
+
+func update_map_paths(map_tiles: Dictionary[Vector2i, Array], units: Array[UnitData], max_cost: int = 9999) -> void:
+	paths_set = false
+	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
+	update_prohibited_terrain(all_passive_effects)
+	update_terrain_costs(all_passive_effects)
+	ignore_height = all_passive_effects.any(func(passive_effect: PassiveEffect) -> bool: return passive_effect.ignore_height)
+	
+	if move_action.targeting_strategy.has_method("get_map_paths"):
+		map_paths = await move_action.targeting_strategy.get_map_paths(self, map_tiles, units, max_cost)
+		paths_set = true
+		paths_updated.emit()

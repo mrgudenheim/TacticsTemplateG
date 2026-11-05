@@ -192,10 +192,6 @@ func _process(_delta: float) -> void:
 	set_base_animation_ptr_id(current_animation_id_fwd)
 
 
-func get_nullify_statuses() -> Array[StatusEffect]:
-	return current_statuses.filter(func(status: StatusEffect) -> bool: return status.passive_effect.nullify_targeted)
-
-
 func update_status_visuals() -> void:
 	var anim_priority: int = 0
 	var shading_priority: int = 0
@@ -273,96 +269,6 @@ func update_status_visuals() -> void:
 		# palette update must come after spritesheet change to make sure palettes are taken from correct spritesheet
 		if other_type_priority != 0:
 			set_sprite_palette_override(sprite_palette_id + other_type_status.palette_idx_offset)
-
-
-func use_attack() -> void:
-	can_move = false
-	push_warning("using attack: " + primary_weapon.display_name)
-	#push_warning("Animations: " + str(PackedInt32Array([action_data.animation_start_id, action_data.animation_charging_id, action_data.animation_executing_id])))
-	#if action_data.animation_start_id != 0:
-		#debug_menu.anim_id_spin.value = action_data.animation_start_id + int(is_back_facing)
-		#await animation_manager.animation_completed
-	#
-	#if action_data.animation_charging_id != 0:
-		#debug_menu.anim_id_spin.value = action_data.animation_charging_id + int(is_back_facing)
-		#await get_tree().create_timer(0.1 + (action_data.ticks_charge_time * 0.1)).timeout
-	
-		#animation_executing_id = 0x3e * 2 # TODO look up based on equiped weapon and target relative height
-		#animation_manager.unit_debug_menu.anim_id_spin.value = 0x3e * 2 # TODO look up based on equiped weapon and target relative height
-	
-	# execute atttack
-	#debug_menu.anim_id_spin.value = (RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) + int(is_back_facing) # TODO lookup based on target relative height
-	current_animation_id_fwd = roundi(RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) # TODO lookup based on target relative height
-	set_base_animation_ptr_id(current_animation_id_fwd)
-	
-	# TODO implement proper timeout for abilities that execute using an infinite loop animation
-	# this implementation can overwrite can_move when in the middle of another ability
-	get_tree().create_timer(2).timeout.connect(func() -> void: can_move = true) 
-	
-	await animation_manager.animation_completed
-
-	#ability_completed.emit()
-	animation_manager.reset_sprites()
-	#debug_menu.anim_id_spin.value = current_idle_animation_id  + int(is_back_facing)
-	current_animation_id_fwd = current_idle_animation_id
-	set_base_animation_ptr_id(current_animation_id_fwd)
-	can_move = true
-
-
-func use_ability(pos: Vector3) -> void:
-	can_move = false
-	print_debug("animating: " + action_data.display_name)
-	#push_warning("Animations: " + str(PackedInt32Array([action_data.animation_start_id, action_data.animation_charging_id, action_data.animation_executing_id])))
-	if action_data.animation_start_id != 0:
-		#debug_menu.anim_id_spin.value = action_data.animation_start_id + int(is_back_facing)
-		current_animation_id_fwd = action_data.animation_start_id
-		set_base_animation_ptr_id(current_animation_id_fwd)
-		await animation_manager.animation_completed
-	
-	if action_data.animation_charging_id != 0:
-		#debug_menu.anim_id_spin.value = action_data.animation_charging_id + int(is_back_facing)
-		current_animation_id_fwd = action_data.animation_charging_id
-		set_base_animation_ptr_id(current_animation_id_fwd)
-		await get_tree().create_timer(0.1 + (action_data.ticks_charge_time * 0.1)).timeout
-	
-	#if action_data.animation_executing_id != 0:
-	if action_data.animation_executing_id < 0:
-		pass
-	elif action_data.animation_executing_id == 0:
-		#animation_executing_id = 0x3e * 2 # TODO look up based on equiped weapon and target relative height
-		#animation_manager.unit_debug_menu.anim_id_spin.value = 0x3e * 2 # TODO look up based on equiped weapon and target relative height
-		#debug_menu.anim_id_spin.value = (RomReader.battle_bin_data.weapon_animation_ids[primary_weapon.item_type].y * 2) + int(is_back_facing) # TODO lookup based on target relative height
-		current_animation_id_fwd = get_attack_action().animation_executing_id # TODO lookup based on target relative height
-		set_base_animation_ptr_id(current_animation_id_fwd)
-	else:
-		var ability_animation_executing_id: int = action_data.animation_executing_id
-		if ["ruka", "arute", "kanzen"].has(GameData.get_spritesheet_data(sprite_file_name).seq_name):
-			ability_animation_executing_id = 0x2c * 2 # https://ffhacktics.com/wiki/Set_attack_animation_flags_and_facing_3
-		#debug_menu.anim_id_spin.value = ability_animation_executing_id + int(is_back_facing)
-		current_animation_id_fwd = ability_animation_executing_id
-		set_base_animation_ptr_id(current_animation_id_fwd)
-		
-	#var new_vfx_location: Node3D = Node3D.new()
-	#new_vfx_location.position = pos
-	##new_vfx_location.position.y += 2 # TODO set position dependent on ability vfx data
-	#new_vfx_location.name = "VfxLocation"
-	#get_parent().add_child(new_vfx_location)
-	var action_instance: ActionInstance = ActionInstance.new(action_data, self, global_battle_manager)
-	if is_instance_valid(action_instance.action.vfx_data):
-		action_instance.show_vfx(pos)
-	
-	# TODO implement proper timeout for abilities that execute using an infinite loop animation
-	# this implementation can overwrite can_move when in the middle of another ability
-	get_tree().create_timer(2).timeout.connect(func() -> void: can_move = true) 
-		
-	await animation_manager.animation_completed
-
-	ability_completed.emit()
-	animation_manager.reset_sprites()
-	#debug_menu.anim_id_spin.value = current_idle_animation_id  + int(is_back_facing)
-	current_animation_id_fwd = current_idle_animation_id
-	set_base_animation_ptr_id(current_animation_id_fwd)
-	can_move = true
 
 
 func animate_start_action(animation_start_id: int, animation_charging_id: int) -> void:
@@ -544,14 +450,7 @@ func hide_debug_menu() -> void:
 
 
 func set_job(new_job_name: String) -> void:
-	job_name = new_job_name
-	job_data = GameData.get_job(new_job_name)
 	set_sprite_by_job(new_job_name)
-	
-	# skillsets_names.fill("")
-	equip_skillset(0, GameData.get_skillset(job_data.skillset_unique_name))
-	
-	job_nickname = job_data.display_name
 	
 	if animation_manager.global_spritesheet_data.is_flying:
 		idle_walk_animation_id = 0x0c
@@ -563,8 +462,6 @@ func set_job(new_job_name: String) -> void:
 		walk_to_animation_id = 0x18
 		current_idle_animation_id = idle_walk_animation_id
 		set_base_animation_ptr_id(idle_walk_animation_id)
-	
-	update_passive_effects()
 
 
 func set_primary_weapon(new_weapon_unique_name: String) -> void:
@@ -785,20 +682,7 @@ func on_sprite_selected(new_spritesheet_name: String) -> void:
 
 
 func set_position_to_tile() -> void:
-	char_body.global_position = Vector3(tile_position.location.x + 0.5, tile_position.get_world_position().y + 0.25, tile_position.location.y + 0.5)
-
-
-func update_map_paths(map_tiles: Dictionary[Vector2i, Array], units: Array[UnitActor], max_cost: int = 9999) -> void:
-	paths_set = false
-	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
-	update_prohibited_terrain(all_passive_effects)
-	update_terrain_costs(all_passive_effects)
-	ignore_height = all_passive_effects.any(func(passive_effect: PassiveEffect) -> bool: return passive_effect.ignore_height)
-	
-	if move_action.targeting_strategy.has_method("get_map_paths"):
-		map_paths = await move_action.targeting_strategy.get_map_paths(self, map_tiles, units, max_cost)
-		paths_set = true
-		paths_updated.emit()
+	char_body.global_position = Vector3(unit_data.terrain_tile_position.xz_location.x + 0.5, unit_data.terrain_tile_position.get_world_position().y + 0.25, unit_data.terrain_tile_position.xz_location.y + 0.5)
 
 
 func _on_character_body_3d_input_event(_camera: Node, event: InputEvent, _event_position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
