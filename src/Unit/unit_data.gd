@@ -986,7 +986,7 @@ func equip_items_leveled() -> void:
 	update_passive_effects()
 	var new_primary_weapon: ItemData = get_primary_weapon()
 	if original_weapon != new_primary_weapon:
-		primary_weapon_changed.emit(new_primary_weapon.item_unique_name)
+		primary_weapon_changed.emit(new_primary_weapon.unique_name)
 
 
 func get_item_unique_name_for_slot(slot_type: ItemData.SlotType, item_level: int, random: bool = false) -> String:
@@ -1017,7 +1017,7 @@ func equip_item(slot: EquipmentSlot, item: ItemData) -> void:
 	update_passive_effects()
 	var new_primary_weapon: ItemData = get_primary_weapon()
 	if original_weapon != new_primary_weapon:
-		primary_weapon_changed.emit(new_primary_weapon.item_unique_name)
+		primary_weapon_changed.emit(new_primary_weapon.unique_name)
 
 
 # TODO is the first item with an action always the primary weapon?
