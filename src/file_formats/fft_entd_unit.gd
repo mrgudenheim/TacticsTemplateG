@@ -154,16 +154,16 @@ func get_unit_data() -> UnitData:
 		unit_data.level = randi_range(0, 50)
 
 	if gender == 4:
-		unit_data.gender = UnitActor.Gender.MALE
+		unit_data.gender = UnitData.Gender.MALE
 	elif gender == 2:
-		unit_data.gender = UnitActor.Gender.FEMALE
+		unit_data.gender = UnitData.Gender.FEMALE
 	elif gender == 1:
-		unit_data.gender = UnitActor.Gender.MONSTER
+		unit_data.gender = UnitData.Gender.MONSTER
 	
-	unit_data.zodiac = "zodiac" # TODO should zodiac be derived from birthday?
+	unit_data.zodiac = UnitData.Zodiac.AQUARIUS # TODO should zodiac be derived from birthday?
 	unit_data.job_unique_name = RomReader.jobs_data.keys()[main_job]
 	unit_data.team_idx = team_color_idx
-	unit_data.controller = 1 if is_player_controlled else 0 # 0 = AI, 1 = Player 1, etc.
+	unit_data.controller = UnitData.Controller.PLAYER if is_player_controlled else UnitData.Controller.AI
 	
 	var new_sprite_id: int = RomReader.jobs_data[unit_data.job_unique_name].sprite_id
 	if sprite_set_id == 0x81:
@@ -178,13 +178,13 @@ func get_unit_data() -> UnitData:
 	
 	
 	if initial_direction == 0:
-		unit_data.facing_direction = UnitActor.Facings.SOUTH
+		unit_data.facing_direction = GameData.Directions.SOUTH
 	elif initial_direction == 1:
-		unit_data.facing_direction = UnitActor.Facings.EAST
+		unit_data.facing_direction = GameData.Directions.EAST
 	elif initial_direction == 2:
-		unit_data.facing_direction = UnitActor.Facings.NORTH
+		unit_data.facing_direction = GameData.Directions.NORTH
 	elif initial_direction == 3:
-		unit_data.facing_direction = UnitActor.Facings.WEST
+		unit_data.facing_direction = GameData.Directions.WEST
 
 	# job levels
 	# jp per job
@@ -192,43 +192,43 @@ func get_unit_data() -> UnitData:
 
 	# Stats
 	unit_data.stats = {
-		UnitActor.StatType.HP_MAX : StatValue.new(0, 999, 150),
-		UnitActor.StatType.HP : StatValue.new(0, 150, 100),
-		UnitActor.StatType.MP_MAX : StatValue.new(0, 999, 100),
-		UnitActor.StatType.MP : StatValue.new(0, 100, 70),
-		UnitActor.StatType.CT : StatValue.new(0, 999, 25),
-		UnitActor.StatType.MOVE : StatValue.new(0, 100, 3),
-		UnitActor.StatType.JUMP : StatValue.new(0, 100, 3),
-		UnitActor.StatType.SPEED : StatValue.new(0, 100, 10),
-		UnitActor.StatType.PHYSICAL_ATTACK : StatValue.new(0, 100, 11),
-		UnitActor.StatType.MAGIC_ATTACK : StatValue.new(0, 100, 12),
-		UnitActor.StatType.BRAVE : StatValue.new(0, 100, 70),
-		UnitActor.StatType.FAITH : StatValue.new(0, 100, 65),
-		UnitActor.StatType.EXP : StatValue.new(0, 999, 99),
-		UnitActor.StatType.LEVEL : StatValue.new(0, 99, 20),
+		UnitData.StatType.HP_MAX : StatValue.new(0, 999, 150),
+		UnitData.StatType.HP : StatValue.new(0, 150, 100),
+		UnitData.StatType.MP_MAX : StatValue.new(0, 999, 100),
+		UnitData.StatType.MP : StatValue.new(0, 100, 70),
+		UnitData.StatType.CT : StatValue.new(0, 999, 25),
+		UnitData.StatType.MOVE : StatValue.new(0, 100, 3),
+		UnitData.StatType.JUMP : StatValue.new(0, 100, 3),
+		UnitData.StatType.SPEED : StatValue.new(0, 100, 10),
+		UnitData.StatType.PHYSICAL_ATTACK : StatValue.new(0, 100, 11),
+		UnitData.StatType.MAGIC_ATTACK : StatValue.new(0, 100, 12),
+		UnitData.StatType.BRAVE : StatValue.new(0, 100, 70),
+		UnitData.StatType.FAITH : StatValue.new(0, 100, 65),
+		UnitData.StatType.EXP : StatValue.new(0, 999, 99),
+		UnitData.StatType.LEVEL : StatValue.new(0, 99, 20),
 	}
 	unit_data.stats_raw = {
-		UnitActor.StatType.HP_MAX : 0.0, 
-		UnitActor.StatType.MP_MAX : 0.0, 
-		UnitActor.StatType.SPEED : 0.0, 
-		UnitActor.StatType.PHYSICAL_ATTACK : 0.0, 
-		UnitActor.StatType.MAGIC_ATTACK : 0.0, 
+		UnitData.StatType.HP_MAX : 0.0, 
+		UnitData.StatType.MP_MAX : 0.0, 
+		UnitData.StatType.SPEED : 0.0, 
+		UnitData.StatType.PHYSICAL_ATTACK : 0.0, 
+		UnitData.StatType.MAGIC_ATTACK : 0.0, 
 	}
 
-	unit_data.stats[UnitActor.StatType.HP_MAX].value_changed.connect(unit_data.stats[UnitActor.StatType.HP].update_max_from_clamped_value)
-	unit_data.stats[UnitActor.StatType.MP_MAX].value_changed.connect(unit_data.stats[UnitActor.StatType.MP].update_max_from_clamped_value)
-	# TODO unit_data.stats[UnitActor.StatType.HP].value_changed.connect(hp_changed)
+	unit_data.stats[UnitData.StatType.HP_MAX].value_changed.connect(unit_data.stats[UnitData.StatType.HP].update_max_from_clamped_value)
+	unit_data.stats[UnitData.StatType.MP_MAX].value_changed.connect(unit_data.stats[UnitData.StatType.MP].update_max_from_clamped_value)
+	# TODO unit_data.stats[UnitData.StatType.HP].value_changed.connect(hp_changed)
 	# TODO connect stat bars?
 
-	unit_data.stats[UnitActor.StatType.LEVEL].set_value(unit_data.level)
-	UnitActor.generate_leveled_raw_stats(unit_data.gender as UnitActor.StatBasis, unit_data.level, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
+	unit_data.stats[UnitData.StatType.LEVEL].set_value(unit_data.level)
+	UnitData.generate_leveled_raw_stats(unit_data.gender as UnitData.StatBasis, unit_data.level, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
 	var use_higher_stat_values: bool = false
 	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(unit_data.spritesheeet_file_name): # lucavi
 		use_higher_stat_values = true
-	UnitActor.calc_battle_stats(RomReader.jobs_data.values()[main_job], unit_data.stats_raw, unit_data.stats, true, use_higher_stat_values)
+	UnitData.calc_battle_stats(RomReader.jobs_data.values()[main_job], unit_data.stats_raw, unit_data.stats, true, use_higher_stat_values)
 
-	unit_data.stats[UnitActor.StatType.BRAVE].set_value(brave)
-	unit_data.stats[UnitActor.StatType.FAITH].set_value(faith)
+	unit_data.stats[UnitData.StatType.BRAVE].set_value(brave)
+	unit_data.stats[UnitData.StatType.FAITH].set_value(faith)
 
 	# equipment
 	unit_data.equip_slots = [
@@ -274,7 +274,7 @@ func get_unit_data() -> UnitData:
 func get_item_name(unit_data: UnitData, slot_idx: int, new_item_idx: int) -> String:
 	if new_item_idx < 0xFE:
 		return RomReader.items_array[new_item_idx].unique_name
-	elif new_item_idx == 0xFF:
+	if new_item_idx == 0xFF:
 		return RomReader.items_array[0].unique_name
 	
 	# TODO if equipment value == 0xFE, get random leveled equipment
@@ -287,7 +287,7 @@ func get_item_name(unit_data: UnitData, slot_idx: int, new_item_idx: int) -> Str
 func get_ability_name(unit_data: UnitData, slot_idx: int, new_ability_idx: int) -> String:
 	if new_ability_idx < 0x01FE:
 		return RomReader.abilities.values()[new_ability_idx].unique_name
-	elif new_ability_idx == 0xFF:
+	if new_ability_idx == 0xFF:
 		return RomReader.abilities.values()[0].unique_name
 	
 	# TODO if ability value == 0x01FE, get random learned ability?

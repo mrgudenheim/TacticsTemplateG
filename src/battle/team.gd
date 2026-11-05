@@ -6,7 +6,7 @@ var team_name: String = "[Team Name]"
 var inventory: PackedInt32Array = []
 var currency: int = 100
 
-var units: Array[UnitActor] = []
+var units: Array[UnitData] = []
 
 #@export var end_conditions: Array[EndCondition] = []
 @export var end_conditions: Dictionary[EndCondition, bool] = {}
@@ -47,10 +47,11 @@ func check_end_conditions(battle_manager: BattleManager) -> State:
 			return end_conditions[end_condition] and end_condition.end_type == EndCondition.EndType.LOSE):
 		state = State.LOST
 		return State.LOST
-	elif end_conditions.keys().any(func(end_condition: EndCondition) -> bool: 
+	
+	if end_conditions.keys().any(func(end_condition: EndCondition) -> bool:
 			return end_conditions[end_condition] and end_condition.end_type == EndCondition.EndType.WIN):
 		state = State.WON
 		return State.WON
-	else:
-		state = State.ACTIVE
-		return State.ACTIVE
+	
+	state = State.ACTIVE
+	return State.ACTIVE

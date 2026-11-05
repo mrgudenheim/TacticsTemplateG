@@ -100,16 +100,16 @@ func bind_unit_data(new_unit_data: UnitData) -> void:
 
 func _exit_tree() -> void:
 	if global_battle_manager != null and is_queued_for_deletion():
-		var unit_index: int = global_battle_manager.units.find(self)
-		for action_instance: ActionInstance in actions_data.values():
+		var unit_index: int = global_battle_manager.units.find(unit_data)
+		for action_instance: ActionInstance in unit_data.actions_data.values():
 			action_instance.stop_targeting()
 		if unit_index != -1: # if the unit is in the battle_manager array
 			global_battle_manager.units.remove_at(unit_index)
 
 
-func add_stat_bar(stat_type: StatType) -> StatBar:
+func add_stat_bar(stat_type: UnitData.StatType) -> StatBar:
 	var new_stat_bar: StatBar = StatBar.instantiate()
-	new_stat_bar.set_stat(str(StatType.keys()[stat_type]), stats[stat_type])
+	new_stat_bar.set_stat(str(UnitData.StatType.keys()[stat_type]), unit_data.stats[stat_type])
 	stat_bars_container.add_child(new_stat_bar)
 
 	return new_stat_bar
@@ -668,24 +668,24 @@ func update_unit_facing(dir: Vector3) -> void:
 	var angle_deg: float = rad_to_deg(atan2(dir.z, dir.x))
 	angle_deg = fposmod(angle_deg, 359.99) + 45 # add 45 so EAST is just < 90 instead of < 45 and > 315
 	angle_deg = fposmod(angle_deg, 359.99) # correction for values over 360 due to adding 45
-	var new_facing: Facings = facing
+	var new_facing: GameData.Directions = unit_data.facing
 	if angle_deg < 90:
-		new_facing = Facings.EAST
+		new_facing = GameData.Directions.EAST
 	elif angle_deg < 180:
-		new_facing = Facings.NORTH
+		new_facing = GameData.Directions.NORTH
 	elif angle_deg < 270:
-		new_facing = Facings.WEST
+		new_facing = GameData.Directions.WEST
 	elif angle_deg < 360:
-		new_facing = Facings.SOUTH
+		new_facing = GameData.Directions.SOUTH
 	
-	if new_facing != facing:
-		facing = new_facing
+	if new_facing != unit_data.facing:
+		unit_data.facing = new_facing
 		if global_battle_manager != null:
 			update_animation_facing(global_battle_manager.camera_controller.camera_facing_vector)
 
 
 func update_animation_facing(camera_facing_vector: Vector3) -> void:
-	var unit_facing_vector: Vector3 = FACING_VECTORS[facing]
+	var unit_facing_vector: Vector3 = UnitData.FACING_VECTORS[unit_data.facing]
 	#var camera_facing_vector: Vector3 = UnitControllerRT.CameraFacingVectors[controller.camera_facing]
 	#var facing_difference: Vector3 = camera_facing_vector - unt_facing_vectorwad
 	

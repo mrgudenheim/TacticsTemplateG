@@ -23,7 +23,7 @@ func setup(new_team: Team, is_random: bool = false) -> void:
 	name = team.team_name
 
 	if not is_random:
-		for unit: UnitActor in team.units:
+		for unit: UnitData in team.units:
 			add_unit_editor(unit)
 
 		num_units_spinbox.value = team.units.size()
@@ -48,7 +48,7 @@ func on_num_units_changed(new_value: int) -> void:
 			unit_panels.remove_at(-1)
 
 
-func add_unit_editor(new_unit: UnitActor) -> void:
+func add_unit_editor(new_unit: UnitData) -> void:
 	if new_unit.team != team:
 		return
 	
