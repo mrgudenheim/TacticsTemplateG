@@ -401,6 +401,24 @@ func get_nullify_statuses() -> Array[StatusEffect]:
 	return current_statuses.filter(func(status: StatusEffect) -> bool: return status.passive_effect.nullify_targeted)
 
 
+func set_sprite_by_file_name(new_sprite_file_name: String) -> void:
+	spritesheet_file_name = new_sprite_file_name
+	sprite_changed.emit(spritesheet_file_name)
+	data_updated.emit(self)
+
+
+func set_sprite_palette(new_palette_id: int) -> void:
+	palette_id = new_palette_id
+	palette_changed.emit(palette_id, palette_id_override)
+	data_updated.emit(self)
+
+
+func set_sprite_palette_override(new_palette_id: int) -> void:
+	palette_id_override = new_palette_id
+	palette_changed.emit(palette_id, palette_id_override)
+	data_updated.emit(self)
+
+
 # TODO should these be triggered actions on the statuses?
 func process_hp_changed(stat_value: StatValue) -> void:	
 	@warning_ignore("integer_division")
@@ -927,8 +945,8 @@ func equip_ability(slot: AbilitySlot, ability: Ability) -> void:
 	update_passive_effects()
 
 
-func equip_skillset(skillset_idx: int, new_skillset: Skillset) -> void:
-	skillsets_names[skillset_idx] = new_skillset.unique_name
+func equip_skillset(skillset_idx: int, new_skillset_name: String) -> void:
+	skillsets_names[skillset_idx] = new_skillset_name
 	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
 	update_available_actions(all_passive_effects)
 	data_updated.emit(self)
@@ -977,15 +995,25 @@ func set_job(new_job_name: String) -> void:
 	job_unique_name = new_job_name
 	job_data = GameData.get_job(new_job_name)
 	
-	var new_skillset: Skillset = GameData.get_skillset(job_data.skillset_unique_name)
+	var new_skillset_name: String = job_data.skillset_unique_name
 	
 	# if the new job's skillset is already equipped in a different slot, swap it to the first slot
-	var skillset_current_slot_idx: int = skillsets_names.find(new_skillset.unique_name)
+	var skillset_current_slot_idx: int = skillsets_names.find(new_skillset_name)
 	if skillset_current_slot_idx > 0:
 		skillsets_names[skillset_current_slot_idx] = skillsets_names[0]
 
-	equip_skillset(0, GameData.get_skillset(job_data.skillset_unique_name))
+	equip_skillset(0, new_skillset_name)
+
+	var sprite_name: String = job_data.sprite_name
+	if (job_data.job_id >= 0x4a and job_data.job_id <= 0x5a or job_data.job_id == 0x5d) and stat_basis == StatBasis.FEMALE:
+		sprite_name = sprite_name.replace("_m", "_w")
+	set_sprite_by_file_name(sprite_name)
+	
+	if job_data.default_palette_idx != -1:
+		set_sprite_palette(job_data.default_palette_idx)
+
 	update_passive_effects()
+	job_changed.emit(new_job_name)
 
 
 func update_map_paths(map_tiles: Dictionary[Vector2i, Array], units: Array[UnitData], max_cost: int = 9999) -> void:

@@ -283,7 +283,7 @@ func update_unit_ability(unit: UnitData, slot: AbilitySlot, new_ability: Ability
 
 
 func update_unit_skillset(unit: UnitData, skillset_idx: int, new_skillset: Skillset) -> void:
-	unit.equip_skillset(skillset_idx, new_skillset)
+	unit.equip_skillset(skillset_idx, new_skillset.unique_name)
 	desetup_skillset_select()
 
 
@@ -456,9 +456,7 @@ func update_unit_dragging(unit: UnitData, event: InputEvent) -> void:
 func export_scenario() -> void:
 	scenario.units_data.clear()
 	for unit: UnitData in battle_manager.units:
-		var new_unit_data: UnitData = UnitData.new()
-		new_unit_data.init_from_unit(unit)
-		scenario.units_data.append(new_unit_data)
+		scenario.units_data.append(unit)
 	Utilities.save_json(scenario)
 	RomReader.scenarios[scenario.unique_name] = scenario
 
