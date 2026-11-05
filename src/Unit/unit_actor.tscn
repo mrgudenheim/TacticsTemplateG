@@ -92,10 +92,10 @@ render_priority = 1
 texture = SubResource("GradientTexture2D_6vwfi")
 script = ExtResource("9_shadow_script")
 
-[node name="UnitAnimationManager" type="Node3D" parent="CharacterBody3D" unique_id=1134309126 node_paths=PackedStringArray("unit_data", "unit_sprites_manager")]
+[node name="UnitAnimationManager" type="Node3D" parent="CharacterBody3D" unique_id=1134309126 node_paths=PackedStringArray("unit_actor", "unit_sprites_manager")]
 transform = Transform3D(1, 0, 0, 0, 0.894934, 0.446198, 0, -0.446198, 0.894934, 0, 0.643, 0)
 script = ExtResource("3_l3ow2")
-unit_data = NodePath("../..")
+unit_actor = NodePath("../..")
 unit_sprites_manager = NodePath("UnitSpritesManager")
 weapon_sheathe_check2_delay = 0
 
