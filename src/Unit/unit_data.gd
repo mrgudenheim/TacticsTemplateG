@@ -396,7 +396,7 @@ func update_actions() -> void:
 	actions_data.clear()
 	
 	# show list UI for selecting an action TODO should action list be toggle/button group?
-	# init_available_actions(get_all_passive_effects())
+	# update_available_actions(get_all_passive_effects())
 	for action: Action in actions:
 		var modified_action: Action = Action.get_modified_action(action, self)
 		var new_action_instance: ActionInstance = ActionInstance.new(modified_action, self, battle_manager)
@@ -466,7 +466,7 @@ func end_turn() -> void:
 		turn_ended.emit(self)
 
 
-func init_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
+func update_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
 	actions.clear()
 	actions.append(move_action)
 	actions.append_array(get_equipment_actions())
@@ -624,7 +624,7 @@ func update_passive_effects(exclude_passives: PackedStringArray = []) -> void:
 
 	update_prohibited_terrain(all_passive_effects)
 	update_terrain_costs(all_passive_effects)
-	init_available_actions(all_passive_effects)
+	update_available_actions(all_passive_effects)
 
 	if battle_manager != null:
 		if not battle_manager.battle_is_running:
@@ -877,7 +877,7 @@ func equip_ability(slot: AbilitySlot, ability: Ability) -> void:
 func equip_skillset(skillset_idx: int, new_skillset: Skillset) -> void:
 	skillsets_names[skillset_idx] = new_skillset.unique_name
 	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
-	set_available_actions(all_passive_effects)
+	update_available_actions(all_passive_effects)
 	data_updated.emit(self)
 
 
