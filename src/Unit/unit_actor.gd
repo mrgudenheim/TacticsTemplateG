@@ -65,6 +65,9 @@ static func instantiate() -> UnitActor:
 
 
 func _ready() -> void:
+	if unit_data == null:
+		unit_data = UnitData.new()
+	
 	var hp_bar: StatBar = add_stat_bar(UnitData.StatType.HP)
 	hp_bar.show_value = true
 	
@@ -84,8 +87,6 @@ func _ready() -> void:
 	icon2.material_override.set_shader_parameter("palette_colors", GameData.palettes["misc"].slice(5 * 16, 6 * 16))
 	icon2.material_override.set_shader_parameter("billboard_enabled", true)
 	cycle_status_icons()
-	
-	add_to_group("Units")
 
 	if not GameData.is_ready:
 		GameData.data_indexed.connect(initialize_unit)
@@ -95,6 +96,7 @@ func _ready() -> void:
 
 func bind_unit_data(new_unit_data: UnitData) -> void:
 	unit_data = new_unit_data
+	unit_data.unit_actor = self
 	unit_data.statuses_updated.connect(update_status_visuals)
 
 
