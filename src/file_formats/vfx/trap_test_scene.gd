@@ -84,7 +84,7 @@ func _spawn_squire() -> void:
 	units_container.add_child(test_unit)
 	test_unit.initialize_unit()
 	test_unit.char_body.global_position = target_world_pos + Vector3(0, 0.25, 0)
-	test_unit.stat_basis = UnitActor.StatBasis.MALE
+	test_unit.stat_basis = UnitData.StatBasis.MALE
 	test_unit.set_job("squire_06") # Squire
 	test_unit.set_sprite_palette(0)
 	test_unit.update_unit_facing(Vector3.FORWARD)
