@@ -482,6 +482,7 @@ func process_clock_tick() -> void:
 					return
 			
 			clear_action_buttons()
+			unit.actions_updated.disconnect(update_action_buttons)
 			active_unit = null
 			
 			if check_end_conditions():
@@ -531,6 +532,7 @@ func start_units_turn(unit: UnitData) -> void:
 	
 	if not unit.is_defeated:
 		camera_controller.follow_node = unit.unit_actor.char_body
+		unit.actions_updated.connect(update_action_buttons)
 	
 	await unit.start_turn()
 
@@ -538,6 +540,19 @@ func start_units_turn(unit: UnitData) -> void:
 func clear_action_buttons() -> void:
 	for child: Node in action_button_list.get_children():
 		child.queue_free()
+
+
+func update_action_buttons(unit: UnitData) -> void:
+	clear_action_buttons()
+	
+	# show list UI for selecting an action TODO should action list be toggle/button group?
+	for action_instance: ActionInstance in unit.actions_data.values():
+		var new_action_button: ActionButton = ActionButton.new(action_instance)
+		action_button_list.add_child(new_action_button)
+		
+		# disable buttons for actions that are not usable - TODO provide hints why action is not usable - not enough mp, already moved, etc.
+		if not action_instance.is_usable():
+			new_action_button.disabled = true
 
 
 func get_scaled_collision_shape(mesh: Mesh, collision_scale: Vector3) -> ConcavePolygonShape3D:

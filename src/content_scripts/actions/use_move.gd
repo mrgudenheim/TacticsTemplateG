@@ -8,7 +8,7 @@ func use(action_instance: ActionInstance) -> void:
 	await travel_path(action_instance.user, map_path)
 	
 	action_instance.battle_manager.update_units_pathfinding()
-	action_instance.action_completed.emit(action_instance.battle_manager)
+	action_instance.action_completed.emit()
 
 
 func walk_to_tile(user: UnitActor, to_tile: TerrainTile) -> void:

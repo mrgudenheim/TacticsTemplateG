@@ -1,7 +1,7 @@
 class_name ActionInstance
 extends RefCounted
 
-signal action_completed(battle_manager: BattleManager)
+signal action_completed()
 signal tile_hovered(tile: TerrainTile, action_instance: ActionInstance)
 
 var action: Action
@@ -355,7 +355,7 @@ func queue_use() -> void:
 	battle_manager.game_state_label.text = user.job_nickname + "-" + user.unit_nickname + " using " + action.display_name
 	battle_manager.safe_to_load_map = false
 	
-	user.clear_action_buttons(battle_manager)
+	battle_manager.clear_action_buttons()
 	if deduct_action_points:
 		pay_action_point_costs()
 	face_target()
@@ -371,7 +371,7 @@ func queue_use() -> void:
 		await user.add_status(charging_status)
 		
 		stop_targeting()
-		action_completed.emit(battle_manager)
+		action_completed.emit()
 	else:
 		await use()
 	battle_manager.safe_to_load_map = true
@@ -745,4 +745,4 @@ func apply_standard() -> void:
 		user.is_ending_turn = true
 		#action_instance.user.end_turn()
 
-	action_completed.emit(battle_manager)
+	action_completed.emit()
