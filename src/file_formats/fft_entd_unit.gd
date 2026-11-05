@@ -169,7 +169,7 @@ func get_unit_data() -> UnitData:
 	if sprite_set_id == 0x81:
 		new_sprite_id += 1
 	var new_sprite_file_name_idx: int = RomReader.spr_file_name_to_id.values().find(new_sprite_id)
-	unit_data.spritesheeet_file_name = RomReader.spr_file_name_to_id.keys()[new_sprite_file_name_idx].to_lower().trim_suffix(".spr")
+	unit_data.spritesheet_file_name = RomReader.spr_file_name_to_id.keys()[new_sprite_file_name_idx].to_lower().trim_suffix(".spr")
 	unit_data.palette_id = palette
 	if sprite_set_id < 0x80:
 		unit_data.palette_id = 0
@@ -223,7 +223,7 @@ func get_unit_data() -> UnitData:
 	unit_data.stats[UnitData.StatType.LEVEL].set_value(unit_data.level)
 	UnitData.generate_leveled_raw_stats(unit_data.gender as UnitData.StatBasis, unit_data.level, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
 	var use_higher_stat_values: bool = false
-	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(unit_data.spritesheeet_file_name): # lucavi
+	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(unit_data.spritesheet_file_name): # lucavi
 		use_higher_stat_values = true
 	UnitData.calc_battle_stats(RomReader.jobs_data.values()[main_job], unit_data.stats_raw, unit_data.stats, true, use_higher_stat_values)
 

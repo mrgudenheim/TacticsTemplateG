@@ -16,6 +16,7 @@ signal completed_move(unit_data: UnitData, tile_moved: int) # emited in use_move
 signal paths_updated()
 signal turn_started(unit_data: UnitData)
 signal turn_ended(unit_data: UnitData)
+
 signal job_changed(new_job_name: String)
 signal sprite_changed(new_sprite_name: String)
 signal palette_changed(new_palette_id: int, new_palette_override_id: int)
@@ -89,7 +90,7 @@ const FACING_VECTORS: Dictionary[GameData.Directions, Vector3] = {
 @export var zodiac: UnitData.Zodiac = UnitData.Zodiac.ARIES
 @export var job_unique_name: String = "job_unique_name"
 @export var controller: UnitData.Controller = UnitData.Controller.AI # 0 = AI, 1 = Player, etc.
-@export var spritesheeet_file_name: String = "spritesheeet_file_name.spr" # TODO get sprite file name?
+@export var spritesheet_file_name: String = "spritesheet_file_name.spr" # TODO get sprite file name?
 @export var palette_id: int = 0
 @export var palette_id_override: int = -1
 @export var facing_direction: GameData.Directions = GameData.Directions.NORTH

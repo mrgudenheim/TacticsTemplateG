@@ -311,7 +311,7 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> UnitActor:
 	# new_unit.update_unit_facing(UnitActor.FacingVectors[UnitActor.Facings[unit_data.facing_direction]])
 	#new_unit.set_job_id(RomReader.jobs_data[unit_data.job_unique_name].job_id)
 	new_unit.set_job(unit_data.job_unique_name)
-	new_unit.set_sprite_by_file_name(unit_data.spritesheeet_file_name)
+	new_unit.set_sprite_by_file_name(unit_data.spritesheet_file_name)
 	new_unit.set_sprite_palette(unit_data.palette_id)
 	new_unit.update_unit_facing(UnitData.FACING_VECTORS[unit_data.facing_direction])
 	# new_unit.gender = UnitActor.Gender[unit_data.gender]
