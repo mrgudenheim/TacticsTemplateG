@@ -30,7 +30,7 @@ enum Strategy {
 func choose_action(unit: UnitData) -> void:
 	unit.battle_manager.game_state_label.text = unit.job_data.display_name + "-" + unit.display_name + " AI choosing action"
 	
-	if Vector2i(floori(unit.char_body.position.x), floori(unit.char_body.position.z)) != unit.terrain_tile_position.location:
+	if Vector2i(floori(unit.unit_actor.char_body.position.x), floori(unit.unit_actor.char_body.position.z)) != unit.terrain_tile_position.location:
 		push_error("UnitData position not equal to char body position")
 	
 	wait_action_instance = unit.actions_data[unit.wait_action.unique_name]
@@ -127,7 +127,7 @@ func choose_action(unit: UnitData) -> void:
 			unit.terrain_tile_position = original_tile
 			if unit.terrain_tile_position.location != original_tile_location:
 				push_error("UnitData position not reset during ai consideration")
-			if Vector2i(floori(unit.char_body.position.x), floori(unit.char_body.position.z)) != unit.terrain_tile_position.location:
+			if Vector2i(floori(unit.unit_actor.char_body.position.x), floori(unit.unit_actor.char_body.position.z)) != unit.terrain_tile_position.location:
 				push_error("UnitData position not equal to char body position")
 		
 		if best_move != null:

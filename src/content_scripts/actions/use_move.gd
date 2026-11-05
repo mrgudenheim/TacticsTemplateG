@@ -11,25 +11,25 @@ func use(action_instance: ActionInstance) -> void:
 	action_instance.action_completed.emit()
 
 
-func walk_to_tile(user: UnitActor, to_tile: TerrainTile) -> void:
-	var distance_to_move: float = user.tile_position.location.distance_to(to_tile.xz_location)
-	var immediate_path: Vector3 = to_tile.get_world_position() - user.tile_position.get_world_position()
+func walk_to_tile(user: UnitData, to_tile: TerrainTile) -> void:
+	var distance_to_move: float = user.terrain_tile_position.location.distance_to(to_tile.xz_location)
+	var immediate_path: Vector3 = to_tile.get_world_position() - user.terrain_tile_position.get_world_position()
 	if distance_to_move > 1.1: # TODO is leaping the only case where moving more than 1 distance at a time?
-		user.char_body.velocity.y = 1.1 * distance_to_move # hop over intermediate tiles
-	elif to_tile.height_mid - user.tile_position.height_mid >= 3:
+		user.unit_actor.char_body.velocity.y = 1.1 * distance_to_move # hop over intermediate tiles
+	elif to_tile.height_mid - user.terrain_tile_position.height_mid >= 3:
 		user.update_unit_facing(immediate_path)
-		var vert_distance: float = (to_tile.height_mid - user.tile_position.height_mid) * FftMapData.HEIGHT_SCALE
-		user.char_body.velocity.y = sqrt(vert_distance) * 4.5 # jump for steep changes in height, to get to bridges that don't have walls
+		var vert_distance: float = (to_tile.height_mid - user.terrain_tile_position.height_mid) * FftMapData.HEIGHT_SCALE
+		user.unit_actor.char_body.velocity.y = sqrt(vert_distance) * 4.5 # jump for steep changes in height, to get to bridges that don't have walls
 		await user.get_tree().create_timer(vert_distance * 0.19).timeout
 	else:
 		user.current_animation_id_fwd = user.walk_to_animation_id
-	await process_physics_move(user, to_tile.get_world_position())
-	user.tile_position = to_tile
+	await process_physics_move(user.unit_actor, to_tile.get_world_position())
+	user.terrain_tile_position = to_tile
 	
-	while not user.char_body.is_on_floor():
+	while not user.unit_actor.char_body.is_on_floor():
 		await user.get_tree().process_frame
 	
-	user.tile_position = to_tile
+	user.terrain_tile_position = to_tile
 	user.reached_tile.emit()
 
 
@@ -65,9 +65,9 @@ func process_physics_move(user: UnitActor, target_position: Vector3) -> void:
 	#return false
 
 
-func travel_path(user: UnitActor, path: Array[TerrainTile]) -> void:
-	user.is_traveling_path = true
-	var initial_pos: Vector2i = user.tile_position.location
+func travel_path(user: UnitData, path: Array[TerrainTile]) -> void:
+	user.unit_actor.is_traveling_path = true
+	var initial_pos: Vector2i = user.terrain_tile_position.location
 	for tile: TerrainTile in path:
 		await walk_to_tile(user, tile) # TODO handle movement types other than walking
 	
@@ -75,8 +75,8 @@ func travel_path(user: UnitActor, path: Array[TerrainTile]) -> void:
 	#animation_manager.global_animation_ptr_id = current_idle_animation_id
 	#user.current_animation_id_fwd = user.current_idle_animation_id
 	user.set_base_animation_ptr_id(user.current_idle_animation_id)
-	user.is_traveling_path = false
-	var distance_moved: Vector2i = (user.tile_position.location - initial_pos).abs()
+	user.unit_actor.is_traveling_path = false
+	var distance_moved: Vector2i = (user.terrain_tile_position.location - initial_pos).abs()
 	var tiles_moved: int = distance_moved.x + distance_moved.y
 	# user.completed_move.emit(user, tiles_moved)
 	for connection: Dictionary in user.completed_move.get_connections():
