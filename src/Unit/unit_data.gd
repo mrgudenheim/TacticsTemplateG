@@ -2,7 +2,6 @@ class_name UnitData
 extends Resource
 
 signal data_updated(unit_data: UnitData)
-signal knocked_out(unit_data: UnitData)
 signal statuses_updated()
 signal actions_updated(unit_data: UnitData)
 @warning_ignore("unused_signal")

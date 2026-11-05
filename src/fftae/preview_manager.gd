@@ -90,7 +90,8 @@ func enable_ui() -> void:
 func _on_weapon_options_item_selected(index: int) -> void:
 	#unit.animation_manager._on_weapon_options_item_selected(index)
 	#unit.animation_manager.weapon_id = index
-	unit.set_primary_weapon(weapon_options.get_item_text(index))
+	var item: ItemData = GameData.get_item(weapon_options.get_item_text(index))
+	unit.unit_data.equip_item(unit.unit_data.equip_slots[0], item)
 	#unit.debug_menu.weapon_options.select(index)
 
 

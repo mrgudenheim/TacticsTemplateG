@@ -342,7 +342,6 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> UnitActor:
 	new_unit.ability_slots = unit_data.ability_slots
 	new_unit.primary_weapon_assigned.connect(func(_weapon_unique_name: String) -> void: new_unit.update_actions(self))
 	new_unit.equip_slots = unit_data.equip_slots
-	new_unit.set_primary_weapon(unit_data.equip_slots[0].item_unique_name)
 	#var unit_actions: Array[Action] = new_unit.get_skillset_actions()
 	#if unit_actions.any(func(action: Action): return not action.required_equipment_type.is_empty()):
 		#while not unit_actions.any(func(action: Action): return action.required_equipment_type.has(new_unit.primary_weapon.item_type)):
