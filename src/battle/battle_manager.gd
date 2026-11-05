@@ -244,12 +244,12 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	# 	new_unit.set_sprite_palette(clampi(teams.find(team), 0, 8))
 	new_unit.update_unit_facing([Vector3.FORWARD, Vector3.BACK, Vector3.LEFT, Vector3.RIGHT].pick_random())
 	new_unit.stats[UnitData.StatType.LEVEL].set_value(level)
-	UnitActor.generate_leveled_raw_stats(new_unit.stat_basis, level, new_unit.job_data, new_unit.stats_raw)
+	UnitData.generate_leveled_raw_stats(new_unit.stat_basis, level, new_unit.job_data, new_unit.stats_raw)
 	
 	var use_higher_stat_values: bool = false
 	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(new_unit.animation_manager.global_seq.file_name): # lucavi
 		use_higher_stat_values = true
-	UnitActor.calc_battle_stats(new_unit.job_data, new_unit.stats_raw, new_unit.stats, true, use_higher_stat_values)
+	UnitData.calc_battle_stats(new_unit.job_data, new_unit.stats_raw, new_unit.stats, true, use_higher_stat_values)
 	
 	camera_controller.rotated.connect(new_unit.char_body.set_rotation_degrees) # have sprite update as camera rotates
 	new_unit.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
