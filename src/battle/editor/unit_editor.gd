@@ -1,10 +1,10 @@
 class_name UnitEditor
 extends Container
 
-signal job_select_pressed(unit: UnitActor)
-signal item_select_pressed(unit: UnitActor, slot: EquipmentSlot)
-signal ability_select_pressed(unit: UnitActor, slot: AbilitySlot)
-signal skillset_select_pressed(unit: UnitActor, skillset_slot_idx: int)
+signal job_select_pressed(unit: UnitData)
+signal item_select_pressed(unit: UnitData, slot: EquipmentSlot)
+signal ability_select_pressed(unit: UnitData, slot: AbilitySlot)
+signal skillset_select_pressed(unit: UnitData, skillset_slot_idx: int)
 
 @export var sprite_rect: TextureRect
 @export var sprite_button: TextureButton
@@ -47,14 +47,14 @@ signal skillset_select_pressed(unit: UnitActor, skillset_slot_idx: int)
 @export var strengthen_elements_label: Label
 
 @export var unit_scene: PackedScene
-var unit: UnitActor
+var unit: UnitData
 
 
 func _ready() -> void:
 	sprite_button.material = sprite_button.material.duplicate() # duplicate becaues each sprite needs its own unique shader parameter for color palette
 
 
-func setup(new_unit: UnitActor) -> void:
+func setup(new_unit: UnitData) -> void:
 	if unit != null:
 		if unit.data_updated.is_connected(update_ui):
 			unit.data_updated.disconnect(update_ui)
@@ -77,14 +77,14 @@ func setup(new_unit: UnitActor) -> void:
 	else:
 		controller_option_button.select(1)
 
-	hp_bar.set_stat(str(UnitActor.StatType.keys()[UnitActor.StatType.HP]), new_unit.stats[UnitActor.StatType.HP])
+	hp_bar.set_stat(str(UnitData.StatType.keys()[UnitData.StatType.HP]), new_unit.stats[UnitData.StatType.HP])
 	hp_bar.name_label.position.x = 5
 	hp_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	hp_bar.value_label.position.x = hp_bar.size.x - hp_bar.value_label.size.x - 5
 	hp_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	# hp_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
 	
-	mp_bar.set_stat(str(UnitActor.StatType.keys()[UnitActor.StatType.MP]), new_unit.stats[UnitActor.StatType.MP])
+	mp_bar.set_stat(str(UnitData.StatType.keys()[UnitData.StatType.MP]), new_unit.stats[UnitData.StatType.MP])
 	mp_bar.fill_color = Color.INDIAN_RED
 	mp_bar.name_label.position.x = 5
 	mp_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -92,7 +92,7 @@ func setup(new_unit: UnitActor) -> void:
 	mp_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	# mp_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
 
-	ct_bar.set_stat(str(UnitActor.StatType.keys()[UnitActor.StatType.CT]), new_unit.stats[UnitActor.StatType.CT])
+	ct_bar.set_stat(str(UnitData.StatType.keys()[UnitData.StatType.CT]), new_unit.stats[UnitData.StatType.CT])
 	ct_bar.fill_color = Color.WEB_GREEN
 	ct_bar.name_label.position.x = 5
 	ct_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -128,8 +128,8 @@ func setup(new_unit: UnitActor) -> void:
 	update_ui(new_unit)
 
 
-func update_ui(new_unit: UnitActor) -> void:
-	# update_stat_label(level_label, unit, UnitActor.StatType.LEVEL)
+func update_ui(new_unit: UnitData) -> void:
+	# update_stat_label(level_label, unit, UnitData.StatType.LEVEL)
 	var atlas_texture: AtlasTexture = sprite_button.texture_normal
 	var unit_sprite: Sprite3D = new_unit.animation_manager.unit_sprites_manager.sprite_primary
 	atlas_texture.atlas = unit_sprite.texture
@@ -138,17 +138,17 @@ func update_ui(new_unit: UnitActor) -> void:
 	sprite_button.material.set_shader_parameter("palette_colors", spritesheet_data.color_palette.slice(new_unit.sprite_palette_id * 16, (new_unit.sprite_palette_id + 1) * 16))
 
 	job_button.text = new_unit.job_data.display_name
-	level_spinbox.value = new_unit.stats[UnitActor.StatType.LEVEL].get_modified_value()
+	level_spinbox.value = new_unit.stats[UnitData.StatType.LEVEL].get_modified_value()
 
-	team_option_button.select(new_unit.team_id)
+	team_option_button.select(new_unit.team_idx)
 	
-	update_stat_label(pa_label, new_unit, UnitActor.StatType.PHYSICAL_ATTACK)
-	update_stat_label(ma_label, new_unit, UnitActor.StatType.MAGIC_ATTACK)
-	update_stat_label(brave_label, new_unit, UnitActor.StatType.BRAVE)
-	update_stat_label(faith_label, new_unit, UnitActor.StatType.FAITH)
-	update_stat_label(move_label, new_unit, UnitActor.StatType.MOVE)
-	update_stat_label(jump_label, new_unit, UnitActor.StatType.JUMP)
-	update_stat_label(speed_label, new_unit, UnitActor.StatType.SPEED)
+	update_stat_label(pa_label, new_unit, UnitData.StatType.PHYSICAL_ATTACK)
+	update_stat_label(ma_label, new_unit, UnitData.StatType.MAGIC_ATTACK)
+	update_stat_label(brave_label, new_unit, UnitData.StatType.BRAVE)
+	update_stat_label(faith_label, new_unit, UnitData.StatType.FAITH)
+	update_stat_label(move_label, new_unit, UnitData.StatType.MOVE)
+	update_stat_label(jump_label, new_unit, UnitData.StatType.JUMP)
+	update_stat_label(speed_label, new_unit, UnitData.StatType.SPEED)
 
 	# update evade
 	var unit_passive_effects: Array[PassiveEffect] = new_unit.get_all_passive_effects()
@@ -314,15 +314,15 @@ func update_passive_effect_list_label(starting_text: String, text_list: PackedSt
 		passive_effect_container.add_child(new_label)
 
 
-func update_stat_label(stat_label: Label, new_unit: UnitActor, stat_type: UnitActor.StatType) -> void:
-	var stat_name: String = UnitActor.StatType.find_key(stat_type).to_pascal_case()
+func update_stat_label(stat_label: Label, new_unit: UnitData, stat_type: UnitData.StatType) -> void:
+	var stat_name: String = UnitData.StatType.find_key(stat_type).to_pascal_case()
 	var stat: StatValue = new_unit.stats[stat_type]
 	var stat_value: int = stat.get_modified_value()
 	# stat_label.text = stat_name + ": " + str(roundi(stat_value)) + "/" + str(roundi(stat.max_value))
 	stat_label.text = stat_name + ": " + str(roundi(stat_value)) # + "/" + str(roundi(stat.max_value))
 
 
-func get_total_evade_factor(new_unit: UnitActor, unit_passive_effects: Array[PassiveEffect], evade_type: EvadeData.EvadeType, evade_direction: EvadeData.Directions) -> int:
+func get_total_evade_factor(new_unit: UnitData, unit_passive_effects: Array[PassiveEffect], evade_type: EvadeData.EvadeType, evade_direction: EvadeData.Directions) -> int:
 	var evade_values: Dictionary[EvadeData.EvadeSource, int] = new_unit.get_evade_values(evade_type, evade_direction)
 
 	var total_evade_factor: float = 1.0
@@ -353,7 +353,7 @@ func set_palette(new_palette_idx: int) -> void:
 
 
 func set_team(new_team_idx: int) -> void:
-	unit.team_id = new_team_idx
+	unit.team_idx = new_team_idx
 	
 	if new_team_idx >= unit.global_battle_manager.teams.size():
 		unit.global_battle_manager.teams.resize(new_team_idx + 1)
@@ -374,11 +374,11 @@ func set_controller(new_controller_idx: int) -> void:
 		# TODO handle multiple player teams
 
 
-func update_level(new_unit: UnitActor, new_level: int) -> void:
-	new_unit.stats[UnitActor.StatType.LEVEL].set_value(new_level)
-	UnitActor.generate_leveled_raw_stats(new_unit.stat_basis, new_level, new_unit.job_data, new_unit.stats_raw)
+func update_level(new_unit: UnitData, new_level: int) -> void:
+	new_unit.stats[UnitData.StatType.LEVEL].set_value(new_level)
+	UnitData.generate_leveled_raw_stats(new_unit.stat_basis, new_level, new_unit.job_data, new_unit.stats_raw)
 	
 	var use_higher_stat_values: bool = false
 	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(new_unit.animation_manager.global_seq.file_name): # lucavi
 		use_higher_stat_values = true
-	UnitActor.calc_battle_stats(new_unit.job_data, new_unit.stats_raw, new_unit.stats, true, use_higher_stat_values)
+	UnitData.calc_battle_stats(new_unit.job_data, new_unit.stats_raw, new_unit.stats, true, use_higher_stat_values)
