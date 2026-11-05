@@ -16,6 +16,7 @@ signal unit_input_event(unit_data: UnitActor, event: InputEvent)
 static var unit_scene: PackedScene = load("uid://dkudrb304m7t1")
 
 var global_battle_manager: BattleManager
+var unit_data: UnitData
 
 @export var char_body: CharacterBody3D
 @export var animation_manager: UnitAnimationManager
@@ -64,20 +65,16 @@ static func instantiate() -> UnitActor:
 
 
 func _ready() -> void:
-	stats[StatType.HP_MAX].value_changed.connect(stats[StatType.HP].update_max_from_clamped_value)
-	stats[StatType.MP_MAX].value_changed.connect(stats[StatType.MP].update_max_from_clamped_value)
-	stats[StatType.HP].value_changed.connect(hp_changed)
-
-	var hp_bar: StatBar = add_stat_bar(StatType.HP)
+	var hp_bar: StatBar = add_stat_bar(UnitData.StatType.HP)
 	hp_bar.show_value = true
 	
-	var mp_bar: StatBar = add_stat_bar(StatType.MP)
+	var mp_bar: StatBar = add_stat_bar(UnitData.StatType.MP)
 	mp_bar.fill_color = Color.INDIAN_RED
 	mp_bar.show_value = true
 
-	var ct_bar: StatBar = add_stat_bar(StatType.CT)
+	var ct_bar: StatBar = add_stat_bar(UnitData.StatType.CT)
 	ct_bar.visual_max = 100.0
-	ct_bar.update_stat(stats[StatType.CT])
+	ct_bar.update_stat(unit_data.stats[UnitData.StatType.CT])
 	ct_bar.fill_color = Color.WEB_GREEN
 	ct_bar.show_value = true
 	
@@ -94,6 +91,11 @@ func _ready() -> void:
 		GameData.data_indexed.connect(initialize_unit)
 	else:
 		initialize_unit()
+
+
+func bind_unit_data(new_unit_data: UnitData) -> void:
+	unit_data = new_unit_data
+	unit_data.statuses_updated.connect(update_status_visuals)
 
 
 func _exit_tree() -> void:
@@ -330,15 +332,6 @@ func generate_random_abilities() -> void:
 	update_passive_effects()
 
 
-func update_equipable_item_types(all_passive_effects: Array[PassiveEffect]) -> void:
-	equipable_item_types = []
-	
-	for passive_effect: PassiveEffect in all_passive_effects:
-		equipable_item_types.append_array(passive_effect.added_equipment_types_equipable)
-	
-	equipable_item_types.append_array(job_data.equippable_item_types) # TODO job equipable item types should be in passive effect
-
-
 # TODO generate equipment https://ffhacktics.com/wiki/Calculate/Store_ENTD_Unit_Equipment
 func generate_equipment() -> void:
 	#if not ["TYPE1.SEQ", "TYPE3.SEQ"].has(animation_manager.global_seq.file_name): # monsters don't have equipment
@@ -361,20 +354,6 @@ func set_equipment_slot(slot: EquipmentSlot, item: ItemData) -> void:
 		set_primary_weapon(item.unique_name) # TODO update weapon data (palette, texture, eff_palette) correctly for either hand?
 	
 	update_passive_effects()
-
-
-func update_stat_modifiers(all_passive_effects: Array[PassiveEffect]) -> void:
-	# remove all to start fresh
-	for stat_type: StatType in StatType.values():
-		if not stats[stat_type].modifiers.is_empty():
-			stats[stat_type].modifiers.clear()
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		for stat_type: StatType in passive_effect.stat_modifiers.keys():
-			stats[stat_type].add_modifier(passive_effect.stat_modifiers[stat_type], false)
-	
-	for stat_type: StatType in StatType.values():
-		stats[stat_type].value_changed.emit(stats[stat_type])
 
 
 func get_item_unique_name_for_slot(slot_type: ItemData.SlotType, item_level: int, random: bool = false) -> String:
@@ -410,326 +389,8 @@ func equip_skillset(skillset_idx: int, new_skillset: Skillset) -> void:
 	data_updated.emit(self)
 
 
-func update_triggered_actions(all_passive_effects: Array[PassiveEffect]) -> void:
-	if job_data != null:
-		for ability: Ability in job_data.innate_abilities:
-			for triggered_action: TriggeredAction in ability.triggered_actions:
-				triggered_action.connect_trigger(self)
-	
-	for ability_slot: AbilitySlot in ability_slots:
-		for triggered_action: TriggeredAction in ability_slot.get_ability().triggered_actions:
-				triggered_action.connect_trigger(self)
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		for triggered_action: TriggeredAction in passive_effect.added_triggered_actions:
-			triggered_action.connect_trigger(self)
-
-
-func update_elemental_affinity(all_passive_effects: Array[PassiveEffect]) -> void:
-	elemental_absorb.clear()
-	elemental_cancel.clear()
-	elemental_half.clear()
-	elemental_strengthen.clear()
-	elemental_weakness.clear()
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		elemental_absorb = append_element_array_unique(elemental_absorb, passive_effect.element_absorb)
-		elemental_cancel = append_element_array_unique(elemental_cancel, passive_effect.element_cancel)
-		elemental_half = append_element_array_unique(elemental_half, passive_effect.element_half)
-		elemental_strengthen = append_element_array_unique(elemental_strengthen, passive_effect.element_strengthen)
-		elemental_weakness = append_element_array_unique(elemental_weakness, passive_effect.element_weakness)
-
-
-func append_element_array_unique(current_array: Array[Action.ElementTypes], array_to_append: Array[Action.ElementTypes]) -> Array[Action.ElementTypes]:
-	for element: Action.ElementTypes in array_to_append:
-		if not current_array.has(element):
-			current_array.append(element)
-	
-	return current_array
-
-
-func start_turn(battle_manager: BattleManager) -> void:
-	battle_manager.game_state_label.text = job_nickname + "-" + unit_nickname + " starting turn"
-	is_ending_turn = false
-
-	for status_effect: StatusEffect in current_statuses:
-		if status_effect.action_on_turn_start != "":
-			var action_instance: ActionInstance = ActionInstance.new(GameData.get_action(status_effect.action_on_turn_start), self, battle_manager)
-			action_instance.submitted_targets = [tile_position] # TODO allow other targeting for status actions on turn start
-			await action_instance.use()
-
-	# set CT
-	stats[StatType.CT].add_value(-100)
-	
-	turn_started.emit(self)
-
-	await update_actions(battle_manager)
-
-
-func update_actions(battle_manager: BattleManager) -> void:
-	if is_ending_turn:
-		await end_turn()
-		return
-	
-	if battle_manager.active_unit != self:
-		return
-	
-	battle_manager.game_state_label.text = job_nickname + "-" + unit_nickname + " updating available actions"
-	
-	clear_action_buttons(battle_manager)
-	
-	# get possible actions
-	for action_instance: ActionInstance in actions_data.values():
-		action_instance.clear()
-	
-	actions_data.clear()
-	
-	# show list UI for selecting an action TODO should action list be toggle/button group?
-	# set_available_actions(get_all_passive_effects())
-	for action: Action in actions:
-		var modified_action: Action = Action.get_modified_action(action, self)
-		var new_action_instance: ActionInstance = ActionInstance.new(modified_action, self, battle_manager)
-		actions_data[modified_action.unique_name] = new_action_instance
-		
-		if new_action_instance.is_usable():
-			await new_action_instance.update_potential_targets()
-		new_action_instance.action_completed.connect(update_actions)
-	
-	update_action_buttons(battle_manager)
-	
-	await select_first_action()
-
-
-func set_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
-	actions.clear()
-	actions.append(move_action)
-	actions.append(get_attack_action())
-	actions.append_array(get_skillset_actions()) # TODO move to skillset ability
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		for action: Action in passive_effect.added_actions:
-			if not actions.has(action):
-				actions.append(action)
-	
-	actions.append(wait_action)
-
-
-func get_skillsets() -> Array[Skillset]:
-	var skillsets: Array[Skillset] = []
-	for skillset_name: String in skillsets_names:
-		if skillset_name != null and not skillset_name.is_empty():
-			skillsets.append(GameData.get_skillset(skillset_name))
-	
-	return skillsets
-
-
-func get_skillset_actions() -> Array[Action]:
-	var action_list: Array[Action] = []
-	for skillset: Skillset in get_skillsets():
-		for ability_name: String in skillset.ability_names:
-			var ability_is_action: bool = not [Ability.SlotType.REACTION, Ability.SlotType.SUPPORT, Ability.SlotType.MOVEMENT].has(GameData.get_ability(ability_name).slot_type)
-			if ability_is_action and GameData.action_paths.has(ability_name):
-				var new_action: Action = GameData.get_action(ability_name)
-				action_list.append(new_action)
-	return action_list
-
-
-func clear_action_buttons(battle_manager: BattleManager) -> void:
-	for child: Node in battle_manager.action_button_list.get_children():
-		child.queue_free()
-
-
-func update_action_buttons(battle_manager: BattleManager) -> void:
-	# show list UI for selecting an action TODO should action list be toggle/button group?
-	for action_instance: ActionInstance in actions_data.values():
-		var new_action_button: ActionButton = ActionButton.new(action_instance)
-		battle_manager.action_button_list.add_child(new_action_button)
-		
-		# disable buttons for actions that are not usable - TODO provide hints why action is not usable - not enough mp, already moved, etc.
-		if not action_instance.is_usable():
-			new_action_button.disabled = true
-
-
-func select_first_action() -> void:
-	# select first usable action by default (usually Move)
-	active_action = null
-	if global_battle_manager.active_unit != self: # TODO improve game flow to prevent this state from ever occuring
-		return
-	
-	for action_instance: ActionInstance in actions_data.values():
-		if action_instance.is_usable() and action_instance != actions_data[wait_action.unique_name]:
-			active_action = action_instance
-			#await active_action.update_potential_targets() # already initialized in update_actions
-			if not is_ai_controlled:
-				active_action.start_targeting()
-			break
-	
-	# end turn when no actions left
-	if active_action == null or is_defeated:
-		await end_turn()
-	else:
-		if is_ai_controlled:
-			#await get_tree().process_frame
-			await ai_controller.choose_action(self)
-
-
-func end_turn() -> void:
-	#if UnitControllerRT.unit != self: # prevent accidentally ending a different units turn TODO what if the next turn is also this unit?
-		#return
-	
-	global_battle_manager.game_state_label.text = job_nickname + "-" + unit_nickname + " ending turn"
-	
-	if active_action != null:
-		active_action.clear()
-		active_action.stop_targeting()
-	
-	for status_effect: StatusEffect in current_statuses:
-		if status_effect.action_on_turn_end != "":
-			var action_instance: ActionInstance = ActionInstance.new(GameData.get_action(status_effect.action_on_turn_end), self, global_battle_manager)
-			action_instance.submitted_targets = [tile_position] # TODO allow other targeting for status actions on turn end
-			await action_instance.use()
-		
-		if status_effect.duration_type == StatusEffect.DurationType.TURNS:
-			status_effect.duration -= 1
-			if status_effect.duration < 0 and status_effect.action_on_complete != "":
-				var status_action_instance: ActionInstance = ActionInstance.new(GameData.get_action(status_effect.action_on_complete), self, global_battle_manager)
-				status_action_instance.submitted_targets.append(tile_position) # TODO get targets for status action
-				global_battle_manager.game_state_label.text = job_nickname + "-" + unit_nickname + " processing " + status_effect.status_effect_name + " completing"
-				await status_action_instance.use()
-
-				remove_status(status_effect)
-
-	# set some stats for next turn - move_points_remaining, action_points_remaining, etc.
-	move_points_remaining = move_points_start
-	action_points_remaining = action_points_start
-	
-	is_ending_turn = true
-	if is_instance_valid(global_battle_manager.active_unit) and global_battle_manager.active_unit != self: # prevent accidentally ending a different units turn TODO what if the next turn is also this unit?
-		push_error(job_nickname + "-" + unit_nickname + " trying to end turn, but active unit is: " + global_battle_manager.active_unit.name)
-	else:
-		clear_action_buttons(global_battle_manager)
-		global_battle_manager.active_unit = null
-		turn_ended.emit()
-
-
-# TODO should these be triggered actions on the statuses?
-func hp_changed(clamped_value: StatValue) -> void:
-	if global_battle_manager == null: # TODO should statuses be applied outside battle?
-		return
-	
-	@warning_ignore("integer_division")
-	var critical_hp_threshold: int = clamped_value.max_value / 5
-
-	if clamped_value.current_value == 0:
-		await add_status(GameData.get_status_effect("dead").duplicate(), true) # add dead
-	elif clamped_value.current_value < critical_hp_threshold: # critical
-		if not current_status_ids.has("critical"):
-			await add_status(GameData.get_status_effect("critical").duplicate()) # add critical
-	elif clamped_value.current_value >= critical_hp_threshold: # not critical
-		remove_status_id("critical") # remove critical
-
-
-func add_status(new_status: StatusEffect, ignore_immunity: bool = false) -> void:
-	if not ignore_immunity and immune_statuses.has(new_status.unique_name): # prevent application based on immune statuses
-		return
-	
-	for status_prevents_id: String in new_status.status_cant_stack: # prevent application based on flags
-		if current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_prevents_id):
-			return
-	
-	var existing_statuses: Array[StatusEffect] = current_statuses.filter(func(status: StatusEffect) -> bool: return status.status_id == new_status.status_id) # TODO use filter to allow for multiple of the same status, ex. double charging
-	if existing_statuses.size() >= new_status.num_allowed:
-		var temp_statuses: Array[StatusEffect] = existing_statuses.filter(func(status: StatusEffect) -> bool: return status.duration_type != StatusEffect.DurationType.PERMANENT)
-		if not temp_statuses.is_empty():
-			remove_status(temp_statuses[0]) # remove oldest temp status
-		else:
-			return # if already has max stack of status and they are all permanent
-	
-	current_statuses.append(new_status)
-	# use action_on_apply
-	if new_status.action_on_apply != "":
-		var action_instance: ActionInstance = ActionInstance.new(GameData.get_action(new_status.action_on_apply), self, global_battle_manager)
-		action_instance.submitted_targets = [tile_position] # TODO allow other targeting for status actions on turn end
-		await action_instance.use()
-	
-	for status_cancelled_id: String in new_status.status_cancels:
-		remove_status_id(status_cancelled_id)
-	
-	update_status_visuals()
-	update_passive_effects()
-
-
-func remove_status_id(status_removed_unique_name: String) -> void:
-	var statuses_to_remove: Array[StatusEffect] = []
-	statuses_to_remove.append_array(current_statuses.filter(func(status: StatusEffect) -> bool: return status.unique_name == status_removed_unique_name and status.duration_type != StatusEffect.DurationType.PERMANENT))
-	for status: StatusEffect in statuses_to_remove:
-		remove_status(status)
-
-
-func remove_status(status_removed: StatusEffect, remove_permanent: bool = false) -> void:
-	if status_removed.duration_type == StatusEffect.DurationType.PERMANENT and not remove_permanent:
-		push_error("Trying to removing Always status: " + status_removed.status_effect_name)
-		return
-	
-	for stat: StatType in status_removed.passive_effect.stat_modifiers.keys():
-		stats[stat].remove_modifier(status_removed.passive_effect.stat_modifiers[stat])
-	current_statuses.erase(status_removed)
-	update_status_visuals()
-	update_passive_effects()
-
-
 func get_nullify_statuses() -> Array[StatusEffect]:
 	return current_statuses.filter(func(status: StatusEffect) -> bool: return status.passive_effect.nullify_targeted)
-
-
-func update_permanent_statuses(all_passive_effects: Array[PassiveEffect]) -> void:
-	always_statuses.clear()
-	for passive_effect: PassiveEffect in all_passive_effects:
-		always_statuses.append_array(passive_effect.status_always)
-	
-	for status_unique_name: String in GameData.status_effect_paths.keys():
-		if immune_statuses.has(status_unique_name):
-			continue
-		
-		var num_should_have: int = 0
-
-		# check passive sources: equipment, job, abilities, statuses
-		for passive_effect: PassiveEffect in all_passive_effects:
-			num_should_have += passive_effect.status_always.count(status_unique_name)
-		
-		var current_permanent: Array[StatusEffect] = current_statuses.filter(func(status: StatusEffect) -> bool: return status.unique_name == status_unique_name and status.duration_type == StatusEffect.DurationType.PERMANENT)
-		var num_has: int = current_permanent.size()
-		var change: int = num_should_have - num_has
-		
-		if change == 0:
-			continue
-		elif change > 0:
-			for counter: int in change:
-				var new_status: StatusEffect = GameData.get_status_effect(status_unique_name).duplicate()
-				new_status.duration_type = StatusEffect.DurationType.PERMANENT
-				await add_status(new_status)
-		elif change < 0:
-			for counter: int in -change:
-				var status_to_remove: StatusEffect = current_permanent[-counter - 1] # remove most recent permanent stack
-				remove_status(status_to_remove, true)
-
-
-func update_immune_statuses(all_passive_effects: Array[PassiveEffect]) -> void:
-	immune_statuses.clear()
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		immune_statuses.append_array(passive_effect.status_immune)
-	
-	#for status: StatusEffect in current_statuses:
-		#if immune_statuses.has(status.unique_name):
-			#remove_status(status, true)
-
-
-func update_start_statuses(all_passive_effects: Array[PassiveEffect]) -> void:
-	start_statuses.clear()
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		start_statuses.append_array(passive_effect.status_start)
 
 
 func update_status_visuals() -> void:
@@ -1133,11 +794,6 @@ func set_primary_weapon(new_weapon_unique_name: String) -> void:
 	primary_weapon_assigned.emit(new_weapon_unique_name)
 
 
-func get_attack_action() -> Action:
-	# TODO handle two swords? other abilities?
-	return equip_slots[0].get_item().get_attack_action()
-
-
 # https://ffhacktics.com/wiki/Determine_Status_Bubble_Parameters
 # https://ffhacktics.com/wiki/Display_Status_Bubble
 func set_icon(new_icon_id: int) -> void:
@@ -1180,139 +836,6 @@ func cycle_status_icons() -> void:
 				#status_idx = (status_idx + 1) % current_statuses2.keys().size()
 			#else:
 				#status_idx = 0
-
-
-func get_evade(evade_source: EvadeData.EvadeSource, evade_type: EvadeData.EvadeType, evade_direction: EvadeData.Directions) -> int:
-	var evade: int = 0
-	
-	for evade_data: EvadeData in job_data.evade_datas:
-		if (evade_data.source == evade_source 
-				and evade_data.type == evade_type
-				and evade_data.directions.has(evade_direction)):
-			evade += evade_data.value
-	
-	for equip_slot: EquipmentSlot in equip_slots:
-		for evade_data: EvadeData in equip_slot.get_item().evade_datas:
-			if (evade_data.source == evade_source 
-					and evade_data.type == evade_type
-					and evade_data.directions.has(evade_direction)):
-				evade += evade_data.value
-	
-	# TODO evade from passive effects (Statuses, R/S/M)
-
-	return evade
-
-
-func get_evade_values(evade_type: EvadeData.EvadeType, evade_direction: EvadeData.Directions) -> Dictionary[EvadeData.EvadeSource, int]:
-	var evade_values: Dictionary[EvadeData.EvadeSource, int] = {}
-	for evade_source: EvadeData.EvadeSource in EvadeData.EvadeSource.values():
-		var evade_value: int = get_evade(evade_source, evade_type, evade_direction)
-		evade_values[evade_source] = evade_value
-	
-	return evade_values
-
-
-func update_passive_effects(exclude_passives: PackedStringArray = []) -> void:
-	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects(exclude_passives)
-
-	update_permanent_statuses(all_passive_effects)
-	update_immune_statuses(all_passive_effects)
-	update_start_statuses(all_passive_effects)
-
-	# update passives in case statuses changed
-	all_passive_effects = get_all_passive_effects(exclude_passives)
-	update_stat_modifiers(all_passive_effects)
-	update_elemental_affinity(all_passive_effects)
-	update_triggered_actions(all_passive_effects)
-	update_equipable_item_types(all_passive_effects)
-
-	update_prohibited_terrain(all_passive_effects)
-	update_terrain_costs(all_passive_effects)
-	set_available_actions(all_passive_effects)
-
-	if global_battle_manager != null:
-		if not global_battle_manager.battle_is_running:
-			stats[StatType.HP].set_value(stats[StatType.HP].max_value) # TODO only set hp = max hp when updating unit not in battle, update on passive effects
-			stats[StatType.MP].set_value(stats[StatType.MP].max_value)
-
-	data_updated.emit(self)
-
-
-func get_all_passive_effects(exclude_passives: PackedStringArray = []) -> Array[PassiveEffect]:
-	var all_passive_effects: Array[PassiveEffect] = []
-	
-	var native_passive_effects: Array[PassiveEffect] = get_native_passive_effects(exclude_passives)
-	var other_passive_effects: Array[PassiveEffect] = get_passive_effects_from_others(exclude_passives)
-	all_passive_effects.append_array(native_passive_effects)
-	all_passive_effects.append_array(other_passive_effects)
-	
-	# all_passive_effects.filter(func(passive_effect): return not exclude_passives.has(passive_effect.unique_name))
-
-	return all_passive_effects
-
-
-func get_native_passive_effects(exclude_passives: PackedStringArray = []) -> Array[PassiveEffect]:
-	var native_passive_effects: Array[PassiveEffect] = []
-	# TODO should all Objects that have PassiveEffect be changed to store Array[PassiveEffect]
-	# all_passive_effects.append_array(ability.passive_effects) 
-	
-	if job_data != null:
-		native_passive_effects.append_array(job_data.get_passive_effects())
-		for ability: Ability in job_data.innate_abilities:
-			native_passive_effects.append(ability.get_passive_effect())
-	
-	for ability_slot: AbilitySlot in ability_slots:
-		native_passive_effects.append(ability_slot.get_ability().get_passive_effect())
-	
-	for equipment_slot: EquipmentSlot in equip_slots:
-		native_passive_effects.append(equipment_slot.get_item().get_passive_effect())
-	
-	for status: StatusEffect in current_statuses:
-		native_passive_effects.append(status.passive_effect)
-	
-	if global_battle_manager != null:
-		native_passive_effects.append_array(global_battle_manager.global_passive_effects)
-
-	native_passive_effects = native_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return passive_effect.effect_range == 0)
-	native_passive_effects = native_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return not exclude_passives.has(passive_effect.unique_name))
-	
-	return native_passive_effects
-
-
-func get_passive_effects_from_others(exclude_passives: PackedStringArray = []) -> Array[PassiveEffect]:
-	var shared_passive_effects: Array[PassiveEffect] = []
-	
-	if global_battle_manager != null:
-		for unit: UnitActor in global_battle_manager.units:
-			var unit_passives: Array[PassiveEffect] = unit.get_native_passive_effects()
-			for passive_effect: PassiveEffect in unit_passives:
-				if passive_effect.effect_range == 0:
-					continue
-				
-				if not passive_effect.unit_team_filter.is_empty():
-					if not passive_effect.unit_team_filter.has(PassiveEffect.FilterTeam.FRIENDLY) and unit.team == self.team:
-						continue
-					elif not passive_effect.unit_team_filter.has(PassiveEffect.FilterTeam.ENEMY) and unit.team != self.team:
-						continue
-				
-				if not passive_effect.unit_basis_filter.is_empty():
-					if not passive_effect.unit_basis_filter.has(stat_basis):
-						continue
-				
-				var relative_position: Vector2i = (tile_position.location - unit.tile_position.location).abs()
-				var distance_to_unit: int = relative_position.x + relative_position.y
-				if distance_to_unit > passive_effect.effect_range:
-					continue
-				
-				var relative_height: float = absf(tile_position.height_mid - unit.tile_position.height_mid)
-				if relative_height > passive_effect.vertical_tolerance:
-					continue
-				
-				shared_passive_effects.append(passive_effect)
-	
-	shared_passive_effects = shared_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return not exclude_passives.has(passive_effect.unique_name))
-	
-	return shared_passive_effects
 
 
 func show_popup_text(text: String) -> void:
@@ -1468,39 +991,6 @@ func on_sprite_selected(new_spritesheet_name: String) -> void:
 		# 	set_base_animation_ptr_id(6) # triggers on_animation_changed
 		# else:
 		animation_manager.on_animation_changed()
-
-
-func update_prohibited_terrain(all_passive_effects: Array[PassiveEffect]) -> void:
-	var new_prohibited_terrain: Array[int] = []
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		for terrain_id: int in passive_effect.add_prohibited_terrain:
-			if not new_prohibited_terrain.has(terrain_id):
-				new_prohibited_terrain.append(terrain_id)
-	
-	for passive_effect: PassiveEffect in all_passive_effects:
-		for terrain_id: int in passive_effect.remove_prohibited_terrain:
-			if new_prohibited_terrain.has(terrain_id):
-				new_prohibited_terrain.erase(terrain_id)
-	
-	prohibited_terrain = new_prohibited_terrain
-
-
-func update_terrain_costs(all_passive_effects: Array[PassiveEffect]) -> void:
-	var new_terrain_costs: Dictionary[int, int] = {}
-
-	for passive_effect: PassiveEffect in all_passive_effects:
-		for terrain_id: int in passive_effect.terrain_cost_modifiers.keys():
-			var current_cost: int = 1
-			if new_terrain_costs.has(terrain_id):
-				current_cost = new_terrain_costs[terrain_id]
-			
-			new_terrain_costs[terrain_id] = passive_effect.terrain_cost_modifiers[terrain_id].apply(current_cost)
-	
-	for terrain_id: int in new_terrain_costs.keys():
-		new_terrain_costs[terrain_id] = max(0, new_terrain_costs[terrain_id]) # move is never negative
-
-	terrain_costs = new_terrain_costs
 
 
 func set_position_to_tile() -> void:
