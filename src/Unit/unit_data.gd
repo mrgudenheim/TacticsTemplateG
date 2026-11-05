@@ -16,6 +16,12 @@ signal completed_move(unit_data: UnitData, tile_moved: int) # emited in use_move
 signal paths_updated()
 signal turn_started(unit_data: UnitData)
 signal turn_ended(unit_data: UnitData)
+signal job_changed(new_job_name: String)
+signal sprite_changed(new_sprite_name: String)
+signal palette_changed(new_palette_id: int, new_palette_override_id: int)
+signal primary_weapon_changed(weapon_unique_name: String)
+signal facing_changed(new_facing: GameData.Directions)
+signal tile_position_changed(new_tile: TerrainTile)
 
 enum StatBasis {
 	MALE,
@@ -183,6 +189,19 @@ var game_data: GameData
 var battle_manager: BattleManager
 var unit_actor: UnitActor
 
+@export var current_animation_id_fwd: int = 6 # set based on current action
+@export var current_idle_animation_id: int = 6 # set based on status (critical, knocked out, etc.)
+# constants?
+@export var idle_walk_animation_id: int = 6 # 0x0c for flying sprites
+@export var walk_to_animation_id: int = 0x18 # 0x1e (30) for flying sprites
+@export var evade_animation_id: int = 0x30 # TODO fix for kanzen, arute?
+@export var taking_damage_animation_id: int = 0x32
+@export var knocked_out_animation_id: int = 0x34
+@export var heal_animation_id: int = 0x36
+@export var mid_jump_animation: int = 0x3e
+var submerged_depth: int = 0
+
+
 static func create_from_dictionary(property_dict: Dictionary) -> UnitData:
 	var new_unit_data: UnitData = UnitData.new()
 	for property_name: String in property_dict.keys():
@@ -339,6 +358,36 @@ func get_facing_vector() -> Vector3:
 	return FACING_VECTORS[facing_direction]
 
 
+func update_unit_facing(dir: Vector3) -> void:
+	var angle_deg: float = rad_to_deg(atan2(dir.z, dir.x))
+	angle_deg = fposmod(angle_deg, 359.99) + 45 # add 45 so EAST is just < 90 instead of < 45 and > 315
+	angle_deg = fposmod(angle_deg, 359.99) # correction for values over 360 due to adding 45
+	var new_facing: GameData.Directions = facing_direction
+	if angle_deg < 90:
+		new_facing = GameData.Directions.EAST
+	elif angle_deg < 180:
+		new_facing = GameData.Directions.NORTH
+	elif angle_deg < 270:
+		new_facing = GameData.Directions.WEST
+	elif angle_deg < 360:
+		new_facing = GameData.Directions.SOUTH
+	
+	if new_facing != facing_direction:
+		set_facing_direction(new_facing)
+
+
+func set_facing_direction(new_facing: GameData.Directions) -> void:
+	facing_direction = new_facing
+	facing_changed.emit(facing_direction)
+
+
+func set_terrain_tile_position(new_tile: TerrainTile) -> void:
+	terrain_tile_position = new_tile
+	if new_tile != null:
+		tile_position = Vector3i(new_tile.xz_location.x, new_tile.layer, new_tile.xz_location.y)
+	tile_position_changed.emit(terrain_tile_position)
+
+
 func is_defeated() -> bool:
 	return current_statuses.any(func(status: StatusEffect) -> bool: return status.counts_as_ko) # returns false when no statuses
 
@@ -432,7 +481,6 @@ func select_default_action() -> void:
 		await end_turn()
 	else:
 		if controller == Controller.AI:
-			#await get_tree().process_frame
 			await ai_controller.choose_action(self)
 
 

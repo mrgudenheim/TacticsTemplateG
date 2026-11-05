@@ -135,7 +135,7 @@ func get_tile_highlights(tiles: Array[TerrainTile], highlight_material: Material
 	for tile: TerrainTile in tiles:
 		var new_tile_highlight: MeshInstance3D = tile.get_tile_mesh()
 		new_tile_highlight.material_override = highlight_material.duplicate() # use pre-existing materials
-		user.tile_highlights.add_child(new_tile_highlight)
+		user.unit_actor.tile_highlights.add_child(new_tile_highlight)
 		new_tile_highlight.position = tile.get_world_position(true) + highlight_offset
 		new_tile_highlight.material_override.set_shader_parameter("depth_position", tile.get_world_position() + highlight_offset)
 		new_tile_highlight.visible = false
@@ -261,7 +261,7 @@ func show_result_preview(target: UnitData) -> ActionPreview:
 	var preview: ActionPreview = action_preview_scene.instantiate()
 	preview.label.text = total_preview_text
 	preview.unit = target.unit_actor
-	target.char_body.add_child(preview)
+	target.unit_actor.char_body.add_child(preview)
 	
 	action_previews.append(preview)
 	
@@ -538,7 +538,7 @@ func show_vfx(position: Vector3) -> Node3D:
 		push_warning("[Action.show_vfx] vfx_data is not valid, skipping")
 		return
 
-	var parent_node: Node = user.get_parent()
+	var parent_node: Node = user.unit_actor.get_parent()
 
 	var vfx_instance: VfxEffectInstance = VfxEffectInstance.new()
 	vfx_instance.name = "VfxEffectInstance"
@@ -557,7 +557,7 @@ func show_shared_vfx(shared_vfx_handler_id: int, target_unit: UnitActor) -> void
 		return
 	var target_pos: Vector3 = target_unit.char_body.global_position
 	battle_manager.trap_instance.global_position = target_pos
-	var dir: Vector3 = (target_pos - user.char_body.global_position).normalized()
+	var dir: Vector3 = (target_pos - user.unit_actor.char_body.global_position).normalized()
 	var trap_element: int = TrapEffectData.element_type_to_trap_id(action.element)
 	var flash_unit: UnitActor = target_unit if shared_vfx_handler_id in TrapEffectData.FLASH_HANDLER_IDS else null
 	battle_manager.trap_instance.play(shared_vfx_handler_id, trap_element, dir, flash_unit)
@@ -570,8 +570,8 @@ func show_projectile(target_unit: UnitActor, new_projectile_type: ProjectileEffe
 	if battle_manager == null or battle_manager.projectile_instance == null:
 		push_warning("[Action.show_projectile] battle_manager or projectile_instance is null")
 		return
-	var origin: Vector3 = user.char_body.global_position
-	var target: Vector3 = target_unit.char_body.global_position
+	var origin: Vector3 = user.unit_actor.char_body.global_position
+	var target: Vector3 = target_unit.unit_actor.char_body.global_position
 	battle_manager.projectile_instance.play(origin, target, new_projectile_type)
 
 
@@ -637,12 +637,12 @@ func apply_standard() -> void:
 				mod_animation_executing_id = action.animation_executing_ids_alternate[1]
 	
 	show_shared_vfx(action.user_shared_vfx_handler_id, user.unit_actor)
-	user.get_tree().create_timer(2.0).timeout.connect(func() -> void: if is_instance_valid(battle_manager): battle_manager.trap_instance.stop(), CONNECT_ONE_SHOT)
-	await user.animate_start_action(action.animation_start_id, action.animation_charging_id)
+	user.unit_actor.get_tree().create_timer(2.0).timeout.connect(func() -> void: if is_instance_valid(battle_manager): battle_manager.trap_instance.stop(), CONNECT_ONE_SHOT)
+	await user.unit_actor.animate_start_action(action.animation_start_id, action.animation_charging_id)
 	
-	user.animate_execute_action(mod_animation_executing_id)
+	user.unit_actor.animate_execute_action(mod_animation_executing_id)
 	
-	await user.get_tree().create_timer(0.2).timeout # TODO delay should be based on effect/vfx data? 
+	await Utilities.wait_for_delay(0.2) # TODO delay should be based on effect/vfx data? 
 	
 	# show vfx, including rock, arrow, bolt...
 	var vfx_locations: Array[Node3D] = []
@@ -693,7 +693,7 @@ func apply_standard() -> void:
 					else:
 						rng -= secondary_action.chance
 		else:
-			animate_evade(target_unit.unit_actor, evade_direction, user.terrain_tile_position.location)
+			animate_evade(target_unit.unit_actor, evade_direction, user.terrain_tile_position.xz_location)
 			
 			target_unit.show_popup_text("Missed!") # TODO or "Guarded"
 			#push_warning(display_name + " missed")
@@ -715,9 +715,9 @@ func apply_standard() -> void:
 	battle_manager.game_state_label.text = "Waiting for " + action.display_name + " vfx" 
 	if action.vfx_data != null and target_units.size() > 0:
 		while vfx_locations.any(func(vfx_location: Node3D) -> bool: return is_instance_valid(vfx_location)): # wait until vfx is completed
-			await user.get_tree().process_frame
+			await Utilities.wait_for_frame()
 	else:
-		await user.get_tree().create_timer(0.5).timeout # TODO show based on vfx timing data? (attacks use vfx 0xFFFF?)
+		await Utilities.wait_for_delay(0.5) # TODO show based on vfx timing data? (attacks use vfx 0xFFFF?)
 	for target_unit: UnitData in target_units:
 		if is_instance_valid(target_unit):
 			target_unit.unit_actor.return_to_idle_from_hit()

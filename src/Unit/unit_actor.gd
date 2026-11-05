@@ -42,23 +42,6 @@ var is_back_facing: bool = false
 var is_in_air: bool = false
 var is_traveling_path: bool = false
 
-var active_ability_name: String = ""
-var action_data: Action
-
-var active_action: ActionInstance
-
-@export var current_animation_id_fwd: int = 6 # set based on current action
-@export var current_idle_animation_id: int = 6 # set based on status (critical, knocked out, etc.)
-# constants?
-@export var idle_walk_animation_id: int = 6 # 0x0c for flying sprites
-@export var walk_to_animation_id: int = 0x18 # 0x1e (30) for flying sprites
-@export var evade_animation_id: int = 0x30 # TODO fix for kanzen, arute?
-@export var taking_damage_animation_id: int = 0x32
-@export var knocked_out_animation_id: int = 0x34
-@export var heal_animation_id: int = 0x36
-@export var mid_jump_animation: int = 0x3e
-var submerged_depth: int = 0
-
 
 static func instantiate() -> UnitActor:
 	return unit_scene.instantiate()

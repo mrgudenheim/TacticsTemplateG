@@ -31,7 +31,7 @@ var action_eval_data: Array = []
 func choose_action(unit: UnitData) -> void:
 	unit.battle_manager.game_state_label.text = unit.job_data.display_name + "-" + unit.display_name + " AI choosing action"
 	
-	if Vector2i(floori(unit.unit_actor.char_body.position.x), floori(unit.unit_actor.char_body.position.z)) != unit.terrain_tile_position.location:
+	if Vector2i(floori(unit.unit_actor.char_body.position.x), floori(unit.unit_actor.char_body.position.z)) != unit.terrain_tile_position.xz_location:
 		push_error("UnitData position not equal to char body position")
 	
 	wait_action_instance = unit.actions_data[unit.wait_action.unique_name]
@@ -92,7 +92,7 @@ func choose_action(unit: UnitData) -> void:
 					action_scores[action_instance] = potential_ai_score
 				
 				if Time.get_ticks_msec() - start_time > max_frame_time_ms: # prevent freezing/lag
-					await action_instance.user.get_tree().process_frame
+					await Utilities.wait_for_frame()
 					start_time = Time.get_ticks_msec()
 			
 			action_instance.stop_targeting()
@@ -102,7 +102,7 @@ func choose_action(unit: UnitData) -> void:
 			var original_tile: TerrainTile = unit.terrain_tile_position
 			var original_tile_location: Vector2i = original_tile.xz_location
 			for potential_move: TerrainTile in move_action_instance.potential_targets: # TODO handle ai score for auto targeting
-				unit.terrain_tile_position = potential_move
+				unit.set_terrain_tile_position(potential_move)
 				
 				for action_instance: ActionInstance in non_move_actions:
 					@warning_ignore("redundant_await") # inherited targeting strategies may be coroutines
@@ -120,15 +120,15 @@ func choose_action(unit: UnitData) -> void:
 							best_move = potential_move
 						
 						if Time.get_ticks_msec() - start_time > max_frame_time_ms: # prevent freezing/lag
-							await action_instance.user.get_tree().process_frame
+							await Utilities.wait_for_frame()
 							start_time = Time.get_ticks_msec()
 					
 					action_instance.stop_targeting()
 			
-			unit.terrain_tile_position = original_tile
-			if unit.terrain_tile_position.location != original_tile_location:
+			unit.set_terrain_tile_position(original_tile)
+			if unit.terrain_tile_position.xz_location != original_tile_location:
 				push_error("UnitData position not reset during ai consideration")
-			if Vector2i(floori(unit.unit_actor.char_body.position.x), floori(unit.unit_actor.char_body.position.z)) != unit.terrain_tile_position.location:
+			if Vector2i(floori(unit.unit_actor.char_body.position.x), floori(unit.unit_actor.char_body.position.z)) != unit.terrain_tile_position.xz_location:
 				push_error("UnitData position not equal to char body position")
 		
 		if best_move != null:
@@ -154,7 +154,7 @@ func choose_action(unit: UnitData) -> void:
 			var shortest_path_target: TerrainTile
 			for other_unit: UnitActor in unit.global_battle_manager.units:
 				if other_unit.team != unit.team and not other_unit.is_defeated: # if enemy
-					var other_unit_xy: Vector2i = other_unit.terrain_tile_position.location
+					var other_unit_xy: Vector2i = other_unit.terrain_tile_position.xz_location
 					var adjacent_tiles: Array[TerrainTile] = []
 					var adjacent_directions: Array[Vector2i] = [
 						Vector2i.LEFT,

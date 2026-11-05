@@ -59,7 +59,7 @@ func get_potential_targets(action_instance: ActionInstance) -> Array[TerrainTile
 					# TODO arc https://ffhacktics.com/wiki/Arc_Range_Calculation_Routine
 			
 			if Time.get_ticks_msec() - start_time > max_frame_time_ms: # prevent freezing/lag
-				await action_instance.user.get_tree().process_frame
+				await Utilities.wait_for_frame()
 				start_time = Time.get_ticks_msec()
 	
 	return potential_targets
@@ -171,7 +171,7 @@ func get_aoe_targets(action_instance: ActionInstance, tile_target: TerrainTile) 
 				var relative_pos_target: Vector2i = map_pos - tile_target.xz_location
 				#if action_instance.action.aoe_targeting_linear:
 				var relative_pos_user: Vector2i = map_pos - action_instance.user.terrain_tile_position.xz_location
-				#var target_relative_user: Vector2i = tile_target.location - action_instance.user.terrain_tile_position.location
+				#var target_relative_user: Vector2i = tile_target.location - action_instance.user.terrain_tile_position.xz_location
 				
 				var distance_xy: int = abs(relative_pos_target.x) + abs(relative_pos_target.y)
 				

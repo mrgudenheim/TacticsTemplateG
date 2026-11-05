@@ -127,7 +127,7 @@ func toggle_debug_ui() -> void:
 		battle_view.reparent(self)
 
 		if active_unit != null:
-			camera_controller.follow_node = active_unit.char_body
+			camera_controller.follow_node = active_unit.unit_actor.char_body
 			controller.unit = active_unit.unit_actor
 		else:
 			camera_controller.follow_node = null
@@ -421,7 +421,7 @@ func process_clock_tick() -> void:
 						var status_action_instance: ActionInstance = ActionInstance.new(RomReader.actions[status.action_on_complete], unit, self)
 						status_action_instance.submitted_targets.append(unit.tile_position) # TODO get targets for status action
 						# RomReader.actions[status.action_on_complete].use(status_action_instance)
-						camera_controller.follow_node = unit.char_body
+						camera_controller.follow_node = unit.unit_actor.char_body
 						game_state_label.text = unit.job_nickname + "-" + unit.unit_nickname + " processing " + status.status_effect_name + " ending"
 						await status_action_instance.use()
 						if not battle_is_running: return
@@ -432,7 +432,7 @@ func process_clock_tick() -> void:
 					if status.delayed_action != null: # execute stored delayed actions, TODO checks to null (no mp, silenced, etc.)
 						#status.delayed_action.show_targets_highlights(status.delayed_action.preview_targets_highlights) # show submitted targets TODO retain preview highlight nodes?
 						#await unit.get_tree().create_timer(0.5).timeout
-						camera_controller.follow_node = unit.char_body
+						camera_controller.follow_node = unit.unit_actor.char_body
 						game_state_label.text = unit.job_nickname + "-" + unit.unit_nickname + " processing delayed " + status.delayed_action.action.display_name
 						await status.delayed_action.use()
 						if not battle_is_running: return

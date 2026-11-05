@@ -339,7 +339,7 @@ func update_unit_positions(units: Array[UnitData]) -> void:
 	for unit: UnitData in units:
 		var existing_tile_idx: int = valid_tiles.find_custom(func(tile: TerrainTile) -> bool: return unit.terrain_tile_position.xz_location == tile.xz_location)
 		if existing_tile_idx >= 0:
-			unit.terrain_tile_position = valid_tiles[existing_tile_idx]
+			unit.set_terrain_tile_position(valid_tiles[existing_tile_idx])
 		else: # find nearest tile
 			var shortest_distance2: int = 9999
 			var closest_tile: TerrainTile = valid_tiles[0]
@@ -348,9 +348,9 @@ func update_unit_positions(units: Array[UnitData]) -> void:
 				if this_distance2 < shortest_distance2:
 					shortest_distance2 = this_distance2
 					closest_tile = potential_tile
-			unit.terrain_tile_position = closest_tile
+			unit.set_terrain_tile_position(closest_tile)
 
-		unit.set_position_to_tile()
+		unit.unit_actor.set_position_to_tile()
 
 
 func update_background_gradient(_new_color: Color = Color.BLACK) -> void:
@@ -446,7 +446,7 @@ func update_unit_dragging(unit: UnitData, event: InputEvent) -> void:
 			return
 		var can_end_on_tile: bool = tile.no_walk == 0 and tile.no_stand_select == 0 and tile.no_cursor == 0
 		if can_end_on_tile and not unit.prohibited_terrain.has(tile.surface_type_id): # lava, etc.
-			unit.terrain_tile_position = battle_manager.get_tile(battle_manager.current_cursor_map_position)
+			unit.set_terrain_tile_position(battle_manager.get_tile(battle_manager.current_cursor_map_position))
 		
 		unit.unit_actor.char_body.global_position = unit.terrain_tile_position.get_world_position()
 		unit_dragged = null
