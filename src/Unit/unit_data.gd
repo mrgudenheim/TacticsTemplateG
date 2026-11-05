@@ -351,6 +351,26 @@ func _init() -> void:
 	wait_action = GameData.get_action("wait")
 
 
+func init_derived_properties(new_battle_manager: BattleManager, create_unit_actor: bool = false) -> void:
+	battle_manager = new_battle_manager
+	
+	# TODO set all derived non-exported properties
+	# var ignore_height
+	# var terrain_tile_position
+	# var team
+	# var ai_controller
+	# var job_data
+	# var equipable_item_types
+	# var actions
+	# var actions_data
+	# var submerged_depth
+
+
+	if create_unit_actor:
+		unit_actor = UnitActor.new()
+		unit_actor.bind_unit_data(self)
+
+
 func has_status(status_unique_name: String) -> bool:
 	return current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_unique_name)
 
