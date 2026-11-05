@@ -129,17 +129,12 @@ func update_stat_bars_scale(camera_zoom: float) -> void:
 
 func initialize_unit() -> void:
 	debug_menu.populate_options()
-
-	move_action = GameData.get_action("move")
-	wait_action = GameData.get_action("wait")
 	
-	#animation_manager.wep_spr = RomReader.sprs[RomReader.file_records["WEP.SPR"].type_index]
 	animation_manager.wep_texture = GameData.get_texture("wep")
 	animation_manager.wep_spritesheet_data = GameData.get_spritesheet_data("wep")
 	animation_manager.wep_shp = GameData.get_shp("wep1")
 	animation_manager.wep_seq = GameData.get_seq("wep1")
 	
-	#animation_manager.eff_spr = RomReader.sprs[RomReader.file_records["EFF.SPR"].type_index]
 	animation_manager.eff_texture = GameData.get_texture("eff")
 	animation_manager.eff_spritesheet_data = GameData.get_spritesheet_data("eff")
 	animation_manager.eff_shp = GameData.get_shp("eff1")
@@ -154,31 +149,12 @@ func initialize_unit() -> void:
 	eff_material.set_shader_parameter("depth_mode", VfxConstants.DepthMode.UNIT)
 	animation_manager.unit_sprites_manager.sprite_effect.material_override = eff_material
 
-	#animation_manager.item_spr = RomReader.sprs[RomReader.file_records["ITEM.BIN"].type_index]
-	
 	animation_manager.unit_sprites_manager.sprite_item.texture = GameData.get_texture("items")
 	
-	#animation_manager.other_spr = RomReader.sprs[RomReader.file_records["OTHER.SPR"].type_index]
 	animation_manager.other_texture = GameData.get_texture("other")
 	animation_manager.other_shp = GameData.get_shp("other")
-
-	skillsets_names.resize(2)
-	skillsets_names.fill("")
 	
-	# 1 cure
-	# 0xc8 blood suck
-	# 0x9b stasis sword
-	set_ability("stasis_sword")
-	set_primary_weapon("mythril_spear") # 1 - dagger, 72 - mythril gun, 101 - mythril spear
-	# TODO use equipment_slots
-	#set_sprite_by_file_idx(98) # RAMUZA.SPR # TODO use sprite_id?
 	set_sprite_by_file_name("ramuza")
-	#set_sprite_by_file_name("RAMUZA.SPR")
-	
-	update_unit_facing(FACING_VECTORS[Facings.SOUTH])
-	
-	var random_name_idx: int = randi_range(0, GameData.names["all_no_empty"].size() - 1)
-	unit_nickname = GameData.names["all_no_empty"][random_name_idx]
 
 	initialized.emit()
 
@@ -206,187 +182,14 @@ func _process(_delta: float) -> void:
 	
 	if char_body.velocity.y != 0 and is_in_air == false:
 		is_in_air = true
-		
-		#var mid_jump_animation: int = 62 # front facing mid jump animation
-		#if animation_manager.is_back_facing:
-			#mid_jump_animation += 1
 		current_animation_id_fwd = mid_jump_animation
 		#debug_menu.anim_id_spin.value = mid_jump_animation
 	elif char_body.velocity.y == 0 and is_in_air == true:
 		is_in_air = false
-		
-		#var idle_animation: int = 6 # front facing idle walk animation
-		#if animation_manager.is_back_facing:
-			#idle_animation += 1
 		current_animation_id_fwd = current_idle_animation_id
 		#debug_menu.anim_id_spin.value = idle_animation
 	
 	set_base_animation_ptr_id(current_animation_id_fwd)
-
-
-static func generate_leveled_raw_stats(stat_basis_to_use: StatBasis, final_level: int, job: JobData, new_stats_raw: Dictionary[UnitActor.StatType, float], use_rom: bool = false) -> void:
-	generate_level_zero_raw_stats(stat_basis_to_use, new_stats_raw, use_rom)
-	
-	for curent_level: int in range(1, final_level + 1):
-		grow_raw_stats(curent_level, job, new_stats_raw)
-
-
-static func generate_level_zero_raw_stats(stat_basis_to_use: StatBasis, new_stats_raw: Dictionary[UnitActor.StatType, float], use_rom: bool = false) -> void:
-	new_stats_raw[StatType.HP_MAX] = generate_level_zero_raw_stat("HP_MAX", stat_basis_to_use, use_rom)
-	new_stats_raw[StatType.MP_MAX] = generate_level_zero_raw_stat("MP_MAX", stat_basis_to_use, use_rom)
-	new_stats_raw[StatType.SPEED] = generate_level_zero_raw_stat("SPEED", stat_basis_to_use, use_rom)
-	new_stats_raw[StatType.PHYSICAL_ATTACK] = generate_level_zero_raw_stat("PHYSICAL_ATTACK", stat_basis_to_use, use_rom)
-	new_stats_raw[StatType.MAGIC_ATTACK] = generate_level_zero_raw_stat("MAGIC_ATTACK", stat_basis_to_use, use_rom)
-
-
-# TODO is this correct for MONSTERs and LUCAVI?
-static func generate_level_zero_raw_stat(stat_name: String, stat_basis_to_use: StatBasis, use_rom: bool = false) -> int:
-	var raw_stat: int = -1
-	if not use_rom:
-		var stat_range: Vector2i = GameData.initial_unit_data.initial_unit_raw_stats[stat_basis_to_use][stat_name]
-		raw_stat = randi_range(stat_range.x , stat_range.y)
-		return raw_stat
-	
-	var stat_idx: int = -1
-	if stat_name == "HP_MAX": stat_idx = 0
-	elif stat_name == "MP_MAX": stat_idx = 1
-	elif stat_name == "SPEED": stat_idx = 2
-	elif stat_name == "PHYSICAL_ATTACK": stat_idx = 3
-	elif stat_name == "MAGIC_ATTACK": stat_idx = 4
-	
-	raw_stat = RomReader.scus_data.unit_base_datas[stat_basis_to_use][stat_idx] * 16384
-	raw_stat += randi_range(0, RomReader.scus_data.unit_base_stats_mods[stat_basis_to_use][stat_idx] * 16384)
-	return raw_stat
-
-
-static func grow_raw_stats(current_level: int, current_job: JobData, new_stats_raw: Dictionary[UnitActor.StatType, float]) -> void:
-	new_stats_raw[StatType.HP_MAX] += new_stats_raw[StatType.HP_MAX] / (current_job.hp_growth + current_level)
-	new_stats_raw[StatType.MP_MAX] += new_stats_raw[StatType.MP_MAX] / (current_job.mp_growth + current_level)
-	new_stats_raw[StatType.SPEED] += new_stats_raw[StatType.SPEED] / (current_job.speed_growth + current_level)
-	new_stats_raw[StatType.PHYSICAL_ATTACK] += new_stats_raw[StatType.PHYSICAL_ATTACK] / (current_job.pa_growth + current_level)
-	new_stats_raw[StatType.MAGIC_ATTACK] += new_stats_raw[StatType.MAGIC_ATTACK] / (current_job.ma_growth + current_level)
-
-
-# TODO is this correct for MONSTERs?
-static func calc_battle_stats(
-		current_job: JobData, 
-		new_stats_raw: Dictionary[UnitActor.StatType, float], 
-		new_stats: Dictionary[UnitActor.StatType, StatValue],
-		set_to_max: bool = true,
-		use_larger_values: bool = false) -> void:
-	var base_hp: int = roundi(new_stats_raw[StatType.HP_MAX] * current_job.hp_multiplier / 0x190000)
-	# if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(animation_manager.global_seq.file_name): # lucavi
-	if use_larger_values:
-		new_stats[StatType.HP_MAX].max_value = 99999
-		base_hp = base_hp * 100
-	new_stats[StatType.HP_MAX].base_value = base_hp
-	new_stats[StatType.HP_MAX].set_value(new_stats[StatType.HP_MAX].base_value)
-	
-	var base_mp: int = roundi(new_stats_raw[StatType.MP_MAX] * current_job.mp_multiplier / 0x190000)
-	# if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(animation_manager.global_seq.file_name): # lucavi
-	if use_larger_values:
-		new_stats[StatType.MP_MAX].max_value = 99999
-		base_mp = base_mp * 100
-	new_stats[StatType.MP_MAX].base_value = base_mp
-	new_stats[StatType.MP_MAX].set_value(new_stats[StatType.MP_MAX].base_value)
-	
-	new_stats[StatType.SPEED].base_value = roundi(new_stats_raw[StatType.SPEED] * current_job.speed_multiplier / 0x190000)
-	new_stats[StatType.SPEED].set_value(new_stats[StatType.SPEED].base_value)
-	
-	new_stats[StatType.PHYSICAL_ATTACK].base_value = roundi(new_stats_raw[StatType.PHYSICAL_ATTACK] * current_job.pa_multiplier / 0x190000)
-	new_stats[StatType.PHYSICAL_ATTACK].set_value(new_stats[StatType.PHYSICAL_ATTACK].base_value)
-	
-	new_stats[StatType.MAGIC_ATTACK].base_value = roundi(new_stats_raw[StatType.MAGIC_ATTACK] * current_job.ma_multiplier / 0x190000)
-	new_stats[StatType.MAGIC_ATTACK].set_value(new_stats[StatType.MAGIC_ATTACK].base_value)
-	
-	new_stats[StatType.MOVE].base_value = current_job.move
-	new_stats[StatType.MOVE].set_value(new_stats[StatType.MOVE].base_value)
-	
-	new_stats[StatType.JUMP].base_value = current_job.jump
-	new_stats[StatType.JUMP].set_value(new_stats[StatType.JUMP].base_value)
-
-	# if global_battle_manager != null:
-	# 	if not global_battle_manager.battle_is_running:
-	# 		new_stats[StatType.HP].set_value(new_stats[StatType.HP].max_value)
-	# 		new_stats[StatType.MP].set_value(new_stats[StatType.MP].max_value)
-	
-	if set_to_max:
-		new_stats[StatType.HP].set_value(new_stats[StatType.HP].max_value)
-		new_stats[StatType.MP].set_value(new_stats[StatType.MP].max_value)
-
-
-func generate_random_abilities() -> void:
-	var random_reaction_name: String = GameData.ability_paths.keys().filter(func(ability_name: String) -> bool: return GameData.get_ability(ability_name).slot_type == Ability.SlotType.REACTION).pick_random()
-	var random_reaction: Ability = GameData.get_ability(random_reaction_name)
-
-	var random_support_name: String = GameData.ability_paths.keys().filter(func(ability_name: String) -> bool: return GameData.get_ability(ability_name).slot_type == Ability.SlotType.SUPPORT).pick_random()
-	var random_support: Ability = GameData.get_ability(random_support_name)
-	
-	var random_movement_name: String = GameData.ability_paths.keys().filter(func(ability_name: String) -> bool: return GameData.get_ability(ability_name).slot_type == Ability.SlotType.MOVEMENT).pick_random()
-	var random_movement: Ability = GameData.get_ability(random_movement_name)
-
-	ability_slots[0].ability_unique_name = random_reaction.unique_name
-	ability_slots[1].ability_unique_name =  random_support.unique_name
-	ability_slots[2].ability_unique_name =  random_movement.unique_name
-
-	update_passive_effects()
-
-
-# TODO generate equipment https://ffhacktics.com/wiki/Calculate/Store_ENTD_Unit_Equipment
-func generate_equipment() -> void:
-	#if not ["TYPE1.SEQ", "TYPE3.SEQ"].has(animation_manager.global_seq.file_name): # monsters don't have equipment
-		#return
-	
-	equip_slots[0].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.WEAPON, level) # RH
-	equip_slots[1].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.SHIELD, level) # LH
-	equip_slots[2].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.HEADGEAR, level) # headgear
-	equip_slots[3].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.ARMOR, level) # armor
-	equip_slots[4].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.ACCESSORY, level, true) # accessory
-	
-	set_primary_weapon(equip_slots[0].item_unique_name)
-	
-	update_passive_effects()
-
-
-func set_equipment_slot(slot: EquipmentSlot, item: ItemData) -> void:
-	slot.item_unique_name = item.unique_name
-	if slot.equipment_slot_name == "RH":
-		set_primary_weapon(item.unique_name) # TODO update weapon data (palette, texture, eff_palette) correctly for either hand?
-	
-	update_passive_effects()
-
-
-func get_item_unique_name_for_slot(slot_type: ItemData.SlotType, item_level: int, random: bool = false) -> String:
-	# var valid_items: Array[ItemData] = []
-	var valid_items_names: Array[String] = []
-	valid_items_names.assign(GameData.item_paths.keys().filter(func(item_name: String) -> bool: 
-		var item: ItemData = GameData.get_item(item_name)
-		var slot_type_is_valid: bool = item.slot_type == slot_type
-		var level_is_valid: bool = item.min_level <= item_level
-		var type_is_valid: bool = equipable_item_types.has(item.item_type) # TODO allow forcing specifc type based on ability requirements
-		return slot_type_is_valid and level_is_valid and type_is_valid))
-	var item_unique_name: String = ""
-	if not valid_items_names.is_empty():
-		if random:
-			item_unique_name = valid_items_names.pick_random()
-		else:
-			valid_items_names.sort_custom(func(item_a_name: String, item_b_name: String) -> bool: return GameData.get_item(item_a_name).min_level > GameData.get_item(item_b_name).min_level)
-			item_unique_name = valid_items_names[0] # pick highest level item
-			#item = valid_items.pick_random()
-	return item_unique_name
-
-
-func equip_ability(slot: AbilitySlot, ability: Ability) -> void:
-	slot.ability_unique_name = ability.unique_name
-
-	update_passive_effects()
-
-
-func equip_skillset(skillset_idx: int, new_skillset: Skillset) -> void:
-	skillsets_names[skillset_idx] = new_skillset.unique_name
-	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
-	set_available_actions(all_passive_effects)
-	data_updated.emit(self)
 
 
 func get_nullify_statuses() -> Array[StatusEffect]:
@@ -762,18 +565,6 @@ func set_job(new_job_name: String) -> void:
 		set_base_animation_ptr_id(idle_walk_animation_id)
 	
 	update_passive_effects()
-
-
-func set_ability(new_action_name: String) -> void:
-	active_ability_name = new_action_name
-	action_data = GameData.get_action(new_action_name)
-	
-	# if not action_data.vfx_data.is_initialized:
-	# 	action_data.vfx_data.init_from_file()
-	
-	image_changed.emit(GameData.get_texture(action_data.vfx_name))
-	#debug_menu.sprite_viewer.texture = ImageTexture.create_from_image(action_data.vfx_data.vfx_spr.spritesheet)
-	ability_assigned.emit(new_action_name)
 
 
 func set_primary_weapon(new_weapon_unique_name: String) -> void:
