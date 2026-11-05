@@ -7,6 +7,16 @@
 class_name UnitAi
 extends Resource
 
+enum Strategy {
+	PLAYER,
+	END_TURN,
+	RANDOM,
+	BEST,
+	CONFUSED,
+	BERSERK,
+	FLEE,
+}
+
 var wait_action_instance: ActionInstance
 @export var strategy: Strategy = Strategy.END_TURN
 var only_end_activation: bool = true
@@ -17,15 +27,6 @@ var choose_best_action: bool = false
 
 var action_eval_data: Array = []
 
-enum Strategy {
-	PLAYER,
-	END_TURN,
-	RANDOM,
-	BEST,
-	CONFUSED,
-	BERSERK,
-	FLEE,
-}
 
 func choose_action(unit: UnitData) -> void:
 	unit.battle_manager.game_state_label.text = unit.job_data.display_name + "-" + unit.display_name + " AI choosing action"
@@ -55,7 +56,7 @@ func choose_action(unit: UnitData) -> void:
 	
 	if strategy == Strategy.RANDOM:
 		var chosen_action: ActionInstance = eligible_actions.pick_random()
-		await action_targeted(unit, chosen_action) # random target
+		await action_targeted(chosen_action) # random target
 	elif strategy == Strategy.BEST: # TODO implement better ai choosing 'best' action
 		var move_action_instance: ActionInstance = unit.actions_data[unit.move_action.unique_name]
 		var non_move_actions: Array[ActionInstance] = eligible_actions.duplicate()
@@ -144,7 +145,7 @@ func choose_action(unit: UnitData) -> void:
 		
 		if best_action != null:
 			var chosen_action: ActionInstance = best_action
-			await action_targeted(unit, chosen_action, best_target)
+			await action_targeted(chosen_action, best_target)
 			return
 		
 		if move_action_instance.is_usable() and not move_action_instance.potential_targets.is_empty():
@@ -167,7 +168,7 @@ func choose_action(unit: UnitData) -> void:
 							adjacent_tiles.append_array(unit.global_battle_manager.total_map_tiles[adjacent_xy])
 					
 					if adjacent_tiles.has(unit.terrain_tile_position): # if already next to enemy, wait
-						await action_targeted(unit, wait_action_instance)
+						await action_targeted(wait_action_instance)
 						return
 					
 					for adjacent_tile: TerrainTile in adjacent_tiles:
@@ -189,7 +190,7 @@ func choose_action(unit: UnitData) -> void:
 					move_cost = roundi(unit.path_costs[move_target])
 			
 			# move to target or else move randomly is no path to any target
-			await action_targeted(unit, move_action_instance, move_target, shortest_path_target)
+			await action_targeted(move_action_instance, move_target, shortest_path_target)
 			return
 		
 		if best_action == null:
@@ -198,17 +199,18 @@ func choose_action(unit: UnitData) -> void:
 	elif strategy == Strategy.CONFUSED: # TODO implement confused ai
 		push_error("Confused ai not implemented")
 		var chosen_action: ActionInstance = eligible_actions.pick_random()
-		await action_targeted(unit, chosen_action) # random target
+		await action_targeted(chosen_action) # random target
 	elif strategy == Strategy.BERSERK: # TODO implement berserk ai
 		push_error("Berserk ai not implemented")
 		var chosen_action: ActionInstance = eligible_actions.pick_random()
-		await action_targeted(unit, chosen_action) # random target
+		await action_targeted(chosen_action) # random target
 	elif strategy == Strategy.FLEE: # TODO implement flee ai
 		push_error("Flee ai not implemented")
 		var chosen_action: ActionInstance = eligible_actions.pick_random()
-		await action_targeted(unit, chosen_action) # random target
+		await action_targeted(chosen_action) # random target
 
-func action_targeted(unit: UnitData, chosen_action: ActionInstance, target: TerrainTile = null, hover_target: TerrainTile = null) -> void:
+
+func action_targeted(chosen_action: ActionInstance, target: TerrainTile = null, hover_target: TerrainTile = null) -> void:
 	#chosen_action.show_potential_targets() # TODO fix move targeting when updating paths/pathfinding is takes longer than delay (large maps with 10+ units)
 	@warning_ignore("redundant_await") # inherited targeting strategies may be coroutines
 	chosen_action.potential_targets = await chosen_action.action.targeting_strategy.get_potential_targets(chosen_action)
