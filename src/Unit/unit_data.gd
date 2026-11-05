@@ -954,8 +954,9 @@ func equip_skillset(skillset_idx: int, new_skillset_name: String) -> void:
 
 # generate equipment https://ffhacktics.com/wiki/Calculate/Store_ENTD_Unit_Equipment
 func equip_items_leveled() -> void:
-	var level: int = stats[StatType.LEVEL].current_value
+	var original_weapon: ItemData = get_primary_weapon()
 
+	var level: int = stats[StatType.LEVEL].current_value
 	equip_slots[0].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.WEAPON, level) # RH
 	equip_slots[1].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.SHIELD, level) # LH
 	equip_slots[2].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.HEADGEAR, level) # headgear
@@ -963,6 +964,9 @@ func equip_items_leveled() -> void:
 	equip_slots[4].item_unique_name = get_item_unique_name_for_slot(ItemData.SlotType.ACCESSORY, level, true) # accessory
 	
 	update_passive_effects()
+	var new_primary_weapon: ItemData = get_primary_weapon()
+	if original_weapon != new_primary_weapon:
+		primary_weapon_changed.emit(new_primary_weapon.item_unique_name)
 
 
 func get_item_unique_name_for_slot(slot_type: ItemData.SlotType, item_level: int, random: bool = false) -> String:
@@ -986,9 +990,24 @@ func get_item_unique_name_for_slot(slot_type: ItemData.SlotType, item_level: int
 
 
 func equip_item(slot: EquipmentSlot, item: ItemData) -> void:
+	var original_weapon: ItemData = get_primary_weapon()
+
 	slot.item_unique_name = item.unique_name
 	
 	update_passive_effects()
+	var new_primary_weapon: ItemData = get_primary_weapon()
+	if original_weapon != new_primary_weapon:
+		primary_weapon_changed.emit(new_primary_weapon.item_unique_name)
+
+
+# TODO is the first item with an action always the primary weapon?
+func get_primary_weapon() -> ItemData:
+	for equip_slot: EquipmentSlot in equip_slots:
+		if equip_slot.item_unique_name != "":
+			var item: ItemData = GameData.get_item(equip_slot.item_unique_name)
+			if not item.action_names.is_empty():
+				return item
+	return null
 
 
 func set_job(new_job_name: String) -> void:
