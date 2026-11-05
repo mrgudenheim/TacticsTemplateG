@@ -273,7 +273,7 @@ func update_unit_job(unit: UnitData, new_job: JobData) -> void:
 
 
 func update_unit_equipment(unit: UnitData, slot: EquipmentSlot, new_item: ItemData) -> void:
-	unit.set_equipment_slot(slot, new_item)
+	unit.equip_item(slot, new_item)
 	desetup_item_select()
 
 
