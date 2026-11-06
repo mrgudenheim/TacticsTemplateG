@@ -77,14 +77,14 @@ func setup(new_unit: UnitData) -> void:
 	else:
 		controller_option_button.select(1)
 
-	hp_bar.set_stat(str(UnitData.StatType.keys()[UnitData.StatType.HP]), new_unit.stats[UnitData.StatType.HP])
+	hp_bar.bind_stat(UnitData.StatType.HP, new_unit.stats[UnitData.StatType.HP])
 	hp_bar.name_label.position.x = 5
 	hp_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	hp_bar.value_label.position.x = hp_bar.size.x - hp_bar.value_label.size.x - 5
 	hp_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	# hp_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
 	
-	mp_bar.set_stat(str(UnitData.StatType.keys()[UnitData.StatType.MP]), new_unit.stats[UnitData.StatType.MP])
+	mp_bar.bind_stat(UnitData.StatType.MP, new_unit.stats[UnitData.StatType.MP])
 	mp_bar.fill_color = Color.INDIAN_RED
 	mp_bar.name_label.position.x = 5
 	mp_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -92,7 +92,7 @@ func setup(new_unit: UnitData) -> void:
 	mp_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	# mp_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
 
-	ct_bar.set_stat(str(UnitData.StatType.keys()[UnitData.StatType.CT]), new_unit.stats[UnitData.StatType.CT])
+	ct_bar.bind_stat(UnitData.StatType.CT, new_unit.stats[UnitData.StatType.CT])
 	ct_bar.fill_color = Color.WEB_GREEN
 	ct_bar.name_label.position.x = 5
 	ct_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT

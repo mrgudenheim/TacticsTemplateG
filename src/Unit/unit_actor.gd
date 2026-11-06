@@ -42,6 +42,10 @@ var is_back_facing: bool = false
 var is_in_air: bool = false
 var is_traveling_path: bool = false
 
+var hp_stat_bar: StatBar
+var mp_stat_bar: StatBar
+var ct_stat_bar: StatBar
+
 
 static func instantiate() -> UnitActor:
 	return unit_scene.instantiate()
@@ -49,20 +53,21 @@ static func instantiate() -> UnitActor:
 
 func _ready() -> void:
 	if unit_data == null:
-		unit_data = UnitData.new()
+		bind_unit_data(UnitData.new())
+	else:
+		_connect_unit_data_signals()
 	
-	var hp_bar: StatBar = add_stat_bar(UnitData.StatType.HP)
-	hp_bar.show_value = true
+	hp_stat_bar = add_stat_bar(UnitData.StatType.HP)
+	hp_stat_bar.show_value = true
 	
-	var mp_bar: StatBar = add_stat_bar(UnitData.StatType.MP)
-	mp_bar.fill_color = Color.INDIAN_RED
-	mp_bar.show_value = true
+	mp_stat_bar = add_stat_bar(UnitData.StatType.MP)
+	mp_stat_bar.fill_color = Color.INDIAN_RED
+	mp_stat_bar.show_value = true
 
-	var ct_bar: StatBar = add_stat_bar(UnitData.StatType.CT)
-	ct_bar.visual_max = 100.0
-	ct_bar.update_stat(unit_data.stats[UnitData.StatType.CT])
-	ct_bar.fill_color = Color.WEB_GREEN
-	ct_bar.show_value = true
+	ct_stat_bar = add_stat_bar(UnitData.StatType.CT)
+	ct_stat_bar.visual_max = 100.0
+	ct_stat_bar.fill_color = Color.WEB_GREEN
+	ct_stat_bar.show_value = true
 	
 	icon2.texture = GameData.get_texture("misc")
 	icon2.material_override = icon2.material_override.duplicate()
@@ -94,10 +99,23 @@ func _exit_tree() -> void:
 
 func add_stat_bar(stat_type: UnitData.StatType) -> StatBar:
 	var new_stat_bar: StatBar = StatBar.instantiate()
-	new_stat_bar.set_stat(str(UnitData.StatType.keys()[stat_type]), unit_data.stats[stat_type])
+	_bind_stat_bar(stat_type, new_stat_bar)
 	stat_bars_container.add_child(new_stat_bar)
 
 	return new_stat_bar
+
+
+func _bind_stat_bars_to_unit_data() -> void:
+	_bind_stat_bar(UnitData.StatType.HP, hp_stat_bar)
+	_bind_stat_bar(UnitData.StatType.MP, mp_stat_bar)
+	_bind_stat_bar(UnitData.StatType.CT, ct_stat_bar)
+
+
+func _bind_stat_bar(stat_type: UnitData.StatType, stat_bar: StatBar) -> void:
+	if unit_data.stats.has(stat_type):
+		stat_bar.bind_stat(stat_type, unit_data.stats[stat_type])
+	else:
+		push_error("unit_data.stats does not have stat_type: " + str(stat_type))
 
 
 func set_stat_bar_visiblity(new_is_visible: bool, stat_bar_idx: int = -1) -> void:

@@ -39,14 +39,14 @@ func setup(unit: UnitActor) -> void:
 	unit_name_label.text = unit.unit_nickname
 	job_label.text = unit.job_data.display_name
 
-	hp_bar.set_stat(str(UnitActor.StatType.keys()[UnitActor.StatType.HP]), unit.stats[UnitActor.StatType.HP])
+	hp_bar.bind_stat(UnitData.StatType.HP, unit.stats[UnitData.StatType.HP])
 	hp_bar.name_label.position.x = 5
 	hp_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	hp_bar.value_label.position.x -= (hp_bar.value_label.size.x + 10)
 	hp_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	# hp_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
 	
-	mp_bar.set_stat(str(UnitActor.StatType.keys()[UnitActor.StatType.MP]), unit.stats[UnitActor.StatType.MP])
+	mp_bar.bind_stat(UnitData.StatType.MP, unit.stats[UnitData.StatType.MP])
 	mp_bar.fill_color = Color.INDIAN_RED
 	mp_bar.name_label.position.x = 5
 	mp_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -54,7 +54,7 @@ func setup(unit: UnitActor) -> void:
 	mp_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	# mp_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
 
-	ct_bar.set_stat(str(UnitActor.StatType.keys()[UnitActor.StatType.CT]), unit.stats[UnitActor.StatType.CT])
+	ct_bar.bind_stat(UnitData.StatType.CT, unit.stats[UnitData.StatType.CT])
 	ct_bar.fill_color = Color.WEB_GREEN
 	ct_bar.name_label.position.x = 5
 	ct_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -68,15 +68,15 @@ func setup(unit: UnitActor) -> void:
 
 
 func update_ui(unit: UnitActor) -> void:
-	update_stat_label(level_label, unit, UnitActor.StatType.LEVEL)
+	update_stat_label(level_label, unit, UnitData.StatType.LEVEL)
 	
-	update_stat_label(pa_label, unit, UnitActor.StatType.PHYSICAL_ATTACK)
-	update_stat_label(ma_label, unit, UnitActor.StatType.MAGIC_ATTACK)
-	update_stat_label(brave_label, unit, UnitActor.StatType.BRAVE)
-	update_stat_label(faith_label, unit, UnitActor.StatType.FAITH)
-	update_stat_label(move_label, unit, UnitActor.StatType.MOVE)
-	update_stat_label(jump_label, unit, UnitActor.StatType.JUMP)
-	update_stat_label(speed_label, unit, UnitActor.StatType.SPEED)
+	update_stat_label(pa_label, unit, UnitData.StatType.PHYSICAL_ATTACK)
+	update_stat_label(ma_label, unit, UnitData.StatType.MAGIC_ATTACK)
+	update_stat_label(brave_label, unit, UnitData.StatType.BRAVE)
+	update_stat_label(faith_label, unit, UnitData.StatType.FAITH)
+	update_stat_label(move_label, unit, UnitData.StatType.MOVE)
+	update_stat_label(jump_label, unit, UnitData.StatType.JUMP)
+	update_stat_label(speed_label, unit, UnitData.StatType.SPEED)
 
 	# update evade
 	var unit_passive_effects: Array[PassiveEffect] = unit.get_all_passive_effects()
@@ -211,8 +211,8 @@ func update_element_list(affinity_list_label: Label, label_start: String, affini
 	affinity_list_label.text += ", ".join(elements_list)
 
 
-func update_stat_label(stat_label: Label, unit: UnitActor, stat_type: UnitActor.StatType) -> void:
-	var stat_name: String = UnitActor.StatType.find_key(stat_type).to_pascal_case()
+func update_stat_label(stat_label: Label, unit: UnitActor, stat_type: UnitData.StatType) -> void:
+	var stat_name: String = UnitData.StatType.find_key(stat_type).to_pascal_case()
 	var stat: StatValue = unit.stats[stat_type]
 	var stat_value: int = stat.get_modified_value()
 	# stat_label.text = stat_name + ": " + str(roundi(stat_value)) + "/" + str(roundi(stat.max_value))

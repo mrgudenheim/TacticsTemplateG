@@ -325,10 +325,10 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> UnitActor:
 
 	var stat_bars: Array[StatBar] = []
 	stat_bars.assign(new_unit.stat_bars_container.get_children())
-	stat_bars[0].set_stat(str(UnitData.StatType.keys()[UnitData.StatType.HP]), new_unit.stats[UnitData.StatType.HP])
-	stat_bars[1].set_stat(str(UnitData.StatType.keys()[UnitData.StatType.MP]), new_unit.stats[UnitData.StatType.MP])
-	stat_bars[2].set_stat(str(UnitData.StatType.keys()[UnitData.StatType.CT]), new_unit.stats[UnitData.StatType.CT])
-	
+	stat_bars[0].bind_stat(UnitData.StatType.HP, new_unit.stats[UnitData.StatType.HP])
+	stat_bars[1].bind_stat(UnitData.StatType.MP, new_unit.stats[UnitData.StatType.MP])
+	stat_bars[2].bind_stat(UnitData.StatType.CT, new_unit.stats[UnitData.StatType.CT])
+
 	camera_controller.rotated.connect(new_unit.char_body.set_rotation_degrees) # have sprite update as camera rotates
 	new_unit.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
 	new_unit.update_animation_facing(camera_controller.camera_facing_vector)
