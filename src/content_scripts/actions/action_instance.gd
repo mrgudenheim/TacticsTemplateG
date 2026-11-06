@@ -511,7 +511,7 @@ func animate_evade(target_unit: UnitActor, evade_direction: EvadeData.Directions
 	
 	var dir_to_target: Vector2i = user_pos - target_unit.tile_position.location
 	var temp_facing: Vector3 = Vector3(dir_to_target.x, 0, dir_to_target.y).normalized()
-	target_unit.update_unit_facing(temp_facing)
+	target_unit.unit_data.update_unit_facing(temp_facing)
 	
 	# var evade_anim_id: int = -1
 	var sum_of_weight: int = 0
@@ -530,7 +530,7 @@ func animate_evade(target_unit: UnitActor, evade_direction: EvadeData.Directions
 				break
 			rnd -= evade_source_value
 	
-	target_unit.update_unit_facing(target_original_facing)
+	target_unit.unit_data.update_unit_facing(target_original_facing)
 
 
 func show_vfx(position: Vector3) -> Node3D:
