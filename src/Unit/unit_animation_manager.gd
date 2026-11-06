@@ -538,7 +538,7 @@ func _on_animation_h_slider_value_changed(value: int) -> void:
 
 
 func _on_palette_spin_box_value_changed(value: int) -> void:
-	unit_actor.set_sprite_palette(value)
+	unit_actor.unit_data.set_sprite_palette(value)
 
 
 func _on_submerged_options_item_selected(index: int) -> void:
