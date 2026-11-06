@@ -32,7 +32,6 @@ var unit_data: UnitData
 	set(value):
 		icon_id = value
 		set_icon(icon_id)
-@export var debug_menu: UnitDebugMenu
 
 var can_move: bool = true
 
@@ -130,9 +129,7 @@ func update_stat_bars_scale(camera_zoom: float) -> void:
 	stat_bars_position.scale = Vector2.ONE * 3.775 / camera_zoom
 
 
-func initialize_unit() -> void:
-	debug_menu.populate_options()
-	
+func initialize_unit() -> void:	
 	animation_manager.wep_texture = GameData.get_texture("wep")
 	animation_manager.wep_spritesheet_data = GameData.get_spritesheet_data("wep")
 	animation_manager.wep_shp = GameData.get_shp("wep1")
@@ -185,14 +182,12 @@ func _process(_delta: float) -> void:
 	
 	if char_body.velocity.y != 0 and is_in_air == false:
 		is_in_air = true
-		current_animation_id_fwd = mid_jump_animation
-		#debug_menu.anim_id_spin.value = mid_jump_animation
+		unit_data.current_animation_id_fwd = unit_data.mid_jump_animation
 	elif char_body.velocity.y == 0 and is_in_air == true:
 		is_in_air = false
-		current_animation_id_fwd = current_idle_animation_id
-		#debug_menu.anim_id_spin.value = idle_animation
+		unit_data.current_animation_id_fwd = unit_data.current_idle_animation_id
 	
-	set_base_animation_ptr_id(current_animation_id_fwd)
+	set_base_animation_ptr_id(unit_data.current_animation_id_fwd)
 
 
 func update_status_visuals() -> void:
@@ -291,7 +286,6 @@ func animate_execute_action(animation_executing_id: int) -> void:
 	var ability_animation_executing_id: int = animation_executing_id
 	if ["ruka", "arute", "kanzen"].has(GameData.get_spritesheet_data(sprite_file_name).seq_name):
 		ability_animation_executing_id = 0x2c * 2 # https://ffhacktics.com/wiki/Set_attack_animation_flags_and_facing_3
-	#debug_menu.anim_id_spin.value = ability_animation_executing_id + int(is_back_facing)
 	set_base_animation_ptr_id(ability_animation_executing_id)
 	
 	await animation_manager.animation_completed # TODO change based on vfx timing data?
@@ -364,16 +358,8 @@ func set_base_animation_ptr_id(ptr_id: int) -> void:
 	else:
 		new_ptr = ptr_id # null animation
 	
-	#if is_back_facing:
-		#debug_menu.anim_id_spin.value = ptr_id + 1
-		##animation_manager.global_animation_ptr_id = ptr_id + 1
-	#else:
-		#debug_menu.anim_id_spin.value = ptr_id
-		##animation_manager.global_animation_ptr_id = ptr_id
-	
 	if animation_manager.global_animation_ptr_id != new_ptr:
-		debug_menu.anim_id_spin.value = new_ptr # TODO the debug ui should not be the primary path to changing he animation
-		#animation_manager.global_animation_ptr_id = new_ptr
+		animation_manager.global_animation_ptr_id = new_ptr
 
 
 func update_unit_facing(dir: Vector3) -> void:
@@ -434,22 +420,14 @@ func update_animation_facing(camera_facing_vector: Vector3) -> void:
 		if animation_manager.is_back_facing != is_back_facing:
 			animation_manager.is_back_facing = is_back_facing
 			var back_facing_offset: int = 1
-			if debug_menu.anim_id_spin.value < 5:
+			if animation_manager.global_animation_ptr_id < 5:
 				back_facing_offset = 2 # there are 5 directions of facing animations, so diagonal front facing id=2 and diagonal back facing id=4
 				# TODO utilize the extra facing frames
 
 			if is_back_facing == true:
-				debug_menu.anim_id_spin.value += back_facing_offset
+				animation_manager.global_animation_ptr_id += back_facing_offset
 			else:
-				debug_menu.anim_id_spin.value -= back_facing_offset
-
-
-func toggle_debug_menu() -> void:
-	debug_menu.visible = not debug_menu.visible
-
-
-func hide_debug_menu() -> void:
-	debug_menu.visible = false
+				animation_manager.global_animation_ptr_id -= back_facing_offset
 
 
 func set_job(new_job_name: String) -> void:
@@ -534,31 +512,12 @@ func show_popup_text(text: String) -> void:
 
 
 func set_sprite_by_file_idx(new_sprite_file_idx: int) -> void:
-	if sprite_file_idx == new_sprite_file_idx:
-		return # do nothing if no change
-	
-	sprite_file_idx = new_sprite_file_idx
 	var spr: Spr = RomReader.sprs[new_sprite_file_idx]
-	sprite_file_name = spr.file_name
-	if RomReader.spr_file_name_to_id.has(spr.file_name):
-		sprite_id = RomReader.spr_file_name_to_id[spr.file_name]
-	debug_menu.sprite_options.select(new_sprite_file_idx)
-	#on_sprite_selected(new_sprite_file_idx)
-	if spr.file_name == "WEP.SPR":
-		animation_manager.unit_sprites_manager.sprite_primary.vframes = 32
-	else:
-		animation_manager.unit_sprites_manager.sprite_primary.vframes = 16 + (16 * spr.sp2s.size())
-	update_spritesheet_grid_texture()
-	
-	debug_menu.anim_id_spin.value = current_idle_animation_id
+	var spr_name: String = spr.file_name.to_lower().trim_suffix(".spr")
+	unit_data.set_sprite_by_file_name(spr_name)
 
 
 func set_sprite_by_file_name(new_sprite_file_name: String) -> void:
-	#var new_sprite_file_idx: int = RomReader.file_records[new_sprite_file_name].type_index
-	#set_sprite_by_file_idx(new_sprite_file_idx)
-	
-	sprite_file_name = new_sprite_file_name
-	#debug_menu.sprite_options.select(new_sprite_file_idx)
 	on_sprite_selected(new_sprite_file_name)
 	var num_sp2s: int = min(0, (GameData.get_texture(new_sprite_file_name).get_height() - 488)) / 256
 	if new_sprite_file_name == "wep":
@@ -567,7 +526,7 @@ func set_sprite_by_file_name(new_sprite_file_name: String) -> void:
 		animation_manager.unit_sprites_manager.sprite_primary.vframes = 16 + (16 * num_sp2s)
 	update_spritesheet_grid_texture()
 	
-	debug_menu.anim_id_spin.value = current_idle_animation_id
+	animation_manager.global_animation_ptr_id = unit_data.current_idle_animation_id
 
 
 func set_sprite_by_id(new_sprite_id: int) -> void:
@@ -672,11 +631,7 @@ func on_sprite_selected(new_spritesheet_name: String) -> void:
 	animation_manager.global_spritesheet_data = GameData.get_spritesheet_data(new_spritesheet_name)
 	animation_manager.global_shp = shp
 	animation_manager.global_seq = seq
-	
-	
-	#spritesheet_changed.emit(animation_manager.unit_sprites_manager.sprite_item.texture) # TODO hook up to sprite for debug purposes
-	#spritesheet_changed.emit(ImageTexture.create_from_image(spr.spritesheet)) # TODO hook up to sprite for debug purposes
-	#spritesheet_changed.emit(animation_manager.unit_sprites_manager.sprite_weapon.texture) # TODO hook up to sprite for debug purposes
+
 	if animation_changed:
 		# if animation_manager.global_animation_id >= animation_manager.global_seq.sequences.size():
 		# 	set_base_animation_ptr_id(6) # triggers on_animation_changed
