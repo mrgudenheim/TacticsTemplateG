@@ -276,8 +276,8 @@ func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitActor:
 	var new_unit: UnitActor = UnitActor.instantiate()
 	units_container.add_child(new_unit)
 	new_unit.battle_manager = self
-	units.append(new_unit.unit_data)
 	new_unit.bind_unit_data(new_unit_data)
+	units.append(new_unit_data)
 
 	var xz_index: int = total_map_tiles.keys().find(Vector2i(new_unit_data.tile_position.x, new_unit_data.tile_position.z))
 	if xz_index >= 0:

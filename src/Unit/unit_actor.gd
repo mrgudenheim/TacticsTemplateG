@@ -90,6 +90,10 @@ func _physics_process(delta: float) -> void:
 
 
 func bind_unit_data(new_unit_data: UnitData) -> void:
+	if not is_node_ready():
+		push_error("bind_unit_data called before _ready()")
+		return
+	
 	if unit_data != new_unit_data and unit_data != null:
 		_disconnect_unit_data_signals()
 		if unit_data.unit_actor == self:
@@ -520,7 +524,7 @@ func set_sprite_by_id(new_sprite_id: int) -> void:
 
 func set_sprite_by_job(new_job_name: String) -> void:
 	if not GameData.job_paths.has(new_job_name):
-		push_error("set_sprite_by_job called with invalid job name: " + new_job_name)
+		push_warning("set_sprite_by_job called with invalid job name: " + new_job_name)
 		return
 
 	var new_job_data: JobData = GameData.get_job(new_job_name)
@@ -577,7 +581,7 @@ func update_spritesheet_grid_texture() -> void:
 func set_position_to_tile() -> void:
 	var map_tile: TerrainTile = unit_data.terrain_tile_position
 	if map_tile == null:
-		push_error("unit_data.terrain_tile_position is null, cannot set unit_actor position for unit: " + str(unit_data.unit_unique_name))
+		push_warning("unit_data.terrain_tile_position is null, cannot set unit_actor position for unit: " + str(unit_data.unit_unique_name))
 		return
 	char_body.global_position = Vector3(
 		map_tile.xz_location.x + 0.5,
