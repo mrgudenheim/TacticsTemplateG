@@ -73,8 +73,8 @@ func start_targeting(action_instance: ActionInstance) -> void:
 			action_instance.battle_manager.map_input_event.connect(action_instance.on_map_input_event)
 		
 		for unit: UnitData in action_instance.battle_manager.units:
-			if not unit.unit_input_event.is_connected(action_instance.on_unit_hovered):
-				unit.unit_input_event.connect(action_instance.on_unit_hovered)
+			if unit.unit_actor != null and not unit.unit_actor.unit_input_event.is_connected(action_instance.on_unit_hovered):
+				unit.unit_actor.unit_input_event.connect(action_instance.on_unit_hovered)
 		
 		if not action_instance.tile_hovered.is_connected(target_tile):
 			action_instance.tile_hovered.connect(target_tile)
@@ -95,8 +95,8 @@ func stop_targeting(action_instance: ActionInstance) -> void:
 		action_instance.battle_manager.map_input_event.disconnect(action_instance.on_map_input_event)
 	
 	for unit: UnitData in action_instance.battle_manager.units:
-		if unit.unit_input_event.is_connected(action_instance.on_unit_hovered):
-			unit.unit_input_event.disconnect(action_instance.on_unit_hovered)
+		if unit.unit_actor != null and unit.unit_actor.unit_input_event.is_connected(action_instance.on_unit_hovered):
+			unit.unit_actor.unit_input_event.disconnect(action_instance.on_unit_hovered)
 	
 	if action_instance.tile_hovered.is_connected(target_tile):
 			action_instance.tile_hovered.disconnect(target_tile)
