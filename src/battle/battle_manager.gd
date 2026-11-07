@@ -228,28 +228,26 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	var new_unit: UnitActor = UnitActor.instantiate()
 	units_container.add_child(new_unit)
 	new_unit.global_battle_manager = self
-	units.append(new_unit)
+	units.append(new_unit.unit_data)
 	new_unit.initialize_unit()
-	new_unit.tile_position = tile_position
+	new_unit.unit_data.terrain_tile_position = tile_position
 	#new_unit.char_body.global_position = Vector3(tile_position.location.x + 0.5, randi_range(15, 20), tile_position.location.y + 0.5)
 	new_unit.char_body.global_position = Vector3(tile_position.xz_location.x + 0.5, tile_position.get_world_position().y + 0.25, tile_position.xz_location.y + 0.5)
 	var new_job_data: JobData = GameData.get_job(job_name)
 	var job_id: int = new_job_data.job_id
 	if job_id < 0x5e: # non-monster
-		new_unit.stat_basis = [UnitData.StatBasis.MALE, UnitData.StatBasis.FEMALE].pick_random()
+		new_unit.unit_data.stat_basis = [UnitData.StatBasis.MALE, UnitData.StatBasis.FEMALE].pick_random()
 	else:
-		new_unit.stat_basis = UnitData.StatBasis.MONSTER
-	new_unit.set_job(job_name)
-	# if new_job_data.default_palette_idx == -1:
-	# 	new_unit.set_sprite_palette(clampi(teams.find(team), 0, 8))
-	new_unit.update_unit_facing([Vector3.FORWARD, Vector3.BACK, Vector3.LEFT, Vector3.RIGHT].pick_random())
-	new_unit.stats[UnitData.StatType.LEVEL].set_value(level)
-	UnitData.generate_leveled_raw_stats(new_unit.stat_basis, level, new_unit.job_data, new_unit.stats_raw)
+		new_unit.unit_data.stat_basis = UnitData.StatBasis.MONSTER
+	new_unit.unit_data.set_job(job_name)
+	new_unit.unit_data.update_unit_facing([Vector3.FORWARD, Vector3.BACK, Vector3.LEFT, Vector3.RIGHT].pick_random())
+	new_unit.unit_data.stats[UnitData.StatType.LEVEL].set_value(level)
+	UnitData.generate_leveled_raw_stats(new_unit.unit_data.stat_basis, level, new_unit.job_data, new_unit.unit_data.stats_raw)
 	
 	var use_higher_stat_values: bool = false
 	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(new_unit.animation_manager.global_seq.file_name): # lucavi
 		use_higher_stat_values = true
-	UnitData.calc_battle_stats(new_unit.job_data, new_unit.stats_raw, new_unit.stats, true, use_higher_stat_values)
+	UnitData.calc_battle_stats(new_unit.job_data, new_unit.unit_data.stats_raw, new_unit.unit_data.stats, true, use_higher_stat_values)
 	
 	camera_controller.rotated.connect(new_unit.char_body.set_rotation_degrees) # have sprite update as camera rotates
 	new_unit.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
@@ -258,23 +256,14 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	new_unit.update_stat_bars_scale(camera_controller.zoom)
 	camera_controller.zoom_changed.connect(new_unit.update_stat_bars_scale)
 	
-	new_unit.icon2.texture = GameData.get_texture("misc")
+	new_unit.unit_data.generate_random_abilities()
+	new_unit.unit_data.generate_equipment()
+	new_unit.name = new_unit.unit_data.job_unique_name + "-" + new_unit.unit_data.unit_unique_name
+	new_unit.unit_data.team_id = teams.find(team)
+	new_unit.unit_data.team = team
+	team.units.append(new_unit.unit_data)
 	
-	new_unit.generate_random_abilities()
-	new_unit.primary_weapon_assigned.connect(func(_weapon_unique_name: String) -> void: new_unit.update_actions(self))
-	new_unit.generate_equipment()
-	#var unit_actions: Array[Action] = new_unit.get_skillset_actions()
-	#if unit_actions.any(func(action: Action): return not action.required_equipment_type.is_empty()):
-		#while not unit_actions.any(func(action: Action): return action.required_equipment_type.has(new_unit.primary_weapon.item_type)):
-			#new_unit.set_primary_weapon(randi_range(0, 0x79)) # random weapon
-	
-	new_unit.name = new_unit.job_nickname + "-" + new_unit.unit_nickname
-	
-	new_unit.team_id = teams.find(team)
-	new_unit.team = team
-	team.units.append(new_unit)
-	
-	new_unit.is_ai_controlled = true
+	new_unit.unit_data.controller = UnitData.Controller.AI
 	new_unit.ai_controller.strategy = UnitAi.Strategy.BEST
 
 	new_unit.unit_battle_details_ui.setup(new_unit)
@@ -283,18 +272,18 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	return new_unit
 
 
-func spawn_unit_from_unit_data(unit_data: UnitData) -> UnitActor:
+func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitActor:
 	var new_unit: UnitActor = UnitActor.instantiate()
 	units_container.add_child(new_unit)
 	new_unit.global_battle_manager = self
-	units.append(new_unit)
+	units.append(new_unit.unit_data)
 	new_unit.initialize_unit()
 
-	var xz_index: int = total_map_tiles.keys().find(Vector2i(unit_data.tile_position.x, unit_data.tile_position.z))
+	var xz_index: int = total_map_tiles.keys().find(Vector2i(new_unit_data.tile_position.x, new_unit_data.tile_position.z))
 	if xz_index >= 0:
-		new_unit.tile_position = total_map_tiles.values()[xz_index][unit_data.tile_position.y]
+		new_unit.unit_data.terrain_tile_position = total_map_tiles.values()[xz_index][new_unit_data.tile_position.y]
 	else:
-		new_unit.tile_position = total_map_tiles.values()[0][0]
+		new_unit.unit_data.terrain_tile_position = total_map_tiles.values()[0][0]
 	# for tile_array: Array in total_map_tiles.values():
 	# 	var xz_tiles: Array[TerrainTile] = []
 	# 	xz_tiles.assign(tile_array)
@@ -310,24 +299,24 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> UnitActor:
 	new_unit.set_position_to_tile()
 	# new_unit.update_unit_facing(UnitActor.FacingVectors[UnitActor.Facings[unit_data.facing_direction]])
 	#new_unit.set_job_id(RomReader.jobs_data[unit_data.job_unique_name].job_id)
-	new_unit.set_job(unit_data.job_unique_name)
-	new_unit.set_sprite_by_file_name(unit_data.spritesheet_file_name)
-	new_unit.set_sprite_palette(unit_data.palette_id)
-	new_unit.update_unit_facing(UnitData.FACING_VECTORS[unit_data.facing_direction])
+	new_unit.unit_data.set_job(new_unit_data.job_unique_name)
+	new_unit.unit_data.set_sprite_by_file_name(new_unit_data.spritesheet_file_name)
+	new_unit.unit_data.set_sprite_palette(new_unit_data.palette_id)
+	new_unit.unit_data.update_unit_facing(UnitData.FACING_VECTORS[new_unit_data.facing_direction])
 	# new_unit.gender = UnitActor.Gender[unit_data.gender]
-	new_unit.gender = unit_data.gender
-	new_unit.level = unit_data.level
-	new_unit.stats_raw = unit_data.stats_raw
-	new_unit.stats = unit_data.stats
+	new_unit.unit_data.gender = new_unit_data.gender
+	new_unit.unit_data.level = new_unit_data.level
+	new_unit.stats_raw = new_unit_data.stats_raw
+	new_unit.stats = new_unit_data.stats
 	new_unit.stats[UnitData.StatType.HP_MAX].value_changed.connect(new_unit.stats[UnitData.StatType.HP].update_max_from_clamped_value)
 	new_unit.stats[UnitData.StatType.MP_MAX].value_changed.connect(new_unit.stats[UnitData.StatType.MP].update_max_from_clamped_value)
 	new_unit.stats[UnitData.StatType.HP].value_changed.connect(new_unit.hp_changed)
 
 	var stat_bars: Array[StatBar] = []
 	stat_bars.assign(new_unit.stat_bars_container.get_children())
-	stat_bars[0].bind_stat(UnitData.StatType.HP, new_unit.stats[UnitData.StatType.HP])
-	stat_bars[1].bind_stat(UnitData.StatType.MP, new_unit.stats[UnitData.StatType.MP])
-	stat_bars[2].bind_stat(UnitData.StatType.CT, new_unit.stats[UnitData.StatType.CT])
+	stat_bars[0].bind_stat(UnitData.StatType.HP, new_unit.unit_data.stats[UnitData.StatType.HP])
+	stat_bars[1].bind_stat(UnitData.StatType.MP, new_unit.unit_data.stats[UnitData.StatType.MP])
+	stat_bars[2].bind_stat(UnitData.StatType.CT, new_unit.unit_data.stats[UnitData.StatType.CT])
 
 	camera_controller.rotated.connect(new_unit.char_body.set_rotation_degrees) # have sprite update as camera rotates
 	new_unit.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
@@ -336,33 +325,26 @@ func spawn_unit_from_unit_data(unit_data: UnitData) -> UnitActor:
 	new_unit.update_stat_bars_scale(camera_controller.zoom)
 	camera_controller.zoom_changed.connect(new_unit.update_stat_bars_scale)
 	
-	new_unit.icon2.texture = GameData.get_texture("misc")
+	new_unit.unit_data.skillsets_names = new_unit_data.skillsets_names
+	new_unit.unit_data.ability_slots = new_unit_data.ability_slots
+	new_unit.unit_data.equip_slots = new_unit_data.equip_slots
 	
-	new_unit.skillsets_names = unit_data.skillsets_names
-	new_unit.ability_slots = unit_data.ability_slots
-	new_unit.primary_weapon_assigned.connect(func(_weapon_unique_name: String) -> void: new_unit.update_actions(self))
-	new_unit.equip_slots = unit_data.equip_slots
-	#var unit_actions: Array[Action] = new_unit.get_skillset_actions()
-	#if unit_actions.any(func(action: Action): return not action.required_equipment_type.is_empty()):
-		#while not unit_actions.any(func(action: Action): return action.required_equipment_type.has(new_unit.primary_weapon.item_type)):
-			#new_unit.set_primary_weapon(randi_range(0, 0x79)) # random weapon
+	new_unit.unit_nickname = new_unit_data.display_name
+	new_unit.name = new_unit.unit_data.job_unique_name + "-" + new_unit.unit_data.unit_unique_name
 	
-	new_unit.unit_nickname = unit_data.display_name
-	new_unit.name = new_unit.job_nickname + "-" + new_unit.unit_nickname
+	if teams.size() < new_unit_data.team_idx + 1:
+		teams.resize(new_unit_data.team_idx + 1)
 	
-	if teams.size() < unit_data.team_idx + 1:
-		teams.resize(unit_data.team_idx + 1)
-	
-	if teams[unit_data.team_idx] == null:
+	if teams[new_unit_data.team_idx] == null:
 		var new_team: Team = Team.new()
-		new_team.team_name = "Team" + str(unit_data.team_idx + 1)
-		teams[unit_data.team_idx] = new_team
+		new_team.team_name = "Team" + str(new_unit_data.team_idx + 1)
+		teams[new_unit_data.team_idx] = new_team
 
-	new_unit.team = teams[unit_data.team_idx]
-	new_unit.team_id = unit_data.team_idx
-	new_unit.team.units.append(new_unit)
+	new_unit.unit_data.team = teams[new_unit_data.team_idx]
+	new_unit.unit_data.team_id = new_unit_data.team_idx
+	new_unit.unit_data.team.units.append(new_unit)
 	
-	new_unit.is_ai_controlled = true if unit_data.controller == 0 else false
+	new_unit.unit_data.controller = new_unit_data.controller
 	new_unit.ai_controller.strategy = UnitAi.Strategy.BEST
 
 	new_unit.update_passive_effects()
