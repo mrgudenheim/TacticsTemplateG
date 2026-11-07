@@ -82,7 +82,7 @@ func target_tile(tile: TerrainTile, action_instance: ActionInstance, event: Inpu
 			if action_instance.user.path_costs[tile] <= action_instance.user.move: # TODO allow parameter instead of move_current
 				action_instance.submitted_targets = get_map_path(action_instance.user.terrain_tile_position, tile, action_instance.user.map_paths)
 				if action_instance.submitted_targets.is_empty():
-					push_error(action_instance.user.unit_nickname + " trying to use Move without any targets")
+					push_error(action_instance.user.display_name + " trying to use Move without any targets")
 				
 				#action_instance.submitted_targets.append(tile)
 				await action_instance.queue_use()

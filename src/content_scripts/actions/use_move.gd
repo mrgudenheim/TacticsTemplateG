@@ -74,7 +74,7 @@ func travel_path(user: UnitData, path: Array[TerrainTile]) -> void:
 	await Utilities.wait_for_frame() # wait one extra frame to allow for landing
 	#animation_manager.global_animation_ptr_id = current_idle_animation_id
 	#user.current_animation_id_fwd = user.current_idle_animation_id
-	user.set_base_animation_ptr_id(user.current_idle_animation_id)
+	user.unit_actor.set_base_animation_ptr_id(user.current_idle_animation_id)
 	user.unit_actor.is_traveling_path = false
 	var distance_moved: Vector2i = (user.terrain_tile_position.xz_location - initial_pos).abs()
 	var tiles_moved: int = distance_moved.x + distance_moved.y

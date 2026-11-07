@@ -145,7 +145,7 @@ func get_tile_highlights(tiles: Array[TerrainTile], highlight_material: Material
 
 
 func start_targeting() -> void:
-	battle_manager.game_state_label.text = user.job_nickname + "-" + user.unit_nickname + " targeting " + action.display_name
+	battle_manager.game_state_label.text = user.job_data.display_name + "-" + user.display_name + " targeting " + action.display_name
 	
 	# cancel any current targeting
 	if is_instance_valid(user.active_action):
@@ -344,7 +344,7 @@ func on_map_input_event(_camera: Camera3D, event: InputEvent, event_position: Ve
 
 
 func on_unit_hovered(unit: UnitActor, event: InputEvent) -> void:
-	var tile: TerrainTile = unit.tile_position
+	var tile: TerrainTile = unit.unit_data.terrain_tile_position
 	if tile == null:
 		return
 	
@@ -352,7 +352,7 @@ func on_unit_hovered(unit: UnitActor, event: InputEvent) -> void:
 
 
 func queue_use() -> void:
-	battle_manager.game_state_label.text = user.job_nickname + "-" + user.unit_nickname + " using " + action.display_name
+	battle_manager.game_state_label.text = user.job_data.display_name + "-" + user.display_name + " using " + action.display_name
 	battle_manager.safe_to_load_map = false
 	
 	battle_manager.clear_action_buttons()
@@ -507,15 +507,15 @@ func get_evade_values(target: UnitData, evade_direction: EvadeData.Directions) -
 
 
 func animate_evade(target_unit: UnitActor, evade_direction: EvadeData.Directions, user_pos: Vector2i) -> void:
-	var target_original_facing: Vector3 = target_unit.facing_vector
+	var target_original_facing: Vector3 = target_unit.unit_data.get_facing_vector()
 	
-	var dir_to_target: Vector2i = user_pos - target_unit.tile_position.location
+	var dir_to_target: Vector2i = user_pos - target_unit.unit_data.terrain_tile_position.xz_location
 	var temp_facing: Vector3 = Vector3(dir_to_target.x, 0, dir_to_target.y).normalized()
 	target_unit.unit_data.update_unit_facing(temp_facing)
 	
 	# var evade_anim_id: int = -1
 	var sum_of_weight: int = 0
-	var evade_values: Dictionary[EvadeData.EvadeSource, int] = target_unit.get_evade_values(action.applicable_evasion_type, evade_direction)
+	var evade_values: Dictionary[EvadeData.EvadeSource, int] = target_unit.unit_data.get_evade_values(action.applicable_evasion_type, evade_direction)
 	for evade_source_value: int in evade_values.values():
 		sum_of_weight += evade_source_value
 	
@@ -571,7 +571,7 @@ func show_projectile(target_unit: UnitActor, new_projectile_type: ProjectileEffe
 		push_warning("[Action.show_projectile] battle_manager or projectile_instance is null")
 		return
 	var origin: Vector3 = user.unit_actor.char_body.global_position
-	var target: Vector3 = target_unit.unit_actor.char_body.global_position
+	var target: Vector3 = target_unit.char_body.global_position
 	battle_manager.projectile_instance.play(origin, target, new_projectile_type)
 
 
@@ -671,9 +671,9 @@ func apply_standard() -> void:
 				effect.apply(user, target_unit, effect_value)
 				
 				if action.set_target_animation_on_hit and [UnitData.StatType.HP, UnitData.StatType.MP].has(effect.effect_stat_type) and effect_value < 0:
-					target_unit.animate_take_hit()
+					target_unit.unit_actor.animate_take_hit()
 				elif action.set_target_animation_on_hit and [UnitData.StatType.HP, UnitData.StatType.MP].has(effect.effect_stat_type) and effect_value > 0:
-					target_unit.animate_recieve_heal()
+					target_unit.unit_actor.animate_recieve_heal()
 			
 			# apply status
 			await apply_status(target_unit, action.target_status_list, action.target_status_list_type, action.target_status_chance, action.will_remove_target_status)
@@ -709,7 +709,7 @@ func apply_standard() -> void:
 	# this is needed in case the action causes the user to change animations (or SEQ entirely, ex. new status)
 	# TODO correctly time animations with end of action
 	if user.current_animation_id_fwd != user.current_idle_animation_id:
-		user.animate_return_to_idle()
+		user.unit_actor.animate_return_to_idle()
 
 	# wait for applying effect animation
 	battle_manager.game_state_label.text = "Waiting for " + action.display_name + " vfx" 

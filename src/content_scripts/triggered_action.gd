@@ -206,7 +206,7 @@ func check_if_triggered(user: UnitData, target: UnitData, element: Action.Elemen
 
 func get_action_instance(triggered_action_data: TriggeredActionInstance) -> ActionInstance:
 	var new_action: Action = get_action(triggered_action_data)
-	var new_action_instance: ActionInstance = ActionInstance.new(new_action, triggered_action_data.user, triggered_action_data.user.global_battle_manager)
+	var new_action_instance: ActionInstance = ActionInstance.new(new_action, triggered_action_data.user, triggered_action_data.user.battle_manager)
 	new_action_instance.allow_triggering_actions = allow_triggering_actions
 	new_action_instance.deduct_action_points = deduct_action_points
 	
