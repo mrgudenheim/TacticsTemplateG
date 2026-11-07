@@ -266,7 +266,7 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	new_unit.unit_data.controller = UnitData.Controller.AI
 	new_unit.ai_controller.strategy = UnitAi.Strategy.BEST
 
-	new_unit.unit_battle_details_ui.setup(new_unit)
+	new_unit.unit_battle_details_ui.bind_unit(new_unit.unit_data)
 	new_unit.unit_input_event.connect(scenario_editor.update_unit_dragging)
 	
 	return new_unit
@@ -348,7 +348,7 @@ func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitActor:
 	new_unit.ai_controller.strategy = UnitAi.Strategy.BEST
 
 	new_unit.update_passive_effects()
-	new_unit.unit_battle_details_ui.setup(new_unit)
+	new_unit.unit_battle_details_ui.bind_unit(new_unit_data)
 	new_unit.unit_input_event.connect(scenario_editor.update_unit_dragging)
 	
 	return new_unit

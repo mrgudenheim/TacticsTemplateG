@@ -35,18 +35,43 @@ extends PanelContainer
 @export var absorb_elements_label: Label
 @export var strengthen_elements_label: Label
 
-func setup(unit: UnitActor) -> void:
-	unit_name_label.text = unit.unit_nickname
-	job_label.text = unit.job_data.display_name
+var unit_data: UnitData
 
-	hp_bar.bind_stat(UnitData.StatType.HP, unit.stats[UnitData.StatType.HP])
+
+func _ready() -> void:
+	if not visibility_changed.is_connected(_on_visibility_changed):
+		visibility_changed.connect(_on_visibility_changed)
+
+
+func _exit_tree() -> void:
+	if is_queued_for_deletion():
+		_disconnect_unit_data_signals()
+
+
+func _on_visibility_changed() -> void:
+	if unit_data != null:
+		update_ui()
+
+
+func bind_unit(new_unit_data: UnitData) -> void:
+	if unit_data != new_unit_data and unit_data != null:
+		_disconnect_unit_data_signals()
+	
+	unit_data = new_unit_data
+	_connect_unit_data_signals()
+
+	unit_name_label.text = unit_data.display_name
+	job_label.text = unit_data.job_data.display_name
+	team_label.text = unit_data.team.team_name
+
+	hp_bar.bind_stat(UnitData.StatType.HP, unit_data.stats[UnitData.StatType.HP])
 	hp_bar.name_label.position.x = 5
 	hp_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	hp_bar.value_label.position.x -= (hp_bar.value_label.size.x + 10)
 	hp_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	# hp_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
 	
-	mp_bar.bind_stat(UnitData.StatType.MP, unit.stats[UnitData.StatType.MP])
+	mp_bar.bind_stat(UnitData.StatType.MP, unit_data.stats[UnitData.StatType.MP])
 	mp_bar.fill_color = Color.INDIAN_RED
 	mp_bar.name_label.position.x = 5
 	mp_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -54,7 +79,7 @@ func setup(unit: UnitActor) -> void:
 	mp_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	# mp_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
 
-	ct_bar.bind_stat(UnitData.StatType.CT, unit.stats[UnitData.StatType.CT])
+	ct_bar.bind_stat(UnitData.StatType.CT, unit_data.stats[UnitData.StatType.CT])
 	ct_bar.fill_color = Color.WEB_GREEN
 	ct_bar.name_label.position.x = 5
 	ct_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -62,85 +87,92 @@ func setup(unit: UnitActor) -> void:
 	ct_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	# ct_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
 
-	update_ui(unit)
-
-	visibility_changed.connect(func() -> void: update_ui(unit))
+	update_ui()
 
 
-func update_ui(unit: UnitActor) -> void:
-	update_stat_label(level_label, unit, UnitData.StatType.LEVEL)
+func _connect_unit_data_signals() -> void:
+	if not unit_data.data_updated.is_connected(_on_unit_data_updated):
+		unit_data.data_updated.connect(_on_unit_data_updated)
+	if not unit_data.statuses_updated.is_connected(_on_statuses_updated):
+		unit_data.statuses_updated.connect(_on_statuses_updated)
+	for stat: StatValue in unit_data.stats.values():
+		if not stat.value_changed.is_connected(_on_stat_value_changed):
+			stat.value_changed.connect(_on_stat_value_changed)
+
+
+func _disconnect_unit_data_signals() -> void:
+	if unit_data.data_updated.is_connected(_on_unit_data_updated):
+		unit_data.data_updated.disconnect(_on_unit_data_updated)
+	if unit_data.statuses_updated.is_connected(_on_statuses_updated):
+		unit_data.statuses_updated.disconnect(_on_statuses_updated)
+	for stat: StatValue in unit_data.stats.values():
+		if stat.value_changed.is_connected(_on_stat_value_changed):
+			stat.value_changed.disconnect(_on_stat_value_changed)
+
+
+func _on_unit_data_updated(_data: UnitData = null) -> void:
+	update_ui()
+
+
+func _on_statuses_updated() -> void:
+	update_ui()
+
+
+func _on_stat_value_changed(_stat: StatValue = null) -> void:
+	update_ui()
+
+
+func update_ui() -> void:
+	if not visible:
+		return
+
+	unit_name_label.text = unit_data.display_name
+	job_label.text = unit_data.job_data.display_name
+	if team_label != null:
+		team_label.text = unit_data.team.team_name if unit_data.team != null else ""
+
+	update_stat_label(level_label, UnitData.StatType.LEVEL)
 	
-	update_stat_label(pa_label, unit, UnitData.StatType.PHYSICAL_ATTACK)
-	update_stat_label(ma_label, unit, UnitData.StatType.MAGIC_ATTACK)
-	update_stat_label(brave_label, unit, UnitData.StatType.BRAVE)
-	update_stat_label(faith_label, unit, UnitData.StatType.FAITH)
-	update_stat_label(move_label, unit, UnitData.StatType.MOVE)
-	update_stat_label(jump_label, unit, UnitData.StatType.JUMP)
-	update_stat_label(speed_label, unit, UnitData.StatType.SPEED)
+	update_stat_label(pa_label, UnitData.StatType.PHYSICAL_ATTACK)
+	update_stat_label(ma_label, UnitData.StatType.MAGIC_ATTACK)
+	update_stat_label(brave_label, UnitData.StatType.BRAVE)
+	update_stat_label(faith_label, UnitData.StatType.FAITH)
+	update_stat_label(move_label, UnitData.StatType.MOVE)
+	update_stat_label(jump_label, UnitData.StatType.JUMP)
+	update_stat_label(speed_label, UnitData.StatType.SPEED)
 
 	# update evade
-	var unit_passive_effects: Array[PassiveEffect] = unit.get_all_passive_effects()
+	var unit_passive_effects: Array[PassiveEffect] = unit_data.get_all_passive_effects()
 
 	for evade_type: EvadeData.EvadeType in EvadeData.EvadeType.values():
 		# skip EvadeType.NONE
 		if evade_type == EvadeData.EvadeType.NONE:
 			continue
 		
-		# skip first row of lables (column headers)
+		# skip first row of labels (column headers)
 		var label_idx: int = evade_type * (EvadeData.Directions.keys().size() + EvadeData.EvadeSource.keys().size() + 2)
 		label_idx += 1 # skip first column of labels
 		for evade_direction: EvadeData.Directions in EvadeData.Directions.values():
-			var evade_factor: int = get_total_evade_factor(unit, unit_passive_effects, evade_type, evade_direction)
+			var evade_factor: int = get_total_evade_factor(unit_passive_effects, evade_type, evade_direction)
 			var evade_value_label: Label = evade_grid.get_child(label_idx)
 			evade_value_label.text = str(evade_factor) + "%"
 			
 			label_idx += 1
 
 		label_idx += 1 # skip empty spacer column
-		var source_evade_values: Dictionary[EvadeData.EvadeSource, int] = unit.get_evade_values(evade_type, EvadeData.Directions.FRONT)
+		var source_evade_values: Dictionary[EvadeData.EvadeSource, int] = unit_data.get_evade_values(evade_type, EvadeData.Directions.FRONT)
 		for evade_source: EvadeData.EvadeSource in source_evade_values.keys():
 			var evade_value_label: Label = evade_grid.get_child(label_idx)
 			evade_value_label.text = str(source_evade_values[evade_source]) + "%"
 			
 			label_idx += 1
 
-	
-	# var magic_evade_values: Dictionary[EvadeData.EvadeSource, int] = unit.get_evade_values(EvadeData.EvadeType.MAGICAL, EvadeData.Directions.FRONT)
-
-	# var job_evade_phys: int = unit.get_evade(EvadeData.EvadeSource.JOB, EvadeData.EvadeType.PHYSICAL, EvadeData.Directions.FRONT)
-	# var shield_evade_phys: int = unit.get_evade(EvadeData.EvadeSource.SHIELD, EvadeData.EvadeType.PHYSICAL, EvadeData.Directions.FRONT)
-	# var accessory_evade_phys: int = unit.get_evade(EvadeData.EvadeSource.ACCESSORY, EvadeData.EvadeType.PHYSICAL, EvadeData.Directions.FRONT)
-	# var weapon_evade_phys: int = unit.get_evade(EvadeData.EvadeSource.WEAPON, EvadeData.EvadeType.PHYSICAL, EvadeData.Directions.FRONT)
-
-	# var job_evade_magic: int = unit.get_evade(EvadeData.EvadeSource.JOB, EvadeData.EvadeType.MAGICAL, EvadeData.Directions.FRONT)
-	# var shield_evade_magic: int = unit.get_evade(EvadeData.EvadeSource.SHIELD, EvadeData.EvadeType.MAGICAL, EvadeData.Directions.FRONT)
-	# var accessory_evade_magic: int = unit.get_evade(EvadeData.EvadeSource.ACCESSORY, EvadeData.EvadeType.MAGICAL, EvadeData.Directions.FRONT)
-	# var weapon_evade_magic: int = unit.get_evade(EvadeData.EvadeSource.WEAPON, EvadeData.EvadeType.MAGICAL, EvadeData.Directions.FRONT)
-
-	
-	# var target_total_evade_factor: float = 1.0
-	# var evade_factors: Dictionary[EvadeData.EvadeSource, float] = {}
-
-	# for evade_source: EvadeData.EvadeSource in physical_evade_values.keys():
-	# 	if unit_passive_effects.any(func(passive_effect): return passive_effect.include_evade_sources.has(evade_source)):
-	# 		var evade_value: float = physical_evade_values[evade_source]
-	# 		for passive_effect: PassiveEffect in unit_passive_effects:
-	# 			if passive_effect.evade_source_modifiers_user.has(evade_source):
-	# 				evade_value = passive_effect.evade_source_modifiers_targeted[evade_source].apply(evade_value)
-			
-	# 		var evade_factor: float = max(0.0, 1 - (evade_value / 100.0))
-
-	# 		evade_factors[evade_source] = evade_factor
-	# 		target_total_evade_factor = target_total_evade_factor * evade_factor
-
-	# target_total_evade_factor = max(0, target_total_evade_factor) # prevent negative evasion
-
 	# update equipment
 	var equipment_labels: Array[Node] = equipment_grid.get_children()
 	for child_idx: int in range(0, equipment_labels.size()):
 		equipment_labels[child_idx].queue_free()
 
-	for equip_slot: EquipmentSlot in unit.equip_slots:
+	for equip_slot: EquipmentSlot in unit_data.equip_slots:
 		var new_slot_label: Label = Label.new()
 		new_slot_label.text = equip_slot.equipment_slot_name
 		equipment_grid.add_child(new_slot_label)
@@ -154,7 +186,7 @@ func update_ui(unit: UnitActor) -> void:
 	for child_idx: int in range(0, ability_labels.size()):
 		ability_labels[child_idx].queue_free()
 
-	for ability_slot: AbilitySlot in unit.ability_slots:
+	for ability_slot: AbilitySlot in unit_data.ability_slots:
 		var new_slot_label: Label = Label.new()
 		new_slot_label.text = ability_slot.ability_slot_name
 		ability_grid.add_child(new_slot_label)
@@ -168,17 +200,18 @@ func update_ui(unit: UnitActor) -> void:
 	for child_idx: int in range(0, innate_ability_labels.size()):
 		innate_ability_labels[child_idx].queue_free()
 
-	for ability: Ability in unit.job_data.innate_abilities:
-		var new_ability_label: Label = Label.new()
-		new_ability_label.text = ability.display_name
-		innate_ability_grid.add_child(new_ability_label)
+	if unit_data.job_data != null:
+		for ability: Ability in unit_data.job_data.innate_abilities:
+			var new_ability_label: Label = Label.new()
+			new_ability_label.text = ability.display_name
+			innate_ability_grid.add_child(new_ability_label)
 
 	# update statuses
 	var current_status_labels: Array[Node] = current_status_list.get_children()
 	for child_idx: int in range(1, current_status_labels.size()):
 		current_status_labels[child_idx].queue_free()
 
-	for status: StatusEffect in unit.current_statuses:
+	for status: StatusEffect in unit_data.current_statuses:
 		var new_status_label: Label = Label.new()
 		new_status_label.text = status.status_effect_name
 		if status.duration_type == StatusEffect.DurationType.PERMANENT:
@@ -190,17 +223,17 @@ func update_ui(unit: UnitActor) -> void:
 	for child_idx: int in range(1, immune_statuses_labels.size()):
 		immune_statuses_labels[child_idx].queue_free()
 
-	for status_name: String in unit.immune_statuses:
+	for status_name: String in unit_data.immune_statuses:
 		var new_status_label: Label = Label.new()
 		new_status_label.text = status_name
 		immune_status_list.add_child(new_status_label)
 	
 	# update element affinities
-	update_element_list(weak_elements_label, "Weak: ", unit.elemental_weakness)
-	update_element_list(resist_elements_label, "Resist: ", unit.elemental_half)
-	update_element_list(immune_elements_label, "Immune: ", unit.elemental_cancel)
-	update_element_list(absorb_elements_label, "Absorb: ", unit.elemental_absorb)
-	update_element_list(strengthen_elements_label, "Strengthen: ", unit.elemental_strengthen)
+	update_element_list(weak_elements_label, "Weak: ", unit_data.elemental_weakness)
+	update_element_list(resist_elements_label, "Resist: ", unit_data.elemental_half)
+	update_element_list(immune_elements_label, "Immune: ", unit_data.elemental_cancel)
+	update_element_list(absorb_elements_label, "Absorb: ", unit_data.elemental_absorb)
+	update_element_list(strengthen_elements_label, "Strengthen: ", unit_data.elemental_strengthen)
 
 
 func update_element_list(affinity_list_label: Label, label_start: String, affinity_list: Array[Action.ElementTypes]) -> void:
@@ -211,22 +244,21 @@ func update_element_list(affinity_list_label: Label, label_start: String, affini
 	affinity_list_label.text += ", ".join(elements_list)
 
 
-func update_stat_label(stat_label: Label, unit: UnitActor, stat_type: UnitData.StatType) -> void:
+func update_stat_label(stat_label: Label, stat_type: UnitData.StatType) -> void:
 	var stat_name: String = UnitData.StatType.find_key(stat_type).to_pascal_case()
-	var stat: StatValue = unit.stats[stat_type]
+	var stat: StatValue = unit_data.stats[stat_type]
 	var stat_value: int = stat.get_modified_value()
-	# stat_label.text = stat_name + ": " + str(roundi(stat_value)) + "/" + str(roundi(stat.max_value))
-	stat_label.text = stat_name + ": " + str(roundi(stat_value)) # + "/" + str(roundi(stat.max_value))
+	stat_label.text = stat_name + ": " + str(roundi(stat_value))
 
 
-func get_total_evade_factor(unit: UnitActor, unit_passive_effects: Array[PassiveEffect], evade_type: EvadeData.EvadeType, evade_direction: EvadeData.Directions) -> int:
-	var evade_values: Dictionary[EvadeData.EvadeSource, int] = unit.get_evade_values(evade_type, evade_direction)
+func get_total_evade_factor(unit_passive_effects: Array[PassiveEffect], evade_type: EvadeData.EvadeType, evade_direction: EvadeData.Directions) -> int:
+	var evade_values: Dictionary[EvadeData.EvadeSource, int] = unit_data.get_evade_values(evade_type, evade_direction)
 
 	var total_evade_factor: float = 1.0
 	var evade_factors: Dictionary[EvadeData.EvadeSource, float] = {}
 
 	for evade_source: EvadeData.EvadeSource in evade_values.keys():
-		if unit_passive_effects.any(func(passive_effect: PassiveEffect) -> void: return passive_effect.include_evade_sources.has(evade_source)):
+		if unit_passive_effects.any(func(passive_effect: PassiveEffect) -> bool: return passive_effect.include_evade_sources.has(evade_source)):
 			var evade_value: float = evade_values[evade_source]
 			for passive_effect: PassiveEffect in unit_passive_effects:
 				if passive_effect.evade_source_modifiers_targeted.has(evade_source):

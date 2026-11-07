@@ -179,6 +179,8 @@ func _sync_all_visuals_from_unit_data() -> void:
 		return
 	
 	_bind_stat_bars_to_unit_data()
+	if unit_battle_details_ui != null:
+		unit_battle_details_ui.bind_unit(unit_data)
 	
 	var sprite_to_load: String = unit_data.spritesheet_file_name
 	if sprite_to_load == "" or sprite_to_load == "spritesheet_file_name.spr":
