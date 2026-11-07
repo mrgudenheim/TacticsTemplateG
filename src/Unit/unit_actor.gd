@@ -57,6 +57,11 @@ func _ready() -> void:
 	start_cycle_status_icons()
 	load_game_data()
 
+	if unit_data != null:
+		_sync_all_visuals_from_unit_data()
+	else:
+		bind_unit_data(UnitData.new())
+
 
 func _process(_delta: float) -> void:
 	if not GameData.is_ready:
@@ -89,11 +94,7 @@ func _physics_process(delta: float) -> void:
 	char_body.move_and_slide()
 
 
-func bind_unit_data(new_unit_data: UnitData) -> void:
-	if not is_node_ready():
-		push_error("bind_unit_data called before _ready()")
-		return
-	
+func bind_unit_data(new_unit_data: UnitData) -> void:	
 	if unit_data != new_unit_data and unit_data != null:
 		_disconnect_unit_data_signals()
 		if unit_data.unit_actor == self:
@@ -103,7 +104,8 @@ func bind_unit_data(new_unit_data: UnitData) -> void:
 	unit_data.unit_actor = self
 	_connect_unit_data_signals()
 	
-	_sync_all_visuals_from_unit_data()
+	if is_node_ready():
+		_sync_all_visuals_from_unit_data()
 
 
 func load_game_data() -> void:
