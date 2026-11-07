@@ -154,6 +154,8 @@ func _connect_unit_data_signals() -> void:
 		unit_data.primary_weapon_changed.connect(update_primary_weapon_visuals)
 	if not unit_data.facing_changed.is_connected(_on_facing_changed):
 		unit_data.facing_changed.connect(_on_facing_changed)
+	if not unit_data.tile_position_changed.is_connected(_on_tile_position_changed):
+		unit_data.tile_position_changed.connect(_on_tile_position_changed)
 
 
 func _disconnect_unit_data_signals() -> void:
@@ -167,6 +169,8 @@ func _disconnect_unit_data_signals() -> void:
 		unit_data.primary_weapon_changed.disconnect(update_primary_weapon_visuals)
 	if unit_data.facing_changed.is_connected(_on_facing_changed):
 		unit_data.facing_changed.disconnect(_on_facing_changed)
+	if unit_data.tile_position_changed.is_connected(_on_tile_position_changed):
+		unit_data.tile_position_changed.disconnect(_on_tile_position_changed)
 
 
 func _sync_all_visuals_from_unit_data() -> void:
@@ -429,6 +433,10 @@ func _on_palette_changed(_new_palette_id: int, _new_palette_override_id: int) ->
 func _on_facing_changed(_new_facing: GameData.Directions) -> void:
 	if battle_manager != null and battle_manager.camera_controller != null:
 		update_animation_facing(battle_manager.camera_controller.camera_facing_vector)
+
+
+func _on_tile_position_changed(_new_tile: TerrainTile) -> void:
+	set_position_to_tile()
 
 
 func update_primary_weapon_visuals(primary_weapon: ItemData) -> void:
