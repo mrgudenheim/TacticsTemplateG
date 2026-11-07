@@ -452,14 +452,13 @@ func update_unit_dragging(unit_actor: UnitActor, event: InputEvent) -> void:
 		var tile: TerrainTile = battle_manager.current_tile_hover
 		var unit_data: UnitData = unit_actor.unit_data
 		if not is_instance_valid(tile): # if tile is invalid, unit will return to its original position
-			if unit_data.terrain_tile_position != null:
-				unit_actor.char_body.global_position = unit_data.terrain_tile_position.get_world_position()
+			unit_actor.set_position_to_tile()
 			unit_dragged = null
 			return
 		var can_end_on_tile: bool = tile.no_walk == 0 and tile.no_stand_select == 0 and tile.no_cursor == 0
 		if can_end_on_tile and not unit_data.prohibited_terrain.has(tile.surface_type_id): # lava, etc.
-			unit_data.set_terrain_tile_position(battle_manager.get_tile(battle_manager.current_cursor_map_position))
-			unit_actor.set_position_to_tile()
+			unit_data.set_terrain_tile_position(tile)
+		unit_actor.set_position_to_tile()
 		unit_dragged = null
 
 
