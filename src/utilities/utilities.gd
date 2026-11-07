@@ -211,7 +211,7 @@ func enforce_max_frame_time(start_time_msec: int, msec_allowed_per_frame: int = 
 	return start_time_msec
 
 
-func wait_for_delay(delay_sec: float) -> void:
+func wait_seconds(delay_sec: float) -> void:
 	await get_tree().create_timer(delay_sec).timeout
 
 

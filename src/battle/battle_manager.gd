@@ -230,7 +230,6 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	new_unit.battle_manager = self
 	new_unit.bind_unit_data(UnitData.new())
 	units.append(new_unit.unit_data)
-	new_unit.initialize_unit()
 	new_unit.unit_data.terrain_tile_position = tile_position
 	#new_unit.char_body.global_position = Vector3(tile_position.location.x + 0.5, randi_range(15, 20), tile_position.location.y + 0.5)
 	new_unit.char_body.global_position = Vector3(tile_position.xz_location.x + 0.5, tile_position.get_world_position().y + 0.25, tile_position.xz_location.y + 0.5)

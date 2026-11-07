@@ -55,7 +55,6 @@ func _ready() -> void:
 	ct_stat_bar.show_value = true
 
 	start_cycle_status_icons()
-	
 	load_game_data()
 
 
@@ -299,7 +298,7 @@ func animate_start_action(animation_start_id: int, animation_charging_id: int) -
 		if unit_data.active_action != null:
 			charge_ticks = unit_data.active_action.action.ticks_charge_time
 		var charge_time: float = 0.1 + (charge_ticks * 0.1)
-		await Utilities.wait_for_seconds(charge_time) # TODO allow looping until changed, ie. charging a spell
+		await Utilities.wait_seconds(charge_time) # TODO allow looping until changed, ie. charging a spell
 
 
 func animate_execute_action(animation_executing_id: int) -> void:
@@ -356,7 +355,7 @@ func animate_knock_out() -> void:
 func animate_return_to_idle() -> void:
 	# add random delay to prevent unit animations from syncing
 	var desync_delay: float = randf_range(0.0, 0.25)
-	await Utilities.wait_for_seconds(desync_delay)
+	await Utilities.wait_seconds(desync_delay)
 	
 	var idle_anim_id: int = unit_data.current_idle_animation_id
 	set_base_animation_ptr_id(idle_anim_id)
@@ -461,7 +460,7 @@ func start_cycle_status_icons() -> void:
 			else:
 				status_idx = 0
 		
-		await Utilities.wait_for_seconds(icon_cycle_time)
+		await Utilities.wait_seconds(icon_cycle_time)
 
 
 func set_sprite_by_file_idx(new_sprite_file_idx: int) -> void:
@@ -520,6 +519,10 @@ func set_sprite_by_id(new_sprite_id: int) -> void:
 
 
 func set_sprite_by_job(new_job_name: String) -> void:
+	if not GameData.job_paths.has(new_job_name):
+		push_error("set_sprite_by_job called with invalid job name: " + new_job_name)
+		return
+
 	var new_job_data: JobData = GameData.get_job(new_job_name)
 	
 	var sprite_name: String = new_job_data.sprite_name
@@ -574,7 +577,7 @@ func update_spritesheet_grid_texture() -> void:
 func set_position_to_tile() -> void:
 	var map_tile: TerrainTile = unit_data.terrain_tile_position
 	if map_tile == null:
-		push_error("unit_data.terrain_tile_position is null, cannot set unit_actor position for unit: " + str(unit_data.unique_name))
+		push_error("unit_data.terrain_tile_position is null, cannot set unit_actor position for unit: " + str(unit_data.unit_unique_name))
 		return
 	char_body.global_position = Vector3(
 		map_tile.xz_location.x + 0.5,

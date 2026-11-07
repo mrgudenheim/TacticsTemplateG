@@ -642,7 +642,7 @@ func apply_standard() -> void:
 	
 	user.unit_actor.animate_execute_action(mod_animation_executing_id)
 	
-	await Utilities.wait_for_delay(0.2) # TODO delay should be based on effect/vfx data? 
+	await Utilities.wait_seconds(0.2) # TODO delay should be based on effect/vfx data? 
 	
 	# show vfx, including rock, arrow, bolt...
 	var vfx_locations: Array[Node3D] = []
@@ -717,7 +717,7 @@ func apply_standard() -> void:
 		while vfx_locations.any(func(vfx_location: Node3D) -> bool: return is_instance_valid(vfx_location)): # wait until vfx is completed
 			await Utilities.wait_for_frame()
 	else:
-		await Utilities.wait_for_delay(0.5) # TODO show based on vfx timing data? (attacks use vfx 0xFFFF?)
+		await Utilities.wait_seconds(0.5) # TODO show based on vfx timing data? (attacks use vfx 0xFFFF?)
 	for target_unit: UnitData in target_units:
 		if is_instance_valid(target_unit):
 			target_unit.unit_actor.return_to_idle_from_hit()

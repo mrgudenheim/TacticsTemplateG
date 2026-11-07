@@ -20,7 +20,7 @@ func walk_to_tile(user: UnitData, to_tile: TerrainTile) -> void:
 		user.update_unit_facing(immediate_path)
 		var vert_distance: float = (to_tile.height_mid - user.terrain_tile_position.height_mid) * FftMapData.HEIGHT_SCALE
 		user.unit_actor.char_body.velocity.y = sqrt(vert_distance) * 4.5 # jump for steep changes in height, to get to bridges that don't have walls
-		await Utilities.wait_for_delay(vert_distance * 0.19)
+		await Utilities.wait_seconds(vert_distance * 0.19)
 	else:
 		user.current_animation_id_fwd = user.walk_to_animation_id
 	await process_physics_move(user.unit_actor, to_tile.get_world_position())

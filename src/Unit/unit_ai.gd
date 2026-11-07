@@ -37,7 +37,7 @@ func choose_action(unit: UnitData) -> void:
 	wait_action_instance = unit.actions_data[unit.wait_action.unique_name]
 	
 	if strategy == Strategy.END_TURN:
-		await Utilities.wait_for_delay(action_delay)
+		await Utilities.wait_seconds(action_delay)
 		wait_action_instance.start_targeting()
 		await wait_action_instance.action_completed
 		return
@@ -49,7 +49,7 @@ func choose_action(unit: UnitData) -> void:
 	if eligible_actions.size() > 1:
 		eligible_actions.erase(wait_action_instance) # don't choose to wait if another action is eligible
 	else:
-		await Utilities.wait_for_delay(action_delay)
+		await Utilities.wait_seconds(action_delay)
 		wait_action_instance.start_targeting()
 		await wait_action_instance.action_completed
 		return
@@ -133,9 +133,9 @@ func choose_action(unit: UnitData) -> void:
 		
 		if best_move != null:
 			move_action_instance.start_targeting() # TODO refactor using actions with specific target
-			await Utilities.wait_for_delay(action_delay)
+			await Utilities.wait_seconds(action_delay)
 			move_action_instance.tile_hovered.emit(best_move, move_action_instance, simulated_input)
-			await Utilities.wait_for_delay(action_delay)
+			await Utilities.wait_seconds(action_delay)
 			#if not move_action_instance.preview_targets.is_empty(): # TODO fix why move does not have targets sometimes
 			var simulated_input_action: InputEventAction = InputEventAction.new()
 			simulated_input_action.action = "primary_action"
@@ -218,14 +218,14 @@ func action_targeted(chosen_action: ActionInstance, target: TerrainTile = null, 
 	if chosen_action.action.auto_target:
 		await chosen_action.action_completed
 	else:
-		await Utilities.wait_for_delay(action_delay)
+		await Utilities.wait_seconds(action_delay)
 		if target == null:
 			target = chosen_action.potential_targets.pick_random() # random target
 		if hover_target == null:
 			hover_target = target
 		var simulated_input: InputEvent = InputEventMouseMotion.new()
 		chosen_action.tile_hovered.emit(hover_target, chosen_action, simulated_input)
-		await Utilities.wait_for_delay(action_delay)
+		await Utilities.wait_seconds(action_delay)
 		if not chosen_action.preview_targets.is_empty(): # TODO fix why move does not have targets sometimes
 			var simulated_input_action: InputEventAction = InputEventAction.new()
 			simulated_input_action.action = "primary_action"
