@@ -113,7 +113,7 @@ var paths_set: bool = false
 var team: Team
 
 var ai_controller: UnitAi = UnitAi.new()
-var job_data: JobData
+var job_data: JobData = JobData.new()
 
 @export var immortal: bool = false
 @export var immune_knockback: bool = false
@@ -1016,7 +1016,7 @@ func equip_item(slot: EquipmentSlot, item: ItemData) -> void:
 	update_passive_effects()
 	var new_primary_weapon: ItemData = get_primary_weapon()
 	if original_weapon != new_primary_weapon:
-		primary_weapon_changed.emit(new_primary_weapon.unique_name)
+		primary_weapon_changed.emit(new_primary_weapon)
 
 
 # TODO is the first item with an action always the primary weapon?

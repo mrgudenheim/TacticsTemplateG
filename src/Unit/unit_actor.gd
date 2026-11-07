@@ -4,18 +4,16 @@ extends Node3D
 # https://ffhacktics.com/wiki/Miscellaneous_Unit_Data
 # https://ffhacktics.com/wiki/Battle_Stats
 
-signal initialized()
 signal data_updated(unit: UnitActor)
 
-signal ability_assigned(name: String)
 signal primary_weapon_assigned(item_unique_name: String)
 signal image_changed(new_image: ImageTexture)
 signal spritesheet_changed(new_spritesheet: ImageTexture)
 signal unit_input_event(unit_data: UnitActor, event: InputEvent)
 
-static var unit_scene: PackedScene = load("uid://dkudrb304m7t1")
+const UNIT_SCENE: PackedScene = preload("uid://dkudrb304m7t1")
 
-var global_battle_manager: BattleManager
+var battle_manager: BattleManager
 var unit_data: UnitData
 
 @export var char_body: CharacterBody3D
@@ -26,12 +24,11 @@ var unit_data: UnitData
 @export var unit_battle_details_ui: UnitDetailsBattleUi
 @export var icon2: Sprite3D
 @export var icon_cycle_time: float = 1.25
-
-var can_move: bool = true
+var is_cycling_status_icons: bool = false
 
 @export var tile_highlights: Node3D
+var can_move: bool = true
 var is_back_facing: bool = false
-
 var is_in_air: bool = false
 var is_traveling_path: bool = false
 
@@ -41,32 +38,25 @@ var ct_stat_bar: StatBar
 
 
 static func instantiate() -> UnitActor:
-	return unit_scene.instantiate()
+	return UNIT_SCENE.instantiate()
 
 
 func _ready() -> void:
-	if not GameData.is_ready:
-		push_error("GameData is not ready, cannot load unit_actor visuals")
-		return
-
-	initialize_unit()
-
-
-func _physics_process(delta: float) -> void:
-	# FFTae (and all non-battles) don't use physics, so this can be turned off
-	if global_battle_manager == null:
-		set_physics_process(false)
-		return
+	hp_stat_bar = add_stat_bar()
+	hp_stat_bar.show_value = true
 	
-	# Add the gravity.
-	if not char_body.is_on_floor():
-		char_body.velocity += char_body.get_gravity() * delta
+	mp_stat_bar = add_stat_bar()
+	mp_stat_bar.fill_color = Color.INDIAN_RED
+	mp_stat_bar.show_value = true
+
+	ct_stat_bar = add_stat_bar()
+	ct_stat_bar.visual_max = 100.0
+	ct_stat_bar.fill_color = Color.WEB_GREEN
+	ct_stat_bar.show_value = true
+
+	start_cycle_status_icons()
 	
-	var velocity_horizontal: Vector3 = char_body.velocity
-	velocity_horizontal.y = 0
-	if velocity_horizontal.length_squared() > 0.01:
-		unit_data.update_unit_facing(velocity_horizontal.normalized())
-	char_body.move_and_slide()
+	load_game_data()
 
 
 func _process(_delta: float) -> void:
@@ -83,8 +73,25 @@ func _process(_delta: float) -> void:
 	set_base_animation_ptr_id(unit_data.current_animation_id_fwd)
 
 
+func _physics_process(delta: float) -> void:
+	# FFTae (and all non-battles) don't use physics, so this can be turned off
+	if battle_manager == null:
+		set_physics_process(false)
+		return
+	
+	# Add the gravity.
+	if not char_body.is_on_floor():
+		char_body.velocity += char_body.get_gravity() * delta
+	
+	var velocity_horizontal: Vector3 = char_body.velocity
+	velocity_horizontal.y = 0
+	if velocity_horizontal.length_squared() > 0.01:
+		unit_data.update_unit_facing(velocity_horizontal.normalized())
+	char_body.move_and_slide()
+
+
 func bind_unit_data(new_unit_data: UnitData) -> void:
-	if unit_data != new_unit_data:
+	if unit_data != new_unit_data and unit_data != null:
 		_disconnect_unit_data_signals()
 		if unit_data.unit_actor == self:
 			unit_data.unit_actor = null
@@ -96,30 +103,16 @@ func bind_unit_data(new_unit_data: UnitData) -> void:
 	_sync_all_visuals_from_unit_data()
 
 
-func initialize_unit() -> void:	
-	if unit_data == null:
-		bind_unit_data(UnitData.new())
-	else:
-		_connect_unit_data_signals()
-	
-	hp_stat_bar = add_stat_bar(UnitData.StatType.HP)
-	hp_stat_bar.show_value = true
-	
-	mp_stat_bar = add_stat_bar(UnitData.StatType.MP)
-	mp_stat_bar.fill_color = Color.INDIAN_RED
-	mp_stat_bar.show_value = true
-
-	ct_stat_bar = add_stat_bar(UnitData.StatType.CT)
-	ct_stat_bar.visual_max = 100.0
-	ct_stat_bar.fill_color = Color.WEB_GREEN
-	ct_stat_bar.show_value = true
+func load_game_data() -> void:
+	if not GameData.is_ready:
+		push_error("GameData is not ready, cannot load unit_actor visuals")
+		return
 	
 	icon2.texture = GameData.get_texture("misc")
 	icon2.material_override = icon2.material_override.duplicate()
 	icon2.material_override.set_shader_parameter("sprite_texture", GameData.get_texture("misc"))
 	icon2.material_override.set_shader_parameter("palette_colors", GameData.palettes["misc"].slice(5 * 16, 6 * 16))
 	icon2.material_override.set_shader_parameter("billboard_enabled", true)
-	cycle_status_icons()
 	
 	animation_manager.wep_texture = GameData.get_texture("wep")
 	animation_manager.wep_spritesheet_data = GameData.get_spritesheet_data("wep")
@@ -131,7 +124,6 @@ func initialize_unit() -> void:
 	animation_manager.eff_shp = GameData.get_shp("eff1")
 	animation_manager.eff_seq = GameData.get_seq("eff1")
 	
-	#animation_manager.unit_sprites_manager.sprite_effect.texture = animation_manager.eff_spr.create_frame_grid_texture(0, 0, 0, 0, 0)
 	var eff_frame_grid: ImageTexture = GameData.get_spritesheet_data("eff").create_frame_grid_texture(0, 0, 0, 0)
 	animation_manager.unit_sprites_manager.sprite_effect.texture = eff_frame_grid
 	var eff_material: ShaderMaterial = animation_manager.unit_sprites_manager.sprite_effect.material_override.duplicate()
@@ -144,10 +136,6 @@ func initialize_unit() -> void:
 	
 	animation_manager.other_texture = GameData.get_texture("other")
 	animation_manager.other_shp = GameData.get_shp("other")
-	
-	_sync_all_visuals_from_unit_data()
-
-	initialized.emit()
 
 
 func _connect_unit_data_signals() -> void:
@@ -193,9 +181,8 @@ func _sync_all_visuals_from_unit_data() -> void:
 	_on_facing_changed(unit_data.facing_direction)
 
 
-func add_stat_bar(stat_type: UnitData.StatType) -> StatBar:
+func add_stat_bar() -> StatBar:
 	var new_stat_bar: StatBar = StatBar.instantiate()
-	_bind_stat_bar(stat_type, new_stat_bar)
 	stat_bars_container.add_child(new_stat_bar)
 
 	return new_stat_bar
@@ -435,8 +422,8 @@ func _on_palette_changed(_new_palette_id: int, _new_palette_override_id: int) ->
 
 
 func _on_facing_changed(_new_facing: GameData.Directions) -> void:
-	if global_battle_manager != null and global_battle_manager.camera_controller != null:
-		update_animation_facing(global_battle_manager.camera_controller.camera_facing_vector)
+	if battle_manager != null and battle_manager.camera_controller != null:
+		update_animation_facing(battle_manager.camera_controller.camera_facing_vector)
 
 
 func update_primary_weapon_visuals(primary_weapon: ItemData) -> void:
@@ -460,17 +447,19 @@ func update_primary_weapon_visuals(primary_weapon: ItemData) -> void:
 	primary_weapon_assigned.emit(primary_weapon.unique_name)
 
 
-func cycle_status_icons() -> void:
+func start_cycle_status_icons() -> void:
 	var status_idx: int = 0
-	while true:
-		var status: StatusEffect = null
-		if not unit_data.current_statuses.is_empty():
-			status_idx = (status_idx + 1) % unit_data.current_statuses.size()
-			status = unit_data.current_statuses[status_idx]
-			var rect: Rect2i = status.get_icon_rect()
-			icon2.region_rect = rect
-		else:
-			status_idx = 0
+	is_cycling_status_icons = true
+	while is_cycling_status_icons:
+		if unit_data != null:
+			var status: StatusEffect = null
+			if not unit_data.current_statuses.is_empty():
+				status_idx = (status_idx + 1) % unit_data.current_statuses.size()
+				status = unit_data.current_statuses[status_idx]
+				var rect: Rect2i = status.get_icon_rect()
+				icon2.region_rect = rect
+			else:
+				status_idx = 0
 		
 		await Utilities.wait_for_seconds(icon_cycle_time)
 
@@ -499,7 +488,9 @@ func set_sprite_by_file_name(new_spritesheet_name: String) -> void:
 	
 	# animation_manager.global_spr = spr
 	var new_spritesheet_data: UnitSpritesheetData = GameData.get_spritesheet_data(new_spritesheet_name)
-	if new_spritesheet_data.is_flying != animation_manager.global_spritesheet_data.is_flying:
+	if animation_manager.global_spritesheet_data == null:
+		animation_changed = true
+	elif new_spritesheet_data.is_flying != animation_manager.global_spritesheet_data.is_flying:
 		animation_changed = true
 	animation_manager.global_spritesheet_data = new_spritesheet_data
 	animation_manager.global_shp = shp
@@ -582,6 +573,9 @@ func update_spritesheet_grid_texture() -> void:
 
 func set_position_to_tile() -> void:
 	var map_tile: TerrainTile = unit_data.terrain_tile_position
+	if map_tile == null:
+		push_error("unit_data.terrain_tile_position is null, cannot set unit_actor position for unit: " + str(unit_data.unique_name))
+		return
 	char_body.global_position = Vector3(
 		map_tile.xz_location.x + 0.5,
 		map_tile.get_world_position().y + 0.25,

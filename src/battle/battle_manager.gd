@@ -227,7 +227,8 @@ func spawn_random_unit(team: Team) -> UnitActor:
 func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level: int = 40) -> UnitActor:
 	var new_unit: UnitActor = UnitActor.instantiate()
 	units_container.add_child(new_unit)
-	new_unit.global_battle_manager = self
+	new_unit.battle_manager = self
+	new_unit.bind_unit_data(UnitData.new())
 	units.append(new_unit.unit_data)
 	new_unit.initialize_unit()
 	new_unit.unit_data.terrain_tile_position = tile_position
@@ -275,9 +276,9 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitActor:
 	var new_unit: UnitActor = UnitActor.instantiate()
 	units_container.add_child(new_unit)
-	new_unit.global_battle_manager = self
+	new_unit.battle_manager = self
 	units.append(new_unit.unit_data)
-	new_unit.initialize_unit()
+	new_unit.bind_unit_data(new_unit_data)
 
 	var xz_index: int = total_map_tiles.keys().find(Vector2i(new_unit_data.tile_position.x, new_unit_data.tile_position.z))
 	if xz_index >= 0:
