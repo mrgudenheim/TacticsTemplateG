@@ -2,7 +2,7 @@ class_name BattleManager
 extends Node3D
 
 signal map_input_event(action_instance: ActionInstance, camera: Camera3D, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) # TODO should action_instance be removed from signal?
-signal unit_created(new_unit: UnitActor)
+signal unit_created(new_unit: UnitData)
 signal delayed_action_completed
 
 const SCALE: float = 1.0 / FftMapData.TILE_SIDE_LENGTH
@@ -111,7 +111,7 @@ func toggle_debug_ui() -> void:
 		battle_view.reparent(scenario_editor.battle_subviewport)
 		
 		for unit: UnitData in units:
-			if not unit.unit_actor.unit_input_event.is_connected(scenario_editor.update_unit_dragging):
+			if unit.unit_actor != null and not unit.unit_actor.unit_input_event.is_connected(scenario_editor.update_unit_dragging):
 				unit.unit_actor.unit_input_event.connect(scenario_editor.update_unit_dragging)
 		
 		camera_controller.follow_node = null
@@ -122,11 +122,12 @@ func toggle_debug_ui() -> void:
 			scenario_editor.tile_highlight.queue_free()
 		
 		for unit: UnitData in units:
-			unit.unit_actor.unit_input_event.disconnect(scenario_editor.update_unit_dragging)
+			if unit.unit_actor != null and unit.unit_actor.unit_input_event.is_connected(scenario_editor.update_unit_dragging):
+				unit.unit_actor.unit_input_event.disconnect(scenario_editor.update_unit_dragging)
 
 		battle_view.reparent(self)
 
-		if active_unit != null:
+		if active_unit != null and active_unit.unit_actor != null:
 			camera_controller.follow_node = active_unit.unit_actor.char_body
 			controller.unit = active_unit.unit_actor
 		else:
@@ -193,16 +194,22 @@ func start_battle() -> void:
 		scenario_editor.tile_highlight.queue_free()
 	
 	for unit: UnitData in units:
-		unit.unit_actor.unit_input_event.disconnect(scenario_editor.update_unit_dragging)
+		if unit.unit_actor != null and unit.unit_actor.unit_input_event.is_connected(scenario_editor.update_unit_dragging):
+			unit.unit_actor.unit_input_event.disconnect(scenario_editor.update_unit_dragging)
 	
 	battle_view.reparent(self)
 	# get list of units again; reparenting temporarily removes the unit from the tree and Units auto remove themselves from the Array when they leave the tree
-	units.assign(units_container.get_children())
+	units.clear()
+	for child: Node in units_container.get_children():
+		var actor: UnitActor = child as UnitActor
+		if actor != null and actor.unit_data != null:
+			units.append(actor.unit_data)
 	set_unit_statbars_visible(show_statbar_check.button_pressed)
 	game_state_container.visible = true
 	
-	camera_controller.follow_node = units[0].unit_actor.char_body
-	controller.unit = units[0].unit_actor
+	if not units.is_empty() and units[0].unit_actor != null:
+		camera_controller.follow_node = units[0].unit_actor.char_body
+		controller.unit = units[0].unit_actor
 	#controller.rotate_camera(1) # HACK workaround for bug where controls are off until camera is rotated
 	
 	if not battle_is_running:
@@ -218,9 +225,9 @@ func spawn_random_unit(team: Team) -> UnitActor:
 		rand_job = GameData.get_job(rand_job_name)
 	var tile_location: TerrainTile = get_random_stand_terrain_tile()
 	var new_unit: UnitActor = spawn_unit(tile_location, rand_job.unique_name, team)
-	new_unit.is_ai_controlled = false
+	new_unit.unit_data.controller = UnitData.Controller.PLAYER
 	
-	unit_created.emit(new_unit)
+	unit_created.emit(new_unit.unit_data)
 	return new_unit
 
 
@@ -400,10 +407,11 @@ func process_clock_tick() -> void:
 					statuses_to_remove.append(status)
 					if status.action_on_complete != "": # process potential removal if ticks_left == 0
 						var status_action_instance: ActionInstance = ActionInstance.new(RomReader.actions[status.action_on_complete], unit, self)
-						status_action_instance.submitted_targets.append(unit.tile_position) # TODO get targets for status action
+						status_action_instance.submitted_targets.append(unit.terrain_tile_position) # TODO get targets for status action
 						# RomReader.actions[status.action_on_complete].use(status_action_instance)
-						camera_controller.follow_node = unit.unit_actor.char_body
-						game_state_label.text = unit.job_nickname + "-" + unit.unit_nickname + " processing " + status.status_effect_name + " ending"
+						if unit.unit_actor != null:
+							camera_controller.follow_node = unit.unit_actor.char_body
+						game_state_label.text = unit.job_data.display_name + "-" + unit.display_name + " processing " + status.status_effect_name + " ending"
 						await status_action_instance.use()
 						if not battle_is_running: return
 						# await status_action_instance.action_completed
@@ -413,8 +421,9 @@ func process_clock_tick() -> void:
 					if status.delayed_action != null: # execute stored delayed actions, TODO checks to null (no mp, silenced, etc.)
 						#status.delayed_action.show_targets_highlights(status.delayed_action.preview_targets_highlights) # show submitted targets TODO retain preview highlight nodes?
 						#await unit.get_tree().create_timer(0.5).timeout
-						camera_controller.follow_node = unit.unit_actor.char_body
-						game_state_label.text = unit.job_nickname + "-" + unit.unit_nickname + " processing delayed " + status.delayed_action.action.display_name
+						if unit.unit_actor != null:
+							camera_controller.follow_node = unit.unit_actor.char_body
+						game_state_label.text = unit.job_data.display_name + "-" + unit.display_name + " processing delayed " + status.delayed_action.action.display_name
 						await status.delayed_action.use()
 						if not battle_is_running: return
 						#await status.delayed_action.action_completed
@@ -430,8 +439,8 @@ func process_clock_tick() -> void:
 			unit.remove_status(status)
 
 	for unit: UnitData in units: # increment each units ct by speed
-		if not unit.is_ct_frozen: # check status that prevent ct gain (stop, sleep, etc.)
-			var ct_gain: int = unit.speed
+		if not unit.is_ct_frozen(): # check status that prevent ct gain (stop, sleep, etc.)
+			var ct_gain: int = unit.stats[UnitData.StatType.SPEED].current_value
 			for passive_effect: PassiveEffect in unit.get_all_passive_effects():
 				ct_gain = passive_effect.ct_gain_modifier.apply(ct_gain)
 			unit.stats[UnitData.StatType.CT].add_value(ct_gain)
@@ -508,11 +517,13 @@ func check_end_conditions() -> bool:
 
 
 func start_units_turn(unit: UnitData) -> void:
-	controller.unit = unit.unit_actor
+	if unit.unit_actor != null:
+		controller.unit = unit.unit_actor
 	active_unit = unit
 	
-	if not unit.is_defeated:
-		camera_controller.follow_node = unit.unit_actor.char_body
+	if not unit.is_defeated():
+		if unit.unit_actor != null:
+			camera_controller.follow_node = unit.unit_actor.char_body
 		unit.actions_updated.connect(update_action_buttons)
 	
 	await unit.start_turn()
@@ -583,7 +594,8 @@ func get_stand_tiles() -> Array[TerrainTile]:
 
 func set_unit_statbars_visible(statbar_is_visible: bool) -> void:
 	for unit: UnitData in units:
-		unit.unit_actor.set_stat_bar_visiblity(statbar_is_visible)
+		if unit.unit_actor != null:
+			unit.unit_actor.set_stat_bar_visiblity(statbar_is_visible)
 
 
 func clear_maps() -> void:
@@ -595,7 +607,8 @@ func clear_maps() -> void:
 
 func clear_units() -> void:
 	for unit: UnitData in units:
-		unit.unit_actor.queue_free()
+		if unit.unit_actor != null:
+			unit.unit_actor.queue_free()
 	
 	units.clear()
 	#for child: Node in units_container.get_children():
