@@ -110,7 +110,7 @@ func apply_value(apply_unit: UnitData, value: int) -> int:
 			# get direction based on user and targert, get path, determine obstructions, and move unit
 	
 	var effect_text: String = get_text(value)
-	apply_unit.unit_actor.show_popup_text(effect_text)
+	apply_unit.unit_actor.popup_texts.show_popup_text(effect_text)
 	
 	return value
 

@@ -583,9 +583,9 @@ func apply_status(unit: UnitData, status_list: Array[String], status_list_type: 
 				var status_effect: StatusEffect = GameData.get_status_effect(status_id)
 				if will_remove_status and unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_id):
 					unit.remove_status_id(status_id)
-					unit.unit_actor.show_popup_text(status_effect.status_effect_name) # TODO different text for removing status
+					unit.unit_actor.popup_texts.show_popup_text(status_effect.status_effect_name) # TODO different text for removing status
 				elif not will_remove_status:
-					unit.unit_actor.show_popup_text(status_effect.status_effect_name)
+					unit.unit_actor.popup_texts.show_popup_text(status_effect.status_effect_name)
 					await unit.add_status(status_effect.duplicate())
 	elif status_list_type == Action.StatusListType.EACH:
 		for status_id: String in status_list:
@@ -594,9 +594,9 @@ func apply_status(unit: UnitData, status_list: Array[String], status_list_type: 
 				var status_effect: StatusEffect = GameData.get_status_effect(status_id)
 				if will_remove_status and unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_id):
 					unit.remove_status_id(status_id)
-					unit.unit_actor.show_popup_text(status_effect.status_effect_name) # TODO different text for removing status
+					unit.unit_actor.popup_texts.show_popup_text(status_effect.status_effect_name) # TODO different text for removing status
 				elif not will_remove_status:
-					unit.unit_actor.show_popup_text(status_effect.status_effect_name)
+					unit.unit_actor.popup_texts.show_popup_text(status_effect.status_effect_name)
 					await unit.add_status(status_effect.duplicate())
 	elif status_list_type == Action.StatusListType.RANDOM:
 		var status_success: bool = randi_range(0, 99) < status_list_chance
@@ -606,12 +606,12 @@ func apply_status(unit: UnitData, status_list: Array[String], status_list_type: 
 				if not removable_status_list.is_empty():
 					var status_id: String = removable_status_list.pick_random()
 					unit.remove_status_id(status_id)
-					unit.unit_actor.show_popup_text(GameData.get_status_effect(status_id).status_effect_name) # TODO different text for removing status
+					unit.unit_actor.popup_texts.show_popup_text(GameData.get_status_effect(status_id).status_effect_name) # TODO different text for removing status
 			elif not will_remove_status:
 				var addable_status_list: Array[String] = status_list.filter(func(status_id: String) -> bool: return not unit.current_status_ids.has(status_id))
 				if not addable_status_list.is_empty():
 					var status_id: String = addable_status_list.pick_random()
-					unit.unit_actor.show_popup_text(GameData.get_status_effect(status_id).status_effect_name)
+					unit.unit_actor.popup_texts.show_popup_text(GameData.get_status_effect(status_id).status_effect_name)
 					await unit.add_status(GameData.get_status_effect(status_id).duplicate())
 
 
@@ -695,7 +695,7 @@ func apply_standard() -> void:
 		else:
 			animate_evade(target_unit.unit_actor, evade_direction, user.terrain_tile_position.xz_location)
 			
-			target_unit.unit_actor.show_popup_text("Missed!") # TODO or "Guarded"
+			target_unit.unit_actor.popup_texts.show_popup_text("Missed!") # TODO or "Guarded"
 			#push_warning(display_name + " missed")
 	
 	# apply effects to user

@@ -19,7 +19,7 @@ signal turn_ended(unit_data: UnitData)
 signal job_changed(new_job_name: String)
 signal sprite_changed(new_sprite_name: String)
 signal palette_changed(new_palette_id: int, new_palette_override_id: int)
-signal primary_weapon_changed(weapon_unique_name: String)
+signal primary_weapon_changed(new_weapon: ItemData)
 signal facing_changed(new_facing: GameData.Directions)
 signal tile_position_changed(new_tile: TerrainTile)
 
@@ -985,7 +985,7 @@ func equip_items_leveled() -> void:
 	update_passive_effects()
 	var new_primary_weapon: ItemData = get_primary_weapon()
 	if original_weapon != new_primary_weapon:
-		primary_weapon_changed.emit(new_primary_weapon.unique_name)
+		primary_weapon_changed.emit(new_primary_weapon)
 
 
 func get_item_unique_name_for_slot(slot_type: ItemData.SlotType, item_level: int, random: bool = false) -> String:
