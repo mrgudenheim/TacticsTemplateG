@@ -162,7 +162,7 @@ func process_triggered_action(triggered_action_data: TriggeredActionInstance) ->
 
 		# TODO check excessive hp recovered
 		# if excessive_hp_recovery_threshold != 0:
-		# 	var excess_hp = action_hp_recovered + user.stats[UnitActor.StatType.HP].modified_value - user.stats[UnitActor.StatType.HP_MAX].modified_value
+		# 	var excess_hp = action_hp_recovered + user.stats[UnitData.StatType.HP].modified_value - user.stats[UnitData.StatType.HP_MAX].modified_value
 		# 	if excess_hp < excessive_hp_recovery_threshold:
 		# 		return
 	

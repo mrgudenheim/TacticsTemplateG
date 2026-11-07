@@ -548,9 +548,9 @@ func init_statuses() -> void:
 	RomReader.fft_abilities[0x0c8].ability_action.status_prevents_use_any.erase("blood_suck") # can use blood suck
 	
 	# faith
-	status_effects[32].passive_effect.stat_modifiers[UnitActor.StatType.FAITH] = Modifier.new("100.0", Modifier.ModifierType.SET)
+	status_effects[32].passive_effect.stat_modifiers[UnitData.StatType.FAITH] = Modifier.new("100.0", Modifier.ModifierType.SET)
 	# innocent
-	status_effects[33].passive_effect.stat_modifiers[UnitActor.StatType.FAITH] = Modifier.new("0.0", Modifier.ModifierType.SET)
+	status_effects[33].passive_effect.stat_modifiers[UnitData.StatType.FAITH] = Modifier.new("0.0", Modifier.ModifierType.SET)
 	
 	# float
 	# TODO handle ignore depth and add height
