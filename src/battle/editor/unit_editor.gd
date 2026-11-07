@@ -60,19 +60,22 @@ func setup(new_unit: UnitData) -> void:
 			unit.data_updated.disconnect(update_ui)
 
 	unit = new_unit
-	if new_unit.job_data == null:
-		new_unit.set_job_id(0x01) # TODO set initial job correctly
+	if new_unit.job_unique_name == "job_unique_name" or new_unit.job_data == null:
+		if not GameData.job_paths.is_empty():
+			new_unit.set_job(GameData.job_paths.keys()[0])
+		else:
+			push_error("No jobs found in GameData.job_paths")
 	
-	unit_name_line_edit.text = new_unit.unit_nickname
+	unit_name_line_edit.text = new_unit.display_name
 	job_button.text = new_unit.job_data.display_name
 	
 	palette_option_button.clear()
 	@warning_ignore("integer_division")
-	for palette_idx: int in GameData.get_spritesheet_data(new_unit.sprite_file_name).color_palette.size() / 16:
+	for palette_idx: int in GameData.get_spritesheet_data(new_unit.spritesheet_file_name).color_palette.size() / 16:
 		palette_option_button.add_item(str(palette_idx))
-	palette_option_button.select(new_unit.sprite_palette_id)
+	palette_option_button.select(new_unit.palette_id)
 
-	if new_unit.is_ai_controlled:
+	if new_unit.controller == UnitData.Controller.AI:
 		controller_option_button.select(0)
 	else:
 		controller_option_button.select(1)
@@ -103,7 +106,7 @@ func setup(new_unit: UnitData) -> void:
 	# clear connections for when panel is reused
 	# hook up buttons to update UnitActor data
 	Utilities.disconnect_all_connections(unit_name_line_edit.text_submitted)
-	unit_name_line_edit.text_submitted.connect(func(new_name: String) -> void: new_unit.unit_nickname = new_name)
+	unit_name_line_edit.text_submitted.connect(func(new_name: String) -> void: new_unit.display_name = new_name)
 	
 	Utilities.disconnect_all_connections(level_spinbox.value_changed)
 	level_spinbox.value_changed.connect(func(new_value: int) -> void: update_level(new_unit, new_value))
@@ -131,11 +134,10 @@ func setup(new_unit: UnitData) -> void:
 func update_ui(new_unit: UnitData) -> void:
 	# update_stat_label(level_label, unit, UnitData.StatType.LEVEL)
 	var atlas_texture: AtlasTexture = sprite_button.texture_normal
-	var unit_sprite: Sprite3D = new_unit.animation_manager.unit_sprites_manager.sprite_primary
+	var unit_sprite: Sprite3D = new_unit.unit_actor.animation_manager.unit_sprites_manager.sprite_primary
 	atlas_texture.atlas = unit_sprite.texture
-	var spritesheet_data: UnitSpritesheetData = GameData.get_spritesheet_data(new_unit.sprite_file_name)
-
-	sprite_button.material.set_shader_parameter("palette_colors", spritesheet_data.color_palette.slice(new_unit.sprite_palette_id * 16, (new_unit.sprite_palette_id + 1) * 16))
+	var spritesheet_data: UnitSpritesheetData = GameData.get_spritesheet_data(new_unit.spritesheet_file_name)
+	sprite_button.material.set_shader_parameter("palette_colors", spritesheet_data.color_palette.slice(new_unit.palette_id * 16, (new_unit.palette_id + 1) * 16))
 
 	job_button.text = new_unit.job_data.display_name
 	level_spinbox.value = new_unit.stats[UnitData.StatType.LEVEL].get_modified_value()
@@ -355,22 +357,22 @@ func set_palette(new_palette_idx: int) -> void:
 func set_team(new_team_idx: int) -> void:
 	unit.team_idx = new_team_idx
 	
-	if new_team_idx >= unit.global_battle_manager.teams.size():
-		unit.global_battle_manager.teams.resize(new_team_idx + 1)
+	if new_team_idx >= unit.battle_manager.teams.size():
+		unit.battle_manager.teams.resize(new_team_idx + 1)
 	
-	if unit.global_battle_manager.teams[new_team_idx] == null:
+	if unit.battle_manager.teams[new_team_idx] == null:
 		var new_team: Team = Team.new()
 		new_team.team_name = "Team" + str(new_team_idx + 1)
-		unit.global_battle_manager.teams[new_team_idx] = new_team
+		unit.battle_manager.teams[new_team_idx] = new_team
 	
-	unit.team = unit.global_battle_manager.teams[new_team_idx]
+	unit.team = unit.battle_manager.teams[new_team_idx]
 
 
 func set_controller(new_controller_idx: int) -> void:
 	if new_controller_idx == 0:
-		unit.is_ai_controlled = true
+		unit.controller = UnitData.Controller.AI
 	else:
-		unit.is_ai_controlled = false
+		unit.controller = UnitData.Controller.PLAYER
 		# TODO handle multiple player teams
 
 
@@ -379,6 +381,6 @@ func update_level(new_unit: UnitData, new_level: int) -> void:
 	UnitData.generate_leveled_raw_stats(new_unit.stat_basis, new_level, new_unit.job_data, new_unit.stats_raw)
 	
 	var use_higher_stat_values: bool = false
-	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(new_unit.animation_manager.global_seq.file_name): # lucavi
+	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(new_unit.unit_actor.animation_manager.global_seq.file_name): # lucavi
 		use_higher_stat_values = true
 	UnitData.calc_battle_stats(new_unit.job_data, new_unit.stats_raw, new_unit.stats, true, use_higher_stat_values)
