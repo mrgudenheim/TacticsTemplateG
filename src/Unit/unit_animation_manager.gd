@@ -186,7 +186,8 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 	# handle LoadFrameWait
 	if not seq_part.is_opcode:
 		var new_frame_id: int = seq_part.parameters[0]
-		var frame_id_offset: int = get_animation_frame_offset(unit_actor.primary_weapon.item_type, fft_animation.shp, fft_animation.back_face_offset)
+		var primary_weapon: ItemData = unit_actor.unit_data.get_primary_weapon()
+		var frame_id_offset: int = get_animation_frame_offset(primary_weapon.item_type, fft_animation.shp, fft_animation.back_face_offset)
 		new_frame_id = new_frame_id + frame_id_offset + opcode_frame_offset
 		
 		## clear the frame to prevent weird and inconsistent ghosting issues
@@ -233,14 +234,14 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 		elif seq_part.opcode_name.begins_with("Move"):
 			var position_offset: Vector3 = Vector3.ZERO
 			if seq_part.opcode_name == "MoveUnitFB":
-				position_offset = unit_actor.facing_vector * seq_part.parameters[0]
+				position_offset = unit_actor.unit_data.get_facing_vector() * seq_part.parameters[0]
 			elif seq_part.opcode_name == "MoveUnitDU":
 				position_offset = Vector3(0, -seq_part.parameters[0], 0)
 			elif seq_part.opcode_name == "MoveUnitRL":
-				position_offset = unit_actor.facing_vector.rotated(Vector3.UP, deg_to_rad(-90)) * seq_part.parameters[0]
+				position_offset = unit_actor.unit_data.get_facing_vector().rotated(Vector3.UP, deg_to_rad(-90)) * seq_part.parameters[0]
 			elif seq_part.opcode_name == "MoveUnitRLDUFB":
-				var position_offset_fb: Vector3 = unit_actor.facing_vector * seq_part.parameters[2]
-				var position_offset_rl: Vector3 = unit_actor.facing_vector.rotated(Vector3.UP, deg_to_rad(-90)) * seq_part.parameters[0]
+				var position_offset_fb: Vector3 = unit_actor.unit_data.get_facing_vector() * seq_part.parameters[2]
+				var position_offset_rl: Vector3 = unit_actor.unit_data.get_facing_vector().rotated(Vector3.UP, deg_to_rad(-90)) * seq_part.parameters[0]
 				var position_offset_du: Vector3 = Vector3(0, -seq_part.parameters[1], 0)
 				position_offset = position_offset_fb + position_offset_rl + position_offset_du
 			elif seq_part.opcode_name == "MoveUp1":
@@ -252,13 +253,13 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 			elif seq_part.opcode_name == "MoveDown2":
 				position_offset = Vector3(0, -2, 0)
 			elif seq_part.opcode_name == "MoveBackward1":
-				position_offset = unit_actor.facing_vector * -1
+				position_offset = unit_actor.unit_data.get_facing_vector() * -1
 			elif seq_part.opcode_name == "MoveBackward2":
-				position_offset = unit_actor.facing_vector * -2
+				position_offset = unit_actor.unit_data.get_facing_vector() * -2
 			elif seq_part.opcode_name == "MoveForward1":
-				position_offset = unit_actor.facing_vector * 1
+				position_offset = unit_actor.unit_data.get_facing_vector() * 1
 			elif seq_part.opcode_name == "MoveForward2":
-				position_offset = unit_actor.facing_vector * 2
+				position_offset = unit_actor.unit_data.get_facing_vector() * 2
 			else:
 				push_warning("can't interpret " + seq_part.opcode_name)
 				
