@@ -515,7 +515,7 @@ func select_default_action() -> void:
 			break
 	
 	# end turn when no actions left
-	if active_action == null or is_defeated:
+	if active_action == null or is_defeated():
 		await end_turn()
 	else:
 		if controller == Controller.AI:

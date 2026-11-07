@@ -51,7 +51,7 @@ func get_ai_value(user: UnitData, target: UnitData, element: Action.ElementTypes
 		else:
 			ai_value = target.stats[effect_stat_type].get_add_delta(nominal_value)
 		
-		if target.is_defeated:
+		if target.is_defeated():
 			ai_value = 0 # prevent ai from focusing defeated units with non-status changes
 	else:
 		ai_value = 0 # TODO remove equipment should not be 0, check changes/modifiers for stats, statuses, element interactions

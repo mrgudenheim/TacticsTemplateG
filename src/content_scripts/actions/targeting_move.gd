@@ -107,7 +107,7 @@ func get_map_paths(user: UnitData, map_tiles: Dictionary[Vector2i, Array], units
 	
 	var unit_tiles: Dictionary[TerrainTile, UnitData] = {}
 	for unit: UnitData in units:
-		if unit == user or unit.is_defeated:
+		if unit == user or unit.is_defeated():
 			continue
 		unit_tiles[unit.terrain_tile_position] = unit
 	
