@@ -44,8 +44,8 @@ func get_potential_targets(action_instance: ActionInstance) -> Array[TerrainTile
 						var collider: Object = Raycaster.raycast(action_instance.user.terrain_tile_position.get_world_position() + Vector3.UP, tile.get_world_position() + Vector3.UP) # TODO adjust for different height sprites: chicken, frog, Altima
 						if is_instance_valid(collider):
 							if collider is CharacterBody3D:
-								var intersected_unit: UnitData = collider.get_parent_node_3d()
-								if intersected_unit.terrain_tile_position != tile:
+								var intersected_actor: UnitActor = collider.get_parent_node_3d() as UnitActor
+								if intersected_actor.unit_data.terrain_tile_position != tile:
 									continue
 						# TODO fix raycast?
 					if action_instance.action.cant_target_self and tile == action_instance.user.terrain_tile_position:
@@ -198,8 +198,8 @@ func get_aoe_targets(action_instance: ActionInstance, tile_target: TerrainTile) 
 						var collider: Object = Raycaster.raycast(tile_target.get_world_position() + Vector3.UP, tile.get_world_position() + Vector3.UP) # TODO adjust for different height sprites: chicken, frog, Altima
 						if is_instance_valid(collider):
 							if collider is CharacterBody3D:
-								var intersected_unit: UnitData = collider.get_parent_node_3d()
-								if intersected_unit.terrain_tile_position != tile:
+								var intersected_actor: UnitActor = collider.get_parent_node_3d() as UnitActor
+								if intersected_actor.unit_data.terrain_tile_position != tile:
 									continue
 						# TODO fix raycast?
 					if action_instance.action.cant_hit_user and tile == action_instance.user.terrain_tile_position:
