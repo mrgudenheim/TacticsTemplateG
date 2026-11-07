@@ -3,10 +3,10 @@ extends Container
 
 signal need_new_unit(team: Team)
 
-signal unit_job_select_pressed(unit: UnitActor)
-signal unit_item_select_pressed(unit: UnitActor, slot: EquipmentSlot)
-signal unit_ability_select_pressed(unit: UnitActor, slot: AbilitySlot)
-signal unit_skillset_select_pressed(unit: UnitActor, skillset_idx: int)
+signal unit_job_select_pressed(unit: UnitData)
+signal unit_item_select_pressed(unit: UnitData, slot: EquipmentSlot)
+signal unit_ability_select_pressed(unit: UnitData, slot: AbilitySlot)
+signal unit_skillset_select_pressed(unit: UnitData, skillset_idx: int)
 
 @export var team: Team
 @export var unit_list: Container
@@ -42,7 +42,11 @@ func on_num_units_changed(new_value: int) -> void:
 		unit_panels.assign(unit_list.get_children())
 		
 		for delta: int in -delta_units:
-			team.units[-1].queue_free()
+			var unit_to_remove: UnitData = team.units[-1]
+			if unit_to_remove.unit_actor != null:
+				unit_to_remove.unit_actor.queue_free()
+			if unit_to_remove.battle_manager != null and unit_to_remove.battle_manager.units.has(unit_to_remove):
+				unit_to_remove.battle_manager.units.erase(unit_to_remove)
 			team.units.remove_at(-1)
 			unit_panels[-1].queue_free()
 			unit_panels.remove_at(-1)
