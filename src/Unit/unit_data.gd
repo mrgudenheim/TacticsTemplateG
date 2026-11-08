@@ -179,6 +179,9 @@ var equipable_item_types: Array[ItemData.ItemType] = []
 @export var action_points_start: int = 1
 @export var action_points_remaining: int = 1
 var is_ending_turn: bool = false
+
+@export var move_action_name: String = "move"
+@export var wait_action_name: String = "wait"
 var move_action: Action
 var wait_action: Action
 var actions: Array[Action] = []
@@ -556,6 +559,9 @@ func end_turn() -> void:
 
 
 func update_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
+	move_action = GameData.get_action(move_action_name)
+	wait_action = GameData.get_action(move_action_name)
+	
 	actions.clear()
 	actions.append(move_action)
 	actions.append_array(get_equipment_actions())
