@@ -185,10 +185,6 @@ var actions: Array[Action] = []
 var actions_data: Dictionary[String, ActionInstance] = {}
 var active_action: ActionInstance
 
-var game_data: GameData
-var battle_manager: BattleManager
-var unit_actor: UnitActor
-
 @export var current_animation_id_fwd: int = 6 # set based on current action
 @export var current_idle_animation_id: int = 6 # set based on status (critical, knocked out, etc.)
 # constants?
@@ -200,6 +196,9 @@ var unit_actor: UnitActor
 @export var heal_animation_id: int = 0x36
 @export var mid_jump_animation: int = 0x3e
 var submerged_depth: int = 0
+
+var battle_manager: BattleManager
+var unit_actor: UnitActor
 
 
 static func create_from_dictionary(property_dict: Dictionary) -> UnitData:
@@ -630,7 +629,7 @@ func add_status(new_status: StatusEffect, ignore_immunity: bool = false) -> void
 	current_statuses.append(new_status)
 	# use action_on_apply
 	if new_status.action_on_apply != "":
-		var action_instance: ActionInstance = ActionInstance.new(game_data.get_action(new_status.action_on_apply), self, battle_manager)
+		var action_instance: ActionInstance = ActionInstance.new(GameData.get_action(new_status.action_on_apply), self, battle_manager)
 		await action_instance.start_targeting()
 		# await action_instance.use()
 	
