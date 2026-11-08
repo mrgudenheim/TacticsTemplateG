@@ -118,7 +118,7 @@ func get_unique_scenarios() -> Array[Scenario]:
 		var map_name_idx: int = RomReader.maps.keys().find_custom(func(map_name: String) -> bool: return map_name.begins_with(map_unique_name_num))
 		var map_unique_name: String = RomReader.maps.keys()[map_name_idx]
 
-		var new_map_chunk: Scenario.MapChunk = Scenario.MapChunk.new()
+		var new_map_chunk: MapChunk = MapChunk.new()
 		# new_map_chunk.set_mirror_xyz([true, true, false])
 		new_map_chunk.unique_name = map_unique_name
 		new_scenario.map_chunks.append(new_map_chunk)

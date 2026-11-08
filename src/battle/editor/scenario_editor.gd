@@ -89,7 +89,7 @@ func load_scenario(dropdown_idx: int) -> void:
 	var scenario_to_load: Scenario = GameData.get_scenario(load_scenario_button.get_item_text(dropdown_idx)).duplicate_deep(Resource.DEEP_DUPLICATE_ALL)
 	scenario_to_load.unique_name = scenario_to_load.unique_name + "_new"
 	# update mirror_scale for duplicated map chunks
-	for map_chunk: Scenario.MapChunk in scenario_to_load.map_chunks:
+	for map_chunk: MapChunk in scenario_to_load.map_chunks:
 		map_chunk.set_mirror_xyz(map_chunk.mirror_xyz)
 	
 	queue_new_scenario(scenario_to_load)
@@ -128,7 +128,7 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 		background_gradient_color_pickers[1].color = scenario.background_gradient_top
 		update_background_gradient()
 
-		for map_chunk: Scenario.MapChunk in scenario.map_chunks:
+		for map_chunk: MapChunk in scenario.map_chunks:
 			add_map_chunk_settings(map_chunk)
 		battle_manager.update_total_map_tiles(scenario.map_chunks)
 
@@ -293,9 +293,9 @@ func update_unit_skillset(unit: UnitData, skillset_idx: int, new_skillset: Skill
 	desetup_skillset_select()
 
 
-func add_map_chunk_settings(new_map_chunk: Scenario.MapChunk = null) -> void:
+func add_map_chunk_settings(new_map_chunk: MapChunk = null) -> void:
 	if new_map_chunk == null:
-		new_map_chunk = Scenario.MapChunk.new()
+		new_map_chunk = MapChunk.new()
 		scenario.map_chunks.append(new_map_chunk)
 		# new_map_chunk.unique_name = "map_114_end"
 	

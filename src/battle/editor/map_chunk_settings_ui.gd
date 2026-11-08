@@ -15,12 +15,11 @@ const SETTINGS_UI_SCENE: PackedScene = preload("uid://dyajlcyhtfdbr")
 @export var position_edit: Vector3iEdit
 @export var mirror_checkboxes: Array[CheckBox]
 
-# @export var map_chunk: Scenario.MapChunk = Scenario.MapChunk.new()
-@export var map_chunk: Scenario.MapChunk
+@export var map_chunk: MapChunk
 @export var map_chunk_nodes: MapChunkNodes
 
 
-static func instantiate(new_map_chunk: Scenario.MapChunk = null) -> MapChunkSettingsUi:
+static func instantiate(new_map_chunk: MapChunk = null) -> MapChunkSettingsUi:
 	var new_map_chunk_settings: MapChunkSettingsUi = SETTINGS_UI_SCENE.instantiate()
 	new_map_chunk_settings.map_chunk = new_map_chunk
 	return new_map_chunk_settings

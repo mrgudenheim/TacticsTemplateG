@@ -957,7 +957,7 @@ func export_data_tables(save_path: String) -> void:
 		Utilities.save_json(ability, save_path)
 	for scenario: Scenario in scenarios.values():
 		# mirror unit placement in scenarios to align with mirrored maps
-		var map_chunk: Scenario.MapChunk = scenario.map_chunks[0]
+		var map_chunk: MapChunk = scenario.map_chunks[0]
 		var map_chunk_data: FftMapData = maps[map_chunk.unique_name]
 		scenario.units_data = Scenario.transform_units_data_tile_location(scenario.units_data, map_chunk_data.terrain_tiles, Vector2(-1, 1))
 		scenario.background_gradient_bottom = RomReader.maps[scenario.map_chunks[0].unique_name].background_gradient_bottom

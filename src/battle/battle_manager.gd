@@ -163,10 +163,10 @@ func on_data_ready() -> void:
 	set_unit_statbars_visible(show_statbar_check.button_pressed)
 
 
-func update_total_map_tiles(map_chunks: Array[Scenario.MapChunk]) -> void:
+func update_total_map_tiles(map_chunks: Array[MapChunk]) -> void:
 	total_map_tiles.clear()
 
-	for map_chunk: Scenario.MapChunk in map_chunks:
+	for map_chunk: MapChunk in map_chunks:
 		var map_chunk_data: MapData = GameData.get_map_data(map_chunk.unique_name)
 		#if not map_chunk_data.is_initialized:
 			#continue
