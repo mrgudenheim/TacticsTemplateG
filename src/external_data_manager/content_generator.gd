@@ -512,7 +512,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_effect = ActionEffect.new()
 	new_effect.effect_stat_type = UnitData.StatType.HP
 	# TODO use correct formula for Counter Tackle
-	new_effect.base_power_formula = FormulaData.new("user.hp_max * 0.04", [4.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, true, true)
+	new_effect.base_power_formula = FormulaData.new("user.stats[user.StatType.HP_MAX].get_modified_value() * 0.04", [4.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, true, true)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
@@ -533,7 +533,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.status_prevents_use_any = []
 	new_effect = ActionEffect.new()
 	new_effect.effect_stat_type = UnitData.StatType.HP
-	new_effect.base_power_formula = FormulaData.new("target.hp", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false)
+	new_effect.base_power_formula = FormulaData.new("target.stats[target.StatType.HP].current_value", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
@@ -592,7 +592,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.description = abilities[new_action.unique_name].description	
 	new_effect = ActionEffect.new()
 	new_effect.effect_stat_type = UnitData.StatType.HP
-	new_effect.base_power_formula = FormulaData.new("target.hp_max", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_effect.base_power_formula = FormulaData.new("target.stats[target.StatType.HP_MAX].get_modified_value()", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
@@ -613,7 +613,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.applicable_evasion_type = EvadeData.EvadeType.PHYSICAL
 	new_effect = ActionEffect.new()
 	new_effect.effect_stat_type = UnitData.StatType.HP
-	new_effect.base_power_formula = FormulaData.new("user.hp_max", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false)
+	new_effect.base_power_formula = FormulaData.new("user.stats[user.StatType.HP_MAX].get_modified_value()", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
@@ -633,7 +633,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
 	new_effect.effect_stat_type = UnitData.StatType.HP
-	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_effect.base_power_formula = FormulaData.new("target.stats[target.StatType.HP_MAX].get_modified_value() * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
@@ -653,7 +653,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
 	new_effect.effect_stat_type = UnitData.StatType.MP
-	new_effect.base_power_formula = FormulaData.new("target.mp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_effect.base_power_formula = FormulaData.new("target.stats[target.StatType.MP_MAX].get_modified_value() * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
@@ -663,7 +663,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.description = abilities[new_action.unique_name].description
 	new_effect = ActionEffect.new()
 	new_effect.effect_stat_type = UnitData.StatType.MP
-	new_effect.base_power_formula = FormulaData.new("target.mp_max", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_effect.base_power_formula = FormulaData.new("target.stats[target.StatType.MP_MAX].get_modified_value()", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
@@ -683,7 +683,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.description = "Applies damage from Poison status"
 	new_effect = ActionEffect.new()
 	new_effect.effect_stat_type = UnitData.StatType.HP
-	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false)
+	new_effect.base_power_formula = FormulaData.new("target.stats[target.StatType.HP_MAX].get_modified_value() * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
@@ -693,7 +693,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.description = "Heals HP from Regeneration status"
 	new_effect = ActionEffect.new()
 	new_effect.effect_stat_type = UnitData.StatType.HP
-	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_effect.base_power_formula = FormulaData.new("target.stats[target.StatType.HP_MAX].get_modified_value() * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
@@ -717,7 +717,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.status_prevents_use_any.erase("dead")
 	new_effect = ActionEffect.new()
 	new_effect.effect_stat_type = UnitData.StatType.HP
-	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_effect.base_power_formula = FormulaData.new("target.stats[target.StatType.HP_MAX].get_modified_value() * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 
@@ -751,7 +751,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.status_prevents_use_any.erase("dead")
 	new_effect = ActionEffect.new()
 	new_effect.effect_stat_type = UnitData.StatType.HP
-	new_effect.base_power_formula = FormulaData.new("target.hp_max * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
+	new_effect.base_power_formula = FormulaData.new("target.stats[target.StatType.HP_MAX].get_modified_value() * 0.1", [100.0], FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, false, false, false)
 	new_action.target_effects.append(new_effect)
 	predefined_actions[new_action.unique_name] = new_action.duplicate_deep()
 

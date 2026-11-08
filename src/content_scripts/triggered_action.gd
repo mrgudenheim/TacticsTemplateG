@@ -42,7 +42,7 @@ var action: Action
 @export var trigger_timing: TriggerTiming = TriggerTiming.TARGETTED_POST_ACTION
 @export var targeting: TargetingTypes = TargetingTypes.SELF
 @export var trigger_chance_formula: FormulaData = FormulaData.new(
-	"user.brave", [1.0],
+	"user.stats[user.StatType.BRAVE].get_modified_value()", [1.0],
 	FormulaData.FaithModifier.NONE, FormulaData.FaithModifier.NONE, 
 	false, false,
 	false
@@ -115,11 +115,11 @@ func self_trigger(user: UnitData) -> void:
 
 func process_triggered_action(triggered_action_data: TriggeredActionInstance) -> void:
 	var user: UnitData = triggered_action_data.user
-	if not Utilities.has_any_elements(user.current_status_ids, required_status_id):
+	if not Utilities.has_any_elements(user.get_current_status_ids(), required_status_id):
 		return
 	
 	for stat_type: UnitData.StatType in user_stat_thresholds.keys():
-		if user.stats[stat_type].modified_value < user_stat_thresholds[stat_type]:
+		if user.stats[stat_type].get_modified_value() < user_stat_thresholds[stat_type]:
 			return
 
 	var needs_initiator: bool = (action_unique_name == "COPY"
@@ -178,7 +178,7 @@ func process_triggered_action(triggered_action_data: TriggeredActionInstance) ->
 	@warning_ignore("redundant_await") # inherited targeting strategies may be coroutines
 	var action_valid_targets: Array[TerrainTile] = await new_action_instance.action.targeting_strategy.get_potential_targets(new_action_instance)
 	if allow_valid_targets_only:
-		if not action_valid_targets.has(initiator.tile_position):
+		if not action_valid_targets.has(initiator.terrain_tile_position):
 			return
 	
 	match targeting:

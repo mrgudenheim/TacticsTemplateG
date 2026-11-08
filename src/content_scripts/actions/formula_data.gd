@@ -110,11 +110,11 @@ func get_base_value(user: UnitData, target: UnitData) -> float:
 
 
 func faith_modify(value: float, unit: UnitData) -> float:
-	return value * unit.faith / 100.0
+	return value * unit.stats[UnitData.StatType.FAITH].get_modified_value() / 100.0
 
 
 func unfaith_modify(value: float, unit: UnitData) -> float:
-	return value * (100 - unit.faith) / 100.0
+	return value * (100 - unit.stats[UnitData.StatType.FAITH].get_modified_value()) / 100.0
 
 
 func zodiac_modify(value: float, user: UnitData, target: UnitData) -> float:

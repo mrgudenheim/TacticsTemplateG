@@ -183,7 +183,7 @@ func choose_action(unit: UnitData) -> void:
 			var move_target: TerrainTile = shortest_path_target
 			var move_cost: int = roundi(shortest_path_cost)
 			if move_target != null:
-				while move_cost > unit.move:
+				while move_cost > unit.stats[UnitData.StatType.MOVE].get_modified_value():
 					#if unit.path_costs[move_target] > unit.move_current:
 						#break
 					move_target = unit.map_paths[move_target]

@@ -220,7 +220,7 @@ func get_unit_data() -> UnitData:
 	# TODO unit_data.stats[UnitData.StatType.HP].value_changed.connect(hp_changed)
 	# TODO connect stat bars?
 
-	UnitData.generate_leveled_raw_stats(unit_data.gender as UnitData.StatBasis, unit_data.level, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
+	UnitData.generate_leveled_raw_stats(unit_data.gender as UnitData.StatBasis, unit_data.stats[UnitData.StatType.LEVEL].current_value, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
 	var use_higher_stat_values: bool = false
 	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(unit_data.spritesheet_file_name): # lucavi
 		use_higher_stat_values = true

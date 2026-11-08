@@ -220,30 +220,29 @@ func _init(idx: int = -1) -> void:
 		match item_type:
 			ItemType.FISTS:
 				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.PA_BRAVE_X_PA
-				# weapon_attack_action.target_effects[0].base_power_formula.formula_text = "(user.stats[user.StatType.PHYSICAL_ATTACK].modified_value * user.stats[user.StatType.BRAVE].modified_value / 100.0) * user.stats[user.StatType.PHYSICAL_ATTACK].modified_value"
-				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "(user.physical_attack * user.brave / 100.0) * user.physical_attack"
+				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "(user.stats[user.StatType.PHYSICAL_ATTACK].get_modified_value() * user.stats[user.StatType.BRAVE].get_modified_value() / 100.0) * user.stats[user.StatType.PHYSICAL_ATTACK].get_modified_value()"
 			ItemType.KNIFE, ItemType.NINJA_BLADE, ItemType.BOW, ItemType.SHURIKEN:
 				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.AVG_PA_SP_X_V1
-				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "((user.physical_attack + user.speed) / 2.0) * %d" % weapon_power
+				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "((user.stats[user.StatType.PHYSICAL_ATTACK].get_modified_value() + user.stats[user.StatType.SPEED].get_modified_value()) / 2.0) * %d" % weapon_power
 			ItemType.SWORD, ItemType.ROD, ItemType.CROSSBOW, ItemType.SPEAR:
 				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.PA_X_V1
-				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "user.physical_attack * %d" % weapon_power
+				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "user.stats[user.StatType.PHYSICAL_ATTACK].get_modified_value() * %d" % weapon_power
 			ItemType.KNIGHT_SWORD, ItemType.KATANA:
 				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.PA_BRAVE_X_V1
-				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "(user.physical_attack * user.brave / 100.0) * %d" % weapon_power
+				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "(user.stats[user.StatType.PHYSICAL_ATTACK].get_modified_value() * user.stats[user.StatType.BRAVE].get_modified_value() / 100.0) * %d" % weapon_power
 			ItemType.AXE, ItemType.FLAIL, ItemType.BAG:
 				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.RANDOM_PA_X_V1
-				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "randi_range(1, user.physical_attack) * %d" % weapon_power
+				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "randi_range(1, user.stats[user.StatType.PHYSICAL_ATTACK].get_modified_value()) * %d" % weapon_power
 			ItemType.STAFF, ItemType.POLE:
 				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.MA_X_V1
-				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "user.magical_attack * %d" % weapon_power
+				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "user.stats[user.StatType.MAGIC_ATTACK].get_modified_value() * %d" % weapon_power
 			ItemType.GUN:
 				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.V1_X_V1
 				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "%d * %d" % [weapon_power, weapon_power]
 				weapon_attack_action.has_vertical_tolerance_from_user = false
 			ItemType.INSTRUMENT, ItemType.BOOK, ItemType.CLOTH:
 				# weapon_attack_action.target_effects[0].base_power_formula.formula = FormulaData.Formulas.MA_X_V1
-				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "user.magical_attack * %d" % weapon_power
+				weapon_attack_action.target_effects[0].base_power_formula.formula_text = "user.stats[user.StatType.MAGIC_ATTACK].get_modified_value() * %d" % weapon_power
 		
 		if [ItemType.BOW, ItemType.CROSSBOW].has(item_type):
 			weapon_attack_action.projectile_type = ProjectileEffectInstance.ProjectileType.ARROW

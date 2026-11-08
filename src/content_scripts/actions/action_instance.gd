@@ -62,7 +62,7 @@ func is_usable() -> bool:
 	if action.useable_strategy == null: # default usable check
 		var user_has_enough_move_points: bool = user.move_points_remaining >= action.move_points_cost
 		var user_has_enough_action_points: bool = user.action_points_remaining >= action.action_points_cost
-		var user_has_enough_mp: bool = user.mp >= action.mp_cost
+		var user_has_enough_mp: bool = user.stats[UnitData.StatType.MP].current_value >= action.mp_cost
 		var user_has_equipment_type: bool = false
 		if action.required_equipment_type.is_empty():
 			user_has_equipment_type = true
@@ -81,7 +81,7 @@ func is_usable() -> bool:
 					user_has_equipment = true
 					break
 		
-		var action_not_prevented_by_status: bool = not action.status_prevents_use_any.any(func(status_id: String) -> bool: return user.current_status_ids.has(status_id))
+		var action_not_prevented_by_status: bool = not action.status_prevents_use_any.any(func(status_id: String) -> bool: return user.get_current_status_ids().has(status_id))
 		
 		action_is_usable = (user_has_enough_move_points 
 				and user_has_enough_action_points 
@@ -304,7 +304,7 @@ func get_statuses_text(target: UnitData) -> String:
 	
 	var status_names: PackedStringArray = []
 	for status_id: String in action.target_status_list:
-		if not action.will_remove_target_status or target.current_status_ids.has(status_id): # don't show removing status the target does not have TODO don't show remove Always statuses
+		if not action.will_remove_target_status or target.get_current_status_ids().has(status_id): # don't show removing status the target does not have TODO don't show remove Always statuses
 			status_names.append(GameData.get_status_effect(status_id).status_effect_name)
 	
 	if status_names.is_empty() and action.will_remove_target_status:
@@ -421,7 +421,7 @@ func get_total_hit_chance(target: UnitData, evade_direction: EvadeData.Direction
 		for passive_effect: PassiveEffect in user_passive_effects:
 			required_status.append_array(passive_effect.add_applicable_target_statuses)
 		
-		if not Utilities.has_any_elements(target.current_status_ids, required_status):
+		if not Utilities.has_any_elements(target.get_current_status_ids(), required_status):
 			return 0
 
 	if not action.required_target_stat_basis.is_empty():
@@ -476,13 +476,13 @@ func get_total_hit_chance(target: UnitData, evade_direction: EvadeData.Direction
 func get_evade_direction(origin_tile: TerrainTile, target: UnitData) -> EvadeData.Directions:
 	var relative_position: Vector2i = origin_tile.xz_location - target.terrain_tile_position.xz_location
 	var relative_facing_position: Vector2i = relative_position
-	if target.facing == GameData.Directions.NORTH:
+	if target.facing_direction == GameData.Directions.NORTH:
 		pass # relative position is already correct for North facing
-	elif target.facing == GameData.Directions.EAST:
+	elif target.facing_direction == GameData.Directions.EAST:
 		relative_facing_position = Vector2i(-relative_position.y, relative_position.x)
-	elif target.facing == GameData.Directions.SOUTH:
+	elif target.facing_direction == GameData.Directions.SOUTH:
 		relative_facing_position = -relative_position
-	elif target.facing == GameData.Directions.WEST:
+	elif target.facing_direction == GameData.Directions.WEST:
 		relative_facing_position = Vector2i(relative_position.y, -relative_position.x)
 	
 	# check target facing, check x>y
@@ -602,13 +602,13 @@ func apply_status(unit: UnitData, status_list: Array[String], status_list_type: 
 		var status_success: bool = randi_range(0, 99) < status_list_chance
 		if status_success:
 			if will_remove_status:
-				var removable_status_list: Array[String] = status_list.filter(func(status_id: String) -> bool: return unit.current_status_ids.has(status_id))
+				var removable_status_list: Array[String] = status_list.filter(func(status_id: String) -> bool: return unit.get_current_status_ids().has(status_id))
 				if not removable_status_list.is_empty():
 					var status_id: String = removable_status_list.pick_random()
 					unit.remove_status_id(status_id)
 					unit.unit_actor.popup_texts.show_popup_text(GameData.get_status_effect(status_id).status_effect_name) # TODO different text for removing status
 			elif not will_remove_status:
-				var addable_status_list: Array[String] = status_list.filter(func(status_id: String) -> bool: return not unit.current_status_ids.has(status_id))
+				var addable_status_list: Array[String] = status_list.filter(func(status_id: String) -> bool: return not unit.get_current_status_ids().has(status_id))
 				if not addable_status_list.is_empty():
 					var status_id: String = addable_status_list.pick_random()
 					unit.unit_actor.popup_texts.show_popup_text(GameData.get_status_effect(status_id).status_effect_name)
