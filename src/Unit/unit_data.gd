@@ -84,11 +84,11 @@ const FACING_VECTORS: Dictionary[GameData.Directions, Vector3] = {
 
 @export var unit_unique_name: String = "unit unique_name"
 @export var display_name: String = "display name"
-@export var gender: UnitData.Gender = UnitData.Gender.MALE # male, female, other, monster
+@export var gender: Gender = Gender.MALE # male, female, other, monster
 @export var stat_basis: StatBasis = StatBasis.MALE
-@export var zodiac: UnitData.Zodiac = UnitData.Zodiac.ARIES
+@export var zodiac: Zodiac = Zodiac.ARIES
 @export var job_unique_name: String = "job_unique_name"
-@export var controller: UnitData.Controller = UnitData.Controller.AI # 0 = AI, 1 = Player, etc.
+@export var controller: Controller = Controller.AI # 0 = AI, 1 = Player, etc.
 @export var spritesheet_file_name: String = "spritesheet_file_name.spr" # TODO get sprite file name?
 @export var palette_id: int = 0
 @export var palette_id_override: int = -1
