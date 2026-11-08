@@ -232,15 +232,8 @@ func spawn_random_unit(team: Team) -> UnitData:
 
 
 func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level: int = 40) -> UnitData:
-	var new_unit_actor: UnitActor = UnitActor.instantiate()
-	new_unit_actor.battle_manager = self
 	var new_unit_data: UnitData = UnitData.new()
-	new_unit_actor.bind_unit_data(new_unit_data)
-	units_container.add_child(new_unit_actor)
-	units.append(new_unit_data)
 	new_unit_data.terrain_tile_position = tile_position
-	#new_unit.char_body.global_position = Vector3(tile_position.location.x + 0.5, randi_range(15, 20), tile_position.location.y + 0.5)
-	new_unit_actor.set_position_to_tile()
 	var new_job_data: JobData = GameData.get_job(job_name)
 	var job_id: int = new_job_data.job_id
 	if job_id < 0x5e: # non-monster
@@ -253,30 +246,18 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	UnitData.generate_leveled_raw_stats(new_unit_data.stat_basis, level, new_unit_data.job_data, new_unit_data.stats_raw)
 	
 	var use_higher_stat_values: bool = false
-	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(new_unit_actor.animation_manager.global_seq.file_name): # lucavi
+	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(new_unit_data.spritesheet_file_name): # lucavi
 		use_higher_stat_values = true
 	UnitData.calc_battle_stats(new_unit_data.job_data, new_unit_data.stats_raw, new_unit_data.stats, true, use_higher_stat_values)
 	
-	camera_controller.rotated.connect(new_unit_actor.char_body.set_rotation_degrees) # have sprite update as camera rotates
-	new_unit_actor.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
-	new_unit_actor.update_animation_facing(camera_controller.camera_facing_vector)
-	
-	new_unit_actor.update_stat_bars_scale(camera_controller.zoom)
-	camera_controller.zoom_changed.connect(new_unit_actor.update_stat_bars_scale)
-	
 	new_unit_data.generate_random_abilities()
 	new_unit_data.generate_equipment()
-	new_unit_actor.name = new_unit_data.job_unique_name + "-" + new_unit_data.unit_unique_name
 	new_unit_data.team_idx = teams.find(team)
 	new_unit_data.team = team
-	new_unit_data.team_name = new_unit_data.team.team_name
-	team.units.append(new_unit_data)
-	new_unit_data.ai_controller.strategy = UnitAi.Strategy.BEST
+	new_unit_data.team_name = team.team_name
+	new_unit_data.controller = UnitData.Controller.AI
 
-	new_unit_actor.unit_battle_details_ui.bind_unit(new_unit_data)
-	new_unit_actor.unit_input_event.connect(scenario_editor.update_unit_dragging)
-	
-	return new_unit_data
+	return spawn_unit_from_unit_data(new_unit_data)
 
 
 func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitData:
@@ -284,7 +265,8 @@ func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitData:
 	new_unit_actor.battle_manager = self
 	new_unit_actor.bind_unit_data(new_unit_data)
 	units_container.add_child(new_unit_actor)
-	units.append(new_unit_data)
+	if not units.has(new_unit_data):
+		units.append(new_unit_data)
 
 	if new_unit_data.terrain_tile_position == null:
 		var unit_xz_position: Vector2i = Vector2i(new_unit_data.tile_position.x, new_unit_data.tile_position.z)
@@ -305,17 +287,29 @@ func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitData:
 	
 	new_unit_actor.name = new_unit_data.job_unique_name + "-" + new_unit_data.unit_unique_name
 	
-	if teams.size() < new_unit_data.team_idx + 1:
-		teams.resize(new_unit_data.team_idx + 1)
-	
-	if teams[new_unit_data.team_idx] == null:
-		var new_team: Team = Team.new()
-		new_team.team_name = "Team" + str(new_unit_data.team_idx + 1)
-		teams[new_unit_data.team_idx] = new_team
+	if new_unit_data.team == null:
+		if new_unit_data.team_idx < 0:
+			new_unit_data.team_idx = 0
+		if teams.size() < new_unit_data.team_idx + 1:
+			teams.resize(new_unit_data.team_idx + 1)
+		
+		if teams[new_unit_data.team_idx] == null:
+			var new_team: Team = Team.new()
+			new_team.team_name = "Team" + str(new_unit_data.team_idx + 1)
+			teams[new_unit_data.team_idx] = new_team
 
-	new_unit_data.team = teams[new_unit_data.team_idx]
-	new_unit_data.team_name = new_unit_data.team_name
-	new_unit_data.team.units.append(new_unit_data)
+		new_unit_data.team = teams[new_unit_data.team_idx]
+	else:
+		if new_unit_data.team_idx < 0:
+			new_unit_data.team_idx = teams.find(new_unit_data.team)
+			if new_unit_data.team_idx < 0:
+				teams.append(new_unit_data.team)
+				new_unit_data.team_idx = teams.size() - 1
+
+	new_unit_data.team_name = new_unit_data.team.team_name
+	if not new_unit_data.team.units.has(new_unit_data):
+		new_unit_data.team.units.append(new_unit_data)
+
 	new_unit_data.ai_controller.strategy = UnitAi.Strategy.BEST
 
 	new_unit_data.update_passive_effects()
