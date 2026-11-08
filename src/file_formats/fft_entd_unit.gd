@@ -149,9 +149,9 @@ func get_unit_data() -> UnitData:
 		unit_data.display_name = RomReader.fft_text.unit_names_list_filtered[new_name_idx]
 
 	if level <= 99:
-		unit_data.level = level
+		unit_data.stats[UnitData.StatType.LEVEL].set_value(level)
 	else: # TODO generate level based on party level
-		unit_data.level = randi_range(0, 50)
+		unit_data.stats[UnitData.StatType.LEVEL].set_value(randi_range(0, 50))
 
 	if gender == 4:
 		unit_data.gender = UnitData.Gender.MALE
@@ -220,7 +220,6 @@ func get_unit_data() -> UnitData:
 	# TODO unit_data.stats[UnitData.StatType.HP].value_changed.connect(hp_changed)
 	# TODO connect stat bars?
 
-	unit_data.stats[UnitData.StatType.LEVEL].set_value(unit_data.level)
 	UnitData.generate_leveled_raw_stats(unit_data.gender as UnitData.StatBasis, unit_data.level, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
 	var use_higher_stat_values: bool = false
 	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(unit_data.spritesheet_file_name): # lucavi

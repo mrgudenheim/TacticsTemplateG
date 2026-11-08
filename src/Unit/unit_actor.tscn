@@ -50,7 +50,7 @@ shader_parameter/bias_fixed_16 = 80.0
 shader_parameter/bias_unit = 0.1
 shader_parameter/bias_tile_overlay = 0.05
 
-[node name="Unit" type="Node3D" unique_id=668783031 node_paths=PackedStringArray("char_body", "animation_manager", "popup_texts", "stat_bars_position", "stat_bars_container", "unit_battle_details_ui", "icon2", "debug_menu", "tile_highlights")]
+[node name="Unit" type="Node3D" unique_id=668783031 node_paths=PackedStringArray("char_body", "animation_manager", "popup_texts", "stat_bars_position", "stat_bars_container", "unit_battle_details_ui", "icon2", "tile_highlights")]
 script = ExtResource("1_lcmw7")
 char_body = NodePath("CharacterBody3D")
 animation_manager = NodePath("CharacterBody3D/UnitAnimationManager")
@@ -59,7 +59,6 @@ stat_bars_position = NodePath("CharacterBody3D/StatBars")
 stat_bars_container = NodePath("CharacterBody3D/StatBars/VBoxContainer")
 unit_battle_details_ui = NodePath("CharacterBody3D/UnitDetailsPosition/UnitDetailsPanel")
 icon2 = NodePath("CharacterBody3D/StatusIcon")
-debug_menu = NodePath("")
 tile_highlights = NodePath("TileHighlights")
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="." unique_id=761181480]
