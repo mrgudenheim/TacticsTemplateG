@@ -233,6 +233,7 @@ func spawn_random_unit(team: Team) -> UnitData:
 
 func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level: int = 40) -> UnitData:
 	var new_unit_data: UnitData = UnitData.new()
+	new_unit_data.battle_manager = self
 	new_unit_data.terrain_tile_position = tile_position
 	var new_job_data: JobData = GameData.get_job(job_name)
 	var job_id: int = new_job_data.job_id
@@ -250,8 +251,8 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 		use_higher_stat_values = true
 	UnitData.calc_battle_stats(new_unit_data.job_data, new_unit_data.stats_raw, new_unit_data.stats, true, use_higher_stat_values)
 	
-	new_unit_data.generate_random_abilities()
-	new_unit_data.generate_equipment()
+	new_unit_data.equip_random_abilities()
+	new_unit_data.equip_items_leveled()
 	new_unit_data.team_idx = teams.find(team)
 	new_unit_data.team = team
 	new_unit_data.team_name = team.team_name
@@ -262,9 +263,9 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 
 func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitData:
 	var new_unit_actor: UnitActor = UnitActor.instantiate()
+	new_unit_data.battle_manager = self
 	new_unit_actor.battle_manager = self
 	new_unit_actor.bind_unit_data(new_unit_data)
-	units_container.add_child(new_unit_actor)
 	if not units.has(new_unit_data):
 		units.append(new_unit_data)
 
@@ -313,8 +314,9 @@ func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitData:
 	new_unit_data.ai_controller.strategy = UnitAi.Strategy.BEST
 
 	new_unit_data.update_passive_effects()
-	new_unit_actor.unit_battle_details_ui.bind_unit(new_unit_data)
 	new_unit_actor.unit_input_event.connect(scenario_editor.update_unit_dragging)
+
+	units_container.add_child(new_unit_actor)
 	
 	return new_unit_data
 
