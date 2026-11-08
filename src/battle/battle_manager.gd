@@ -277,8 +277,6 @@ func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitData:
 		elif not total_map_tiles.is_empty():
 			new_unit_data.terrain_tile_position = total_map_tiles.values()[0][0]
 
-	new_unit_actor.set_position_to_tile()
-
 	camera_controller.rotated.connect(new_unit_actor.char_body.set_rotation_degrees) # have sprite update as camera rotates
 	new_unit_actor.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
 	new_unit_actor.update_animation_facing(camera_controller.camera_facing_vector)
