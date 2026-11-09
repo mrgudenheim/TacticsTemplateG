@@ -450,7 +450,7 @@ func load_all_data() -> void:
 		get_spritesheet_data(file_name)
 
 
-func export_resource(resource: Variant, save_path: String = "") -> Error:
+func export_resource(resource: Resource, save_path: String = "") -> Error:
 	if save_path == "":
 		save_path = GameData.external_data_paths["EXPORT_PATH"]
 	var resource_dir: String = save_path.path_join(resource.SAVE_FOLDER)

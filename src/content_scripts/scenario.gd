@@ -50,15 +50,3 @@ static func transform_units_data_tile_location(
 		# TODO fix unit facing?
 	
 	return transformed_units_data
-
-
-func export(save_path: String = "") -> Error:
-	if save_path == "":
-		save_path = GameData.external_data_paths["EXPORT_PATH"]
-	var scenario_dir: String = save_path.path_join(SAVE_FOLDER)
-	DirAccess.make_dir_recursive_absolute(scenario_dir)
-	var scenario_file_path: String = scenario_dir.path_join(unique_name + FILE_SUFFIX)
-	var error: Error = ResourceSaver.save(self, scenario_file_path)
-	if error != OK:
-		push_error("Error saving scenario: " + error_string(error))
-	return error
