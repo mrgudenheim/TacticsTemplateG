@@ -60,7 +60,11 @@ var delayed_action: ActionInstance # charging
 @export var idle_animation_id: int = -1
 
 @export var passive_effect_name: String = ""
-var passive_effect: PassiveEffect = PassiveEffect.new()
+var passive_effect: PassiveEffect:
+	get:
+		if GameData.is_ready:
+			return GameData.get_passive_effect(passive_effect_name)
+		return null
 
 
 var counts_as_ko: bool = false:
@@ -92,12 +96,10 @@ func get_icon_rect() -> Rect2i:
 	if duration_type == DurationType.TURNS:
 		if duration >= duration_icons.size() - 1:
 			return duration_icons[-1]
-		else:
-			return duration_icons[duration]
-	elif not icon_rects.is_empty():
+		return duration_icons[duration]
+	if not icon_rects.is_empty():
 		return icon_rects[0]
-	else:
-		return Rect2i(Vector2i.ZERO, Vector2i.ONE)
+	return Rect2i(Vector2i.ZERO, Vector2i.ONE)
 
 
 # called after all StatusEffects have already been initialized since this indexes into the complete array
