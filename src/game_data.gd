@@ -78,11 +78,7 @@ func _get_saved_data_paths() -> Dictionary [String, String]:
 	if file == null:
 		var err: Error = FileAccess.get_open_error()
 		push_error(err)
-		return {
-			"IMPORT_PATH" : "",
-			"ROM_PATH" : "",
-			"EXPORT_PATH" : "",
-		}
+		return external_data_paths
 
 	var file_text: String = file.get_as_text()
 	var untyped_dict : Dictionary = JSON.parse_string(file_text)
