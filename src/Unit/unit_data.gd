@@ -348,9 +348,6 @@ func _init() -> void:
 	stats[StatType.MP_MAX].value_changed.connect(stats[StatType.MP].update_max_from_clamped_value)
 	stats[StatType.HP].value_changed.connect(process_hp_changed)
 
-	move_action = GameData.get_action("move")
-	wait_action = GameData.get_action("wait")
-
 
 func init_derived_properties(new_battle_manager: BattleManager, create_unit_actor: bool = false) -> void:
 	battle_manager = new_battle_manager
@@ -560,7 +557,7 @@ func end_turn() -> void:
 
 func update_available_actions(all_passive_effects: Array[PassiveEffect]) -> void:
 	move_action = GameData.get_action(move_action_name)
-	wait_action = GameData.get_action(move_action_name)
+	wait_action = GameData.get_action(wait_action_name)
 	
 	actions.clear()
 	actions.append(move_action)
