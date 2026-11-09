@@ -296,9 +296,18 @@ func _init() -> void:
 
 
 func _connect_stats_signals() -> void:
-	stats[StatType.HP_MAX].value_changed.connect(stats[StatType.HP].update_max_from_clamped_value)
-	stats[StatType.MP_MAX].value_changed.connect(stats[StatType.MP].update_max_from_clamped_value)
-	stats[StatType.HP].value_changed.connect(process_hp_changed)
+	if not stats.has(StatType.HP_MAX) or not stats.has(StatType.HP) or not stats.has(StatType.MP_MAX) or not stats.has(StatType.MP):
+		return
+	
+	var hp_callable: Callable = stats[StatType.HP].update_max_from_clamped_value
+	if not stats[StatType.HP_MAX].value_changed.is_connected(hp_callable):
+		stats[StatType.HP_MAX].value_changed.connect(hp_callable)
+	var mp_callable: Callable = stats[StatType.MP].update_max_from_clamped_value
+	if not stats[StatType.MP_MAX].value_changed.is_connected(mp_callable):
+		stats[StatType.MP_MAX].value_changed.connect(mp_callable)
+	
+	if not stats[StatType.HP].value_changed.is_connected(process_hp_changed):
+		stats[StatType.HP].value_changed.connect(process_hp_changed)
 
 
 func init_derived_properties(new_battle_manager: BattleManager, create_unit_actor: bool = false) -> void:
