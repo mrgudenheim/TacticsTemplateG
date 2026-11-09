@@ -200,8 +200,8 @@ func index_data(directory_path: String) -> void:
 		
 		elif file_path.ends_with(Scenario.FILE_SUFFIX):
 			scenario_paths[file_path.get_file().trim_suffix(Scenario.FILE_SUFFIX)] = file_path
-		elif file_path.ends_with(".status_effect.tres"):
-			status_effect_paths[file_path.get_file().trim_suffix(".status_effect.tres")] = file_path
+		elif file_path.ends_with(StatusEffect.FILE_SUFFIX):
+			status_effect_paths[file_path.get_file().trim_suffix(StatusEffect.FILE_SUFFIX)] = file_path
 		elif file_path.ends_with(".skillset.tres"):
 			skillset_paths[file_path.get_file().trim_suffix(".skillset.tres")] = file_path
 		elif file_path.ends_with(".palette.tres"):

@@ -4,7 +4,7 @@ class_name StatusEffect
 extends Resource
 
 const SAVE_FOLDER: String = "status_effects/"
-const FILE_SUFFIX: String = "status_effect"
+const FILE_SUFFIX: String = ".status_effect.tres"
 @export var unique_name: String = "unique_name"
 
 @export var status_id: int = 0
@@ -167,47 +167,6 @@ func add_to_global_list(will_overwrite: bool = false) -> void:
 		unique_name = new_unique_name
 	
 	RomReader.status_effects[unique_name] = self
-
-
-func to_json() -> String:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	return Utilities.object_properties_to_json(self, properties_to_exclude)
-
-
-static func create_from_json(json_string: String) -> StatusEffect:
-	var property_dict: Dictionary = JSON.parse_string(json_string)
-	var new_status_effect: StatusEffect = create_from_dictionary(property_dict)
-	
-	return new_status_effect
-
-
-static func create_from_dictionary(property_dict: Dictionary) -> StatusEffect:
-	var new_status_effect: StatusEffect = StatusEffect.new()
-	for property_name: String in property_dict.keys():
-		if property_name.contains("color"):
-			var new_color: Color = Color.BLACK
-			var color_rgb_array: Array = property_dict[property_name]
-			new_color.r = color_rgb_array[0]
-			new_color.g = color_rgb_array[1]
-			new_color.b = color_rgb_array[2]
-			new_color.a = color_rgb_array[3]
-
-			new_status_effect.set(property_name, new_color)
-		elif property_name == "duration_type":
-			new_status_effect.duration_type = DurationType[property_dict[property_name]]
-		else:
-			new_status_effect.set(property_name, property_dict[property_name])
-
-	new_status_effect.emit_changed()
-	return new_status_effect
 
 
 #Status Set 1
