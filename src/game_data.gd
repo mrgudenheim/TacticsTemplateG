@@ -392,7 +392,7 @@ func get_scenario(unique_name: String) -> Scenario:
 	
 	var file_path: String = scenario_paths[unique_name]
 	var scenario: Scenario = ResourceLoader.load(file_path, "Scenario")
-	scenarios[unique_name] = ResourceLoader.load(file_path, "Scenario")
+	scenarios[unique_name] = scenario
 	return scenario
 
 
