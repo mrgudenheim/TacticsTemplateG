@@ -153,7 +153,10 @@ var equipable_item_types: Array[ItemData.ItemType] = []
 	StatType.FAITH : StatValue.new(0, 100, 65),
 	StatType.EXP : StatValue.new(0, 999, 99),
 	StatType.LEVEL : StatValue.new(0, 99, 20),
-}
+}:
+	set(value):
+		stats = value
+		_connect_stats_signals()
 
 @export var stats_raw: Dictionary[StatType, float] = {
 	StatType.HP_MAX : 0.0, 
@@ -289,6 +292,10 @@ static func calc_battle_stats(
 
 
 func _init() -> void:
+	_connect_stats_signals()
+
+
+func _connect_stats_signals() -> void:
 	stats[StatType.HP_MAX].value_changed.connect(stats[StatType.HP].update_max_from_clamped_value)
 	stats[StatType.MP_MAX].value_changed.connect(stats[StatType.MP].update_max_from_clamped_value)
 	stats[StatType.HP].value_changed.connect(process_hp_changed)
