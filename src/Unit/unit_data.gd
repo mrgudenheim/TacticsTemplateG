@@ -204,61 +204,6 @@ var battle_manager: BattleManager
 var unit_actor: UnitActor
 
 
-static func create_from_dictionary(property_dict: Dictionary) -> UnitData:
-	var new_unit_data: UnitData = UnitData.new()
-	for property_name: String in property_dict.keys():
-		if property_name == "tile_position":
-			var vector_as_array: Array = property_dict[property_name]
-			var new_tile_position: Vector3i = Vector3i(roundi(vector_as_array[0]), roundi(vector_as_array[1]), roundi(vector_as_array[2]))
-			new_unit_data.set(property_name, new_tile_position)
-		elif property_name == "ability_slots":
-			var array: Array = property_dict[property_name]
-			var new_ability_slots: Array[AbilitySlot] = []
-			for ability_slot_dictionary: Dictionary in array:
-				var new_ability_slot: AbilitySlot = AbilitySlot.create_from_dictionary(ability_slot_dictionary)
-				new_ability_slots.append(new_ability_slot)
-			new_unit_data.set(property_name, new_ability_slots)
-		elif property_name == "equip_slots":
-			var array: Array = property_dict[property_name]
-			var new_equip_slots: Array[EquipmentSlot] = []
-			for equip_slot_dictionary: Dictionary in array:
-				var new_equip_slot: EquipmentSlot = EquipmentSlot.create_from_dictionary(equip_slot_dictionary)
-				new_equip_slots.append(new_equip_slot)
-			new_unit_data.set(property_name, new_equip_slots)
-		elif property_name == "stats_raw":
-			var dict: Dictionary = property_dict[property_name]
-			var new_stats_raw: Dictionary[StatType, float] = {}
-			for stat_type: String in dict.keys():
-				new_stats_raw[StatType[stat_type]] = dict[stat_type]
-			new_unit_data.set(property_name, new_stats_raw)
-		elif property_name == "stats":
-			var dict: Dictionary = property_dict[property_name]
-			var new_stats: Dictionary[StatType, StatValue] = {}
-			for stat_type: String in dict.keys():
-				var new_clamped_value: StatValue = StatValue.create_from_dictionary(dict[stat_type])
-				new_stats[StatType[stat_type]] = new_clamped_value
-			new_unit_data.set(property_name, new_stats)
-		else:
-			new_unit_data.set(property_name, property_dict[property_name])
-
-	new_unit_data.emit_changed()
-	return new_unit_data
-
-
-func to_dictionary() -> Dictionary:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	
-	return Utilities.object_properties_to_dictionary(self, properties_to_exclude)
-
-
 static func generate_leveled_raw_stats(stat_basis_to_use: StatBasis, final_level: int, job: JobData, new_stats_raw: Dictionary[StatType, float], use_rom: bool = false) -> void:
 	generate_level_zero_raw_stats(stat_basis_to_use, new_stats_raw, use_rom)
 	

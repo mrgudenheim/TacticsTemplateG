@@ -26,56 +26,6 @@ static func lazy_init(new_unique_name: String) -> Scenario:
 	return new_scenario
 
 
-static func create_from_json(json_string: String) -> Scenario:
-	var property_dict: Dictionary = JSON.parse_string(json_string)
-	var new_scenario: Scenario = create_from_dictionary(property_dict)
-	new_scenario.is_loaded = true
-	
-	return new_scenario
-
-
-static func create_from_dictionary(property_dict: Dictionary) -> Scenario:
-	var new_scenario: Scenario = Scenario.new()
-	for property_name: String in property_dict.keys():
-		if property_name == "map_chunks":
-			var new_map_chunks: Array[MapChunk] = []
-			var map_chunks_array: Array = property_dict[property_name]
-			for map_chunk_dict: Dictionary in map_chunks_array:
-				var new_map_chunk: MapChunk = MapChunk.create_from_dictionary(map_chunk_dict)
-				new_map_chunks.append(new_map_chunk)
-			new_scenario.set(property_name, new_map_chunks)
-		elif property_name == "deployment_zones":
-			var new_deployment_zones: Array[PackedVector2Array] = []
-			var array_of_arrays: Array = property_dict[property_name]
-			for zone: Array in array_of_arrays:
-				var new_zone: PackedVector2Array = []
-				for location: Array in zone:
-					new_zone.append(Vector2(location[0], location[1]))
-				new_deployment_zones.append(new_zone)
-			new_scenario.set(property_name, new_deployment_zones)
-		elif property_name == "units_data":
-			var new_units_data: Array[UnitData] = []
-			var new_units_data_array: Array = property_dict[property_name]
-			for unit_data_dictionary: Dictionary in new_units_data_array:
-				var new_unit_data: UnitData = UnitData.create_from_dictionary(unit_data_dictionary)
-				new_units_data.append(new_unit_data)
-			new_scenario.set(property_name, new_units_data)
-		elif property_name.contains("background_gradient"):
-			var new_color: Color = Color.BLACK
-			var color_rgb_array: Array = property_dict[property_name]
-			new_color.r = color_rgb_array[0]
-			new_color.g = color_rgb_array[1]
-			new_color.b = color_rgb_array[2]
-			new_color.a = color_rgb_array[3]
-
-			new_scenario.set(property_name, new_color)
-		else:
-			new_scenario.set(property_name, property_dict[property_name])
-
-	new_scenario.emit_changed()
-	return new_scenario
-
-
 static func transform_units_data_tile_location(
 	local_units_data: Array[UnitData], 
 	terrain_tiles: Array[TerrainTile],
@@ -100,27 +50,6 @@ static func transform_units_data_tile_location(
 		# TODO fix unit facing?
 	
 	return transformed_units_data
-
-
-func add_to_global_list(will_overwrite: bool = false) -> void:
-	if ["", "unique_name"].has(unique_name):
-		unique_name = display_name.to_snake_case()
-	
-	if RomReader.scenarios.has(unique_name) and will_overwrite:
-		push_warning("Overwriting existing scenario: " + unique_name)
-	elif RomReader.scenarios.has(unique_name) and not will_overwrite:
-		var num: int = 2
-		var formatted_num: String = "%02d" % num
-		var new_unique_name: String = unique_name + "_" + formatted_num
-		while RomReader.scenarios.has(new_unique_name):
-			num += 1
-			formatted_num = "%02d" % num
-			new_unique_name = unique_name + "_" + formatted_num
-		
-		push_warning("Scenario list already contains: " + unique_name + ". Incrementing unique_name to: " + new_unique_name)
-		unique_name = new_unique_name
-	
-	RomReader.scenarios[unique_name] = self
 
 
 func export(save_path: String = "") -> Error:
