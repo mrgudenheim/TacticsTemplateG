@@ -2,7 +2,7 @@ class_name Scenario
 extends Resource
 
 const SAVE_FOLDER: String = "scenarios/"
-const FILE_SUFFIX: String = "scenario"
+const FILE_SUFFIX: String = ".scenario.tres"
 @export var unique_name: String = "unique_name"
 @export var display_name: String = "display_name" # TODO add ui to set scenario name
 @export var description: String = "description"
@@ -123,14 +123,13 @@ func add_to_global_list(will_overwrite: bool = false) -> void:
 	RomReader.scenarios[unique_name] = self
 
 
-func to_json() -> String:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	return Utilities.object_properties_to_json(self, properties_to_exclude)
+func export(save_path: String = "") -> Error:
+	if save_path == "":
+		save_path = GameData.external_data_paths["EXPORT_PATH"]
+	var scenario_dir: String = save_path.path_join(SAVE_FOLDER)
+	DirAccess.make_dir_recursive_absolute(scenario_dir)
+	var scenario_file_path: String = scenario_dir.path_join(unique_name + FILE_SUFFIX)
+	var error: Error = ResourceSaver.save(self, scenario_file_path)
+	if error != OK:
+		push_error("Error saving scenario: " + error_string(error))
+	return error

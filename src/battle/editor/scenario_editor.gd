@@ -466,13 +466,13 @@ func export_scenario() -> void:
 	scenario.units_data.clear()
 	for unit: UnitData in battle_manager.units:
 		scenario.units_data.append(unit)
-	Utilities.save_json(scenario)
-	RomReader.scenarios[scenario.unique_name] = scenario
+	scenario.export()
+	GameData.scenarios[scenario.unique_name] = scenario
 
 
 func open_import_dialong() -> void:
 	# https://docs.godotengine.org/en/stable/classes/class_filedialog.html#class-filedialog-property-current-dir
-	import_file_dialog.current_dir = "user://overrides/scenarios" # current_dir is not helpful for Windows native file dialaog
+	import_file_dialog.current_dir = GameData.external_data_paths["IMPORT_PATH"] # current_dir is not helpful for Windows native file dialaog
 	# import_file_dialog.current_dir = OS.get_system_dir(OS.SystemDir.SYSTEM_DIR_DOCUMENTS)
 	
 	import_file_dialog.visible = true
@@ -480,9 +480,9 @@ func open_import_dialong() -> void:
 
 
 func import_scenario(file_path: String) -> void:
-	var file: FileAccess = FileAccess.open(file_path, FileAccess.READ)
-	var file_text: String = file.get_as_text()
-	var new_scenario: Scenario = Scenario.create_from_json(file_text)
-	RomReader.scenarios[new_scenario.unique_name] = new_scenario # do not use "add_to_global_list" as it may set a new unique name
-	
-	queue_new_scenario(new_scenario)
+	var new_scenario: Scenario = ResourceLoader.load(file_path, "Scenario")
+	if new_scenario != null:
+		GameData.scenarios[new_scenario.unique_name] = new_scenario
+		queue_new_scenario(new_scenario)
+	else:
+		push_error("Failed to load scenario from file: " + file_path)

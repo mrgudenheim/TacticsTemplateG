@@ -134,18 +134,11 @@ func process_rom() -> void:
 	battle_bin_data.init_from_battle_bin()
 	section_start = _profile_section("battle_bin_data.init_from_battle_bin", section_start)
 
-	var scenario_dir: DirAccess = DirAccess.open("user://overrides/" + Scenario.SAVE_FOLDER)
-	var fft_scenarios_pre_extracted: bool = scenario_dir != null and Array(scenario_dir.get_files()).any(func(scenario_file_name: String) -> bool: return scenario_file_name.ends_with(".scenario.json"))
-	fft_scenarios_pre_extracted = false
+	wldcore_data.init_from_wldcore()
+	section_start = _profile_section("wldcore_data.init_from_wldcore", section_start)
 
-	if not fft_scenarios_pre_extracted:
-		wldcore_data.init_from_wldcore()
-		section_start = _profile_section("wldcore_data.init_from_wldcore", section_start)
-
-		attack_out_data.init_from_attack_out()
-		section_start = _profile_section("attack_out_data.init_from_attack_out", section_start)
-	else:
-		section_start = _profile_section("SKIPPED wldcore+attack_out (pre-extracted)", section_start)
+	attack_out_data.init_from_attack_out()
+	section_start = _profile_section("attack_out_data.init_from_attack_out", section_start)
 
 	cache_associated_files()
 	section_start = _profile_section("cache_associated_files", section_start)
@@ -193,37 +186,34 @@ func process_rom() -> void:
 			if not job_data.innate_ability_names.has(ability_uname):
 				job_data.innate_ability_names.append(ability_uname)
 
-	if not fft_scenarios_pre_extracted:
-		add_entds("ENTD1.ENT")
-		add_entds("ENTD2.ENT")
-		add_entds("ENTD3.ENT")
-		add_entds("ENTD4.ENT")
-		section_start = _profile_section("add_entds (4 files)", section_start)
+	add_entds("ENTD1.ENT")
+	add_entds("ENTD2.ENT")
+	add_entds("ENTD3.ENT")
+	add_entds("ENTD4.ENT")
+	section_start = _profile_section("add_entds (4 files)", section_start)
 
-		var wldcore_scenarios: Array[Scenario] = wldcore_data.get_all_scenarios()
-		for new_scenario: Scenario in wldcore_scenarios:
-			var number: int = 1
-			var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
-			while scenarios.keys().has(new_unique_name):
-				number += 1
-				new_unique_name = new_scenario.unique_name + ("_%02d" % number)
-			new_scenario.unique_name = new_unique_name
+	var wldcore_scenarios: Array[Scenario] = wldcore_data.get_all_scenarios()
+	for new_scenario: Scenario in wldcore_scenarios:
+		var number: int = 1
+		var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
+		while scenarios.keys().has(new_unique_name):
+			number += 1
+			new_unique_name = new_scenario.unique_name + ("_%02d" % number)
+		new_scenario.unique_name = new_unique_name
 
-			RomReader.scenarios[new_scenario.unique_name] = new_scenario
+		RomReader.scenarios[new_scenario.unique_name] = new_scenario
 
-		var attack_out_scenarios: Array[Scenario] = attack_out_data.get_unique_scenarios()
-		for new_scenario: Scenario in attack_out_scenarios:
-			var number: int = 1
-			var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
-			while scenarios.keys().has(new_unique_name):
-				number += 1
-				new_unique_name = new_scenario.unique_name + ("_%02d" % number)
-			new_scenario.unique_name = new_unique_name
+	var attack_out_scenarios: Array[Scenario] = attack_out_data.get_unique_scenarios()
+	for new_scenario: Scenario in attack_out_scenarios:
+		var number: int = 1
+		var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
+		while scenarios.keys().has(new_unique_name):
+			number += 1
+			new_unique_name = new_scenario.unique_name + ("_%02d" % number)
+		new_scenario.unique_name = new_unique_name
 
-			RomReader.scenarios[new_scenario.unique_name] = new_scenario
-		section_start = _profile_section("scenario_extraction", section_start)
-	else:
-		section_start = _profile_section("SKIPPED entds+scenarios (pre-extracted)", section_start)
+		RomReader.scenarios[new_scenario.unique_name] = new_scenario
+	section_start = _profile_section("scenario_extraction", section_start)
 
 	# for status_: int in status_effects.size():
 		# status_effects[idx].ai_score_formula.values[0] = battle_bin_data.ai_status_priorities[idx] / 128.0
@@ -962,7 +952,7 @@ func export_data_tables(save_path: String) -> void:
 		scenario.units_data = Scenario.transform_units_data_tile_location(scenario.units_data, map_chunk_data.terrain_tiles, Vector2(-1, 1))
 		scenario.background_gradient_bottom = RomReader.maps[scenario.map_chunks[0].unique_name].background_gradient_bottom
 		scenario.background_gradient_top = RomReader.maps[scenario.map_chunks[0].unique_name].background_gradient_top
-		Utilities.save_json(scenario, save_path)
+		scenario.export()
 	for skillset: Skillset in scus_data.skillsets_data:
 		var skillset_path: String = save_path.path_join("/skillsets/")
 		DirAccess.make_dir_recursive_absolute(skillset_path)

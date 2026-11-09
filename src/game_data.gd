@@ -188,8 +188,6 @@ func index_data(directory_path: String) -> void:
 					passive_effect_paths[file_path.get_file().trim_suffix(".passive_effect.json")] = file_path
 				"item":
 					item_paths[file_path.get_file().trim_suffix(".item.json")] = file_path
-				"scenario":
-					scenario_paths[file_path.get_file().trim_suffix(".scenario.json")] = file_path
 				"job":
 					job_paths[file_path.get_file().trim_suffix(".job.json")] = file_path
 				"text":
@@ -200,6 +198,8 @@ func index_data(directory_path: String) -> void:
 						if names["all_no_empty"][idx] == "":
 							names["all_no_empty"].remove_at(idx)
 		
+		elif file_path.ends_with(Scenario.FILE_SUFFIX):
+			scenario_paths[file_path.get_file().trim_suffix(Scenario.FILE_SUFFIX)] = file_path
 		elif file_path.ends_with(".status_effect.tres"):
 			status_effect_paths[file_path.get_file().trim_suffix(".status_effect.tres")] = file_path
 		elif file_path.ends_with(".skillset.tres"):
@@ -391,9 +391,8 @@ func get_scenario(unique_name: String) -> Scenario:
 		return scenarios[unique_name]
 	
 	var file_path: String = scenario_paths[unique_name]
-	var file_text: String = FileAccess.get_file_as_string(file_path)
-	scenarios[unique_name] = Scenario.create_from_json(file_text)
-	return scenarios[unique_name]
+	var scenario: Scenario = ResourceLoader.load(file_path, "Scenario")
+	return scenario
 
 
 func get_texture(unique_name: String) -> Texture2D:

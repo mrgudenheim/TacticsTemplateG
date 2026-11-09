@@ -506,7 +506,7 @@ dialog_hide_on_ok = true
 file_mode = 0
 display_mode = 1
 access = 2
-filters = PackedStringArray("*.scenario.json")
+filters = PackedStringArray("*.scenario.tres")
 use_native_dialog = true
 
 [node name="LoadScenario" type="OptionButton" parent="ScenarioEditor/MarginContainer/HBoxContainer" unique_id=1776173876]
