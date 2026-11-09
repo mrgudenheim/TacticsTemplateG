@@ -450,5 +450,18 @@ func load_all_data() -> void:
 		get_spritesheet_data(file_name)
 
 
+func export_resource(resource: Variant, save_path: String = "") -> Error:
+	if save_path == "":
+		save_path = GameData.external_data_paths["EXPORT_PATH"]
+	var resource_dir: String = save_path.path_join(resource.SAVE_FOLDER)
+	DirAccess.make_dir_recursive_absolute(resource_dir)
+	var resource_file_path: String = resource_dir.path_join(resource.unique_name + resource.FILE_SUFFIX)
+	var error: Error = ResourceSaver.save(resource, resource_file_path)
+	if error != OK:
+		push_error("Error saving resource: " + error_string(error) + " - " + resource.unique_name + resource.FILE_SUFFIX)
+	return error
+
+
+
 static func get_16_color_palette(palette_id: int, full_palette: PackedColorArray) -> PackedColorArray:
 	return full_palette.slice(palette_id * 16, (palette_id + 1) * 16)

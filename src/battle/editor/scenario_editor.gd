@@ -466,7 +466,7 @@ func export_scenario() -> void:
 	scenario.units_data.clear()
 	for unit: UnitData in battle_manager.units:
 		scenario.units_data.append(unit)
-	scenario.export()
+	GameData.export_resource(scenario)
 	GameData.scenarios[scenario.unique_name] = scenario
 
 

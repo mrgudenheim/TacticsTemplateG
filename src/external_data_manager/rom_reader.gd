@@ -930,12 +930,7 @@ func export_data_tables(save_path: String) -> void:
 	for item: ItemData in items.values():
 		Utilities.save_json(item, save_path)
 	for status_effect: StatusEffect in status_effects.values():
-		var status_dir: String = save_path.path_join(StatusEffect.SAVE_FOLDER)
-		DirAccess.make_dir_recursive_absolute(status_dir)
-		var status_file_path: String = status_dir.path_join(status_effect.unique_name + StatusEffect.FILE_SUFFIX)
-		error = ResourceSaver.save(status_effect, status_file_path)
-		if error != OK:
-			push_warning("error saving status: " + error_string(error))
+		GameData.export_resource(status_effect, save_path)
 	for job_data: JobData in jobs_data.values():
 		Utilities.save_json(job_data, save_path)
 	for action: Action in actions.values():
@@ -953,7 +948,7 @@ func export_data_tables(save_path: String) -> void:
 		scenario.units_data = Scenario.transform_units_data_tile_location(scenario.units_data, map_chunk_data.terrain_tiles, Vector2(-1, 1))
 		scenario.background_gradient_bottom = RomReader.maps[scenario.map_chunks[0].unique_name].background_gradient_bottom
 		scenario.background_gradient_top = RomReader.maps[scenario.map_chunks[0].unique_name].background_gradient_top
-		scenario.export(save_path)
+		GameData.export_resource(scenario, save_path)
 	for skillset: Skillset in scus_data.skillsets_data:
 		var skillset_path: String = save_path.path_join("/skillsets/")
 		DirAccess.make_dir_recursive_absolute(skillset_path)
