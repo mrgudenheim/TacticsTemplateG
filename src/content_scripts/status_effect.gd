@@ -60,11 +60,11 @@ var delayed_action: ActionInstance # charging
 @export var idle_animation_id: int = -1
 
 @export var passive_effect_name: String = ""
-var passive_effect: PassiveEffect:
+var passive_effect: PassiveEffect = PassiveEffect.new():
 	get:
-		if GameData.is_ready:
+		if GameData.is_ready and passive_effect.unique_name == "unique_name":
 			return GameData.get_passive_effect(passive_effect_name)
-		return null
+		return passive_effect
 	set(value):
 		passive_effect = value
 		if value != null:
