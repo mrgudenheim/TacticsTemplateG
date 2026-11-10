@@ -65,6 +65,10 @@ var passive_effect: PassiveEffect:
 		if GameData.is_ready:
 			return GameData.get_passive_effect(passive_effect_name)
 		return null
+	set(value):
+		passive_effect = value
+		if value != null:
+			passive_effect_name = value.unique_name
 
 
 var counts_as_ko: bool = false:
