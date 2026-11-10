@@ -190,36 +190,6 @@ func get_unit_data() -> UnitData:
 	# jp per job
 	# abilities learned
 
-	# Stats
-	unit_data.stats = {
-		UnitData.StatType.HP_MAX : StatValue.new(0, 999, 150),
-		UnitData.StatType.HP : StatValue.new(0, 150, 100),
-		UnitData.StatType.MP_MAX : StatValue.new(0, 999, 100),
-		UnitData.StatType.MP : StatValue.new(0, 100, 70),
-		UnitData.StatType.CT : StatValue.new(0, 999, 25),
-		UnitData.StatType.MOVE : StatValue.new(0, 100, 3),
-		UnitData.StatType.JUMP : StatValue.new(0, 100, 3),
-		UnitData.StatType.SPEED : StatValue.new(0, 100, 10),
-		UnitData.StatType.PHYSICAL_ATTACK : StatValue.new(0, 100, 11),
-		UnitData.StatType.MAGIC_ATTACK : StatValue.new(0, 100, 12),
-		UnitData.StatType.BRAVE : StatValue.new(0, 100, 70),
-		UnitData.StatType.FAITH : StatValue.new(0, 100, 65),
-		UnitData.StatType.EXP : StatValue.new(0, 999, 99),
-		UnitData.StatType.LEVEL : StatValue.new(0, 99, 20),
-	}
-	unit_data.stats_raw = {
-		UnitData.StatType.HP_MAX : 0.0, 
-		UnitData.StatType.MP_MAX : 0.0, 
-		UnitData.StatType.SPEED : 0.0, 
-		UnitData.StatType.PHYSICAL_ATTACK : 0.0, 
-		UnitData.StatType.MAGIC_ATTACK : 0.0, 
-	}
-
-	unit_data.stats[UnitData.StatType.HP_MAX].value_changed.connect(unit_data.stats[UnitData.StatType.HP].update_max_from_clamped_value)
-	unit_data.stats[UnitData.StatType.MP_MAX].value_changed.connect(unit_data.stats[UnitData.StatType.MP].update_max_from_clamped_value)
-	# TODO unit_data.stats[UnitData.StatType.HP].value_changed.connect(hp_changed)
-	# TODO connect stat bars?
-
 	UnitData.generate_leveled_raw_stats(unit_data.gender as UnitData.StatBasis, unit_data.stats[UnitData.StatType.LEVEL].current_value, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
 	var use_higher_stat_values: bool = false
 	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(unit_data.spritesheet_file_name): # lucavi
