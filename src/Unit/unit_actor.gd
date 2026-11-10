@@ -244,7 +244,7 @@ func update_status_visuals() -> void:
 		icon2.region_rect = Rect2i(Vector2i.ZERO, Vector2i.ONE)
 		animation_manager.unit_sprites_manager.sprite_primary.modulate = Color.WHITE
 		animation_manager.other_type_index = 0
-		unit_data.palette_id_override = -1
+		unit_data.set_sprite_palette_override(-1)
 		set_sprite_by_job(unit_data.job_unique_name)
 	else:
 		for status: StatusEffect in unit_data.current_statuses:
