@@ -278,13 +278,6 @@ func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitData:
 			new_unit_data.terrain_tile_position = total_map_tiles.values()[xz_index][new_unit_data.tile_position.y]
 		elif not total_map_tiles.is_empty():
 			new_unit_data.terrain_tile_position = total_map_tiles.values()[0][0]
-
-	camera_controller.rotated.connect(new_unit_actor.char_body.set_rotation_degrees) # have sprite update as camera rotates
-	new_unit_actor.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
-	new_unit_actor.update_animation_facing(camera_controller.camera_facing_vector)
-	
-	new_unit_actor.update_stat_bars_scale(camera_controller.zoom)
-	camera_controller.zoom_changed.connect(new_unit_actor.update_stat_bars_scale)
 	
 	new_unit_actor.name = new_unit_data.job_unique_name + "-" + new_unit_data.unit_unique_name
 	
@@ -317,6 +310,13 @@ func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitData:
 	new_unit_actor.unit_input_event.connect(scenario_editor.update_unit_dragging)
 
 	units_container.add_child(new_unit_actor)
+
+	camera_controller.rotated.connect(new_unit_actor.char_body.set_rotation_degrees) # have sprite update as camera rotates
+	new_unit_actor.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
+	new_unit_actor.update_animation_facing(camera_controller.camera_facing_vector)
+	
+	new_unit_actor.update_stat_bars_scale(camera_controller.zoom)
+	camera_controller.zoom_changed.connect(new_unit_actor.update_stat_bars_scale)
 	
 	return new_unit_data
 
