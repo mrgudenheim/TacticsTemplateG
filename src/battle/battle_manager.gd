@@ -262,6 +262,8 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 
 
 func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitData:
+	if new_unit_data.job_data.unique_name == "unique_name" and new_unit_data.job_unique_name != "job_unique_name":
+		new_unit_data.job_data = GameData.get_job(new_unit_data.job_unique_name)
 	var new_unit_actor: UnitActor = UnitActor.instantiate()
 	new_unit_data.battle_manager = self
 	new_unit_actor.battle_manager = self
