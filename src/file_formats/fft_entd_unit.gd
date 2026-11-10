@@ -199,15 +199,6 @@ func get_unit_data() -> UnitData:
 	unit_data.stats[UnitData.StatType.BRAVE].set_value(brave)
 	unit_data.stats[UnitData.StatType.FAITH].set_value(faith)
 
-	# equipment
-	unit_data.equip_slots = [
-		EquipmentSlot.new("RH", [ItemData.SlotType.WEAPON, ItemData.SlotType.SHIELD]),
-		EquipmentSlot.new("LH", [ItemData.SlotType.WEAPON, ItemData.SlotType.SHIELD]),
-		EquipmentSlot.new("Head", [ItemData.SlotType.HEADGEAR]),
-		EquipmentSlot.new("Body", [ItemData.SlotType.ARMOR]),
-		EquipmentSlot.new("Accesory", [ItemData.SlotType.ACCESSORY]),
-	]
-
 	# TODO if equipment value == 0xFE, get random leveled equipment
 	unit_data.equip_slots[0].item_unique_name = get_item_name(unit_data, 0, equipment_right_hand)
 	unit_data.equip_slots[1].item_unique_name = get_item_name(unit_data, 1, equipment_left_hand)
@@ -219,15 +210,6 @@ func get_unit_data() -> UnitData:
 	# if primary_skillset == 0xFF, ability_slots[0] set by main job
 	unit_data.skillsets_names = ["", ""]
 	unit_data.skillsets_names[0] = RomReader.jobs_data.values()[main_job].skillset_unique_name
-
-	# abilities
-	unit_data.ability_slots = [
-		#AbilitySlot.new("Skillset 1", [Ability.SlotType.SKILLSET]),
-		#AbilitySlot.new("Skillset 2", [Ability.SlotType.SKILLSET]),
-		AbilitySlot.new("Reaction", [Ability.SlotType.REACTION]),
-		AbilitySlot.new("Support", [Ability.SlotType.SUPPORT]),
-		AbilitySlot.new("Movement", [Ability.SlotType.MOVEMENT]),
-	]
 
 	# TODO if ability value == 0x01FE, get random ability
 	unit_data.ability_slots[0].ability_unique_name = get_ability_name(unit_data, 0, reaction)
