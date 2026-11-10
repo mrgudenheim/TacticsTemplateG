@@ -399,7 +399,10 @@ func set_sprite_palette_override(new_palette_id: int) -> void:
 
 
 # TODO should these be triggered actions on the statuses?
-func process_hp_changed(stat_value: StatValue) -> void:	
+func process_hp_changed(stat_value: StatValue) -> void:
+	if not GameData.is_ready:
+		return
+	
 	@warning_ignore("integer_division")
 	var critical_hp_threshold: int = stat_value.max_value / 5
 
