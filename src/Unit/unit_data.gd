@@ -550,7 +550,7 @@ func get_equipment_actions() -> Array[Action]:
 	var action_list: Array[Action] = []
 	for equip_slot: EquipmentSlot in equip_slots:
 		if is_instance_valid(equip_slot.get_item()):
-			var item_actions: Array[Action] = equip_slot.get_item().get_actions()
+			var item_actions: Array[Action] = equip_slot.get_item().get_equipped_actions()
 			for action: Action in item_actions:
 				if not action_list.has(action):
 					action_list.append(action)
@@ -990,7 +990,7 @@ func get_primary_weapon() -> ItemData:
 	for equip_slot: EquipmentSlot in equip_slots:
 		if equip_slot.item_unique_name != "":
 			var item: ItemData = GameData.get_item(equip_slot.item_unique_name)
-			if not item.action_names.is_empty():
+			if not item.equipped_action_names.is_empty():
 				return item
 	return null
 

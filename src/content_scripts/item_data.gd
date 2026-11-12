@@ -38,7 +38,7 @@ var weapon_is_direct: bool = false
 var weapon_is_arc: bool = false
 #@export var weapon_targeting_strategy: TargetingStrategy
 
-@export var action_names: PackedStringArray = []
+@export var equipped_action_names: PackedStringArray = []
 @export var weapon_attack_action_name: String = ""
 var weapon_attack_action: Action
 @export var is_dual_wieldable: bool = false
@@ -196,6 +196,7 @@ func _init(idx: int = -1) -> void:
 		weapon_attack_action.display_name = "Attack (" + display_name + ")"
 		weapon_attack_action.add_to_global_list()
 		weapon_attack_action_name = weapon_attack_action.unique_name
+		equipped_action_names.append(weapon_attack_action_name)
 		weapon_attack_action.name_will_display = false
 		weapon_attack_action.min_targeting_range = 0
 		weapon_attack_action.max_targeting_range = max_range
@@ -425,9 +426,9 @@ func set_item_attributes(item_attribute: ScusData.ItemAttribute) -> void:
 	emit_changed()
 
 
-func get_actions() -> Array[Action]:
+func get_equipped_actions() -> Array[Action]:
 	var action_list: Array[Action] = []
-	for action_name: String in action_names:
+	for action_name: String in equipped_action_names:
 		action_list.append(GameData.get_action(action_name))
 
 	return action_list
