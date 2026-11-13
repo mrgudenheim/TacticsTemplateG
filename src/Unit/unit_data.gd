@@ -667,7 +667,7 @@ func get_evade_values(evade_type: EvadeData.EvadeType, evade_direction: EvadeDat
 func update_passive_effects(exclude_passives: PackedStringArray = []) -> void:
 	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects(exclude_passives)
 
-	update_permanent_statuses(all_passive_effects)
+	await update_permanent_statuses(all_passive_effects)
 	update_immune_statuses(all_passive_effects)
 	update_start_statuses(all_passive_effects)
 
