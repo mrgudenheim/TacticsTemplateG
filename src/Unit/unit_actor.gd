@@ -156,6 +156,8 @@ func _connect_unit_data_signals() -> void:
 		unit_data.facing_changed.connect(_on_facing_changed)
 	if not unit_data.tile_position_changed.is_connected(_on_tile_position_changed):
 		unit_data.tile_position_changed.connect(_on_tile_position_changed)
+	if not unit_data.submerged_depth_changed.is_connected(_on_submerged_depth_changed):
+		unit_data.submerged_depth_changed.connect(_on_submerged_depth_changed)
 
 
 func _disconnect_unit_data_signals() -> void:
@@ -171,6 +173,8 @@ func _disconnect_unit_data_signals() -> void:
 		unit_data.facing_changed.disconnect(_on_facing_changed)
 	if unit_data.tile_position_changed.is_connected(_on_tile_position_changed):
 		unit_data.tile_position_changed.disconnect(_on_tile_position_changed)
+	if unit_data.submerged_depth_changed.is_connected(_on_submerged_depth_changed):
+		unit_data.submerged_depth_changed.disconnect(_on_submerged_depth_changed)
 
 
 func _sync_all_visuals_from_unit_data() -> void:
@@ -561,11 +565,7 @@ func set_sprite_tint(tint: Vector3) -> void:
 	animation_manager.unit_sprites_manager.set_tint(tint)
 
 
-func set_submerged_depth(new_depth: int) -> void:
-	if new_depth == unit_data.submerged_depth:
-		return
-	
-	unit_data.submerged_depth = new_depth
+func _on_submerged_depth_changed(_new_depth: int) -> void:
 	update_spritesheet_grid_texture()
 
 

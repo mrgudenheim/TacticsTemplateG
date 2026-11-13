@@ -547,7 +547,7 @@ func _on_palette_spin_box_value_changed(value: int) -> void:
 
 
 func _on_submerged_options_item_selected(index: int) -> void:
-	unit_actor.set_submerged_depth(index)
+	unit_actor.unit_data.set_submerged_depth(index)
 	#unit_sprites_manager.sprite_primary.texture = unit_actor.
 	#_on_animation_changed()
 

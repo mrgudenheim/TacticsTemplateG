@@ -359,8 +359,6 @@ func update_unit_positions(units: Array[UnitData]) -> void:
 					closest_tile = potential_tile
 			unit.set_terrain_tile_position(closest_tile)
 
-		unit.unit_actor.set_position_to_tile()
-
 
 func update_background_gradient(_new_color: Color = Color.BLACK) -> void:
 	background_gradient_colors.clear()

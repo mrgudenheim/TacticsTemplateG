@@ -273,9 +273,9 @@ func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitData:
 		var unit_xz_position: Vector2i = Vector2i(new_unit_data.tile_position.x, new_unit_data.tile_position.z)
 		var xz_index: int = total_map_tiles.keys().find(unit_xz_position)
 		if xz_index >= 0:
-			new_unit_data.terrain_tile_position = total_map_tiles.values()[xz_index][new_unit_data.tile_position.y]
+			new_unit_data.set_terrain_tile_position(total_map_tiles.values()[xz_index][new_unit_data.tile_position.y])
 		elif not total_map_tiles.is_empty():
-			new_unit_data.terrain_tile_position = total_map_tiles.values()[0][0]
+			new_unit_data.set_terrain_tile_position(total_map_tiles.values()[0][0])
 	
 	new_unit_actor.name = new_unit_data.job_unique_name + "-" + new_unit_data.unit_unique_name
 	
@@ -574,7 +574,8 @@ func clear_units() -> void:
 
 
 func increment_counter(unit: UnitData) -> void:
-	var knocked_out_icon: Image = unit.unit_actor.animation_manager.global_shp.get_assembled_frame(0x17, unit.unit_actor.animation_manager.global_spr.spritesheet, 0, 0, 0, 0)
+	var spritesheet_data: UnitSpritesheetData = GameData.get_spritesheet_data(unit.spritesheet_file_name)
+	var knocked_out_icon: Image = spritesheet_data.get_shp().get_assembled_frame(0x17, spritesheet_data.get_texture().get_image(), 0, 0, 0, 0)
 	knocked_out_icon = knocked_out_icon.get_region(Rect2i(40, 50, 40, 40))
 	
 	var icon_rect: TextureRect = TextureRect.new()

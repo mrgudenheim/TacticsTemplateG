@@ -22,6 +22,7 @@ signal palette_changed(new_palette_id: int, new_palette_override_id: int)
 signal primary_weapon_changed(new_weapon: ItemData)
 signal facing_changed(new_facing: GameData.Directions)
 signal tile_position_changed(new_tile: TerrainTile)
+signal submerged_depth_changed(new_depth: int)
 
 enum StatBasis {
 	MALE,
@@ -399,6 +400,14 @@ func set_sprite_palette(new_palette_id: int) -> void:
 func set_sprite_palette_override(new_palette_id: int) -> void:
 	palette_id_override = new_palette_id
 	palette_changed.emit(palette_id, palette_id_override)
+	data_updated.emit(self)
+
+
+func set_submerged_depth(new_depth: int) -> void:
+	if new_depth == submerged_depth:
+		return
+	submerged_depth = new_depth
+	submerged_depth_changed.emit(submerged_depth)
 	data_updated.emit(self)
 
 
