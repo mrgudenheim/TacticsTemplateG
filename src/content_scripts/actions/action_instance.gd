@@ -151,7 +151,7 @@ func start_targeting() -> void:
 	if is_instance_valid(user.active_action):
 		user.active_action.stop_targeting()
 	user.active_action = self
-	action.targeting_strategy.start_targeting(self)
+	await action.targeting_strategy.start_targeting(self)
 
 
 func stop_targeting() -> void:
