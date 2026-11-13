@@ -376,6 +376,10 @@ func is_ct_frozen() -> bool:
 	return current_statuses.any(func(status: StatusEffect) -> bool: return status.freezes_ct) # returns false when no statuses
 
 
+func is_lucavi() -> bool:
+	return ["ruka", "arute", "kanzen"].has(GameData.get_spritesheet_data(spritesheet_file_name).seq_name)
+
+
 func get_nullify_statuses() -> Array[StatusEffect]:
 	return current_statuses.filter(func(status: StatusEffect) -> bool: return status.passive_effect.nullify_targeted)
 

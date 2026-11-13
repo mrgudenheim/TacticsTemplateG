@@ -380,7 +380,5 @@ func update_level(new_unit: UnitData, new_level: int) -> void:
 	new_unit.stats[UnitData.StatType.LEVEL].set_value(new_level)
 	UnitData.generate_leveled_raw_stats(new_unit.stat_basis, new_level, new_unit.job_data, new_unit.stats_raw)
 	
-	var use_higher_stat_values: bool = false
-	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(new_unit.unit_actor.animation_manager.global_seq.file_name): # lucavi
-		use_higher_stat_values = true
+	var use_higher_stat_values: bool = new_unit.is_lucavi()
 	UnitData.calc_battle_stats(new_unit.job_data, new_unit.stats_raw, new_unit.stats, true, use_higher_stat_values)

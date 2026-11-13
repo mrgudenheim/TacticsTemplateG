@@ -319,8 +319,7 @@ func animate_execute_action(animation_executing_id: int) -> void:
 		return
 	
 	var ability_animation_executing_id: int = animation_executing_id
-	var sprite_name: String = unit_data.spritesheet_file_name
-	if ["ruka", "arute", "kanzen"].has(GameData.get_spritesheet_data(sprite_name).seq_name):
+	if unit_data.is_lucavi():
 		ability_animation_executing_id = 0x2c * 2 # https://ffhacktics.com/wiki/Set_attack_animation_flags_and_facing_3
 	set_base_animation_ptr_id(ability_animation_executing_id)
 	

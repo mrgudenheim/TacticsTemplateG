@@ -191,9 +191,7 @@ func get_unit_data() -> UnitData:
 	# abilities learned
 
 	UnitData.generate_leveled_raw_stats(unit_data.gender as UnitData.StatBasis, unit_data.stats[UnitData.StatType.LEVEL].current_value, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
-	var use_higher_stat_values: bool = false
-	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(unit_data.spritesheet_file_name): # lucavi
-		use_higher_stat_values = true
+	var use_higher_stat_values: bool = unit_data.is_lucavi()
 	UnitData.calc_battle_stats(RomReader.jobs_data.values()[main_job], unit_data.stats_raw, unit_data.stats, true, use_higher_stat_values)
 
 	unit_data.stats[UnitData.StatType.BRAVE].set_value(brave)

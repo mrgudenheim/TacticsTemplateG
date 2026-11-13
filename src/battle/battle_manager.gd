@@ -246,9 +246,7 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 	new_unit_data.stats[UnitData.StatType.LEVEL].set_value(level)
 	UnitData.generate_leveled_raw_stats(new_unit_data.stat_basis, level, new_unit_data.job_data, new_unit_data.stats_raw)
 	
-	var use_higher_stat_values: bool = false
-	if ["RUKA.SEQ", "KANZEN.SEQ", "ARUTE.SEQ"].has(new_unit_data.spritesheet_file_name): # lucavi
-		use_higher_stat_values = true
+	var use_higher_stat_values: bool = new_unit_data.is_lucavi()
 	UnitData.calc_battle_stats(new_unit_data.job_data, new_unit_data.stats_raw, new_unit_data.stats, true, use_higher_stat_values)
 	
 	new_unit_data.equip_random_abilities()
