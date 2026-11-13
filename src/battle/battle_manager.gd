@@ -366,7 +366,7 @@ func process_clock_tick() -> void:
 					#unit.current_statuses.erase(status)
 					statuses_to_remove.append(status)
 					if status.action_on_complete != "": # process potential removal if ticks_left == 0
-						var status_action_instance: ActionInstance = ActionInstance.new(RomReader.actions[status.action_on_complete], unit, self)
+						var status_action_instance: ActionInstance = ActionInstance.new(GameData.get_action(status.action_on_complete), unit, self)
 						status_action_instance.submitted_targets.append(unit.terrain_tile_position) # TODO get targets for status action
 						# RomReader.actions[status.action_on_complete].use(status_action_instance)
 						if unit.unit_actor != null:
