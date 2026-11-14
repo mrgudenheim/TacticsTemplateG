@@ -260,51 +260,11 @@ func spawn_unit(tile_position: TerrainTile, job_name: String, team: Team, level:
 
 
 func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitData:
-	if new_unit_data.job_data.unique_name == "unique_name" and new_unit_data.job_unique_name != "job_unique_name":
-		new_unit_data.job_data = GameData.get_job(new_unit_data.job_unique_name)
-	var new_unit_actor: UnitActor = UnitActor.instantiate()
-	new_unit_data.battle_manager = self
-	new_unit_actor.battle_manager = self
-	new_unit_actor.bind_unit_data(new_unit_data)
 	if not units.has(new_unit_data):
 		units.append(new_unit_data)
-
-	if new_unit_data.terrain_tile_position == null:
-		var unit_xz_position: Vector2i = Vector2i(new_unit_data.tile_position.x, new_unit_data.tile_position.z)
-		var xz_index: int = total_map_tiles.keys().find(unit_xz_position)
-		if xz_index >= 0:
-			new_unit_data.set_terrain_tile_position(total_map_tiles.values()[xz_index][new_unit_data.tile_position.y])
-		elif not total_map_tiles.is_empty():
-			new_unit_data.set_terrain_tile_position(total_map_tiles.values()[0][0])
-	
+	new_unit_data.init_derived_properties(self, true)
+	var new_unit_actor: UnitActor = new_unit_data.unit_actor
 	new_unit_actor.name = new_unit_data.job_unique_name + "-" + new_unit_data.unit_unique_name
-	
-	if new_unit_data.team == null:
-		if new_unit_data.team_idx < 0:
-			new_unit_data.team_idx = 0
-		if teams.size() < new_unit_data.team_idx + 1:
-			teams.resize(new_unit_data.team_idx + 1)
-		
-		if teams[new_unit_data.team_idx] == null:
-			var new_team: Team = Team.new()
-			new_team.team_name = "Team" + str(new_unit_data.team_idx + 1)
-			teams[new_unit_data.team_idx] = new_team
-
-		new_unit_data.team = teams[new_unit_data.team_idx]
-	else:
-		if new_unit_data.team_idx < 0:
-			new_unit_data.team_idx = teams.find(new_unit_data.team)
-			if new_unit_data.team_idx < 0:
-				teams.append(new_unit_data.team)
-				new_unit_data.team_idx = teams.size() - 1
-
-	new_unit_data.team_name = new_unit_data.team.team_name
-	if not new_unit_data.team.units.has(new_unit_data):
-		new_unit_data.team.units.append(new_unit_data)
-
-	new_unit_data.ai_controller.strategy = UnitAi.Strategy.BEST
-
-	new_unit_data.update_passive_effects()
 	new_unit_actor.unit_input_event.connect(scenario_editor.update_unit_dragging)
 
 	units_container.add_child(new_unit_actor)

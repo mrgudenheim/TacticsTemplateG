@@ -313,21 +313,62 @@ func _connect_stats_signals() -> void:
 
 func init_derived_properties(new_battle_manager: BattleManager, create_unit_actor: bool = false) -> void:
 	battle_manager = new_battle_manager
-	
-	# TODO set all derived non-exported properties
-	# var ignore_height
-	# var terrain_tile_position
-	# var team
-	# var ai_controller
-	# var job_data
-	# var equipable_item_types
-	# var actions
-	# var actions_data
-	# var submerged_depth
+	_connect_stats_signals()
 
+	if job_unique_name != "" and job_unique_name != "job_unique_name" and GameData.job_paths.has(job_unique_name):
+		job_data = GameData.get_job(job_unique_name)
+
+	if terrain_tile_position == null and battle_manager != null:
+		var unit_xz_position: Vector2i = Vector2i(tile_position.x, tile_position.z)
+		var xz_index: int = battle_manager.total_map_tiles.keys().find(unit_xz_position)
+		if xz_index >= 0:
+			var tile_stack: Array = battle_manager.total_map_tiles.values()[xz_index]
+			var layer_idx: int = clampi(tile_position.y, 0, tile_stack.size() - 1)
+			set_terrain_tile_position(tile_stack[layer_idx])
+		elif not battle_manager.total_map_tiles.is_empty():
+			set_terrain_tile_position(battle_manager.total_map_tiles.values()[0][0])
+
+	if terrain_tile_position != null:
+		set_submerged_depth(terrain_tile_position.depth)
+
+	if team == null:
+		if team_idx < 0:
+			team_idx = 0
+		if battle_manager.teams.size() < team_idx + 1:
+			battle_manager.teams.resize(team_idx + 1)
+		if battle_manager.teams[team_idx] == null:
+			var new_team: Team = Team.new()
+			new_team.team_name = "Team" + str(team_idx + 1)
+			battle_manager.teams[team_idx] = new_team
+		team = battle_manager.teams[team_idx]
+	else:
+		if team_idx < 0:
+			team_idx = battle_manager.teams.find(team)
+			if team_idx < 0:
+				battle_manager.teams.append(team)
+				team_idx = battle_manager.teams.size() - 1
+
+	team_name = team.team_name
+	if not team.units.has(self):
+		team.units.append(self)
+
+	if ai_controller == null:
+		ai_controller = UnitAi.new()
+	ai_controller.strategy = UnitAi.Strategy.BEST
+
+	update_passive_effects()
+
+	for action_instance: ActionInstance in actions_data.values():
+		action_instance.clear()
+	actions_data.clear()
+	for action: Action in actions:
+		var modified_action: Action = Action.get_modified_action(action, self)
+		var new_action_instance: ActionInstance = ActionInstance.new(modified_action, self, battle_manager)
+		actions_data[modified_action.unique_name] = new_action_instance
 
 	if create_unit_actor:
 		unit_actor = UnitActor.instantiate()
+		unit_actor.battle_manager = battle_manager
 		unit_actor.bind_unit_data(self)
 
 
