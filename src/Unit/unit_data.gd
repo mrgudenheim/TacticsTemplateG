@@ -693,6 +693,7 @@ func update_passive_effects(exclude_passives: PackedStringArray = []) -> void:
 
 	update_prohibited_terrain(all_passive_effects)
 	update_terrain_costs(all_passive_effects)
+	ignore_height = all_passive_effects.any(func(passive_effect: PassiveEffect) -> bool: return passive_effect.ignore_height)
 	update_available_actions(all_passive_effects)
 
 	if battle_manager != null:
@@ -1038,7 +1039,6 @@ func update_map_paths(map_tiles: Dictionary[Vector2i, Array], units: Array[UnitD
 	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects()
 	update_prohibited_terrain(all_passive_effects)
 	update_terrain_costs(all_passive_effects)
-	ignore_height = all_passive_effects.any(func(passive_effect: PassiveEffect) -> bool: return passive_effect.ignore_height)
 	
 	if move_action.targeting_strategy.has_method("get_map_paths"):
 		map_paths = await move_action.targeting_strategy.get_map_paths(self, map_tiles, units, max_cost)
