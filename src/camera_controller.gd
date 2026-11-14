@@ -5,7 +5,7 @@ extends Node3D
 
 signal zoom_changed(new_zoom: float)
 signal rotated(new_rotation: Vector3)
-signal camera_facing_changed
+signal camera_facing_changed(new_camera_facing_vector: Vector3)
 
 @export var pan_speed_max: float = 10
 @export var pan_accel: float = 10
@@ -170,8 +170,7 @@ func rotate_camera(new_rotation_degrees: Vector3) -> void:
 	
 	if new_camera_facing != camera_facing:
 		camera_facing = new_camera_facing
-		camera_facing_changed.emit()
-		get_tree().call_group("Units", "update_animation_facing", CameraFacingVectors[camera_facing])
+		camera_facing_changed.emit(CameraFacingVectors[camera_facing])
 
 
 func on_orthographic_toggled(toggled_on: bool) -> void:

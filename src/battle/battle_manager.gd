@@ -272,6 +272,7 @@ func spawn_unit_from_unit_data(new_unit_data: UnitData) -> UnitData:
 	camera_controller.rotated.connect(new_unit_actor.char_body.set_rotation_degrees) # have sprite update as camera rotates
 	new_unit_actor.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
 	new_unit_actor.update_animation_facing(camera_controller.camera_facing_vector)
+	camera_controller.camera_facing_changed.connect(new_unit_actor.update_animation_facing)
 	
 	new_unit_actor.update_stat_bars_scale(camera_controller.zoom)
 	camera_controller.zoom_changed.connect(new_unit_actor.update_stat_bars_scale)

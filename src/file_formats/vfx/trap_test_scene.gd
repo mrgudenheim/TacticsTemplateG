@@ -91,6 +91,7 @@ func _spawn_squire() -> void:
 	camera_controller.rotated.connect(test_unit.char_body.set_rotation_degrees)
 	test_unit.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
 	test_unit.update_animation_facing(camera_controller.camera_facing_vector)
+	camera_controller.camera_facing_changed.connect(test_unit.update_animation_facing)
 	test_unit.hide_debug_menu()
 	test_unit.stat_bars_container.visible = false
 

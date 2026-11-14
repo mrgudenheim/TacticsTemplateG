@@ -129,6 +129,7 @@ func _spawn_unit(pos: Vector3, job_name: String, palette: int) -> UnitActor:
 	camera_controller.rotated.connect(unit.char_body.set_rotation_degrees)
 	unit.char_body.set_rotation_degrees(Vector3(0, camera_controller.rotation_degrees.y, 0))
 	unit.update_animation_facing(camera_controller.camera_facing_vector)
+	camera_controller.camera_facing_changed.connect(unit.update_animation_facing)
 	unit.hide_debug_menu()
 	unit.stat_bars_container.visible = false
 	return unit
