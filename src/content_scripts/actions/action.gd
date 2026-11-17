@@ -124,10 +124,40 @@ class SecondaryAction:
 	var action_idx: int
 	var action_unique_name: String
 	var chance: int
+	var requires_primary_hit: bool = true
+	var play_caster_animation: bool = true
+	var roll_hit_chance: bool = true
 	
-	func _init(new_unique_name: String, new_chance: int) -> void:
+	func _init(
+		new_unique_name: String = "",
+		new_chance: int = 100,
+		new_requires_primary_hit: bool = true,
+		new_play_caster_animation: bool = true,
+		new_roll_hit_chance: bool = true
+	) -> void:
 		action_unique_name = new_unique_name
 		chance = new_chance
+		requires_primary_hit = new_requires_primary_hit
+		play_caster_animation = new_play_caster_animation
+		roll_hit_chance = new_roll_hit_chance
+	
+	func to_dictionary() -> Dictionary:
+		return {
+			"action_unique_name": action_unique_name,
+			"chance": chance,
+			"requires_primary_hit": requires_primary_hit,
+			"play_caster_animation": play_caster_animation,
+			"roll_hit_chance": roll_hit_chance,
+		}
+	
+	static func create_from_dictionary(property_dict: Dictionary) -> SecondaryAction:
+		return SecondaryAction.new(
+			str(property_dict.get("action_unique_name", "")),
+			int(property_dict.get("chance", 100)),
+			bool(property_dict.get("requires_primary_hit", true)),
+			bool(property_dict.get("play_caster_animation", true)),
+			bool(property_dict.get("roll_hit_chance", true))
+		)
 
 # @export var secondary_actions: Array[Action] = [] # skip right to applying ActionEffects to targets, but can use new FormulaData
 # @export var secondary_actions: PackedStringArray = [] # list of unique_names
@@ -270,6 +300,7 @@ static func get_modified_action(action_to_modify: Action, user: UnitData) -> Act
 	var modified_action: Action = action_to_modify.duplicate()
 	modified_action.vfx_data = action_to_modify.vfx_data
 	modified_action.user_shared_vfx_handler_id = action_to_modify.user_shared_vfx_handler_id
+	modified_action.secondary_actions2 = action_to_modify.secondary_actions2.duplicate()
 	var all_passive_effects: Array[PassiveEffect] = user.get_all_passive_effects(action_to_modify.ignore_passives)
 
 	for passive_effect: PassiveEffect in all_passive_effects:
@@ -376,7 +407,7 @@ func set_data_from_formula_id(new_formula_id: int) -> void:
 			# secondary_actions.append(RomReader.abilities[inflict_status_id].ability_action)
 			target_status_chance = 19
 			# secondary_actions_chances = [19]
-			secondary_actions2.append(SecondaryAction.new(RomReader.fft_abilities[inflict_status_id].ability_action.unique_name, target_status_chance))
+			secondary_actions2.append(SecondaryAction.new(RomReader.fft_abilities[inflict_status_id].ability_action.unique_name, target_status_chance, true, false, true))
 			# ignores_statuses.erase(26) # affected by protect, sleeping, charging, frog, chicken
 			ignore_passives.erase("protect_status")
 			ignore_passives.erase("attack_up")
@@ -416,7 +447,7 @@ func set_data_from_formula_id(new_formula_id: int) -> void:
 				new_action.mp_cost = 0
 				var chance: int = secondary_actions_chances[secondary_action_idx]
 				# secondary_actions.append(new_action)
-				secondary_actions2.append(SecondaryAction.new(new_action.unique_name, chance))
+				secondary_actions2.append(SecondaryAction.new(new_action.unique_name, chance, true, false, false))
 			
 			# TODO damage formula is WP (instead of MA) * ability Y
 			# TODO magic gun should probably use totally new Actions?, with WP*V1 formula, EvadeType.NONE, no costs, animation_ids = 0, etc., but where V1 and vfx are from the original action
