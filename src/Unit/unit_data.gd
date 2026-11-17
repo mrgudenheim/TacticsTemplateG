@@ -419,7 +419,10 @@ func is_ct_frozen() -> bool:
 
 
 func is_lucavi() -> bool:
-	return ["ruka", "arute", "kanzen"].has(GameData.get_spritesheet_data(spritesheet_file_name).seq_name)
+	if GameData.is_ready:
+		return ["ruka", "arute", "kanzen"].has(GameData.get_spritesheet_data(spritesheet_file_name).seq_name)
+	
+	return ["veri", "zarue", "hasyu", "arute", "kyuku", "adora", "kanzen", "hebi"].has(spritesheet_file_name)
 
 
 func get_nullify_statuses() -> Array[StatusEffect]:
