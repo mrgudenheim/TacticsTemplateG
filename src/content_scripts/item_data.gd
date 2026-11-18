@@ -281,7 +281,7 @@ func _init(idx: int = -1) -> void:
 					new_secondary_action.mp_cost = 0
 					var chance: int = weapon_attack_action.secondary_actions_chances[secondary_action_idx]
 					# weapon_attack_action.secondary_actions.append(new_secondary_action)
-					weapon_attack_action.secondary_actions2.append(Action.SecondaryAction.new(new_secondary_action.unique_name, chance, true, false, false))
+					weapon_attack_action.secondary_actions2.append(SecondaryAction.new(new_secondary_action.unique_name, chance, true, false, false))
 				
 				# TODO damage formula is WP (instead of MA) * ability Y
 				# TODO magic gun should probably use totally new Actions?, with WP*V1 formula, EvadeType.NONE, no costs, animation_ids = 0, etc., but where V1 and vfx are from the original action
@@ -295,7 +295,7 @@ func _init(idx: int = -1) -> void:
 			# weapon_attack_action.secondary_actions.append(RomReader.abilities[weapon_inflict_status_spell_id].ability_action)
 			# weapon_attack_action.status_chance = 19
 			# weapon_attack_action.secondary_actions_chances = [19]
-			weapon_attack_action.secondary_actions2.append(Action.SecondaryAction.new(RomReader.fft_abilities[weapon_inflict_status_spell_id].ability_action.unique_name, 19, true, false, true))
+			weapon_attack_action.secondary_actions2.append(SecondaryAction.new(RomReader.fft_abilities[weapon_inflict_status_spell_id].ability_action.unique_name, 19, true, false, true))
 		else: # inflict status data
 			weapon_attack_action.inflict_status_id = weapon_inflict_status_spell_id
 			var inflict_status: ScusData.InflictStatus = RomReader.scus_data.inflict_statuses[weapon_inflict_status_spell_id]

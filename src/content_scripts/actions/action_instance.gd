@@ -324,7 +324,7 @@ func get_secondary_actions_text(_target: UnitData) -> String:
 		total_secondary_action_text = "" # don't show list type if only 1 entry in list
 	
 	var all_secondary_action_text: PackedStringArray = []
-	for secondary_action: Action.SecondaryAction in action.secondary_actions2:
+	for secondary_action: SecondaryAction in action.secondary_actions2:
 		var secondary_action_chance: String = str(secondary_action.chance) + "%"
 		#var secondary_action_effect_text: String = secondary_action.ac # TODO get effect text of secondary action?
 		var secondary_action_text: String = secondary_action_chance + " " + RomReader.actions[secondary_action.action_unique_name].display_name
@@ -681,10 +681,10 @@ func apply_standard() -> void:
 			# TODO apply secondary action
 			if action.secondary_action_list_type == Action.StatusListType.RANDOM:
 				var sum_weights: int = 0
-				for secondary_action: Action.SecondaryAction in action.secondary_actions2:
+				for secondary_action: SecondaryAction in action.secondary_actions2:
 					sum_weights += secondary_action.chance
 				var rng: int = randi_range(0, sum_weights)
-				for secondary_action: Action.SecondaryAction in action.secondary_actions2:
+				for secondary_action: SecondaryAction in action.secondary_actions2:
 					if rng < secondary_action.chance:
 						var secondary_action_instance: ActionInstance = self.duplicate()
 						secondary_action_instance.action = RomReader.actions[secondary_action.action_unique_name]

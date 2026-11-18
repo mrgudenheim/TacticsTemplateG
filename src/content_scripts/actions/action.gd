@@ -124,7 +124,7 @@ var vfx_data: VisualEffectData
 # @export var secondary_actions: PackedStringArray = [] # list of unique_names
 @export var secondary_actions_chances: PackedInt32Array = [100]
 @export var secondary_action_list_type: StatusListType = StatusListType.EACH
-var secondary_actions2: Array[SecondaryAction] = []
+@export var secondary_actions2: Array[SecondaryAction] = []
 
 @export var set_target_animation_on_hit: bool = true
 @export var ends_turn: bool = false
