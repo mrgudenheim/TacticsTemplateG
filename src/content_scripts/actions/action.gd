@@ -216,6 +216,12 @@ static func create_from_dictonary(property_dict: Dictionary) -> Action:
 				var new_action_effect: ActionEffect = ActionEffect.create_from_dictionary(effect)
 				new_effects.append(new_action_effect)
 			new_action.set(property_name, new_effects)
+		elif property_name == "secondary_actions2":
+			var new_secondary_actions: Array[SecondaryAction] = []
+			for secondary_action_dict: Dictionary in property_dict[property_name]:
+				var new_secondary_action: SecondaryAction = SecondaryAction.create_from_dictionary(secondary_action_dict)
+				new_secondary_actions.append(new_secondary_action)
+			new_action.secondary_actions2 = new_secondary_actions
 		elif property_name == "base_hit_formula":
 			var new_formula_data: FormulaData = FormulaData.create_from_dictionary(property_dict[property_name])
 			new_action.set(property_name, new_formula_data)
@@ -233,6 +239,8 @@ static func create_from_dictonary(property_dict: Dictionary) -> Action:
 			new_action.target_status_list_type = StatusListType[property_dict[property_name]]
 		elif property_name == "user_status_list_type":
 			new_action.user_status_list_type = StatusListType[property_dict[property_name]]
+		elif property_name == "secondary_action_list_type":
+			new_action.secondary_action_list_type = StatusListType[property_dict[property_name]]
 		elif property_name == "targeting_type":
 			new_action.targeting_type = TargetingTypes[property_dict[property_name]]
 		elif property_name == "use_type":
