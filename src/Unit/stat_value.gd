@@ -7,7 +7,7 @@ signal value_changed(clamped_value: StatValue)
 @export var max_value: int = 100 # should not change (except when linked to another stat, ex hp_max)
 @export var base_value: int = 50 # should not change
 @export var current_value: int = 50 # typically used for stats that get value_changed until end of battle: hp, mp, ct, faith, brave, exp, lvl
-var modifiers: Array[Modifier] = [] # should only come from passive_effects
+@export var modifiers: Array[Modifier] = [] # should only come from passive_effects
 
 
 static func create_from_dictionary(property_dict: Dictionary) -> StatValue:
