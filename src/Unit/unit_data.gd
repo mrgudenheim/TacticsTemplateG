@@ -634,7 +634,7 @@ func get_skillset_actions() -> Array[Action]:
 	return action_list
 
 
-func add_status(new_status: StatusEffect, ignore_immunity: bool = false) -> void:
+func add_status(new_status: StatusEffect, ignore_immunity: bool = false, units_override: Array[UnitData] = []) -> void:
 	if not ignore_immunity and immune_statuses.has(new_status.unique_name): # prevent application based on immune statuses
 		return
 	
@@ -646,7 +646,7 @@ func add_status(new_status: StatusEffect, ignore_immunity: bool = false) -> void
 	if existing_statuses.size() >= new_status.num_allowed:
 		var temp_statuses: Array[StatusEffect] = existing_statuses.filter(func(status: StatusEffect) -> bool: return status.duration_type != StatusEffect.DurationType.PERMANENT)
 		if not temp_statuses.is_empty():
-			remove_status(temp_statuses[0]) # remove oldest temp status
+			remove_status(temp_statuses[0], false, units_override) # remove oldest temp status
 		else:
 			return # if already has max stack of status and they are all permanent
 	
@@ -658,20 +658,20 @@ func add_status(new_status: StatusEffect, ignore_immunity: bool = false) -> void
 		# await action_instance.use()
 	
 	for status_cancelled_id: String in new_status.status_cancels:
-		remove_status_id(status_cancelled_id)
+		remove_status_id(status_cancelled_id, units_override)
 	
 	statuses_updated.emit()
-	update_passive_effects()
+	update_passive_effects([], units_override)
 
 
-func remove_status_id(status_removed_unique_name: String) -> void:
+func remove_status_id(status_removed_unique_name: String, units_override: Array[UnitData] = []) -> void:
 	var statuses_to_remove: Array[StatusEffect] = []
 	statuses_to_remove.append_array(current_statuses.filter(func(status: StatusEffect) -> bool: return status.unique_name == status_removed_unique_name and status.duration_type != StatusEffect.DurationType.PERMANENT))
 	for status: StatusEffect in statuses_to_remove:
-		remove_status(status)
+		remove_status(status, false, units_override)
 
 
-func remove_status(status_removed: StatusEffect, remove_permanent: bool = false) -> void:
+func remove_status(status_removed: StatusEffect, remove_permanent: bool = false, units_override: Array[UnitData] = []) -> void:
 	if status_removed.duration_type == StatusEffect.DurationType.PERMANENT and not remove_permanent:
 		push_error("Trying to removing Always status: " + status_removed.status_effect_name)
 		return
@@ -680,7 +680,7 @@ func remove_status(status_removed: StatusEffect, remove_permanent: bool = false)
 		stats[stat].remove_modifier(status_removed.passive_effect.stat_modifiers[stat])
 	current_statuses.erase(status_removed)
 	statuses_updated.emit()
-	update_passive_effects()
+	update_passive_effects([], units_override)
 
 
 func get_current_status_ids() -> PackedStringArray:
@@ -721,15 +721,15 @@ func get_evade_values(evade_type: EvadeData.EvadeType, evade_direction: EvadeDat
 	return evade_values
 
 
-func update_passive_effects(exclude_passives: PackedStringArray = []) -> void:
-	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects(exclude_passives)
+func update_passive_effects(exclude_passives: PackedStringArray = [], units_override: Array[UnitData] = []) -> void:
+	var all_passive_effects: Array[PassiveEffect] = get_all_passive_effects(exclude_passives, units_override)
 
-	await update_permanent_statuses(all_passive_effects)
+	update_permanent_statuses(all_passive_effects, units_override)
 	update_immune_statuses(all_passive_effects)
 	update_start_statuses(all_passive_effects)
 
 	# update passives in case statuses changed
-	all_passive_effects = get_all_passive_effects(exclude_passives)
+	all_passive_effects = get_all_passive_effects(exclude_passives, units_override)
 	update_stat_modifiers(all_passive_effects)
 	update_elemental_affinity(all_passive_effects)
 	update_triggered_actions(all_passive_effects)
@@ -748,11 +748,11 @@ func update_passive_effects(exclude_passives: PackedStringArray = []) -> void:
 	data_updated.emit(self)
 
 
-func get_all_passive_effects(exclude_passives: PackedStringArray = []) -> Array[PassiveEffect]:
+func get_all_passive_effects(exclude_passives: PackedStringArray = [], units_override: Array[UnitData] = []) -> Array[PassiveEffect]:
 	var all_passive_effects: Array[PassiveEffect] = []
 	
 	var native_passive_effects: Array[PassiveEffect] = get_native_passive_effects(exclude_passives)
-	var other_passive_effects: Array[PassiveEffect] = get_passive_effects_from_others(exclude_passives)
+	var other_passive_effects: Array[PassiveEffect] = get_passive_effects_from_others(exclude_passives, units_override)
 	all_passive_effects.append_array(native_passive_effects)
 	all_passive_effects.append_array(other_passive_effects)
 	
@@ -789,43 +789,47 @@ func get_native_passive_effects(exclude_passives: PackedStringArray = []) -> Arr
 	return native_passive_effects
 
 
-func get_passive_effects_from_others(exclude_passives: PackedStringArray = []) -> Array[PassiveEffect]:
+func get_passive_effects_from_others(exclude_passives: PackedStringArray = [], units_override: Array[UnitData] = []) -> Array[PassiveEffect]:
 	var shared_passive_effects: Array[PassiveEffect] = []
+	var units_to_check: Array[UnitData] = units_override
+	if units_to_check.is_empty() and battle_manager != null:
+		units_to_check = battle_manager.units
 	
-	if battle_manager != null:
-		for unit: UnitData in battle_manager.units:
-			var unit_passives: Array[PassiveEffect] = unit.get_native_passive_effects()
-			for passive_effect: PassiveEffect in unit_passives:
-				if passive_effect.effect_range == 0:
+	for unit: UnitData in units_to_check:
+		if terrain_tile_position == null or unit.terrain_tile_position == null:
+			continue
+		var unit_passives: Array[PassiveEffect] = unit.get_native_passive_effects()
+		for passive_effect: PassiveEffect in unit_passives:
+			if passive_effect.effect_range == 0:
+				continue
+			
+			if not passive_effect.unit_team_filter.is_empty():
+				if not passive_effect.unit_team_filter.has(PassiveEffect.FilterTeam.FRIENDLY) and unit.team == self.team:
 					continue
-				
-				if not passive_effect.unit_team_filter.is_empty():
-					if not passive_effect.unit_team_filter.has(PassiveEffect.FilterTeam.FRIENDLY) and unit.team == self.team:
-						continue
-					elif not passive_effect.unit_team_filter.has(PassiveEffect.FilterTeam.ENEMY) and unit.team != self.team:
-						continue
-				
-				if not passive_effect.unit_basis_filter.is_empty():
-					if not passive_effect.unit_basis_filter.has(stat_basis):
-						continue
-				
-				var relative_position: Vector2i = (terrain_tile_position.xz_location - unit.terrain_tile_position.xz_location).abs()
-				var distance_to_unit: int = relative_position.x + relative_position.y
-				if distance_to_unit > passive_effect.effect_range:
+				elif not passive_effect.unit_team_filter.has(PassiveEffect.FilterTeam.ENEMY) and unit.team != self.team:
 					continue
-				
-				var relative_height: float = absf(terrain_tile_position.height_mid - unit.terrain_tile_position.height_mid)
-				if relative_height > passive_effect.vertical_tolerance:
+			
+			if not passive_effect.unit_basis_filter.is_empty():
+				if not passive_effect.unit_basis_filter.has(stat_basis):
 					continue
-				
-				shared_passive_effects.append(passive_effect)
+			
+			var relative_position: Vector2i = (terrain_tile_position.xz_location - unit.terrain_tile_position.xz_location).abs()
+			var distance_to_unit: int = relative_position.x + relative_position.y
+			if distance_to_unit > passive_effect.effect_range:
+				continue
+			
+			var relative_height: float = absf(terrain_tile_position.height_mid - unit.terrain_tile_position.height_mid)
+			if relative_height > passive_effect.vertical_tolerance:
+				continue
+			
+			shared_passive_effects.append(passive_effect)
 	
 	shared_passive_effects = shared_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return not exclude_passives.has(passive_effect.unique_name))
 	
 	return shared_passive_effects
 
 
-func update_permanent_statuses(all_passive_effects: Array[PassiveEffect]) -> void:
+func update_permanent_statuses(all_passive_effects: Array[PassiveEffect], units_override: Array[UnitData] = []) -> void:
 	always_statuses.clear()
 	for passive_effect: PassiveEffect in all_passive_effects:
 		always_statuses.append_array(passive_effect.status_always)
@@ -850,11 +854,11 @@ func update_permanent_statuses(all_passive_effects: Array[PassiveEffect]) -> voi
 			for counter: int in change:
 				var new_status: StatusEffect = GameData.get_status_effect(status_unique_name).duplicate()
 				new_status.duration_type = StatusEffect.DurationType.PERMANENT
-				await add_status(new_status)
+				add_status(new_status, false, units_override)
 		elif change < 0:
 			for counter: int in -change:
 				var status_to_remove: StatusEffect = current_permanent[-counter - 1] # remove most recent permanent stack
-				remove_status(status_to_remove, true)
+				remove_status(status_to_remove, true, units_override)
 
 
 func update_immune_statuses(all_passive_effects: Array[PassiveEffect]) -> void:
