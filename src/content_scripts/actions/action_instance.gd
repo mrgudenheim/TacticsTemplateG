@@ -368,7 +368,7 @@ func queue_use() -> void:
 		charging_status.duration_type = StatusEffect.DurationType.TICKS
 		if charging_status.delayed_action.action_completed.is_connected(charging_status.delayed_action.user.update_actions):
 			charging_status.delayed_action.action_completed.disconnect(charging_status.delayed_action.user.update_actions)
-		await user.add_status(charging_status)
+		user.add_status(charging_status)
 		
 		stop_targeting()
 		action_completed.emit()
@@ -586,7 +586,7 @@ func apply_status(unit: UnitData, status_list: Array[String], status_list_type: 
 					unit.unit_actor.popup_texts.show_popup_text(status_effect.status_effect_name) # TODO different text for removing status
 				elif not will_remove_status:
 					unit.unit_actor.popup_texts.show_popup_text(status_effect.status_effect_name)
-					await unit.add_status(status_effect.duplicate())
+					unit.add_status(status_effect.duplicate())
 	elif status_list_type == Action.StatusListType.EACH:
 		for status_id: String in status_list:
 			var status_success: bool = randi_range(0, 99) < status_list_chance
@@ -597,7 +597,7 @@ func apply_status(unit: UnitData, status_list: Array[String], status_list_type: 
 					unit.unit_actor.popup_texts.show_popup_text(status_effect.status_effect_name) # TODO different text for removing status
 				elif not will_remove_status:
 					unit.unit_actor.popup_texts.show_popup_text(status_effect.status_effect_name)
-					await unit.add_status(status_effect.duplicate())
+					unit.add_status(status_effect.duplicate())
 	elif status_list_type == Action.StatusListType.RANDOM:
 		var status_success: bool = randi_range(0, 99) < status_list_chance
 		if status_success:
@@ -612,7 +612,7 @@ func apply_status(unit: UnitData, status_list: Array[String], status_list_type: 
 				if not addable_status_list.is_empty():
 					var status_id: String = addable_status_list.pick_random()
 					unit.unit_actor.popup_texts.show_popup_text(GameData.get_status_effect(status_id).status_effect_name)
-					await unit.add_status(GameData.get_status_effect(status_id).duplicate())
+					unit.add_status(GameData.get_status_effect(status_id).duplicate())
 
 
 func apply_standard() -> void:
@@ -676,7 +676,7 @@ func apply_standard() -> void:
 					target_unit.unit_actor.animate_recieve_heal()
 			
 			# apply status
-			await apply_status(target_unit, action.target_status_list, action.target_status_list_type, action.target_status_chance, action.will_remove_target_status)
+			apply_status(target_unit, action.target_status_list, action.target_status_list_type, action.target_status_chance, action.will_remove_target_status)
 			
 			# TODO apply secondary action
 			if action.secondary_action_list_type == Action.StatusListType.RANDOM:
@@ -704,7 +704,7 @@ func apply_standard() -> void:
 		effect.apply(user, user, effect_value)
 	
 	# apply status to user
-	await apply_status(user, action.user_status_list, action.user_status_list_type, action.user_status_chance, action.will_remove_user_status)
+	apply_status(user, action.user_status_list, action.user_status_list_type, action.user_status_chance, action.will_remove_user_status)
 
 	# this is needed in case the action causes the user to change animations (or SEQ entirely, ex. new status)
 	# TODO correctly time animations with end of action
