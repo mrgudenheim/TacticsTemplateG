@@ -306,9 +306,6 @@ func _connect_stats_signals() -> void:
 	var mp_callable: Callable = stats[StatType.MP].update_max_from_clamped_value
 	if not stats[StatType.MP_MAX].value_changed.is_connected(mp_callable):
 		stats[StatType.MP_MAX].value_changed.connect(mp_callable)
-	
-	if not stats[StatType.HP].value_changed.is_connected(process_hp_changed):
-		stats[StatType.HP].value_changed.connect(process_hp_changed)
 
 
 func init_derived_properties(new_battle_manager: BattleManager, create_unit_actor: bool = false) -> void:
@@ -453,23 +450,6 @@ func set_submerged_depth(new_depth: int) -> void:
 	submerged_depth = new_depth
 	submerged_depth_changed.emit(submerged_depth)
 	data_updated.emit(self)
-
-
-# TODO should these be triggered actions on the statuses?
-func process_hp_changed(stat_value: StatValue) -> void:
-	if not GameData.is_ready:
-		return
-	
-	@warning_ignore("integer_division")
-	var critical_hp_threshold: int = stat_value.max_value / 5
-
-	if stat_value.current_value == 0:
-		await add_status(GameData.get_status_effect("dead").duplicate(), true) # add dead
-	elif stat_value.current_value < critical_hp_threshold: # critical
-		if not has_status("critical"):
-			await add_status(GameData.get_status_effect("critical").duplicate()) # add critical
-	elif stat_value.current_value >= critical_hp_threshold: # not critical
-		remove_status_id("critical") # remove critical
 
 
 func start_turn() -> void:
@@ -651,11 +631,6 @@ func add_status(new_status: StatusEffect, ignore_immunity: bool = false, units_o
 			return # if already has max stack of status and they are all permanent
 	
 	current_statuses.append(new_status)
-	# use action_on_apply
-	if new_status.action_on_apply != "":
-		var action_instance: ActionInstance = ActionInstance.new(GameData.get_action(new_status.action_on_apply), self, battle_manager)
-		await action_instance.start_targeting()
-		# await action_instance.use()
 	
 	for status_cancelled_id: String in new_status.status_cancels:
 		remove_status_id(status_cancelled_id, units_override)
