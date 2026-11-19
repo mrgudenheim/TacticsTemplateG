@@ -80,11 +80,9 @@ func connect_trigger(unit: UnitData) -> void:
 			if not unit.completed_move.is_connected(moved_trigger):
 				unit.completed_move.connect(moved_trigger)
 		TriggerTiming.TARGETTED_PRE_ACTION:
-			if not unit.targeted_pre_action.is_connected(action_trigger):
-				unit.targeted_pre_action.connect(action_trigger)
+			pass
 		TriggerTiming.TARGETTED_POST_ACTION:
-			if not unit.targeted_post_action.is_connected(action_trigger):
-				unit.targeted_post_action.connect(action_trigger)
+			pass
 		TriggerTiming.TURN_START:
 			if not unit.turn_started.is_connected(self_trigger):
 				unit.turn_started.connect(self_trigger)

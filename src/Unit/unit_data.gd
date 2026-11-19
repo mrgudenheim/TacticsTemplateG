@@ -189,6 +189,7 @@ var is_ending_turn: bool = false
 var move_action: Action
 var wait_action: Action
 var actions: Array[Action] = []
+var triggered_actions: Array[TriggeredAction] = []
 var actions_data: Dictionary[String, ActionInstance] = {}
 var active_action: ActionInstance
 
@@ -911,17 +912,24 @@ func update_equipable_item_types(all_passive_effects: Array[PassiveEffect]) -> v
 
 
 func update_triggered_actions(all_passive_effects: Array[PassiveEffect]) -> void:
+	triggered_actions.clear()
 	if job_data != null:
 		for ability: Ability in job_data.innate_abilities:
 			for triggered_action: TriggeredAction in ability.triggered_actions:
+				if not triggered_actions.has(triggered_action):
+					triggered_actions.append(triggered_action)
 				triggered_action.connect_trigger(self)
 	
 	for ability_slot: AbilitySlot in ability_slots:
 		for triggered_action: TriggeredAction in ability_slot.get_ability().triggered_actions:
-				triggered_action.connect_trigger(self)
+			if not triggered_actions.has(triggered_action):
+				triggered_actions.append(triggered_action)
+			triggered_action.connect_trigger(self)
 
 	for passive_effect: PassiveEffect in all_passive_effects:
 		for triggered_action: TriggeredAction in passive_effect.added_triggered_actions:
+			if not triggered_actions.has(triggered_action):
+				triggered_actions.append(triggered_action)
 			triggered_action.connect_trigger(self)
 
 
