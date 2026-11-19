@@ -370,6 +370,25 @@ func init_derived_properties(new_battle_manager: BattleManager, create_unit_acto
 		unit_actor.bind_unit_data(self)
 
 
+func duplicate_for_simulation() -> UnitData:
+	var simulated_unit: UnitData = duplicate_deep()
+	simulated_unit.battle_manager = battle_manager
+	simulated_unit.terrain_tile_position = terrain_tile_position
+	simulated_unit.team = team
+	simulated_unit.job_data = job_data
+	simulated_unit.move_action = move_action
+	simulated_unit.wait_action = wait_action
+	simulated_unit.actions = actions.duplicate()
+	simulated_unit.triggered_actions = triggered_actions.duplicate()
+	simulated_unit.equipable_item_types = equipable_item_types.duplicate()
+	simulated_unit.ignore_height = ignore_height
+	simulated_unit.submerged_depth = submerged_depth
+	simulated_unit.is_ending_turn = is_ending_turn
+	simulated_unit.active_action = active_action
+	simulated_unit.unit_actor = null
+	return simulated_unit
+
+
 func has_status(status_unique_name: String) -> bool:
 	return current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_unique_name)
 
