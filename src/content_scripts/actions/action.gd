@@ -690,6 +690,7 @@ func set_data_from_formula_id(new_formula_id: int) -> void:
 			
 			target_effects.append(ActionEffect.new(ActionEffect.EffectType.UNIT_STAT, UnitData.StatType.HP))
 			# target_effects[0].base_power_formula.formula = FormulaData.Formulas.TARGET_CURRENT_HP_MINUS_V1
+			target_effects[0].base_power_formula.formula_text = "target.stats[target.StatType.HP].current_value - 1"
 			target_effects[0].base_power_formula.values[0] = 1
 			
 			# ignores_statuses.erase(27) # affected by shell, frog, chicken, hit chance
@@ -1032,7 +1033,7 @@ func set_data_from_formula_id(new_formula_id: int) -> void:
 		0x31:
 			target_effects.append(ActionEffect.new(ActionEffect.EffectType.UNIT_STAT, UnitData.StatType.HP))
 			# target_effects[0].base_power_formula.formula = FormulaData.Formulas.PA_X_PA_PLUS_V1_DIV_2
-			target_effects[0].base_power_formula.formula_text = "(user.stats[user.StatType.PHYSICAL_ATTACK].get_modified_value() + %.2f) * user.stats[user.StatType.PHYSICAL_ATTACK].get_modified_value() / 2.0"
+			target_effects[0].base_power_formula.formula_text = "(user.stats[user.StatType.PHYSICAL_ATTACK].get_modified_value() + %.2f) * user.stats[user.StatType.PHYSICAL_ATTACK].get_modified_value() / 2.0" % float(formula_y)
 			target_effects[0].base_power_formula.values[0] = formula_y
 			
 			# ignores_statuses.erase(26) # affected by protect, sleeping, charging, frog, chicken
