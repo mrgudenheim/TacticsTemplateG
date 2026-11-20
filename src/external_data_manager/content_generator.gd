@@ -26,14 +26,12 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "defense_up"
-	new_passive_effect.power_modifier_user = Modifier.new("value * 0.66", Modifier.ModifierType.MULT)
-	# new_passive_effect.power_modifier_targeted = Modifier.new(0.66, Modifier.ModifierType.MULT)
+	new_passive_effect.power_modifier_targeted = Modifier.new("value * 0.66", Modifier.ModifierType.MULT)
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "magic_defense_up"
-	new_passive_effect.power_modifier_user = Modifier.new("value * 0.66", Modifier.ModifierType.MULT)
-	# new_passive_effect.power_modifier_targeted = Modifier.new(0.66, Modifier.ModifierType.MULT)
+	new_passive_effect.power_modifier_targeted = Modifier.new("value * 0.66", Modifier.ModifierType.MULT)
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
 	new_passive_effect = PassiveEffect.new()
@@ -249,11 +247,6 @@ static func get_predefined_passive_effects() -> Dictionary[String, PassiveEffect
 
 	new_passive_effect = PassiveEffect.new()
 	new_passive_effect.unique_name = "cant_enter_depth"
-	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
-
-	new_passive_effect = PassiveEffect.new()
-	new_passive_effect.unique_name = "equip_change"
-	new_passive_effect.added_actions_names = ["equip_change"]
 	predefined_passive_effects[new_passive_effect.unique_name] = new_passive_effect.duplicate_deep()
 
 	new_passive_effect = PassiveEffect.new()
@@ -506,7 +499,7 @@ static func get_predefined_actions(abilities: Dictionary[String, Ability]) -> Di
 	new_action.unique_name = new_action.display_name.to_snake_case()
 	new_action.description = abilities[new_action.unique_name].description
 	new_action.applicable_evasion_type = EvadeData.EvadeType.PHYSICAL
-	new_action.ignore_passives.erase("protect")
+	new_action.ignore_passives.erase("protect_status")
 	new_action.ignore_passives.erase("attack_up")
 	new_action.ignore_passives.erase("defense_up")
 	new_effect = ActionEffect.new()
