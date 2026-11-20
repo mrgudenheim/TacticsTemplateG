@@ -324,7 +324,8 @@ func use() -> void:
 	if action.use_strategy == null: # default use
 		await apply_standard()
 	else:
-		action.use_strategy.use(self)
+		@warning_ignore("redundant_await") # inherited use strategies may be coroutines
+		await action.use_strategy.use(self)
 
 
 func pay_action_point_costs() -> void:
