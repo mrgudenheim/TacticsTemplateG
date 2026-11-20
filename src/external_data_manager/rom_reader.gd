@@ -1118,7 +1118,9 @@ func export_vfx(save_path: String) -> void:
 			push_warning("error saving vfx " + vfx_file.unique_name + ": " + error_string(error))
 
 		var vfx_texture_webp_file_path: String = vfx_path.path_join(vfx_file.unique_name + ".texture.webp")
-		vfx_file.texture.get_image().save_webp(vfx_texture_webp_file_path)
+		error = vfx_file.vfx_spr.spritesheet.save_webp(vfx_texture_webp_file_path)
+		if error != Error.OK:
+			push_warning("error saving vfx texture " + vfx_file.unique_name + ": " + error_string(error))
 
 	
 	var trap_texture_webp_file_path: String = vfx_path.path_join("shared_vfx.texture.webp")
