@@ -38,7 +38,8 @@ func create_frame_grid(anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: 
 		different_shp_name = shp_name
 	if not get_shp().is_initialized:
 		push_error(shp_name + " not initialized")
-	var num_sp2s: int = min(0, (get_texture().get_height() - 488)) / 256
+	@warning_ignore("integer_division")
+	var num_sp2s: int = maxi(0, get_texture().get_height() - 488) / 256
 	var num_cells_wide: int = 16
 	var num_cells_tall: int = 16 + (16 * num_sp2s)
 	if get_shp().frames.size() > 256: # WEP has more frames (related to the frame offsets per item type)

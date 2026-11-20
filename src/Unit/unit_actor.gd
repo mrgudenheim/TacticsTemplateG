@@ -528,7 +528,8 @@ func set_sprite_by_file_name(new_spritesheet_name: String) -> void:
 		unit_data.idle_walk_animation_id = 0x06
 		unit_data.walk_to_animation_id = 0x18
 	
-	var num_sp2s: int = min(0, (GameData.get_texture(new_spritesheet_name).get_height() - 488)) / 256
+	@warning_ignore("integer_division")
+	var num_sp2s: int = maxi(0, GameData.get_texture(new_spritesheet_name).get_height() - 488) / 256
 	if new_spritesheet_name == "wep":
 		animation_manager.unit_sprites_manager.sprite_primary.vframes = 32
 	else:
