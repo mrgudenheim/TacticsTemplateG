@@ -60,8 +60,8 @@ func clear_targets(target_highlights: Dictionary[TerrainTile, Node3D]) -> void:
 func is_usable() -> bool:
 	var action_is_usable: bool = false
 	if action.useable_strategy == null: # default usable check
-		var user_has_enough_move_points: bool = user.move_points_remaining >= action.move_points_cost
-		var user_has_enough_action_points: bool = user.action_points_remaining >= action.action_points_cost
+		var user_has_enough_move_points: bool = (not deduct_action_points) or (user.move_points_remaining >= action.move_points_cost)
+		var user_has_enough_action_points: bool = (not deduct_action_points) or (user.action_points_remaining >= action.action_points_cost)
 		var user_has_enough_mp: bool = user.stats[UnitData.StatType.MP].current_value >= action.mp_cost
 		var user_has_equipment_type: bool = false
 		if action.required_equipment_type.is_empty():

@@ -9,7 +9,7 @@ var simulated_units: Dictionary[UnitData, UnitData] = {}
 var unit_reaction_counts: Dictionary[UnitData, int] = {}
 
 
-func get_or_create(live_unit: UnitData) -> UnitData:
+func get_simulated_unit(live_unit: UnitData) -> UnitData:
 	if live_unit == null:
 		return null
 	if not simulated_units.has(live_unit):
@@ -18,7 +18,7 @@ func get_or_create(live_unit: UnitData) -> UnitData:
 	return simulated_units[live_unit]
 
 
-func get_units_override(battle_manager: BattleManager) -> Array[UnitData]:
+func get_all_units(battle_manager: BattleManager) -> Array[UnitData]:
 	var combined_units: Array[UnitData] = []
 	if battle_manager != null:
 		for battle_unit: UnitData in battle_manager.units:
@@ -63,7 +63,7 @@ func can_unit_react(live_unit: UnitData, chain_depth: int) -> bool:
 		return false
 	if unit_reaction_counts.get(live_unit, 0) >= MAX_REACTIONS_PER_UNIT:
 		return false
-	var simulated_unit: UnitData = get_or_create(live_unit)
+	var simulated_unit: UnitData = get_simulated_unit(live_unit)
 	return not simulated_unit.is_defeated()
 
 

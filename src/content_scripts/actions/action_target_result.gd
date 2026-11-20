@@ -48,11 +48,11 @@ var knockback_destination_tile: TerrainTile = null
 var target_sub_resolutions: Array[ActionResolution] = []
 
 
-func is_success() -> bool:
+func did_hit() -> bool:
 	return hit_outcome == HitOutcome.HIT or hit_outcome == HitOutcome.CRITICAL
 
 
-func apply_to_target(apply_displacement: bool = true) -> void:
+func apply_to_unit(apply_displacement: bool = true) -> void:
 	if not is_instance_valid(target_unit):
 		return
 

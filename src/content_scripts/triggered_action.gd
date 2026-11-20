@@ -132,8 +132,10 @@ func process_triggered_action(triggered_action_data: TriggeredActionInstance) ->
 	var initiator_data: ActionInstance = triggered_action_data.initiating_action_instance
 	var has_initiator_data: bool = initiator_data != null
 	var initiator: UnitData = triggered_action_data.user
+	var initiating_action: Action = null
 	if has_initiator_data:
 		initiator = initiator_data.user
+		initiating_action = initiator_data.action
 
 	if needs_initiator:
 		if not has_initiator_data:
@@ -168,30 +170,187 @@ func process_triggered_action(triggered_action_data: TriggeredActionInstance) ->
 	if not is_triggered:
 		return
 	
-	var new_action_instance: ActionInstance = get_action_instance(triggered_action_data)
-	if only_trigger_if_usable:
-		if not new_action_instance.is_usable():
+	if targeting == TargetingTypes.ACTION:
+		var action_to_use: Action = get_action_for_unit(user, initiating_action)
+		if action_to_use == null:
 			return
+		var manual_action_instance: ActionInstance = ActionInstance.new(action_to_use, user, user.battle_manager)
+		manual_action_instance.allow_triggering_actions = allow_triggering_actions
+		manual_action_instance.deduct_action_points = deduct_action_points
+		if only_trigger_if_usable and not manual_action_instance.is_usable():
+			return
+		manual_action_instance.start_targeting() # TODO await targeting selection of triggered action
+		return
 
-	@warning_ignore("redundant_await") # inherited targeting strategies may be coroutines
-	var action_valid_targets: Array[TerrainTile] = await new_action_instance.action.targeting_strategy.get_potential_targets(new_action_instance)
-	if allow_valid_targets_only:
-		if not action_valid_targets.has(initiator.terrain_tile_position):
-			return
-	
+	var new_action_instance: ActionInstance = build_action_instance(
+		user,
+		user,
+		initiator,
+		initiating_action,
+		user.battle_manager
+	)
+	if new_action_instance == null:
+		return
+
+	await new_action_instance.queue_use()
+
+
+func can_trigger(
+	unit_triggered: UnitData,
+	unit_initiator: UnitData,
+	initiating_action: Action,
+	target_result: ActionTargetResult,
+	units_override: Array[UnitData] = []
+) -> bool:
+	if unit_triggered == null or unit_triggered.is_defeated():
+		return false
+
+	var reactor_passives: Array[PassiveEffect] = unit_triggered.get_all_passive_effects([], units_override)
+	if reactor_passives.any(func(passive_effect: PassiveEffect) -> bool: return not passive_effect.can_react):
+		return false
+
+	if unit_initiator != null:
+		var initiator_passives: Array[PassiveEffect] = unit_initiator.get_all_passive_effects([], units_override)
+		if initiator_passives.any(func(passive_effect: PassiveEffect) -> bool: return not passive_effect.target_can_react):
+			return false
+
+	if not Utilities.has_any_elements(unit_triggered.get_current_status_ids(), required_status_id):
+		return false
+
+	for stat_type: UnitData.StatType in user_stat_thresholds.keys():
+		if unit_triggered.stats[stat_type].get_modified_value() < user_stat_thresholds[stat_type]:
+			return false
+
+	var needs_initiator: bool = (action_unique_name == "COPY"
+			or not required_trigger_type.is_empty()
+			or action_mp_cost_threshold != 0
+			or requries_hit != HitRequirement.NONE
+			or not required_action_type.is_empty()
+			or action_hp_damage_threshold != 0
+			or excessive_hp_recovery_threshold != 0)
+
+	if needs_initiator:
+		if initiating_action == null or unit_initiator == null:
+			return false
+
+		if not Utilities.has_any_elements(initiating_action.trigger_types, required_trigger_type):
+			return false
+
+		if initiating_action.mp_cost < action_mp_cost_threshold:
+			return false
+
+		if requries_hit == HitRequirement.HIT:
+			if target_result == null or not target_result.did_hit():
+				return false
+		elif requries_hit == HitRequirement.MISS:
+			if target_result == null or target_result.did_hit():
+				return false
+
+		if not Utilities.has_any_elements(initiating_action.get_action_types(), required_action_type):
+			return false
+
+		if action_hp_damage_threshold > 0:
+			var hp_damage: int = 0
+			if target_result != null:
+				hp_damage = maxi(0, -target_result.stat_deltas.get(UnitData.StatType.HP, 0))
+			if hp_damage < action_hp_damage_threshold:
+				return false
+
+		if excessive_hp_recovery_threshold > 0:
+			var excess_hp: int = 0
+			if target_result != null:
+				excess_hp = target_result.stat_overflows.get(UnitData.StatType.HP, 0)
+			if excess_hp < excessive_hp_recovery_threshold:
+				return false
+
+	return true
+
+
+func roll_trigger_chance(
+	simulated_reactor: UnitData,
+	simulated_initiator: UnitData,
+	random_generator: RandomNumberGenerator,
+	element: Action.ElementTypes = Action.ElementTypes.NONE
+) -> bool:
+	var trigger_chance: float = trigger_chance_formula.get_result(simulated_reactor, simulated_initiator, element)
+	return random_generator.randi_range(0, 99) < trigger_chance
+
+
+func build_action_instance(
+	live_unit_triggered: UnitData,
+	simulated_unit_triggered: UnitData = null,
+	simulated_unit_initiator: UnitData = null,
+	initiating_action: Action = null,
+	battle_manager: BattleManager = null
+) -> ActionInstance:
+	var evaluation_reactor: UnitData = simulated_unit_triggered if simulated_unit_triggered != null else live_unit_triggered
+	if live_unit_triggered == null or evaluation_reactor == null:
+		return null
+
+	var active_battle_manager: BattleManager = battle_manager if battle_manager != null else live_unit_triggered.battle_manager
+	var reaction_action: Action = get_action_for_unit(evaluation_reactor, initiating_action)
+	if reaction_action == null:
+		return null
+
+	var simulated_action_instance: ActionInstance = ActionInstance.new(reaction_action, evaluation_reactor, active_battle_manager)
+	simulated_action_instance.allow_triggering_actions = allow_triggering_actions
+	simulated_action_instance.deduct_action_points = deduct_action_points
+
+	if only_trigger_if_usable and not simulated_action_instance.is_usable():
+		return null
+
+	var target_tile: TerrainTile = null
 	match targeting:
-		TargetingTypes.ACTION:
-			new_action_instance.start_targeting() # TODO await targeting selection of triggered action
 		TargetingTypes.SELF:
-			var target_tile: TerrainTile = triggered_action_data.user.terrain_tile_position
-			new_action_instance.submitted_targets = new_action_instance.action.targeting_strategy.get_aoe_targets(new_action_instance, target_tile)
-			await new_action_instance.queue_use()
+			target_tile = evaluation_reactor.terrain_tile_position
 		TargetingTypes.INITIATOR:
-			var target_tile: TerrainTile = initiator.terrain_tile_position
-			new_action_instance.submitted_targets = new_action_instance.action.targeting_strategy.get_aoe_targets(new_action_instance, target_tile)
-			await new_action_instance.queue_use()
+			if simulated_unit_initiator != null:
+				target_tile = simulated_unit_initiator.terrain_tile_position
 		_:
-			push_warning("Invalid targeting type for triggered action: " + new_action_instance.action.display_name)
+			return null
+
+	if target_tile == null:
+		return null
+
+	if allow_valid_targets_only and active_battle_manager != null and reaction_action.targeting_strategy is RangeTargeting:
+		var range_targeting: RangeTargeting = reaction_action.targeting_strategy as RangeTargeting
+		var valid_targets: Array[TerrainTile] = range_targeting.get_potential_targets(simulated_action_instance)
+		if not valid_targets.has(target_tile):
+			return null
+
+	var submitted_tiles: Array[TerrainTile] = []
+	if active_battle_manager != null and reaction_action.targeting_strategy is RangeTargeting:
+		var range_targeting: RangeTargeting = reaction_action.targeting_strategy as RangeTargeting
+		submitted_tiles = range_targeting.get_aoe_targets(simulated_action_instance, target_tile)
+	else:
+		submitted_tiles.append(target_tile)
+
+	var reaction_instance: ActionInstance = ActionInstance.new(reaction_action, live_unit_triggered, active_battle_manager)
+	reaction_instance.allow_triggering_actions = allow_triggering_actions
+	reaction_instance.deduct_action_points = deduct_action_points
+	reaction_instance.submitted_targets = submitted_tiles
+	return reaction_instance
+
+
+func get_action_for_unit(reactor_unit: UnitData, initiating_action: Action) -> Action:
+	if action_unique_name == "ATTACK":
+		return reactor_unit.get_attack_action()
+	elif action_unique_name == "COPY":
+		if initiating_action == null:
+			return null
+		var copied_action: Action = initiating_action.duplicate()
+		copied_action.vfx_data = initiating_action.vfx_data
+		copied_action.user_shared_vfx_handler_id = initiating_action.user_shared_vfx_handler_id
+		copied_action.secondary_actions2 = initiating_action.secondary_actions2.duplicate()
+		copied_action.mp_cost = 0
+		copied_action.ticks_charge_time = 0
+		return copied_action
+	else:
+		var looked_up_action: Action = ActionResolver.lookup_action(action_unique_name)
+		if looked_up_action != null:
+			return looked_up_action
+		push_error("Action unique_name: " + action_unique_name + " not found in GameData or RomReader. Using weapon attack.")
+		return reactor_unit.get_attack_action()
 
 
 func check_if_triggered(user: UnitData, target: UnitData, element: Action.ElementTypes = Action.ElementTypes.NONE) -> bool:
@@ -200,29 +359,6 @@ func check_if_triggered(user: UnitData, target: UnitData, element: Action.Elemen
 	is_triggered = randi() % 100 < trigger_chance
 	
 	return is_triggered
-
-
-func get_action_instance(triggered_action_data: TriggeredActionInstance) -> ActionInstance:
-	var new_action: Action = get_action(triggered_action_data)
-	var new_action_instance: ActionInstance = ActionInstance.new(new_action, triggered_action_data.user, triggered_action_data.user.battle_manager)
-	new_action_instance.allow_triggering_actions = allow_triggering_actions
-	new_action_instance.deduct_action_points = deduct_action_points
-	
-	return new_action_instance
-
-
-func get_action(triggered_action_data: TriggeredActionInstance) -> Action:
-	var new_action: Action = triggered_action_data.user.get_attack_action()
-	if RomReader.actions.keys().has(action_unique_name):
-		new_action = RomReader.actions[action_unique_name]
-	elif action_unique_name == "ATTACK": # special case to use weapon attack
-		new_action = triggered_action_data.user.get_attack_action()
-	elif action_unique_name == "COPY": # special case to use initiator action
-		new_action = triggered_action_data.initiating_action_instance.action
-	else:
-		push_error("Action unique_name: " + action_unique_name + " not in Action dictionary. Using weapon attack.")
-	
-	return new_action
 
 
 func add_to_global_list(will_overwrite: bool = false) -> void:

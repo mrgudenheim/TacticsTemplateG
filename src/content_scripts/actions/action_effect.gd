@@ -40,6 +40,23 @@ func get_value(user: UnitData, target: UnitData, element: Action.ElementTypes) -
 	return roundi(base_power_formula.get_result(user, target, element))
 
 
+func get_modified_value(
+	user: UnitData,
+	target: UnitData,
+	action: Action,
+	units_override: Array[UnitData] = []
+) -> int:
+	var effect_value: int = get_value(user, target, action.element)
+	if not action.passive_power_modifier_applies_to_hit_chance:
+		var user_passive_effects: Array[PassiveEffect] = user.get_all_passive_effects(action.ignore_passives, units_override)
+		var target_passive_effects: Array[PassiveEffect] = target.get_all_passive_effects(action.ignore_passives, units_override)
+		for passive_effect: PassiveEffect in user_passive_effects:
+			effect_value = passive_effect.power_modifier_user.apply(effect_value, user, target)
+		for passive_effect: PassiveEffect in target_passive_effects:
+			effect_value = passive_effect.power_modifier_targeted.apply(effect_value, user, target)
+	return effect_value
+
+
 func get_ai_value(user: UnitData, target: UnitData, element: Action.ElementTypes) -> int:
 	var nominal_value: int = roundi(base_power_formula.get_result(user, target, element))
 	var is_friendly: bool = target.team == user.team

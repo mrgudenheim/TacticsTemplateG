@@ -4,11 +4,13 @@ extends TargetingStrategy
 
 func get_potential_targets(action_instance: ActionInstance) -> Array[TerrainTile]:
 	if action_instance.action.use_weapon_targeting:
-		var weapon_attack_action_instance: ActionInstance = action_instance.user.actions_data[action_instance.user.get_attack_action().unique_name]
-		return weapon_attack_action_instance.action.targeting_strategy.get_potential_targets(weapon_attack_action_instance)
-	
-	var start_time: int = Time.get_ticks_msec()
-	var max_frame_time_ms: float = 1000.0 / 120.0
+		var attack_action: Action = action_instance.user.get_attack_action()
+		if attack_action != null:
+			var weapon_attack_action_instance: ActionInstance = action_instance.user.actions_data.get(attack_action.unique_name, null)
+			if weapon_attack_action_instance == null:
+				var modified_attack_action: Action = Action.get_modified_action(attack_action, action_instance.user)
+				weapon_attack_action_instance = ActionInstance.new(modified_attack_action, action_instance.user, action_instance.battle_manager)
+			return weapon_attack_action_instance.action.targeting_strategy.get_potential_targets(weapon_attack_action_instance)
 	
 	var potential_targets: Array[TerrainTile] = []
 	#action_instance.user.get_map_paths(action_instance.battle_manager.total_map_tiles, action_instance.battle_manager.units)
@@ -57,10 +59,6 @@ func get_potential_targets(action_instance: ActionInstance) -> Array[TerrainTile
 							potential_targets.append(tile)
 					
 					# TODO arc https://ffhacktics.com/wiki/Arc_Range_Calculation_Routine
-			
-			if Time.get_ticks_msec() - start_time > max_frame_time_ms: # prevent freezing/lag
-				await Utilities.wait_for_frame()
-				start_time = Time.get_ticks_msec()
 	
 	return potential_targets
 

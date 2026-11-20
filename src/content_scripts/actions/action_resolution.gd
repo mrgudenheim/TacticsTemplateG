@@ -22,9 +22,9 @@ var roll_hit_chance: bool = true
 var chain_depth: int = 0
 
 # --- Secondary Branch Probability Metadata (used in preview/AI mode on child ActionResolutions) ---
-var chance_percent: int = 100
-var list_type: Action.StatusListType = Action.StatusListType.EACH
-var group_weight_sum: int = 100
+var branch_chance_percent: int = 100
+var branch_list_type: Action.StatusListType = Action.StatusListType.EACH
+var branch_weight_sum: int = 100
 
 # --- Deterministic RNG Metadata ---
 var rng_seed: int = 0
@@ -56,15 +56,15 @@ var ends_turn: bool = false
 
 
 func is_probabilistic_branch() -> bool:
-	return is_preview_only and (chance_percent < 100 or list_type == Action.StatusListType.RANDOM)
+	return is_preview_only and (branch_chance_percent < 100 or branch_list_type == Action.StatusListType.RANDOM)
 
 
 func get_branch_probability() -> float:
 	if not is_probabilistic_branch():
 		return 1.0
-	if list_type == Action.StatusListType.RANDOM:
-		return float(chance_percent) / float(maxi(1, group_weight_sum))
-	return clampf(chance_percent / 100.0, 0.0, 1.0)
+	if branch_list_type == Action.StatusListType.RANDOM:
+		return float(branch_chance_percent) / float(maxi(1, branch_weight_sum))
+	return clampf(branch_chance_percent / 100.0, 0.0, 1.0)
 
 
 func get_direct_target_result(target_unit: UnitData) -> ActionTargetResult:
@@ -97,11 +97,11 @@ func apply_all_state_changes() -> void:
 
 	if not was_aborted_before_execution:
 		for target_result: ActionTargetResult in target_results:
-			target_result.apply_to_target(true)
+			target_result.apply_to_unit(true)
 			for target_sub_resolution: ActionResolution in target_result.target_sub_resolutions:
 				target_sub_resolution.apply_all_state_changes()
 		if user_result != null:
-			user_result.apply_to_target(true)
+			user_result.apply_to_unit(true)
 			for user_sub_resolution: ActionResolution in user_result.target_sub_resolutions:
 				user_sub_resolution.apply_all_state_changes()
 		apply_costs_to_user()
@@ -115,20 +115,20 @@ func apply_all_state_changes() -> void:
 	apply_turn_end_flag()
 
 
-func get_execution_stream() -> Array[ActionResolution]:
-	var stream: Array[ActionResolution] = []
+func get_execution_order() -> Array[ActionResolution]:
+	var execution_order: Array[ActionResolution] = []
 	for pre_reaction: ActionResolution in pre_action_reactions:
-		stream.append_array(pre_reaction.get_execution_stream())
+		execution_order.append_array(pre_reaction.get_execution_order())
 	if not was_aborted_before_execution:
-		stream.append(self)
+		execution_order.append(self)
 		for target_result: ActionTargetResult in target_results:
 			for target_sub_resolution: ActionResolution in target_result.target_sub_resolutions:
-				stream.append_array(target_sub_resolution.get_execution_stream())
+				execution_order.append_array(target_sub_resolution.get_execution_order())
 		if user_result != null:
 			for user_sub_resolution: ActionResolution in user_result.target_sub_resolutions:
-				stream.append_array(user_sub_resolution.get_execution_stream())
+				execution_order.append_array(user_sub_resolution.get_execution_order())
 	for secondary_resolution: ActionResolution in secondary_resolutions:
-		stream.append_array(secondary_resolution.get_execution_stream())
+		execution_order.append_array(secondary_resolution.get_execution_order())
 	for post_reaction: ActionResolution in post_action_reactions:
-		stream.append_array(post_reaction.get_execution_stream())
-	return stream
+		execution_order.append_array(post_reaction.get_execution_order())
+	return execution_order

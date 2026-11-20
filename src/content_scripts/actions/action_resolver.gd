@@ -121,10 +121,10 @@ static func resolve(
 	play_caster_animation: bool = true,
 	roll_hit_chance: bool = true
 ) -> ActionResolution:
-	var active_rng: RandomNumberGenerator = random_generator
-	if active_rng == null:
-		active_rng = RandomNumberGenerator.new()
-		active_rng.randomize()
+	var active_random_generator: RandomNumberGenerator = random_generator
+	if active_random_generator == null:
+		active_random_generator = RandomNumberGenerator.new()
+		active_random_generator.randomize()
 
 	var active_context: CombatSimulationContext = simulation_context
 	if active_context == null:
@@ -139,8 +139,8 @@ static func resolve(
 	resolution.play_caster_animation = play_caster_animation
 	resolution.roll_hit_chance = roll_hit_chance
 	resolution.chain_depth = chain_depth
-	resolution.rng_seed = active_rng.seed
-	resolution.rng_initial_state = active_rng.state
+	resolution.rng_seed = active_random_generator.seed
+	resolution.rng_initial_state = active_random_generator.state
 	resolution.ends_turn = action_instance.action.ends_turn and not is_reaction and not is_secondary_action
 
 	if not is_secondary_action:
@@ -165,7 +165,7 @@ static func resolve(
 	if battle_manager == null and action_instance.user != null:
 		battle_manager = action_instance.user.battle_manager
 
-	var simulated_caster: UnitData = active_context.get_or_create(action_instance.user)
+	var simulated_caster: UnitData = active_context.get_simulated_unit(action_instance.user)
 	resolution.targeted_units = _resolve_target_units(
 		action_instance.action,
 		resolution.targeted_tiles,
@@ -190,7 +190,7 @@ static func resolve(
 				null,
 				TriggeredAction.TriggerTiming.TARGETTED_PRE_ACTION,
 				battle_manager,
-				active_rng,
+				active_random_generator,
 				active_context,
 				chain_depth
 			)
@@ -203,13 +203,13 @@ static func resolve(
 			return resolution
 
 	# 2. Primary Target Outcomes
-	var units_override: Array[UnitData] = active_context.get_units_override(battle_manager)
+	var units_override: Array[UnitData] = active_context.get_all_units(battle_manager)
 	var on_hit_secondaries: Array[SecondaryAction] = _filter_secondary_actions(action_instance.action.secondary_actions2, true)
 	var follow_up_secondaries: Array[SecondaryAction] = _filter_secondary_actions(action_instance.action.secondary_actions2, false)
 
 	for live_target: UnitData in resolution.targeted_units:
-		var simulated_target: UnitData = active_context.get_or_create(live_target)
-		units_override = active_context.get_units_override(battle_manager)
+		var simulated_target: UnitData = active_context.get_simulated_unit(live_target)
+		units_override = active_context.get_all_units(battle_manager)
 
 		var target_result: ActionTargetResult = ActionTargetResult.new()
 		target_result.target_unit = live_target
@@ -229,7 +229,7 @@ static func resolve(
 			if is_preview:
 				target_result.hit_outcome = ActionTargetResult.HitOutcome.HIT if total_hit_chance > 0 else ActionTargetResult.HitOutcome.MISS
 			else:
-				var hit_roll: int = active_rng.randi_range(0, 99)
+				var hit_roll: int = active_random_generator.randi_range(0, 99)
 				if hit_roll < total_hit_chance:
 					target_result.hit_outcome = ActionTargetResult.HitOutcome.HIT
 				else:
@@ -239,14 +239,14 @@ static func resolve(
 						simulated_target,
 						evade_direction,
 						target_result,
-						active_rng,
+						active_random_generator,
 						units_override
 					)
 		else:
 			target_result.hit_chance_percentage = 100
 			target_result.hit_outcome = ActionTargetResult.HitOutcome.HIT
 
-		if target_result.is_success():
+		if target_result.did_hit():
 			for effect: ActionEffect in action_instance.action.target_effects:
 				var effect_value: int = effect.get_modified_value(simulated_caster, simulated_target, action_instance.action, units_override)
 				_apply_effect_in_simulation(
@@ -267,7 +267,7 @@ static func resolve(
 				action_instance.action.target_status_chance,
 				action_instance.action.will_remove_target_status,
 				is_preview,
-				active_rng,
+				active_random_generator,
 				units_override
 			)
 
@@ -279,7 +279,7 @@ static func resolve(
 					simulated_target,
 					target_result,
 					battle_manager,
-					active_rng,
+					active_random_generator,
 					active_context,
 					chain_depth
 				)
@@ -294,7 +294,7 @@ static func resolve(
 					on_hit_tiles,
 					battle_manager,
 					is_preview,
-					active_rng,
+					active_random_generator,
 					active_context,
 					chain_depth
 				)
@@ -303,7 +303,7 @@ static func resolve(
 		resolution.target_results.append(target_result)
 
 	# 3. User Effects & Statuses
-	units_override = active_context.get_units_override(battle_manager)
+	units_override = active_context.get_all_units(battle_manager)
 	var has_user_outcomes: bool = (
 		not action_instance.action.user_effects.is_empty()
 		or not action_instance.action.user_status_list.is_empty()
@@ -323,7 +323,7 @@ static func resolve(
 			action_instance.action.user_status_chance,
 			action_instance.action.will_remove_user_status,
 			is_preview,
-			active_rng,
+			active_random_generator,
 			units_override
 		)
 
@@ -335,7 +335,7 @@ static func resolve(
 				simulated_caster,
 				user_result,
 				battle_manager,
-				active_rng,
+				active_random_generator,
 				active_context,
 				chain_depth
 			)
@@ -352,7 +352,7 @@ static func resolve(
 			resolution.targeted_tiles,
 			battle_manager,
 			is_preview,
-			active_rng,
+			active_random_generator,
 			active_context,
 			chain_depth
 		)
@@ -370,7 +370,7 @@ static func resolve(
 				target_result,
 				TriggeredAction.TriggerTiming.TARGETTED_POST_ACTION,
 				battle_manager,
-				active_rng,
+				active_random_generator,
 				active_context,
 				chain_depth
 			)
@@ -804,9 +804,9 @@ static func _resolve_secondary_action_list(
 				secondary_action.play_caster_animation,
 				secondary_action.roll_hit_chance
 			)
-			secondary_resolution.chance_percent = secondary_action.chance
-			secondary_resolution.list_type = list_type
-			secondary_resolution.group_weight_sum = weight_sum
+			secondary_resolution.branch_chance_percent = secondary_action.chance
+			secondary_resolution.branch_list_type = list_type
+			secondary_resolution.branch_weight_sum = weight_sum
 			results.append(secondary_resolution)
 		return results
 
@@ -906,19 +906,19 @@ static func _resolve_triggered_actions(
 	if not simulation_context.can_unit_react(live_reactor, chain_depth):
 		return reaction_resolutions
 
-	var simulated_reactor: UnitData = simulation_context.get_or_create(live_reactor)
-	var simulated_initiator: UnitData = simulation_context.get_or_create(live_initiator)
-	var units_override: Array[UnitData] = simulation_context.get_units_override(battle_manager)
+	var simulated_reactor: UnitData = simulation_context.get_simulated_unit(live_reactor)
+	var simulated_initiator: UnitData = simulation_context.get_simulated_unit(live_initiator)
+	var units_override: Array[UnitData] = simulation_context.get_all_units(battle_manager)
 
 	for triggered_action: TriggeredAction in simulated_reactor.triggered_actions:
 		if triggered_action.trigger_timing != timing:
 			continue
 		if not simulation_context.can_unit_react(live_reactor, chain_depth):
 			break
-		if not triggered_action.can_trigger_in_simulation(simulated_reactor, simulated_initiator, initiating_action, target_result, units_override):
+		if not triggered_action.can_trigger(simulated_reactor, simulated_initiator, initiating_action, target_result, units_override):
 			continue
 
-		var reaction_instance: ActionInstance = triggered_action.build_reaction_action_instance(
+		var reaction_instance: ActionInstance = triggered_action.build_action_instance(
 			live_reactor,
 			simulated_reactor,
 			simulated_initiator,
