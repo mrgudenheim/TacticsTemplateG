@@ -303,21 +303,28 @@ func update_status_visuals() -> void:
 			unit_data.set_sprite_palette_override(unit_data.palette_id + other_type_status.palette_idx_offset)
 
 
-func animate_start_action(animation_start_id: int, animation_charging_id: int) -> void:
+func animate_start_action(
+	animation_start_id: int,
+	animation_charging_id: int,
+	charge_ticks: int = -1,
+	speed_scale: float = 1.0
+) -> void:
 	if animation_start_id != 0:
 		set_base_animation_ptr_id(animation_start_id)
 		await animation_manager.animation_completed
 	
 	if animation_charging_id != 0:
 		set_base_animation_ptr_id(animation_charging_id)
-		var charge_ticks: int = 0
-		if unit_data.active_action != null:
-			charge_ticks = unit_data.active_action.action.ticks_charge_time
-		var charge_time: float = 0.1 + (charge_ticks * 0.1)
+		var resolved_charge_ticks: int = charge_ticks
+		if resolved_charge_ticks < 0:
+			resolved_charge_ticks = 0
+			if unit_data.active_action != null:
+				resolved_charge_ticks = unit_data.active_action.action.ticks_charge_time
+		var charge_time: float = (0.1 + (resolved_charge_ticks * 0.1)) / maxf(0.1, speed_scale)
 		await Utilities.wait_seconds(charge_time) # TODO allow looping until changed, ie. charging a spell
 
 
-func animate_execute_action(animation_executing_id: int) -> void:
+func animate_execute_action(animation_executing_id: int, return_to_idle_on_complete: bool = true) -> void:
 	if animation_executing_id < 0: # no animation
 		push_error("animate_execute_action called with invalid animation_executing_id: " + str(animation_executing_id))
 		return
@@ -330,7 +337,7 @@ func animate_execute_action(animation_executing_id: int) -> void:
 	await animation_manager.animation_completed # TODO change based on vfx timing data?
 	
 	var current_animation: int = unit_data.current_animation_id_fwd
-	if current_animation == animation_executing_id:
+	if return_to_idle_on_complete and current_animation == ability_animation_executing_id:
 		animate_return_to_idle()
 
 

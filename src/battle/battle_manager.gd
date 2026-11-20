@@ -37,6 +37,8 @@ var current_cursor_map_position: Vector3
 @export var controller: UnitControllerRT
 @export var battle_is_running: bool = false
 @export var safe_to_load_map: bool = true
+@export var action_playback_speed: float = 1.0
+@export var skip_action_animations: bool = false
 @export var battle_end_panel: Control
 @export var post_battle_messages: Control
 @export var start_new_battle_button: Button
