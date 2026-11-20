@@ -638,7 +638,7 @@ func add_status(new_status: StatusEffect, ignore_immunity: bool = false, units_o
 		if current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_prevents_id):
 			return
 	
-	var existing_statuses: Array[StatusEffect] = current_statuses.filter(func(status: StatusEffect) -> bool: return status.status_id == new_status.status_id) # TODO use filter to allow for multiple of the same status, ex. double charging
+	var existing_statuses: Array[StatusEffect] = current_statuses.filter(func(status: StatusEffect) -> bool: return status.unique_name == new_status.unique_name) # TODO use filter to allow for multiple of the same status, ex. double charging
 	if existing_statuses.size() >= new_status.num_allowed:
 		var temp_statuses: Array[StatusEffect] = existing_statuses.filter(func(status: StatusEffect) -> bool: return status.duration_type != StatusEffect.DurationType.PERMANENT)
 		if not temp_statuses.is_empty():
