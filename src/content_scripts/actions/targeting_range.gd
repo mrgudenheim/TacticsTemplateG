@@ -31,9 +31,9 @@ func get_potential_targets(action_instance: ActionInstance) -> Array[TerrainTile
 				
 				var min_height: float = 0
 				if action_instance.action.targeting_top_down:
-					var map_tiles_at_pos: Array[TileData] = action_instance.battle_manager.total_map_tiles[map_pos].duplicate()
+					var map_tiles_at_pos: Array[TerrainTile] = action_instance.battle_manager.total_map_tiles[map_pos].duplicate()
 					if map_tiles_at_pos.size() > 1:
-						map_tiles_at_pos.sort_custom(func(a: TileData, b: TileData) -> bool: return a.height_mid > b.height_mid)
+						map_tiles_at_pos.sort_custom(func(a: TerrainTile, b: TerrainTile) -> bool: return a.height_mid > b.height_mid)
 						min_height = map_tiles_at_pos[0].height_mid
 						
 				
@@ -176,9 +176,9 @@ func get_aoe_targets(action_instance: ActionInstance, tile_target: TerrainTile) 
 				
 				var min_height: float = 0
 				if action_instance.action.targeting_top_down:
-					var map_tiles_at_pos: Array[TileData] = action_instance.battle_manager.total_map_tiles[map_pos].duplicate()
+					var map_tiles_at_pos: Array[TerrainTile] = action_instance.battle_manager.total_map_tiles[map_pos].duplicate()
 					if map_tiles_at_pos.size() > 1:
-						map_tiles_at_pos.sort_custom(func(a: TileData, b: TileData) -> bool: return a.height_mid > b.height_mid)
+						map_tiles_at_pos.sort_custom(func(a: TerrainTile, b: TerrainTile) -> bool: return a.height_mid > b.height_mid)
 						min_height = map_tiles_at_pos[0].height_mid
 						
 				
