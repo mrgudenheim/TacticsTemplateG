@@ -166,172 +166,110 @@ func stop_targeting() -> void:
 	action.targeting_strategy.stop_targeting(self)
 
 
-func get_target_units(target_tiles: Array[TerrainTile]) -> Array[UnitData]:
-	var target_units: Array[UnitData] = []
-	for target_tile: TerrainTile in target_tiles:
-		var units_on_tile: Array[UnitData] = battle_manager.units.filter(func(unit: UnitData) -> bool: return unit.terrain_tile_position == target_tile)
-		
-		for unit: UnitData in units_on_tile:
-			if unit.get_nullify_statuses().is_empty(): # TODO check all passives not just statuses
-				target_units.append(unit)
-				continue
-			
-			var action_ignores_all_null_statuses: bool = unit.get_nullify_statuses().all(
-				func(status: StatusEffect) -> bool: return action.ignores_statuses.has(status.unique_name))
-			var action_removes_null_status: bool = unit.get_nullify_statuses().any(
-				func(status: StatusEffect) -> bool: return action.will_remove_target_status and action.target_status_list.has(status.unique_name)) # ignore action unless it would remove nullify
-		
-			if action_ignores_all_null_statuses or action_removes_null_status:
-				target_units.append(unit)
-
-		# units_on_tile = units_on_tile.filter(
-		# 	func(unit: UnitActor): return unit.get_nullify_statuses().is_empty() or action_ignores_all_null_statuses(unit) or action_removes_null_status(unit))
-		# target_units.append_array(units_on_tile)
-		#if unit_index == -1:
-			#continue
-		#var target_unit: UnitActor = battle_manager.units[unit_index]
-		#target_units.append(target_unit)
-	
-	return target_units
-
-
-# func action_ignores_all_null_statuses(unit: UnitActor) -> bool:
-# 	return unit.get_nullify_statuses().all(
-# 			func(status: StatusEffect): return action.ignores_statuses.has(status.status_id))
-
-
-# func action_removes_null_status(unit: UnitActor) -> bool:
-# 	return unit.get_nullify_statuses().any(
-# 			func(status: StatusEffect): return action.will_remove_status and action.target_status_list.has(status.status_id)) # ignore action unless it would remove nullify
-
-
 func get_ai_score() -> int:
 	# https://ffhacktics.com/smf/index.php?topic=11590.0
 	# Target Value Formula
 	# (HP Value[curHP * 128 / maxHP] + Total Status Values + (51 * # of items broken up to 7) + Caster Hate [(curMP% / 16) * # MP using Abilities, 0 if not enough MP] + Golem Fear [CurGolem * 128 / Average Team HP (- 1 if Golem not damaged)]) * (-1 if unit is Enemy, 1 if ally)
+	var preview_resolution: ActionResolution = ActionResolver.resolve(self, true)
+	return roundi(_score_resolution_tree(preview_resolution, 1.0))
 
 
-	var ai_score: int = 0
-	var target_units: Array[UnitData] = get_target_units(preview_targets)
-	
-	for target: UnitData in target_units:
-		var target_score: float = 0.0
-		for action_effect: ActionEffect in action.target_effects:
-			var effect_value: int = action_effect.get_ai_value(user, target, action.element)
-			target_score += effect_value
-		
-		var evade_direction: EvadeData.Directions = get_evade_direction(user.terrain_tile_position, target)
-		var hit_chance_value: int = get_total_hit_chance(target, evade_direction)
-		hit_chance_value = clamp(hit_chance_value, 0, 100)
-		target_score = target_score * (hit_chance_value / 100.0)
-		
-		# status scores
-		var total_status_score: float = 0.0
-		for status_id: String in action.target_status_list:
-			var status: StatusEffect = GameData.get_status_effect(status_id)
-			var status_score: float = status.get_ai_score(user, target, action.will_remove_target_status)
-			if action.target_status_list_type == Action.StatusListType.ALL:
-				status_score = status_score * action.target_status_chance
-			elif action.target_status_list_type == Action.StatusListType.EACH:
-				status_score = status_score * action.target_status_chance
-			total_status_score += status_score
-		
-		if action.target_status_list_type == Action.StatusListType.RANDOM:
-			total_status_score = total_status_score / action.target_status_list.size()
-		
-		ai_score += roundi(target_score) + roundi(total_status_score)
-		#push_warning(action.action_name + " " + str(preview_targets) + " " + str(ai_score))
-	
-	return ai_score
+func _score_resolution_tree(resolution: ActionResolution, weight: float) -> float:
+	if resolution == null or weight <= 0.0:
+		return 0.0
+
+	var effective_weight: float = weight * resolution.get_branch_probability()
+	if effective_weight <= 0.0:
+		return 0.0
+
+	var total_score: float = 0.0
+	for target_result: ActionTargetResult in resolution.target_results:
+		var target_unit: UnitData = target_result.target_unit
+		if target_unit == null:
+			continue
+
+		var hit_probability: float = clampf(float(target_result.hit_chance_percentage) / 100.0, 0.0, 1.0)
+		var is_friendly: bool = (target_unit.team == user.team)
+
+		var stat_score: float = 0.0
+		if not target_result.was_defeated_before_hit or _result_removes_ko(resolution.action, target_result):
+			for stat_type: UnitData.StatType in target_result.stat_deltas.keys():
+				var stat_delta: int = target_result.stat_deltas[stat_type]
+				stat_score += float(stat_delta if is_friendly else -stat_delta)
+
+		var status_score: float = _score_result_statuses(resolution.action, target_result, target_unit, false)
+		total_score += (stat_score + status_score) * hit_probability * effective_weight
+
+		for target_sub_resolution: ActionResolution in target_result.target_sub_resolutions:
+			total_score += _score_resolution_tree(target_sub_resolution, effective_weight * hit_probability)
+
+	if resolution.user_result != null and resolution.user_result.target_unit != null:
+		var user_stat_score: float = 0.0
+		if not resolution.user_result.was_defeated_before_hit or _result_removes_ko(resolution.action, resolution.user_result, true):
+			for stat_type: UnitData.StatType in resolution.user_result.stat_deltas.keys():
+				user_stat_score += float(resolution.user_result.stat_deltas[stat_type])
+		var user_status_score: float = _score_result_statuses(resolution.action, resolution.user_result, resolution.user_result.target_unit, true)
+		total_score += (user_stat_score + user_status_score) * effective_weight
+
+		for user_sub_resolution: ActionResolution in resolution.user_result.target_sub_resolutions:
+			total_score += _score_resolution_tree(user_sub_resolution, effective_weight)
+
+	for secondary_resolution: ActionResolution in resolution.secondary_resolutions:
+		total_score += _score_resolution_tree(secondary_resolution, effective_weight)
+
+	return total_score
 
 
-func show_result_preview(target: UnitData) -> ActionPreview:
-	var hit_chance_text: String = get_hit_chance_text(target)
-	var effects_text: String = get_effects_text(target)
-	var statuses_text: String = get_statuses_text(target)
-	var secondary_actions_text: String = get_secondary_actions_text(target)
-	
-	var all_text: PackedStringArray = [hit_chance_text, effects_text, statuses_text, secondary_actions_text]
-	for text_idx: int in range(all_text.size() - 1, -1, -1):
-		if all_text[text_idx] == "":
-			all_text.remove_at(text_idx)
-	
-	var total_preview_text: String = "\n".join(all_text)
-	
-	var preview: ActionPreview = action_preview_scene.instantiate()
-	preview.label.text = total_preview_text
-	preview.unit = target.unit_actor
-	target.unit_actor.char_body.add_child(preview)
-	
-	action_previews.append(preview)
-	
-	return preview
+func _score_result_statuses(
+	action_data: Action,
+	target_result: ActionTargetResult,
+	target_unit: UnitData,
+	is_user_result: bool
+) -> float:
+	if action_data == null or target_result.eligible_status_ids.is_empty():
+		return 0.0
+
+	var status_chance: int = action_data.user_status_chance if is_user_result else action_data.target_status_chance
+	var status_list_type: Action.StatusListType = action_data.user_status_list_type if is_user_result else action_data.target_status_list_type
+	var will_remove: bool = action_data.will_remove_user_status if is_user_result else action_data.will_remove_target_status
+	var status_probability: float = clampf(float(status_chance) / 100.0, 0.0, 1.0)
+
+	var total_status_score: float = 0.0
+	for status_id: String in target_result.eligible_status_ids:
+		var status_effect: StatusEffect = ActionResolver.lookup_status_effect(status_id)
+		if status_effect == null:
+			continue
+		total_status_score += status_effect.get_ai_score(user, target_unit, will_remove)
+
+	if status_list_type == Action.StatusListType.RANDOM:
+		total_status_score = (total_status_score / float(target_result.eligible_status_ids.size())) * status_probability
+	else:
+		total_status_score = total_status_score * status_probability
+
+	return total_status_score
 
 
-func get_hit_chance_text(target: UnitData) -> String:
-	# hit chance preview
-	var evade_direction: EvadeData.Directions = get_evade_direction(user.terrain_tile_position, target)
-	var hit_chance_value: int = get_total_hit_chance(target, evade_direction)
-	var hit_chance_text: String = str(hit_chance_value) + "% Hit"
-	
-	return hit_chance_text
+func _result_removes_ko(action_data: Action, target_result: ActionTargetResult, is_user_result: bool = false) -> bool:
+	if target_result.statuses_removed.has("dead"):
+		return true
+	if action_data != null:
+		var will_remove: bool = action_data.will_remove_user_status if is_user_result else action_data.will_remove_target_status
+		if will_remove and target_result.eligible_status_ids.has("dead"):
+			return true
+	return false
 
 
-func get_effects_text(target: UnitData) -> String:
-	# effect preview
-	var all_effects_text: PackedStringArray = []
-	for action_effect: ActionEffect in action.target_effects:
-		var effect_value: int = action_effect.get_value(user, target, action.element)
-		var effect_text: String = action_effect.get_text(effect_value)
-		all_effects_text.append(effect_text)
-	
-	var total_effect_text: String = "/n".join(all_effects_text)
-	return total_effect_text
-
-
-func get_statuses_text(target: UnitData) -> String:
-	# status preview
-	if action.target_status_list.is_empty():
-		return ""
-	
-	var status_chance: String = str(action.target_status_chance) + "%"
-	var remove_status: String = ""
-	if action.will_remove_target_status:
-		remove_status = "Remove "
-	var status_group_type: String = Action.StatusListType.keys()[action.target_status_list_type] + " "
-	if action.target_status_list.size() < 2:
-		status_group_type = "" # don't mention group type if 1 or less status
-	
-	var status_names: PackedStringArray = []
-	for status_id: String in action.target_status_list:
-		if not action.will_remove_target_status or target.get_current_status_ids().has(status_id): # don't show removing status the target does not have TODO don't show remove Always statuses
-			status_names.append(GameData.get_status_effect(status_id).status_effect_name)
-	
-	if status_names.is_empty() and action.will_remove_target_status:
-		status_names = ["[No status to remove]"]
-	
-	var total_status_text: String = status_chance + " " + remove_status + status_group_type + ", ".join(status_names)
-	return total_status_text
-
-
-func get_secondary_actions_text(_target: UnitData) -> String:
-	# TODO show effects and statuses from secondary actions?
-	if action.secondary_actions2.is_empty():
-		return ""
-	
-	var total_secondary_action_text: String = Action.StatusListType.keys()[action.secondary_action_list_type] + "\n"
-	if action.secondary_actions2.size() < 2:
-		total_secondary_action_text = "" # don't show list type if only 1 entry in list
-	
-	var all_secondary_action_text: PackedStringArray = []
-	for secondary_action: SecondaryAction in action.secondary_actions2:
-		var secondary_action_chance: String = str(secondary_action.chance) + "%"
-		#var secondary_action_effect_text: String = secondary_action.ac # TODO get effect text of secondary action?
-		var secondary_action_text: String = secondary_action_chance + " " + RomReader.actions[secondary_action.action_unique_name].display_name
-		all_secondary_action_text.append(secondary_action_text)
-	
-	total_secondary_action_text += "\n".join(all_secondary_action_text)
-	return total_secondary_action_text
+func show_result_previews() -> Array[ActionPreview]:
+	var preview_resolution: ActionResolution = ActionResolver.resolve(self, true)
+	for target: UnitData in preview_resolution.targeted_units:
+		if not is_instance_valid(target) or target.unit_actor == null or target.unit_actor.char_body == null:
+			continue
+		var preview: ActionPreview = action_preview_scene.instantiate()
+		preview.unit = target.unit_actor
+		preview.set_from_resolution(preview_resolution, target)
+		target.unit_actor.char_body.add_child(preview)
+		action_previews.append(preview)
+	return action_previews
 
 
 func on_map_input_event(_camera: Camera3D, event: InputEvent, event_position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
@@ -404,345 +342,9 @@ func face_target() -> void:
 		user.update_unit_facing(Vector3(direction_to_target.x, 0, direction_to_target.y))
 
 
-func get_total_hit_chance(target: UnitData, evade_direction: EvadeData.Directions) -> int:
-	var user_passive_effects: Array[PassiveEffect] = user.get_all_passive_effects(action.ignore_passives)
-	var target_passive_effects: Array[PassiveEffect] = target.get_all_passive_effects(action.ignore_passives)
-	
-	if not action.required_target_job_uname.is_empty():
-		var required_jobs: PackedStringArray = action.required_target_job_uname.duplicate()
-		for passive_effect: PassiveEffect in user_passive_effects:
-			required_jobs.append_array(passive_effect.add_applicable_target_jobs)
-
-		if not required_jobs.has(target.job_data.unique_name):
-			return 0
-	
-	if not action.required_target_status_uname.is_empty():
-		var required_status: PackedStringArray = action.required_target_status_uname.duplicate()
-		for passive_effect: PassiveEffect in user_passive_effects:
-			required_status.append_array(passive_effect.add_applicable_target_statuses)
-		
-		if not Utilities.has_any_elements(target.get_current_status_ids(), required_status):
-			return 0
-
-	if not action.required_target_stat_basis.is_empty():
-		var required_basis: Array[UnitData.StatBasis] = action.required_target_stat_basis.duplicate()
-		for passive_effect: PassiveEffect in user_passive_effects:
-			required_basis.append_array(passive_effect.add_applicable_target_stat_bases)
-
-		if not required_basis.has(target.stat_basis):
-			return 0
-	
-	var base_hit_chance: float = action.base_hit_formula.get_result(user, target, action.element)
-	var modified_hit_chance: float = base_hit_chance
-	if action.passive_power_modifier_applies_to_hit_chance:
-		for passive_effect: PassiveEffect in user_passive_effects:
-			modified_hit_chance = passive_effect.power_modifier_user.apply(roundi(modified_hit_chance), user)
-		for passive_effect: PassiveEffect in target_passive_effects:
-			modified_hit_chance = passive_effect.power_modifier_targeted.apply(roundi(modified_hit_chance), target)
-	else:
-		for passive_effect: PassiveEffect in user_passive_effects:
-			modified_hit_chance = passive_effect.hit_chance_modifier_user.apply(roundi(modified_hit_chance), user)
-		for passive_effect: PassiveEffect in target_passive_effects:
-			modified_hit_chance = passive_effect.hit_chance_modifier_targeted.apply(roundi(modified_hit_chance), target)
-
-	var evade_values: Dictionary[EvadeData.EvadeSource, int] = target.get_evade_values(action.applicable_evasion_type, evade_direction)
-	
-	var target_total_evade_factor: float = 1.0
-	var evade_factors: Dictionary[EvadeData.EvadeSource, float] = {}
-	if action.applicable_evasion_type != EvadeData.EvadeType.NONE:
-		for evade_source: EvadeData.EvadeSource in evade_values.keys():
-			if target_passive_effects.any(func(passive_effect: PassiveEffect) -> bool: return passive_effect.include_evade_sources.has(evade_source)):
-				var evade_value: float = evade_values[evade_source]
-				for passive_effect: PassiveEffect in user_passive_effects:
-					if passive_effect.evade_source_modifiers_user.has(evade_source):
-						evade_value = passive_effect.evade_source_modifiers_user[evade_source].apply(roundi(evade_value))
-				
-				for passive_effect: PassiveEffect in target_passive_effects:
-					if passive_effect.evade_source_modifiers_targeted.has(evade_source):
-						evade_value = passive_effect.evade_source_modifiers_targeted[evade_source].apply(roundi(evade_value))
-				
-				var evade_factor: float = max(0.0, 1 - (evade_value / 100.0))
-
-				evade_factors[evade_source] = evade_factor
-				target_total_evade_factor = target_total_evade_factor * evade_factor
-
-		target_total_evade_factor = max(0, target_total_evade_factor) # prevent negative evasion
-	
-	var total_hit_chance: int = roundi(modified_hit_chance * target_total_evade_factor)
-	
-	return roundi(total_hit_chance)
-
-
-func get_evade_direction(origin_tile: TerrainTile, target: UnitData) -> EvadeData.Directions:
-	var relative_position: Vector2i = origin_tile.xz_location - target.terrain_tile_position.xz_location
-	var relative_facing_position: Vector2i = relative_position
-	if target.facing_direction == GameData.Directions.NORTH:
-		pass # relative position is already correct for North facing
-	elif target.facing_direction == GameData.Directions.EAST:
-		relative_facing_position = Vector2i(-relative_position.y, relative_position.x)
-	elif target.facing_direction == GameData.Directions.SOUTH:
-		relative_facing_position = -relative_position
-	elif target.facing_direction == GameData.Directions.WEST:
-		relative_facing_position = Vector2i(relative_position.y, -relative_position.x)
-	
-	# check target facing, check x>y
-	var evade_direction: EvadeData.Directions = EvadeData.Directions.FRONT
-	if relative_facing_position.y < 0:
-		evade_direction = EvadeData.Directions.BACK
-		if abs(relative_facing_position.x) >= abs(relative_facing_position.y):
-			evade_direction = EvadeData.Directions.SIDE
-	elif abs(relative_facing_position.x) > abs(relative_facing_position.y):
-		evade_direction = EvadeData.Directions.SIDE
-	
-	return evade_direction
-
-
-func get_evade_values(target: UnitData, evade_direction: EvadeData.Directions) -> Dictionary[EvadeData.EvadeSource, int]:
-	var evade_values: Dictionary[EvadeData.EvadeSource, int] = {}
-	for evade_source: int in EvadeData.EvadeSource.size():
-		var evade_value: int = target.get_evade(evade_source, action.applicable_evasion_type, evade_direction)
-		evade_values[evade_source] = evade_value
-	
-	return evade_values
-
-
-func animate_evade(target_unit: UnitActor, evade_direction: EvadeData.Directions, user_pos: Vector2i) -> void:
-	var target_original_facing: Vector3 = target_unit.unit_data.get_facing_vector()
-	
-	var dir_to_target: Vector2i = user_pos - target_unit.unit_data.terrain_tile_position.xz_location
-	var temp_facing: Vector3 = Vector3(dir_to_target.x, 0, dir_to_target.y).normalized()
-	target_unit.unit_data.update_unit_facing(temp_facing)
-	
-	# var evade_anim_id: int = -1
-	var sum_of_weight: int = 0
-	var evade_values: Dictionary[EvadeData.EvadeSource, int] = target_unit.unit_data.get_evade_values(action.applicable_evasion_type, evade_direction)
-	for evade_source_value: int in evade_values.values():
-		sum_of_weight += evade_source_value
-	
-	if sum_of_weight <= 0: # missed due to action base hit chance
-		await target_unit.animate_evade(EvadeData.animation_ids[0])
-	else:
-		var rnd: int = randi_range(0, sum_of_weight)
-		for evade_source_idx: int in evade_values.size():
-			var evade_source_value: int = evade_values[evade_source_idx]
-			if rnd < evade_source_value:
-				await target_unit.animate_evade(EvadeData.animation_ids[evade_source_idx])
-				break
-			rnd -= evade_source_value
-	
-	target_unit.unit_data.update_unit_facing(target_original_facing)
-
-
-func show_vfx(position: Vector3) -> Node3D:
-	if not is_instance_valid(action.vfx_data):
-		push_warning("[Action.show_vfx] vfx_data is not valid, skipping")
-		return
-
-	var parent_node: Node = user.unit_actor.get_parent()
-
-	var vfx_instance: VfxEffectInstance = VfxEffectInstance.new()
-	vfx_instance.name = "VfxEffectInstance"
-	vfx_instance.position = position
-	parent_node.add_child(vfx_instance)
-
-	var origin_pos: Vector3 = user.terrain_tile_position.get_world_position()
-	vfx_instance.initialize(action.vfx_data, position, origin_pos)
-	return vfx_instance
-
-
-func show_shared_vfx(shared_vfx_handler_id: int, target_unit: UnitActor) -> void:
-	if shared_vfx_handler_id <= 0:
-		return
-	if battle_manager == null or battle_manager.trap_instance == null:
-		return
-	var target_pos: Vector3 = target_unit.char_body.global_position
-	battle_manager.trap_instance.global_position = target_pos
-	var dir: Vector3 = (target_pos - user.unit_actor.char_body.global_position).normalized()
-	var trap_element: int = TrapEffectData.element_type_to_trap_id(action.element)
-	var flash_unit: UnitActor = target_unit if shared_vfx_handler_id in TrapEffectData.FLASH_HANDLER_IDS else null
-	battle_manager.trap_instance.play(shared_vfx_handler_id, trap_element, dir, flash_unit)
-
-
-func show_projectile(target_unit: UnitActor, new_projectile_type: ProjectileEffectInstance.ProjectileType) -> void:
-	if new_projectile_type == ProjectileEffectInstance.ProjectileType.NONE:
-		return
-	
-	if battle_manager == null or battle_manager.projectile_instance == null:
-		push_warning("[Action.show_projectile] battle_manager or projectile_instance is null")
-		return
-	var origin: Vector3 = user.unit_actor.char_body.global_position
-	var target: Vector3 = target_unit.char_body.global_position
-	battle_manager.projectile_instance.play(origin, target, new_projectile_type)
-
-
-func apply_status(unit: UnitData, status_list: Array[String], status_list_type: Action.StatusListType, status_list_chance: int, will_remove_status: bool) -> void:
-	if status_list_type == Action.StatusListType.ALL:
-		var status_success: bool = randi_range(0, 99) < status_list_chance
-		if status_success:
-			for status_id: String in status_list:
-				var status_effect: StatusEffect = GameData.get_status_effect(status_id)
-				if will_remove_status and unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_id):
-					unit.remove_status_id(status_id)
-					unit.unit_actor.popup_texts.show_popup_text(status_effect.status_effect_name) # TODO different text for removing status
-				elif not will_remove_status:
-					unit.unit_actor.popup_texts.show_popup_text(status_effect.status_effect_name)
-					unit.add_status(status_effect.duplicate())
-	elif status_list_type == Action.StatusListType.EACH:
-		for status_id: String in status_list:
-			var status_success: bool = randi_range(0, 99) < status_list_chance
-			if status_success:
-				var status_effect: StatusEffect = GameData.get_status_effect(status_id)
-				if will_remove_status and unit.current_statuses.any(func(status: StatusEffect) -> bool: return status.unique_name == status_id):
-					unit.remove_status_id(status_id)
-					unit.unit_actor.popup_texts.show_popup_text(status_effect.status_effect_name) # TODO different text for removing status
-				elif not will_remove_status:
-					unit.unit_actor.popup_texts.show_popup_text(status_effect.status_effect_name)
-					unit.add_status(status_effect.duplicate())
-	elif status_list_type == Action.StatusListType.RANDOM:
-		var status_success: bool = randi_range(0, 99) < status_list_chance
-		if status_success:
-			if will_remove_status:
-				var removable_status_list: Array[String] = status_list.filter(func(status_id: String) -> bool: return unit.get_current_status_ids().has(status_id))
-				if not removable_status_list.is_empty():
-					var status_id: String = removable_status_list.pick_random()
-					unit.remove_status_id(status_id)
-					unit.unit_actor.popup_texts.show_popup_text(GameData.get_status_effect(status_id).status_effect_name) # TODO different text for removing status
-			elif not will_remove_status:
-				var addable_status_list: Array[String] = status_list.filter(func(status_id: String) -> bool: return not unit.get_current_status_ids().has(status_id))
-				if not addable_status_list.is_empty():
-					var status_id: String = addable_status_list.pick_random()
-					unit.unit_actor.popup_texts.show_popup_text(GameData.get_status_effect(status_id).status_effect_name)
-					unit.add_status(GameData.get_status_effect(status_id).duplicate())
-
-
 func apply_standard() -> void:
-	var target_units: Array[UnitData] = get_target_units(submitted_targets)
-	
-	if allow_triggering_actions:
-		for target: UnitData in target_units:
-			for connection: Dictionary in target.targeted_pre_action.get_connections():
-				await connection["callable"].call(target, self)
-	
-
-	# look up animation based on weapon type and vertical angle to target
-	var mod_animation_executing_id: int = action.animation_executing_id
-	if not submitted_targets.is_empty():
-		if action.animation_executing_ids_alternate.size() != 0 and action.use_weapon_animation:
-			mod_animation_executing_id = action.animation_executing_id
-			var angle_to_target: float = ((submitted_targets[0].height_mid - user.terrain_tile_position.height_mid) 
-					/ (submitted_targets[0].xz_location - user.terrain_tile_position.xz_location).length())
-			if angle_to_target > 0.51:
-				mod_animation_executing_id = action.animation_executing_ids_alternate[0]
-			elif angle_to_target < -0.51:
-				mod_animation_executing_id = action.animation_executing_ids_alternate[1]
-	
-	show_shared_vfx(action.user_shared_vfx_handler_id, user.unit_actor)
-	user.unit_actor.get_tree().create_timer(2.0).timeout.connect(func() -> void: if is_instance_valid(battle_manager): battle_manager.trap_instance.stop(), CONNECT_ONE_SHOT)
-	await user.unit_actor.animate_start_action(action.animation_start_id, action.animation_charging_id)
-	
-	user.unit_actor.animate_execute_action(mod_animation_executing_id)
-	
-	await Utilities.wait_seconds(0.2) # TODO delay should be based on effect/vfx data? 
-	
-	# show vfx, including rock, arrow, bolt...
-	var vfx_locations: Array[Node3D] = []
-	# apply effects to targets
-	for target_unit: UnitData in target_units:
-		if action.vfx_data != null:
-			#vfx_data.vfx_completed.connect(func(): vfx_completed = true, CONNECT_ONE_SHOT)
-			vfx_locations.append(show_vfx(target_unit.terrain_tile_position.get_world_position()))
-		show_projectile(target_unit.unit_actor, action.projectile_type)
-		var evade_direction: EvadeData.Directions = get_evade_direction(user.terrain_tile_position, target_unit)
-		var total_hit_chance: int = get_total_hit_chance(target_unit, evade_direction)
-		var hit_success: bool = randi_range(0, 99) < total_hit_chance
-		if hit_success:
-			show_shared_vfx(action.target_shared_vfx_handler_id, target_unit.unit_actor)
-
-			for effect: ActionEffect in action.target_effects:
-				var effect_value: int = roundi(effect.base_power_formula.get_result(user, target_unit, action.element))
-				if not action.passive_power_modifier_applies_to_hit_chance:
-					# TODO check all passive_effects on user and target
-					# TODO check ignores_statuses
-					for status: StatusEffect in user.current_statuses:
-						effect_value = status.passive_effect.power_modifier_user.apply(effect_value)
-					for status: StatusEffect in target_unit.current_statuses:
-						effect_value = status.passive_effect.power_modifier_targeted.apply(effect_value)
-				
-				effect.apply(user, target_unit, effect_value)
-				
-				if action.set_target_animation_on_hit and [UnitData.StatType.HP, UnitData.StatType.MP].has(effect.effect_stat_type) and effect_value < 0:
-					target_unit.unit_actor.animate_take_hit()
-				elif action.set_target_animation_on_hit and [UnitData.StatType.HP, UnitData.StatType.MP].has(effect.effect_stat_type) and effect_value > 0:
-					target_unit.unit_actor.animate_recieve_heal()
-			
-			# apply status
-			apply_status(target_unit, action.target_status_list, action.target_status_list_type, action.target_status_chance, action.will_remove_target_status)
-			
-			# TODO apply secondary action
-			if action.secondary_action_list_type == Action.StatusListType.RANDOM:
-				var sum_weights: int = 0
-				for secondary_action: SecondaryAction in action.secondary_actions2:
-					sum_weights += secondary_action.chance
-				var rng: int = randi_range(0, sum_weights)
-				for secondary_action: SecondaryAction in action.secondary_actions2:
-					if rng < secondary_action.chance:
-						var secondary_action_instance: ActionInstance = self.duplicate()
-						secondary_action_instance.action = RomReader.actions[secondary_action.action_unique_name]
-						await secondary_action_instance.use() # TODO do not use unit animations, don't check for hit again (when using magic gun)
-						break
-					else:
-						rng -= secondary_action.chance
-		else:
-			animate_evade(target_unit.unit_actor, evade_direction, user.terrain_tile_position.xz_location)
-			
-			target_unit.unit_actor.popup_texts.show_popup_text("Missed!") # TODO or "Guarded"
-			#push_warning(display_name + " missed")
-	
-	# apply effects to user
-	for effect: ActionEffect in action.user_effects:
-		var effect_value: int = roundi(effect.base_power_formula.get_result(user, user, action.element))
-		effect.apply(user, user, effect_value)
-	
-	# apply status to user
-	apply_status(user, action.user_status_list, action.user_status_list_type, action.user_status_chance, action.will_remove_user_status)
-
-	# this is needed in case the action causes the user to change animations (or SEQ entirely, ex. new status)
-	# TODO correctly time animations with end of action
-	if user.current_animation_id_fwd != user.current_idle_animation_id:
-		user.unit_actor.animate_return_to_idle()
-
-	# wait for applying effect animation
-	battle_manager.game_state_label.text = "Waiting for " + action.display_name + " vfx" 
-	if action.vfx_data != null and target_units.size() > 0:
-		while vfx_locations.any(func(vfx_location: Node3D) -> bool: return is_instance_valid(vfx_location)): # wait until vfx is completed
-			await Utilities.wait_for_frame()
-	else:
-		await Utilities.wait_seconds(0.5) # TODO show based on vfx timing data? (attacks use vfx 0xFFFF?)
-	for target_unit: UnitData in target_units:
-		if is_instance_valid(target_unit):
-			target_unit.unit_actor.return_to_idle_from_hit()
-	vfx_locations.clear()
-
-	if not is_instance_valid(user):
-		return
-
-	# pay costs
-	user.stats[UnitData.StatType.MP].add_value(-action.mp_cost)
-
-	# wait for triggered actions
-	if allow_triggering_actions:
-		for target: UnitData in target_units:
-			if is_instance_valid(target):
-				for connection: Dictionary in target.targeted_post_action.get_connections():
-					await connection["callable"].call(target, self)
-
-	clear() # clear all highlighting and target data
-
-	if not is_instance_valid(user):
-		return
-
-	if action.ends_turn:
-		user.is_ending_turn = true
-		#action_instance.user.end_turn()
-
-	action_completed.emit()
+	var resolution: ActionResolution = ActionResolver.resolve(self)
+	await ActionPresenter.play_resolution(resolution, battle_manager)
+	clear()
+	if is_instance_valid(user):
+		action_completed.emit()

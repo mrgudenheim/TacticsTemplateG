@@ -98,13 +98,6 @@ func moved_trigger(user: UnitData, moved_tiles: int) -> void:
 	await process_triggered_action(new_triggered_action_data)
 
 
-func action_trigger(user: UnitData, action_instance_targeted_by: ActionInstance) -> void:
-	var new_triggered_action_data: TriggeredActionInstance = TriggeredActionInstance.new()
-	new_triggered_action_data.user = user
-	new_triggered_action_data.initiating_action_instance = action_instance_targeted_by
-	await process_triggered_action(new_triggered_action_data)
-
-
 func self_trigger(user: UnitData) -> void:	
 	var new_triggered_action_data: TriggeredActionInstance = TriggeredActionInstance.new()
 	new_triggered_action_data.user = user

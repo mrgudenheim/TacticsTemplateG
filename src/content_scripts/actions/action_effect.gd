@@ -57,28 +57,6 @@ func get_modified_value(
 	return effect_value
 
 
-func get_ai_value(user: UnitData, target: UnitData, element: Action.ElementTypes) -> int:
-	var nominal_value: int = roundi(base_power_formula.get_result(user, target, element))
-	var is_friendly: bool = target.team == user.team
-	var ai_value: int = nominal_value
-	
-	if type == EffectType.UNIT_STAT:
-		if set_value:
-			ai_value = target.stats[effect_stat_type].get_set_delta(nominal_value)
-		else:
-			ai_value = target.stats[effect_stat_type].get_add_delta(nominal_value)
-		
-		if target.is_defeated():
-			ai_value = 0 # prevent ai from focusing defeated units with non-status changes
-	else:
-		ai_value = 0 # TODO remove equipment should not be 0, check changes/modifiers for stats, statuses, element interactions
-	
-	if not is_friendly:
-		ai_value = -ai_value
-	
-	return ai_value
-
-
 func set_effect_label() -> void:
 	label = EffectType.keys()[type]
 	
@@ -99,49 +77,6 @@ func get_text(value: int) -> String:
 		text = "+" + text
 	
 	return text
-
-
-func apply_value(apply_unit: UnitData, value: int) -> int:
-	match type:
-		EffectType.UNIT_STAT:
-			if set_value:
-				apply_unit.stats[effect_stat_type].set_value(value)
-			else:
-				apply_unit.stats[effect_stat_type].add_value(value)
-		EffectType.CURRENCY:
-			if set_value:
-				apply_unit.team.currency = value
-			else:
-				apply_unit.team.currency += value
-		EffectType.INVENTORY:
-			if set_value:
-				apply_unit.team.inventory[0] = value # TODO get inventory item id to change
-			else:
-				apply_unit.team.inventory[0] += value # TODO get inventory item id to change
-		EffectType.REMOVE_EQUIPMENT:
-			pass
-			# TODO implement action_effect removing equipment from unit.equip_slot
-		EffectType.PUSH:
-			pass
-			# TODO implment push
-			# get direction based on user and targert, get path, determine obstructions, and move unit
-	
-	var effect_text: String = get_text(value)
-	apply_unit.unit_actor.popup_texts.show_popup_text(effect_text)
-	
-	return value
-
-func apply(user: UnitData, target: UnitData, value: int) -> int:
-	var apply_unit: UnitData = target
-	if apply_to_user:
-		apply_unit = user
-	
-	value = apply_value(apply_unit, value)
-	
-	if transfer_to_user:
-		apply_value(user, -value)
-	
-	return value
 
 
 func to_dictionary() -> Dictionary:

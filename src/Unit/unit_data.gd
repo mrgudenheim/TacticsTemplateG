@@ -5,10 +5,6 @@ signal data_updated(unit_data: UnitData)
 signal statuses_updated()
 signal actions_updated(unit_data: UnitData)
 @warning_ignore("unused_signal")
-signal targeted_pre_action(unit_data: UnitData, action_instance: ActionInstance) # emited in action_instance
-@warning_ignore("unused_signal")
-signal targeted_post_action(unit_data: UnitData, action_instance: ActionInstance) # emited in action_instance
-@warning_ignore("unused_signal")
 signal reached_tile() # emited in use_move
 @warning_ignore("unused_signal")
 signal completed_move(unit_data: UnitData, tile_moved: int) # emited in use_move

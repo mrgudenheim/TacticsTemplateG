@@ -128,12 +128,7 @@ func target_tile(tile: TerrainTile, action_instance: ActionInstance, event: Inpu
 		action_instance.action_previews.clear()
 		
 		# show target previews
-		for preview_tile: TerrainTile in action_instance.preview_targets:
-			for unit: UnitData in action_instance.battle_manager.units:
-				if unit.terrain_tile_position == preview_tile and (unit.get_nullify_statuses().is_empty() or unit.get_nullify_statuses().any(
-						func(status: StatusEffect) -> bool: return action_instance.action.will_remove_target_status and action_instance.action.target_status_list.has(status.unique_name))): # ignore action unless it would remove nullify
-					action_instance.show_result_preview(unit)
-					break
+		action_instance.show_result_previews()
 	
 	if not action_instance.potential_targets.has(tile):
 		return
