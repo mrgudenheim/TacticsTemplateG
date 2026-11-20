@@ -699,7 +699,7 @@ static func _can_apply_status(simulated_unit: UnitData, status_id: String) -> bo
 			return false
 
 	var existing_matching: Array[StatusEffect] = simulated_unit.current_statuses.filter(
-		func(existing_status: StatusEffect) -> bool: return existing_status.status_id == status_effect.status_id
+		func(existing_status: StatusEffect) -> bool: return existing_status.unique_name == status_effect.unique_name
 	)
 	if existing_matching.size() >= status_effect.num_allowed:
 		var has_replaceable_temp: bool = existing_matching.any(
