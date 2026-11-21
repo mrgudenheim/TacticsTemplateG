@@ -774,7 +774,7 @@ func get_native_passive_effects(exclude_passives: PackedStringArray = []) -> Arr
 	if battle_manager != null:
 		native_passive_effects.append_array(battle_manager.global_passive_effects)
 
-	native_passive_effects = native_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return passive_effect.effect_range == 0)
+	# native_passive_effects = native_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return passive_effect.effect_range == 0)
 	native_passive_effects = native_passive_effects.filter(func(passive_effect: PassiveEffect) -> bool: return not exclude_passives.has(passive_effect.unique_name))
 	
 	return native_passive_effects
