@@ -63,7 +63,7 @@ class DeploymentZoneData:
 		deployment_id = bytes.decode_u16(10)
 
 		for idx: int in 25:
-			var is_present: bool = deployment_zone_bitmap & (idx**2) != 0
+			var is_present: bool = (deployment_zone_bitmap & (1 << idx)) != 0
 			if is_present:
 				# get coordinates where 0,0 is center of 5x5 zone
 				var base_x: int = (idx % 5) - 2
