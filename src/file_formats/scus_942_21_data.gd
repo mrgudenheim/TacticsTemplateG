@@ -541,7 +541,7 @@ func init_statuses() -> void:
 	status_effects[21].passive_effect.ai_strategy = UnitAi.Strategy.FLEE
 	status_effects[21].spritesheet_file_name = "other"
 	status_effects[21].palette_idx_offset = 0 # TODO chicken is actually palettes 0-4 depending on original palette
-	status_effects[1].other_type_index = 0
+	status_effects[21].other_type_index = 0
 	# blood suck
 	status_effects[13].passive_effect.ai_strategy = UnitAi.Strategy.BEST
 	status_effects[13].passive_effect.added_actions = [RomReader.fft_abilities[0x0c8].ability_action] # blood suck action
@@ -603,7 +603,7 @@ func init_statuses() -> void:
 	status_effects[24].action_on_turn_end = "poison_damage"
 
 	# regen action
-	status_effects[25].action_on_turn_end = "regen_heal"
+	status_effects[25].action_on_turn_end = "regeneration_heal"
 
 	# reraise triggered action
 	status_effects[18].passive_effect.added_triggered_actions_names = ["reraise_remove_dead"]
