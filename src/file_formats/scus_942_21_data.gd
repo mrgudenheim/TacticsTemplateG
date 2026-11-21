@@ -459,7 +459,7 @@ func init_from_scus() -> void:
 	var terrain_geomancy_bytes: PackedByteArray = scus_bytes.slice(terrain_geomancy_start, terrain_geomancy_start + (terrain_geomancy_entries * terrain_geomancy_length))
 	terrain_geomancy.resize(terrain_geomancy_entries)
 	for byte_idx: int in terrain_geomancy_bytes.size():
-		terrain_geomancy.append(terrain_geomancy_bytes.decode_u8(byte_idx))
+		terrain_geomancy[byte_idx] = terrain_geomancy_bytes.decode_u8(byte_idx)
 
 
 func init_statuses() -> void:
