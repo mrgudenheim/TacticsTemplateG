@@ -185,7 +185,12 @@ func init_from_battle_bin() -> void:
 	weapon_animation_ids.resize(num_entries)
 	var data_bytes: PackedByteArray = battle_bytes.slice(weapon_animation_ids_start, weapon_animation_ids_start + (num_entries * entry_size))
 	for id: int in num_entries:
-		weapon_animation_ids[id] = Vector3(data_bytes.decode_u8(id * entry_size), data_bytes.decode_u8(id * entry_size) + 1, data_bytes.decode_u8(id * entry_size) + 2)
+		var data_start: int = id * entry_size
+		weapon_animation_ids[id] = Vector3(
+			data_bytes.decode_u8(data_start),
+			data_bytes.decode_u8(data_start + 1),
+			data_bytes.decode_u8(data_start + 2)
+		)
 	
 	# ability vfx header offsets
 	entry_size = 4
