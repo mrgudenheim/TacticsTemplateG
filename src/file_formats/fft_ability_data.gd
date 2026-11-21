@@ -315,7 +315,7 @@ func set_action() -> void:
 	if require_sword:
 		ability_action.required_equipment_type = [ItemData.ItemType.SWORD] # sword, gun, etc.
 	if require_materia_blade:
-		ability_action.required_equipment_unique_name = ["material_blade"] # materia_blade, etc.
+		ability_action.required_equipment_unique_name = ["materia_blade"] # materia_blade, etc.
 	if not is_reflectable:
 		# ability_action.ignores_statuses.append("reflect") # ignore reflect # TODO ignoring Reflect is handled within TriggeredAction
 		ability_action.ignore_passives.append("reflect_status")
