@@ -221,8 +221,7 @@ func _render_frame(
 	mat.set_shader_parameter("color_modulate", p.color_modulate)
 	mat.set_shader_parameter("depth_mode", depth_mode)
 	mat.set_shader_parameter("depth_scale", depth_scale)
-	if debug_depth_enabled:
-		mat.set_shader_parameter("debug_depth", true)
+	mat.set_shader_parameter("debug_depth", debug_depth_enabled)
 
 	mesh.visible = true
 
