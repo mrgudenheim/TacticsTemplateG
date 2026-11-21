@@ -311,18 +311,24 @@ func get_action_types() -> Array[ActionType]:
 	
 	for effect: ActionEffect in target_effects:
 		if effect.type == ActionEffect.EffectType.UNIT_STAT:
+			var effective_sign: float = 1.0
+			if effect.base_power_formula.reverse_sign:
+				effective_sign = -1.0
+			if not effect.base_power_formula.values.is_empty() and effect.base_power_formula.values[0] < 0.0:
+				effective_sign = -effective_sign
 			if effect.effect_stat_type == UnitData.StatType.HP:
-				if effect.base_power_formula.values[0] > 0:
+				if effective_sign > 0.0 and not action_types.has(ActionType.HP_RECOVERY):
 					action_types.append(ActionType.HP_RECOVERY)
-				elif effect.base_power_formula.values[0] < 0:
+				elif effective_sign < 0.0 and not action_types.has(ActionType.HP_DAMAGE):
 					action_types.append(ActionType.HP_DAMAGE)
-			if effect.effect_stat_type == UnitData.StatType.MP:
-				if effect.base_power_formula.values[0] > 0:
+			elif effect.effect_stat_type == UnitData.StatType.MP:
+				if effective_sign > 0.0 and not action_types.has(ActionType.MP_RECOVERY):
 					action_types.append(ActionType.MP_RECOVERY)
-				elif effect.base_power_formula.values[0] < 0:
+				elif effective_sign < 0.0 and not action_types.has(ActionType.MP_DAMAGE):
 					action_types.append(ActionType.MP_DAMAGE)
-		if not target_status_list.is_empty():
-			action_types.append(ActionType.STATUS_CHANGE)
+	
+	if not target_status_list.is_empty():
+		action_types.append(ActionType.STATUS_CHANGE)
 	
 	return action_types
 
