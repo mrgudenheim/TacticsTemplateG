@@ -136,11 +136,13 @@ func get_ai_score(user: UnitData, target: UnitData, remove: bool = false) -> flo
 		return 0.0
 	
 	var current_statuses: Array[StatusEffect] = target.current_statuses.filter(func(status: StatusEffect) -> bool: return status.unique_name == unique_name)
-	if remove and current_statuses.all(func(status: StatusEffect) -> bool: return status.duration_type != StatusEffect.DurationType.PERMANENT):
+	if remove and current_statuses.all(func(status: StatusEffect) -> bool: return status.duration_type == StatusEffect.DurationType.PERMANENT):
 		return 0.0
 	
 	score = ai_score_formula.get_base_value(user, target)
 	if target.team == user.team:
+		score = -score
+	if remove:
 		score = -score
 	
 	if not remove and current_statuses.size() >= num_allowed: # re-applying existing status
@@ -149,7 +151,8 @@ func get_ai_score(user: UnitData, target: UnitData, remove: bool = false) -> flo
 		
 		var ticking_statuses: Array[StatusEffect] = current_statuses.filter(func(status: StatusEffect) -> bool: return status.duration_type == StatusEffect.DurationType.TICKS)
 		if not ticking_statuses.is_empty():
-			score = score * ticking_statuses[0].duration * duration
+			var remaining_fraction: float = clampf(1.0 - (float(ticking_statuses[0].duration) / float(maxi(1, duration))), 0.0, 1.0)
+			score = score * remaining_fraction
 	
 	return score
 
