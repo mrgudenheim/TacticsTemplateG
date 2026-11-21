@@ -474,9 +474,13 @@ func init_statuses() -> void:
 	# haste
 	# status_effects[28].passive_effect.ct_gain_modifier.value_formula.values = [1.5]
 	status_effects[28].passive_effect.ct_gain_modifier.formula_text = "value * 1.5"
+	status_effects[28].passive_effect_name = status_effects[28].unique_name + "_status"
+	status_effects[28].passive_effect.unique_name = status_effects[28].passive_effect_name
 	# slow
 	# status_effects[29].passive_effect.ct_gain_modifier.value_formula.values = [0.5]
 	status_effects[29].passive_effect.ct_gain_modifier.formula_text = "value * 0.5"
+	status_effects[29].passive_effect_name = status_effects[29].unique_name + "_status"
+	status_effects[29].passive_effect.unique_name = status_effects[29].passive_effect_name
 	
 	# freeze ct flag
 	for status: StatusEffect in status_effects:
@@ -485,6 +489,8 @@ func init_statuses() -> void:
 			status.passive_effect.ct_gain_modifier.formula_text = "value * 0.0"
 		status.passive_effect.can_react = not (status.checks_02 & 0x80 == 0x80) # cant react flag
 		status.passive_effect.nullify_targeted = status.checks_02 & 0x20 == 0x20 # ignore attacks flag
+		status.passive_effect_name = status.unique_name + "_status"
+		status.passive_effect.unique_name = status.passive_effect_name
 	
 	# reflect - handled as a triggered action
 	# status_effects[38].passive_effect.hit_chance_modifier_targeted.value = 0.0
@@ -492,23 +498,31 @@ func init_statuses() -> void:
 	# defending
 	# status_effects[6].passive_effect.hit_chance_modifier_targeted.value_formula.values = [0.5]
 	status_effects[6].passive_effect.hit_chance_modifier_targeted.formula_text = "value * 0.5"
+	status_effects[6].passive_effect_name = status_effects[6].unique_name + "_status"
+	status_effects[6].passive_effect.unique_name = status_effects[6].passive_effect_name
 	
 	# protect, shell
 	for idx: int in [26, 27]:
 		# status_effects[idx].passive_effect.hit_chance_modifier_targeted.value_formula.values = [0.66]
 		# status_effects[idx].passive_effect.power_modifier_targeted.value_formula.values = [0.66]
 		status_effects[idx].passive_effect.power_modifier_targeted.formula_text = "value * 0.66"
+		status_effects[idx].passive_effect_name = status_effects[idx].unique_name + "_status"
+		status_effects[idx].passive_effect.unique_name = status_effects[idx].passive_effect_name
 	
 	# chicken, frog, sleeping, charging
 	for idx: int in [21, 22, 35, 4]:
 		#status_effects[idx].passive_effect.hit_chance_modifier_targeted.value_formula.values = [1.5]
 		# status_effects[idx].passive_effect.power_modifier_targeted.value_formula.values = [1.5]
 		status_effects[idx].passive_effect.power_modifier_targeted.formula_text = "value * 1.5"
+		status_effects[idx].passive_effect_name = status_effects[idx].unique_name + "_status"
+		status_effects[idx].passive_effect.unique_name = status_effects[idx].passive_effect_name
 	
 	# dark, confuse
 	for idx: int in [10, 11]:
 		# status_effects[idx].passive_effect.hit_chance_modifier_user.value_formula.values = [0.5]
 		status_effects[idx].passive_effect.hit_chance_modifier_user.formula_text = "value * 0.5"
+		status_effects[idx].passive_effect_name = status_effects[idx].unique_name + "_status"
+		status_effects[idx].passive_effect.unique_name = status_effects[idx].passive_effect_name
 	
 	# dont act, sleep, stop, confuse, charging, performing
 	for idx: int in [37, 35, 30, 11, 4, 7]:
@@ -520,6 +534,8 @@ func init_statuses() -> void:
 			EvadeData.EvadeSource.ACCESSORY: Modifier.new("0", Modifier.ModifierType.SET),
 			EvadeData.EvadeSource.WEAPON: Modifier.new("0", Modifier.ModifierType.SET),
 		}
+		status_effects[idx].passive_effect_name = status_effects[idx].unique_name + "_status"
+		status_effects[idx].passive_effect.unique_name = status_effects[idx].passive_effect_name
 	
 	# user is transparent
 	status_effects[19].passive_effect.target_can_react = false
@@ -531,12 +547,16 @@ func init_statuses() -> void:
 		EvadeData.EvadeSource.ACCESSORY: Modifier.new("0", Modifier.ModifierType.SET),
 		EvadeData.EvadeSource.WEAPON: Modifier.new("0", Modifier.ModifierType.SET),
 	}
+	status_effects[19].passive_effect_name = status_effects[19].unique_name + "_status"
+	status_effects[19].passive_effect.unique_name = status_effects[19].passive_effect_name
 	
 	
 	# confuse
 	status_effects[11].passive_effect.ai_strategy = UnitAi.Strategy.CONFUSED
 	# berserk
 	status_effects[20].passive_effect.ai_strategy = UnitAi.Strategy.BEST
+	status_effects[20].passive_effect_name = status_effects[20].unique_name + "_status"
+	status_effects[20].passive_effect.unique_name = status_effects[20].passive_effect_name
 	# chicken
 	status_effects[21].passive_effect.ai_strategy = UnitAi.Strategy.FLEE
 	status_effects[21].spritesheet_file_name = "other"
@@ -545,12 +565,18 @@ func init_statuses() -> void:
 	# blood suck
 	status_effects[13].passive_effect.ai_strategy = UnitAi.Strategy.BEST
 	status_effects[13].passive_effect.added_actions = [RomReader.fft_abilities[0x0c8].ability_action] # blood suck action
+	status_effects[13].passive_effect_name = status_effects[13].unique_name + "_status"
+	status_effects[13].passive_effect.unique_name = status_effects[13].passive_effect_name
 	RomReader.fft_abilities[0x0c8].ability_action.status_prevents_use_any.erase("blood_suck") # can use blood suck
 	
 	# faith
 	status_effects[32].passive_effect.stat_modifiers[UnitData.StatType.FAITH] = Modifier.new("100.0", Modifier.ModifierType.SET)
+	status_effects[32].passive_effect_name = status_effects[32].unique_name + "_status"
+	status_effects[32].passive_effect.unique_name = status_effects[32].passive_effect_name
 	# innocent
 	status_effects[33].passive_effect.stat_modifiers[UnitData.StatType.FAITH] = Modifier.new("0.0", Modifier.ModifierType.SET)
+	status_effects[32].passive_effect_name = status_effects[32].unique_name + "_status"
+	status_effects[32].passive_effect.unique_name = status_effects[32].passive_effect_name
 	
 	# float
 	# TODO handle ignore depth and add height
@@ -568,9 +594,13 @@ func init_statuses() -> void:
 		0x19,
 		0x1c,
 	]
+	status_effects[17].passive_effect_name = status_effects[17].unique_name + "_status"
+	status_effects[17].passive_effect.unique_name = status_effects[17].passive_effect_name
 
 	# oil
 	status_effects[16].passive_effect.element_weakness = [Action.ElementTypes.FIRE] # TODO oil is in addition to fire weakness
+	status_effects[16].passive_effect_name = status_effects[16].unique_name + "_status"
+	status_effects[16].passive_effect.unique_name = status_effects[16].passive_effect_name
 	
 	# frog
 	status_effects[22].passive_effect.added_actions = [RomReader.fft_abilities[0x16f].ability_action] # frog attack action
@@ -579,6 +609,8 @@ func init_statuses() -> void:
 	status_effects[22].other_type_index = 1
 	RomReader.fft_abilities[0x16f].ability_action.status_prevents_use_any.erase("frog") # can use frog attack
 	RomReader.fft_abilities[0x01d].ability_action.status_prevents_use_any.erase("frog") # can use Frog
+	status_effects[22].passive_effect_name = status_effects[22].unique_name + "_status"
+	status_effects[22].passive_effect.unique_name = status_effects[22].passive_effect_name
 	
 	# crystal
 	status_effects[1].spritesheet_file_name = "other"
@@ -607,12 +639,18 @@ func init_statuses() -> void:
 
 	# reraise triggered action
 	status_effects[18].passive_effect.added_triggered_actions_names = ["reraise_remove_dead"]
+	status_effects[18].passive_effect_name = status_effects[18].unique_name + "_status"
+	status_effects[18].passive_effect.unique_name = status_effects[18].passive_effect_name
 
 	# undead triggered action
 	status_effects[3].passive_effect.added_triggered_actions_names = ["undead_remove_dead"]
+	status_effects[3].passive_effect_name = status_effects[3].unique_name + "_status"
+	status_effects[3].passive_effect.unique_name = status_effects[3].passive_effect_name
 
 	# reflect triggered action
 	status_effects[38].passive_effect.added_triggered_actions_names = ["reflect"]
+	status_effects[38].passive_effect_name = status_effects[38].unique_name + "_status"
+	status_effects[38].passive_effect.unique_name = status_effects[38].passive_effect_name
 
 	# death sentence action
 	status_effects[39].action_on_complete = "death_sentence_to_dead"

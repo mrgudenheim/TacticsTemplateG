@@ -931,6 +931,8 @@ func export_data_tables(save_path: String) -> void:
 		Utilities.save_json(item, save_path)
 	for status_effect: StatusEffect in status_effects.values():
 		GameData.export_resource(status_effect, save_path)
+		if status_effect.passive_effect_name != "" and not passive_effects.has(status_effect.passive_effect_name):
+			passive_effects[status_effect.passive_effect_name] = status_effect.passive_effect
 	for job_data: JobData in jobs_data.values():
 		Utilities.save_json(job_data, save_path)
 	for action: Action in actions.values():
