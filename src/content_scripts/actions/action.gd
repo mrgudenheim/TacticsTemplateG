@@ -1,8 +1,8 @@
 class_name Action
 extends Resource
 
-const SAVE_FOLDER: String = "actions"
-const FILE_SUFFIX: String = "action"
+const SAVE_FOLDER: String = "actions/"
+const FILE_SUFFIX: String = ".action.tres"
 # static var current_id: int = 0
 
 @export var unique_name: String = "unique_name" # "ATTACK" and "COPY" are special cases
@@ -198,58 +198,6 @@ enum UseTypes {
 	# 	RomReader.actions[action_idx] = self
 		
 	# emit_changed()
-
-
-static func create_from_json(json_string: String) -> Action:
-	var property_dict: Dictionary = JSON.parse_string(json_string)
-	var new_action: Action = create_from_dictonary(property_dict)
-	
-	return new_action
-
-
-static func create_from_dictonary(property_dict: Dictionary) -> Action:
-	var new_action: Action = Action.new()
-	for property_name: String in property_dict.keys():
-		if ["target_effects", "user_effects"].has(property_name):
-			var new_effects: Array[ActionEffect] = []
-			for effect: Dictionary in property_dict[property_name]:
-				var new_action_effect: ActionEffect = ActionEffect.create_from_dictionary(effect)
-				new_effects.append(new_action_effect)
-			new_action.set(property_name, new_effects)
-		elif property_name == "secondary_actions2":
-			var new_secondary_actions: Array[SecondaryAction] = []
-			for secondary_action_dict: Dictionary in property_dict[property_name]:
-				var new_secondary_action: SecondaryAction = SecondaryAction.create_from_dictionary(secondary_action_dict)
-				new_secondary_actions.append(new_secondary_action)
-			new_action.secondary_actions2 = new_secondary_actions
-		elif property_name == "base_hit_formula":
-			var new_formula_data: FormulaData = FormulaData.create_from_dictionary(property_dict[property_name])
-			new_action.set(property_name, new_formula_data)
-		elif ["action_id", "action_idx"].has(property_name):
-			if property_dict[property_name] >= 0: # auto generate action_id if < 0
-				new_action.set(property_name, property_dict[property_name])
-				# TODO overwrite other Action at index
-		elif property_name == "projectile_type":
-			new_action.projectile_type = ProjectileEffectInstance.ProjectileType[property_dict[property_name]]
-		elif property_name == "applicable_evasion_type":
-			new_action.applicable_evasion_type = EvadeData.EvadeType[property_dict[property_name]]
-		elif property_name == "element":
-			new_action.element = ElementTypes[property_dict[property_name]]
-		elif property_name == "target_status_list_type":
-			new_action.target_status_list_type = StatusListType[property_dict[property_name]]
-		elif property_name == "user_status_list_type":
-			new_action.user_status_list_type = StatusListType[property_dict[property_name]]
-		elif property_name == "secondary_action_list_type":
-			new_action.secondary_action_list_type = StatusListType[property_dict[property_name]]
-		elif property_name == "targeting_type":
-			new_action.targeting_type = TargetingTypes[property_dict[property_name]]
-		elif property_name == "use_type":
-			new_action.use_type = UseTypes[property_dict[property_name]]
-		else:
-			new_action.set(property_name, property_dict[property_name])
-
-	new_action.emit_changed()
-	return new_action
 
 
 static func get_element_types_array(element_bitflags: PackedByteArray) -> Array[ElementTypes]:
@@ -1684,16 +1632,3 @@ func set_data_from_formula_id(new_formula_id: int) -> void:
 			ignore_passives.erase("martial_arts")
 	
 	emit_changed()
-
-
-func to_json() -> String:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	return Utilities.object_properties_to_json(self, properties_to_exclude)

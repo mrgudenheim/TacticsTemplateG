@@ -3,8 +3,8 @@ extends Resource
 
 # https://ffhacktics.com/wiki/Item_Data
 
-const SAVE_FOLDER: String = "items"
-const FILE_SUFFIX: String = "item"
+const SAVE_FOLDER: String = "items/"
+const FILE_SUFFIX: String = ".item.tres"
 
 @export var unique_name: String = "unique_name"
 @export var display_name: String = "Item display_name"
@@ -457,49 +457,3 @@ func add_to_global_list(will_overwrite: bool = false) -> void:
 		unique_name = new_unique_name
 	
 	RomReader.items[unique_name] = self
-
-
-func to_json() -> String:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	return Utilities.object_properties_to_json(self, properties_to_exclude)
-
-
-static func create_from_json(json_string: String) -> ItemData:
-	var property_dict: Dictionary = JSON.parse_string(json_string)
-	var new_item: ItemData = create_from_dictionary(property_dict)
-	
-	return new_item
-
-
-static func create_from_dictionary(property_dict: Dictionary) -> ItemData:
-	var new_item: ItemData = ItemData.new()
-	for property_name: String in property_dict.keys():
-		if property_name == "stat_modifiers":
-			var new_stat_modifiers: Dictionary[UnitData.StatType, Modifier] = {}
-			var temp_dict: Dictionary = property_dict[property_name]
-			for key: String in temp_dict:
-				new_stat_modifiers[int(key)] = Modifier.create_from_dictionary(temp_dict[key])
-			new_item.stat_modifiers = new_stat_modifiers
-		elif property_name == "slot_type":
-			new_item.slot_type = SlotType[property_dict[property_name]]
-		elif property_name == "item_type":
-			new_item.item_type = ItemType[property_dict[property_name]]
-		elif property_name == "evade_datas":
-			var new_evade_datas: Array[EvadeData] = []
-			var temp_array: Array = property_dict[property_name]
-			for element: Dictionary in temp_array:
-				new_evade_datas.append(EvadeData.create_from_dictionary(element))
-			new_item.evade_datas = new_evade_datas
-		else:	
-			new_item.set(property_name, property_dict[property_name])
-
-	new_item.emit_changed()
-	return new_item

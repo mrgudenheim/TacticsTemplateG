@@ -929,21 +929,21 @@ func export_data_tables(save_path: String) -> void:
 	
 	var error: Error
 	for item: ItemData in items.values():
-		Utilities.save_json(item, save_path)
+		GameData.export_resource(item, save_path)
 	for status_effect: StatusEffect in status_effects.values():
 		GameData.export_resource(status_effect, save_path)
 		if status_effect.passive_effect_name != "" and not passive_effects.has(status_effect.passive_effect_name):
 			passive_effects[status_effect.passive_effect_name] = status_effect.passive_effect
 	for job_data: JobData in jobs_data.values():
-		Utilities.save_json(job_data, save_path)
+		GameData.export_resource(job_data, save_path)
 	for action: Action in actions.values():
-		Utilities.save_json(action, save_path)
+		GameData.export_resource(action, save_path)
 	for triggered_action: TriggeredAction in triggered_actions.values():
-		Utilities.save_json(triggered_action, save_path)
+		GameData.export_resource(triggered_action, save_path)
 	for passive_effect: PassiveEffect in passive_effects.values():
-		Utilities.save_json(passive_effect, save_path)
+		GameData.export_resource(passive_effect, save_path)
 	for ability: Ability in abilities.values():
-		Utilities.save_json(ability, save_path)
+		GameData.export_resource(ability, save_path)
 	for scenario: Scenario in scenarios.values():
 		# mirror unit placement in scenarios to align with mirrored maps
 		var map_chunk: MapChunk = scenario.map_chunks[0]

@@ -10,33 +10,10 @@ signal value_changed(clamped_value: StatValue)
 @export var modifiers: Array[Modifier] = [] # should only come from passive_effects
 
 
-static func create_from_dictionary(property_dict: Dictionary) -> StatValue:
-	var new_clamped_value: StatValue = StatValue.new()
-	for property_name: String in property_dict.keys():
-		new_clamped_value.set(property_name, property_dict[property_name])
-
-	new_clamped_value.emit_changed()
-	return new_clamped_value
-
-
 func _init(new_min_value: int = 0, new_max_value: int = 100, new_current_value: int = 50) -> void:
 	min_value = new_min_value
 	max_value = new_max_value
 	current_value = new_current_value
-
-
-func to_dictionary() -> Dictionary:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	
-	return Utilities.object_properties_to_dictionary(self, properties_to_exclude)
 
 
 func get_unclampped_modified_value(preview_value: int = current_value) -> int:

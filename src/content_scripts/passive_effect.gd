@@ -2,7 +2,7 @@ class_name PassiveEffect
 extends Resource
 
 const SAVE_FOLDER: String = "passive_effects/"
-const FILE_SUFFIX: String = "passive_effect"
+const FILE_SUFFIX: String = ".passive_effect.tres"
 @export var unique_name: String = "unique_name"
 
 # checks if passive_effect should be applied
@@ -94,78 +94,6 @@ func add_to_global_list(will_overwrite: bool = false) -> void:
 		unique_name = new_unique_name
 	
 	RomReader.passive_effects[unique_name] = self
-
-
-func to_json() -> String:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	return Utilities.object_properties_to_json(self, properties_to_exclude)
-
-
-static func create_from_json(json_string: String) -> PassiveEffect:
-	var property_dict: Dictionary = JSON.parse_string(json_string)
-	var new_passive_effect: PassiveEffect = create_from_dictionary(property_dict)
-	
-	return new_passive_effect
-
-
-static func create_from_dictionary(property_dict: Dictionary) -> PassiveEffect:
-	var new_passive_effect: PassiveEffect = PassiveEffect.new()
-	for property_name: String in property_dict.keys():
-		if property_name == "stat_modifiers":
-			var new_stat_modifiers: Dictionary[UnitData.StatType, Modifier] = {}
-			var temp_dict: Dictionary = property_dict[property_name]
-			for key: String in temp_dict:
-				new_stat_modifiers[UnitData.StatType[key]] = Modifier.create_from_dictionary(temp_dict[key])
-			new_passive_effect.set(property_name, new_stat_modifiers)
-		elif property_name.contains("evade_source_modifiers"):
-			var new_evade_modifiers: Dictionary[EvadeData.EvadeSource, Modifier] = {}
-			var temp_dict: Dictionary = property_dict[property_name]
-			for key: String in temp_dict:
-				new_evade_modifiers[EvadeData.EvadeSource[key]] = Modifier.create_from_dictionary(temp_dict[key])
-			new_passive_effect.set(property_name, new_evade_modifiers)
-		elif property_name.contains("include_evade_sources"):
-			var new_include_evade_sources: Array[EvadeData.EvadeSource] = []
-			for value: String in property_dict[property_name]:
-				new_include_evade_sources.append(EvadeData.EvadeSource[value])
-			new_passive_effect.set(property_name, new_include_evade_sources)
-		elif property_name.contains("modifier"):
-			var new_modifier: Modifier = Modifier.create_from_dictionary(property_dict[property_name])
-			new_passive_effect.set(property_name, new_modifier)
-		elif ["element_absorb", "element_cancel", "element_half", "element_strengthen", "element_weakness"].has(property_name):
-			var array: Array = property_dict[property_name]
-			var new_element_types: Array[Action.ElementTypes] = []
-			for type: String in array:
-				new_element_types.append(Action.ElementTypes[type])
-			new_passive_effect.set(property_name, new_element_types)
-		elif property_name == "ai_strategy":
-			var type: String = property_dict[property_name]
-			var new_ai_type: UnitAi.Strategy = UnitAi.Strategy[type]
-			new_passive_effect.set(property_name, new_ai_type)
-		elif property_name == "unit_team_filter":
-			var array: Array = property_dict[property_name]
-			var new_team_filter_types: Array[FilterTeam] = []
-			for type: String in array:
-				new_team_filter_types.append(FilterTeam[type])
-			new_passive_effect.set(property_name, new_team_filter_types)
-		elif property_name == "unit_basis_filter":
-			var array: Array = property_dict[property_name]
-			var new_unit_basis_filter_types: Array[UnitData.StatBasis] = []
-			for type: String in array:
-				new_unit_basis_filter_types.append(UnitData.StatBasis[type])
-			new_passive_effect.set(property_name, new_unit_basis_filter_types)
-		else:
-			new_passive_effect.set(property_name, property_dict[property_name])
-
-	new_passive_effect.emit_changed()
-	return new_passive_effect
 
 # TODO affects targeting - float - can attack 1 higher, jump 1 higher, ignore depth and terrain cost, counts as 1 higher when being targeted, chicken/frog counts as further? maybe targeting just checks sprite height var
 # TODO reflect

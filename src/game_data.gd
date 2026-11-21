@@ -170,30 +170,25 @@ func index_data(directory_path: String) -> void:
 			await get_tree().process_frame
 			last_frame_time = Time.get_ticks_msec()
 
-		var data_type: String = file_path.split(".")[-2]
-		
-		if file_path.ends_with(".json"):
-			match data_type:
-				"action":
-					action_paths[file_path.get_file().trim_suffix(".action.json")] = file_path
-				"ability":
-					ability_paths[file_path.get_file().trim_suffix(".ability.json")] = file_path
-				"triggered_action":
-					triggered_action_paths[file_path.get_file().trim_suffix(".triggered_action.json")] = file_path
-				"passive_effect":
-					passive_effect_paths[file_path.get_file().trim_suffix(".passive_effect.json")] = file_path
-				"item":
-					item_paths[file_path.get_file().trim_suffix(".item.json")] = file_path
-				"job":
-					job_paths[file_path.get_file().trim_suffix(".job.json")] = file_path
-				"text":
-					var file_text: String = FileAccess.get_file_as_string(file_path)
-					names["all"] = JSON.parse_string(file_text) as PackedStringArray
-					names["all_no_empty"] = names["all"].duplicate()
-					for idx: int in range(names["all_no_empty"].size() -1, -1, -1):
-						if names["all_no_empty"][idx] == "":
-							names["all_no_empty"].remove_at(idx)
-		
+		if file_path.ends_with(".text.json"):
+			var file_text: String = FileAccess.get_file_as_string(file_path)
+			names["all"] = JSON.parse_string(file_text) as PackedStringArray
+			names["all_no_empty"] = names["all"].duplicate()
+			for idx: int in range(names["all_no_empty"].size() - 1, -1, -1):
+				if names["all_no_empty"][idx] == "":
+					names["all_no_empty"].remove_at(idx)
+		elif file_path.ends_with(Action.FILE_SUFFIX):
+			action_paths[file_path.get_file().trim_suffix(Action.FILE_SUFFIX)] = file_path
+		elif file_path.ends_with(Ability.FILE_SUFFIX):
+			ability_paths[file_path.get_file().trim_suffix(Ability.FILE_SUFFIX)] = file_path
+		elif file_path.ends_with(TriggeredAction.FILE_SUFFIX):
+			triggered_action_paths[file_path.get_file().trim_suffix(TriggeredAction.FILE_SUFFIX)] = file_path
+		elif file_path.ends_with(PassiveEffect.FILE_SUFFIX):
+			passive_effect_paths[file_path.get_file().trim_suffix(PassiveEffect.FILE_SUFFIX)] = file_path
+		elif file_path.ends_with(ItemData.FILE_SUFFIX):
+			item_paths[file_path.get_file().trim_suffix(ItemData.FILE_SUFFIX)] = file_path
+		elif file_path.ends_with(JobData.FILE_SUFFIX):
+			job_paths[file_path.get_file().trim_suffix(JobData.FILE_SUFFIX)] = file_path
 		elif file_path.ends_with(Scenario.FILE_SUFFIX):
 			scenario_paths[file_path.get_file().trim_suffix(Scenario.FILE_SUFFIX)] = file_path
 		elif file_path.ends_with(StatusEffect.FILE_SUFFIX):
@@ -306,8 +301,7 @@ func get_item(unique_name: String) -> ItemData:
 		return items[unique_name]
 	
 	var file_path: String = item_paths[unique_name]
-	var file_text: String = FileAccess.get_file_as_string(file_path)
-	items[unique_name] = ItemData.create_from_json(file_text)
+	items[unique_name] = ResourceLoader.load(file_path, "ItemData")
 	return items[unique_name]
 
 
@@ -325,8 +319,7 @@ func get_job(unique_name: String) -> JobData:
 		return jobs_data[unique_name]
 	
 	var file_path: String = job_paths[unique_name]
-	var file_text: String = FileAccess.get_file_as_string(file_path)
-	jobs_data[unique_name] = JobData.create_from_json(file_text)
+	jobs_data[unique_name] = ResourceLoader.load(file_path, "JobData")
 	return jobs_data[unique_name]
 
 
@@ -344,8 +337,7 @@ func get_action(unique_name: String) -> Action:
 		return actions[unique_name]
 	
 	var file_path: String = action_paths[unique_name]
-	var file_text: String = FileAccess.get_file_as_string(file_path)
-	var new_action: Action = Action.create_from_json(file_text)
+	var new_action: Action = ResourceLoader.load(file_path, "Action")
 	if new_action.vfx_name != "":
 		new_action.vfx_data = get_vfx_data(new_action.vfx_name)
 	actions[unique_name] = new_action
@@ -357,8 +349,7 @@ func get_triggered_action(unique_name: String) -> TriggeredAction:
 		return triggered_actions[unique_name]
 	
 	var file_path: String = triggered_action_paths[unique_name]
-	var file_text: String = FileAccess.get_file_as_string(file_path)
-	triggered_actions[unique_name] = TriggeredAction.create_from_json(file_text)
+	triggered_actions[unique_name] = ResourceLoader.load(file_path, "TriggeredAction")
 	return triggered_actions[unique_name]
 
 
@@ -367,8 +358,7 @@ func get_passive_effect(unique_name: String) -> PassiveEffect:
 		return passive_effects[unique_name]
 	
 	var file_path: String = passive_effect_paths[unique_name]
-	var file_text: String = FileAccess.get_file_as_string(file_path)
-	passive_effects[unique_name] = PassiveEffect.create_from_json(file_text)
+	passive_effects[unique_name] = ResourceLoader.load(file_path, "PassiveEffect")
 	return passive_effects[unique_name]
 
 
@@ -377,8 +367,7 @@ func get_ability(unique_name: String) -> Ability:
 		return abilities[unique_name]
 	
 	var file_path: String = ability_paths[unique_name]
-	var file_text: String = FileAccess.get_file_as_string(file_path)
-	abilities[unique_name] = Ability.create_from_json(file_text)
+	abilities[unique_name] = ResourceLoader.load(file_path, "Ability")
 	return abilities[unique_name]
 
 

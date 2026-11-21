@@ -32,7 +32,7 @@ enum HitRequirement {
 } # TODO other hit requirements for specific evade types?
 
 const SAVE_FOLDER: String = "triggered_actions/"
-const FILE_SUFFIX: String = "triggered_action"
+const FILE_SUFFIX: String = ".triggered_action.tres"
 
 @export var unique_name: String = "unique_name.triggered"
 @export var display_name: String = "[Triggered Action]"
@@ -372,79 +372,3 @@ func add_to_global_list(will_overwrite: bool = false) -> void:
 		unique_name = new_unique_name
 	
 	RomReader.triggered_actions[unique_name] = self
-
-
-func to_json() -> String:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	return Utilities.object_properties_to_json(self, properties_to_exclude)
-
-
-func to_csv_row(delimeter: String = "|") -> String:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	var property_dict: Dictionary = Utilities.object_properties_to_dictionary(self, properties_to_exclude)
-	var entries: String = delimeter.join(property_dict.values())
-	return entries
-
-
-func get_csv_headers(delimeter: String = "|") -> String:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	var property_dict: Dictionary = Utilities.object_properties_to_dictionary(self, properties_to_exclude)
-	var headers: String = delimeter.join(property_dict.keys())
-	return headers
-
-
-static func create_from_json(json_string: String) -> TriggeredAction:
-	var property_dict: Dictionary = JSON.parse_string(json_string)
-	var new_triggered_action: TriggeredAction = create_from_dictonary(property_dict)
-	
-	return new_triggered_action
-
-
-static func create_from_dictonary(property_dict: Dictionary) -> TriggeredAction:
-	var new_triggered_action: TriggeredAction = TriggeredAction.new()
-	for property_name: String in property_dict.keys():
-		if property_name == "trigger_chance_formula":
-			var new_formula_data: FormulaData = FormulaData.create_from_dictionary(property_dict[property_name])
-			new_triggered_action.set(property_name, new_formula_data)
-		elif property_name == "user_stat_thresholds":
-			var new_dictionary: Dictionary[UnitData.StatType, int] = {}
-			var json_dict: Dictionary = property_dict[property_name]
-			for key: String in json_dict.keys():
-				new_dictionary[key.to_int()] = roundi(json_dict[key])
-			
-			new_triggered_action.set(property_name, new_dictionary)
-		elif property_name == "trigger_timing":
-			new_triggered_action.trigger_timing = TriggerTiming[property_dict[property_name]]
-		elif property_name == "targeting":
-			new_triggered_action.targeting = TargetingTypes[property_dict[property_name]]
-		elif property_name == "requries_hit":
-			new_triggered_action.requries_hit = HitRequirement[property_dict[property_name]]
-		else:
-			new_triggered_action.set(property_name, property_dict[property_name])
-	
-	new_triggered_action.emit_changed()
-	return new_triggered_action

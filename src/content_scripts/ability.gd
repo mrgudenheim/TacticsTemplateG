@@ -10,7 +10,7 @@ enum SlotType {
 }
 
 const SAVE_FOLDER: String = "abilities/"
-const FILE_SUFFIX: String = "ability"
+const FILE_SUFFIX: String = ".ability.tres"
 
 @export var unique_name: String = "unique_name"
 @export var display_name: String = "[Ability Name]"
@@ -50,39 +50,5 @@ func add_to_global_list(will_overwrite: bool = false) -> void:
 	RomReader.abilities[unique_name] = self
 
 
-func to_json() -> String:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	return Utilities.object_properties_to_json(self, properties_to_exclude)
-
-
 func get_passive_effect() -> PassiveEffect:
 	return GameData.get_passive_effect(passive_effect_name)
-
-
-static func create_from_json(json_string: String) -> Ability:
-	var property_dict: Dictionary = JSON.parse_string(json_string)
-	var new_ability: Ability = create_from_dictonary(property_dict)
-	
-	return new_ability
-
-
-static func create_from_dictonary(property_dict: Dictionary) -> Ability:
-	var new_ability: Ability = Ability.new()
-	for property_name: String in property_dict.keys():
-		if property_name == "slot_type":
-			var type: String = property_dict[property_name]
-			var new_slot_type: SlotType = SlotType[type]
-			new_ability.set(property_name, new_slot_type)
-		else:
-			new_ability.set(property_name, property_dict[property_name])
-
-	new_ability.emit_changed()
-	return new_ability

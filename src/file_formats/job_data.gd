@@ -1,8 +1,8 @@
 class_name JobData
 extends Resource
 
-const SAVE_FOLDER: String = "jobs"
-const FILE_SUFFIX: String = "job"
+const SAVE_FOLDER: String = "jobs/"
+const FILE_SUFFIX: String = ".job.tres"
 @export var unique_name: String = "unique_name" # "ATTACK" and "COPY" are special cases
 
 # Job Data # 800610b8 in RAM
@@ -156,46 +156,3 @@ func add_to_global_list(will_overwrite: bool = false) -> void:
 	# passive_effect_names = unique_name
 	# passive_effects.unique_name = unique_name
 	RomReader.jobs_data[unique_name] = self
-
-
-func to_json() -> String:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	return Utilities.object_properties_to_json(self, properties_to_exclude)
-
-
-static func create_from_json(json_string: String) -> JobData:
-	var property_dict: Dictionary = JSON.parse_string(json_string)
-	var new_job_data: JobData = create_from_dictonary(property_dict)
-	
-	return new_job_data
-
-
-static func create_from_dictonary(property_dict: Dictionary) -> JobData:
-	var new_job_data: JobData = JobData.new()
-	for property_name: String in property_dict.keys():
-		if property_name == "equippable_item_types":
-			var array: Array = property_dict[property_name]
-			var new_equipable_item_types: Array[ItemData.ItemType] = []
-			for type: String in array:
-				new_equipable_item_types.append(ItemData.ItemType[type])
-			new_job_data.set(property_name, new_equipable_item_types)
-		elif property_name == "evade_datas":
-			var new_evade_datas: Array[EvadeData] = []
-			var new_evade_datas_array: Array = property_dict[property_name]
-			for evade_data_dictionary: Dictionary in new_evade_datas_array:
-				var new_evade_data: EvadeData = EvadeData.create_from_dictionary(evade_data_dictionary)
-				new_evade_datas.append(new_evade_data)
-			new_job_data.set(property_name, new_evade_datas)
-		else:
-			new_job_data.set(property_name, property_dict[property_name])
-
-	new_job_data.emit_changed()
-	return new_job_data

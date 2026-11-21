@@ -25,28 +25,6 @@ enum FaithModifier {
 	UNFAITH,
 }
 
-static func create_from_json(json_string: String) -> FormulaData:
-	var property_dict: Dictionary = JSON.parse_string(json_string)
-	var new_formula: FormulaData = create_from_dictionary(property_dict)
-
-	return new_formula
-
-
-static func create_from_dictionary(property_dict: Dictionary) -> FormulaData:
-	var new_formula: FormulaData = FormulaData.new()
-	for property_name: String in property_dict.keys():
-		# if property_name == "formula":
-		# 	new_formula.formula = Formulas[property_dict[property_name]]
-		if property_name == "user_faith_modifier":
-			new_formula.user_faith_modifier = FaithModifier[property_dict[property_name]]
-		elif property_name == "target_faith_modifier":
-			new_formula.target_faith_modifier = FaithModifier[property_dict[property_name]]
-		else:
-			new_formula.set(property_name, property_dict[property_name])
-
-	new_formula.emit_changed()
-	return new_formula
-
 
 func _init(new_formula_text: String = "0.0", new_values: PackedFloat64Array = [100.0, 1.0], 
 		new_user_faith_modifier: FaithModifier = FaithModifier.NONE, new_target_faith_modifier: FaithModifier = FaithModifier.NONE, 
@@ -144,17 +122,3 @@ func element_modify(value: float, user: UnitData, target: UnitData, element: Act
 			new_value = abs(new_value) # positive is healing
 	
 	return new_value
-
-
-func to_dictionary() -> Dictionary:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	
-	return Utilities.object_properties_to_dictionary(self, properties_to_exclude)

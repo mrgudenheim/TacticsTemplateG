@@ -11,39 +11,6 @@ extends Resource
 var mirror_scale: Vector3i = Vector3i.ONE
 
 
-static func create_from_dictionary(property_dict: Dictionary) -> MapChunk:
-	var new_map_chunk: MapChunk = MapChunk.new()
-	for property_name: String in property_dict.keys():
-		if property_name == "corner_position":
-			var vector_as_array: Array = property_dict[property_name]
-			var new_corner_position: Vector3i = Vector3i(roundi(vector_as_array[0]), roundi(vector_as_array[1]), roundi(vector_as_array[2]))
-			new_map_chunk.set(property_name, new_corner_position)
-		elif property_name == "mirror_xyz":
-			var array: Array = property_dict[property_name]
-			var new_mirror_xyz: Array[bool] = []
-			new_mirror_xyz.assign(array)
-			new_map_chunk.set(property_name, new_mirror_xyz)
-			new_map_chunk.set_mirror_xyz(new_mirror_xyz)
-		else:
-			new_map_chunk.set(property_name, property_dict[property_name])
-
-	new_map_chunk.emit_changed()
-	return new_map_chunk
-
-
-func to_dictionary() -> Dictionary:
-	var properties_to_exclude: PackedStringArray = [
-		"RefCounted",
-		"Resource",
-		"resource_local_to_scene",
-		"resource_path",
-		"resource_name",
-		"resource_scene_unique_id",
-		"script",
-	]
-	return Utilities.object_properties_to_dictionary(self, properties_to_exclude)
-
-
 func set_mirror_xyz(new_mirror_xyz: Array[bool]) -> void:
 	mirror_xyz = new_mirror_xyz
 	if mirror_xyz.size() >= 3:
