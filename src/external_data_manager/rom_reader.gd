@@ -811,6 +811,7 @@ func export_data(save_path: String) -> void:
 	await export_maps(save_path) # needs to be before data tables so maps will be initialized
 	await export_data_tables(save_path)
 	await export_vfx(save_path)
+	ContentValidator.validate_rom_reader_exports()
 
 
 func export_unit_spritesheets(save_path: String) -> void:
