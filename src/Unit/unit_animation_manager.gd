@@ -318,6 +318,9 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 			var target_sprite: Sprite3D = unit_sprites_manager.sprite_item
 			var item_data: ItemData = current_item_data if current_item_data != null else GameData.get_item_by_idx(item_frame_id)
 			if item_data != null:
+				if GameData.palettes.has("items"):
+					var item_palette: PackedColorArray = GameData.get_16_color_palette(item_data.item_palette_id, GameData.palettes["items"])
+					unit_sprites_manager.set_item_palette(item_palette)
 				# item graphics start on 3rd row of ITEM.BIN, item graphic id does not count the blank 16th column, so need to add extra based on the row
 				@warning_ignore("integer_division")
 				target_sprite.frame = 32 + item_data.item_graphic_id + (item_data.item_graphic_id / 15)
@@ -568,8 +571,12 @@ func set_animation_fps(value: float) -> void:
 
 func set_item(new_item_index: int) -> void:
 	item_index = new_item_index
-	item_spr.set_pixel_colors(RomReader.items_array[item_index].item_palette_id)
-	unit_sprites_manager.sprite_item.texture = ImageTexture.create_from_image(item_spr.get_rgba8_image())
+	current_item_data = GameData.get_item_by_idx(new_item_index)
+	if current_item_data == null:
+		return
+	if GameData.palettes.has("items"):
+		var item_palette: PackedColorArray = GameData.get_16_color_palette(current_item_data.item_palette_id, GameData.palettes["items"])
+		unit_sprites_manager.set_item_palette(item_palette)
 	if unit_sprites_manager.sprite_item.frame != 32:
 		@warning_ignore("integer_division")
 		unit_sprites_manager.sprite_item.frame = 32 + current_item_data.item_graphic_id + (current_item_data.item_graphic_id / 15)

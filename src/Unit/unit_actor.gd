@@ -137,7 +137,9 @@ func load_game_data() -> void:
 	eff_material.set_shader_parameter("depth_mode", VfxConstants.DepthMode.UNIT)
 	animation_manager.unit_sprites_manager.sprite_effect.material_override = eff_material
 
-	animation_manager.unit_sprites_manager.sprite_item.texture = GameData.get_texture("items")
+	animation_manager.unit_sprites_manager.set_item_texture(GameData.get_texture("items"))
+	if GameData.palettes.has("items"):
+		animation_manager.unit_sprites_manager.set_item_palette(GameData.get_16_color_palette(0, GameData.palettes["items"]))
 	
 	animation_manager.other_texture = GameData.get_texture("other")
 	animation_manager.other_shp = GameData.get_shp("other")

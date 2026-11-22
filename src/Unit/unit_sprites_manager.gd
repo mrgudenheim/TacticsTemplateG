@@ -15,6 +15,7 @@ var item_initial_pos: Vector3 = Vector3(0, -0.714, 0)
 
 var _primary_material: ShaderMaterial
 var _weapon_material: ShaderMaterial
+var _item_material: ShaderMaterial
 
 
 func _ready() -> void:
@@ -28,6 +29,12 @@ func _ready() -> void:
 	_weapon_material.set_shader_parameter("depth_mode", VfxConstants.DepthMode.UNIT)
 	sprite_weapon.material_override = _weapon_material
 
+	_item_material = ShaderMaterial.new()
+	_item_material.shader = UNIT_SPRITE_SHADER
+	_item_material.set_shader_parameter("depth_mode", VfxConstants.DepthMode.UNIT)
+	_item_material.set_shader_parameter("billboard_enabled", true)
+	sprite_item.material_override = _item_material
+
 
 func set_primary_texture(tex: Texture2D) -> void:
 	sprite_primary.texture = tex
@@ -37,6 +44,15 @@ func set_primary_texture(tex: Texture2D) -> void:
 func set_weapon_texture(tex: Texture2D) -> void:
 	sprite_weapon.texture = tex
 	_weapon_material.set_shader_parameter("sprite_texture", tex)
+
+
+func set_item_texture(tex: Texture2D) -> void:
+	sprite_item.texture = tex
+	_item_material.set_shader_parameter("sprite_texture", tex)
+
+
+func set_item_palette(palette: PackedColorArray) -> void:
+	_item_material.set_shader_parameter("palette_colors", palette)
 
 
 func set_tint(tint: Vector3) -> void:
