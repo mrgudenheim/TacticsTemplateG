@@ -91,6 +91,23 @@ func connect_trigger(unit: UnitData) -> void:
 				unit.turn_ended.connect(self_trigger)
 
 
+func disconnect_trigger(unit: UnitData) -> void:
+	match trigger_timing:
+		TriggerTiming.MOVED:
+			if unit.completed_move.is_connected(moved_trigger):
+				unit.completed_move.disconnect(moved_trigger)
+		TriggerTiming.TARGETTED_PRE_ACTION:
+			pass
+		TriggerTiming.TARGETTED_POST_ACTION:
+			pass
+		TriggerTiming.TURN_START:
+			if unit.turn_started.is_connected(self_trigger):
+				unit.turn_started.disconnect(self_trigger)
+		TriggerTiming.TURN_END:
+			if unit.turn_ended.is_connected(self_trigger):
+				unit.turn_ended.disconnect(self_trigger)
+
+
 func moved_trigger(user: UnitData, moved_tiles: int) -> void:
 	var new_triggered_action_data: TriggeredActionInstance = TriggeredActionInstance.new()
 	new_triggered_action_data.user = user
