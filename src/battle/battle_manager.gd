@@ -12,10 +12,6 @@ const SCALED_UNITS_PER_HEIGHT: float = SCALE * FftMapData.UNITS_PER_HEIGHT
 @export var reference_quad: MeshInstance3D # for debugging
 @export var highlights_container: Node3D
 
-#static var main_camera: Camera3D
-#@export var phantom_camera: PhantomCamera3D
-@export var load_rom_button: LoadRomButton
-
 @export var orthographic_check: CheckBox
 @export var camera_controller: CameraController
 var main_camera: Camera3D
@@ -94,7 +90,6 @@ var walled_maps: PackedInt32Array = [
 func _ready() -> void:
 	main_camera = camera_controller.camera
 
-	load_rom_button.file_selected.connect(RomReader.on_load_rom_dialog_file_selected)
 	GameData.data_indexed.connect(on_data_ready)
 	orthographic_check.toggled.connect(camera_controller.on_orthographic_toggled)
 	show_statbar_check.toggled.connect(set_unit_statbars_visible)
@@ -137,9 +132,6 @@ func toggle_debug_ui() -> void:
 
 
 func on_data_ready() -> void:
-	#push_warning("on data ready")
-	load_rom_button.visible = false
-
 	if trap_instance != null:
 		trap_instance.stop()
 		trap_instance.queue_free()

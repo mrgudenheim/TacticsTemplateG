@@ -6,7 +6,6 @@
 [ext_resource type="Material" path="res://src/content_scripts/map/tile_highlight_yellow.tres" id="7_f2r6p"]
 [ext_resource type="PackedScene" uid="uid://c7upwdml4aygu" path="res://src/external_data_manager/external_data_setup_panel.tscn" id="8_bes1w"]
 [ext_resource type="Material" path="res://src/content_scripts/map/tile_highlight_white.tres" id="8_kb1q2"]
-[ext_resource type="PackedScene" uid="uid://26tg32417lfm" path="res://src/external_data_manager/load_rom.tscn" id="9_pbg35"]
 [ext_resource type="Script" uid="uid://cl143w048iago" path="res://src/Unit/character_controller_realtime.gd" id="10_d5yoq"]
 [ext_resource type="Material" uid="uid://cid35mcqfy575" path="res://src/content_scripts/map/tile_highlight_blue.tres" id="11_1os5c"]
 [ext_resource type="PackedScene" uid="uid://7tn6b6eup5na" path="res://src/camera_controller.tscn" id="12_l2dig"]
@@ -61,11 +60,10 @@ albedo_color = Color(6.016344e-08, 0.39723238, 0.15930742, 1)
 [sub_resource type="QuadMesh" id="QuadMesh_vdfg3"]
 material = SubResource("StandardMaterial3D_we1pw")
 
-[node name="BattleManager" type="Node3D" unique_id=1724416264 node_paths=PackedStringArray("texture_viewer", "reference_quad", "load_rom_button", "orthographic_check", "camera_controller", "background_gradient", "maps", "battle_view", "action_menu", "action_button_list", "units_container", "controller", "battle_end_panel", "post_battle_messages", "start_new_battle_button", "game_state_container", "game_state_label", "scenario_editor", "icon_counter", "show_statbar_check")]
+[node name="BattleManager" type="Node3D" unique_id=1724416264 node_paths=PackedStringArray("texture_viewer", "reference_quad", "orthographic_check", "camera_controller", "background_gradient", "maps", "battle_view", "action_menu", "action_button_list", "units_container", "controller", "battle_end_panel", "post_battle_messages", "start_new_battle_button", "game_state_container", "game_state_label", "scenario_editor", "icon_counter", "show_statbar_check")]
 script = ExtResource("1_hnd0w")
 texture_viewer = NodePath("SpriteViewer")
 reference_quad = NodePath("ReferenceQuad")
-load_rom_button = NodePath("LoadRom")
 orthographic_check = NodePath("OptionsPanelContainer/MarginContainer/VBoxContainer/FoldableContainer/VBoxContainer/OrthographicCheckBox")
 camera_controller = NodePath("ScenarioEditor/BattleSetupTabContainer/Map/VBoxContainer/SubViewportContainer/SubViewport/BattleView/CameraController")
 background_gradient = NodePath("BackgroundCanvasLayer/TextureRect")
@@ -104,20 +102,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("GradientTexture2D_1dnhu")
-
-[node name="LoadRom" parent="." unique_id=801972973 instance=ExtResource("9_pbg35")]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -57.0
-offset_top = -14.0
-offset_right = 57.0
-offset_bottom = 14.0
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="ExternalDataSetupPanel" parent="." unique_id=256136291 instance=ExtResource("8_bes1w")]
 
