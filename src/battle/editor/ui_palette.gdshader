@@ -13,6 +13,6 @@ void fragment() {
     vec4 color = texture(TEXTURE, atlas_uv);
     
     // swap palette
-    vec4 new_color = palette_colors[int(round(color.x * 255.0))];
-    COLOR = new_color;
+    int palette_index = int(round(color.x * 255.0));
+    COLOR = palette_colors[palette_index];
 }

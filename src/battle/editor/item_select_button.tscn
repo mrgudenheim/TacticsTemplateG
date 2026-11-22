@@ -4,6 +4,7 @@
 [ext_resource type="Shader" uid="uid://cp6kt2paa88bq" path="res://src/battle/editor/ui_palette.gdshader" id="2_82o32"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_o2poa"]
+resource_local_to_scene = true
 shader = ExtResource("2_82o32")
 shader_parameter/palette_colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
@@ -39,6 +40,7 @@ layout_mode = 2
 color = Color(0.7724798, 0.5703566, 0.2862759, 1)
 
 [node name="Sprite" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer2/PanelContainer" unique_id=1333961665]
+texture_filter = 1
 material = SubResource("ShaderMaterial_o2poa")
 layout_mode = 2
 texture = SubResource("AtlasTexture_o3x16")

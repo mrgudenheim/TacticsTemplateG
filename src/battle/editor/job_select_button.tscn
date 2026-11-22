@@ -4,6 +4,7 @@
 [ext_resource type="Shader" uid="uid://cp6kt2paa88bq" path="res://src/battle/editor/ui_palette.gdshader" id="2_tisr8"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_uksfq"]
+resource_local_to_scene = true
 shader = ExtResource("2_tisr8")
 shader_parameter/palette_colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
