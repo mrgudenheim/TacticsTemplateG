@@ -944,6 +944,9 @@ func update_equipable_item_types(all_passive_effects: Array[PassiveEffect]) -> v
 
 
 func update_triggered_actions(all_passive_effects: Array[PassiveEffect]) -> void:
+	for existing_triggered_action: TriggeredAction in triggered_actions:
+		if existing_triggered_action != null:
+			existing_triggered_action.disconnect_trigger(self)
 	triggered_actions.clear()
 	if job_data != null:
 		for ability: Ability in job_data.innate_abilities:
