@@ -1,7 +1,7 @@
 class_name BattleManager
 extends Node3D
 
-signal map_input_event(action_instance: ActionInstance, camera: Camera3D, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) # TODO should action_instance be removed from signal?
+signal map_input_event(camera: Camera3D, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int)
 signal unit_created(new_unit: UnitData)
 signal delayed_action_completed
 
