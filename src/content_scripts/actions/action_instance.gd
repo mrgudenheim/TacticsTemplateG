@@ -2,7 +2,7 @@ class_name ActionInstance
 extends RefCounted
 
 signal action_completed()
-signal tile_hovered(tile: TerrainTile, action_instance: ActionInstance)
+signal tile_hovered(tile: TerrainTile, action_instance: ActionInstance, event: InputEvent)
 
 var action: Action
 var user: UnitData
