@@ -111,7 +111,7 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 		tile_highlight.queue_free()
 
 	# remove current map chunks
-	for map_chunk_settings_instance: MapChunkSettingsUi in map_chunk_settings_list:
+	for map_chunk_settings_instance: MapChunkSettingsUi in map_chunk_settings_list.duplicate():
 		map_chunk_settings_instance.queue_free()
 		map_chunk_settings_instance.deleted.emit(map_chunk_settings_instance) # queue_free takes 1 frame, but need to stop referencing data immediately
 	
