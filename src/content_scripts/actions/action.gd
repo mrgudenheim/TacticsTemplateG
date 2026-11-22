@@ -232,27 +232,6 @@ func _to_string() -> String:
 	return display_name
 
 
-func add_to_global_list(will_overwrite: bool = false) -> void:
-	if ["", "unique_name"].has(unique_name):
-		unique_name = display_name.to_snake_case()
-	
-	if RomReader.actions.keys().has(unique_name) and will_overwrite:
-		push_warning("Overwriting existing action: " + unique_name)
-	elif RomReader.actions.keys().has(unique_name) and not will_overwrite:
-		var num: int = 2
-		var formatted_num: String = "%02d" % num
-		var new_unique_name: String = unique_name + "_" + formatted_num
-		while RomReader.actions.keys().has(new_unique_name):
-			num += 1
-			formatted_num = "%02d" % num
-			new_unique_name = unique_name + "_" + formatted_num
-		
-		push_warning("Action list already contains: " + unique_name + ". Incrementing unique_name to: " + new_unique_name)
-		unique_name = new_unique_name
-	
-	RomReader.actions[unique_name] = self
-
-
 # TODO set action type directly for each action? maybe as part of action processing per target to check values after formula processing and passive effect modifications
 func get_action_types() -> Array[ActionType]:
 	var action_types: Array[ActionType] = []

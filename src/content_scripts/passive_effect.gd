@@ -69,32 +69,6 @@ enum FilterTeam {
 	ENEMY,
 }
 
-# const TeamFilters: Dictionary[String, String] = {
-# 	"FRIENDLY": "FRIENDLY",
-# 	"ENEMY": "ENEMY",
-# }
-# var team_filters: PackedStringArray = [TeamFilters.FRIENDLY]
-
-func add_to_global_list(will_overwrite: bool = false) -> void:
-	if ["", "unique_name"].has(unique_name):
-		push_warning("needs unique name added")
-	
-	if RomReader.passive_effects.keys().has(unique_name) and will_overwrite:
-		push_warning("Overwriting existing passive effect: " + unique_name)
-	elif RomReader.passive_effects.keys().has(unique_name) and not will_overwrite:
-		var num: int = 2
-		var formatted_num: String = "%02d" % num
-		var new_unique_name: String = unique_name + "_" + formatted_num
-		while RomReader.passive_effects.keys().has(new_unique_name):
-			num += 1
-			formatted_num = "%02d" % num
-			new_unique_name = unique_name + "_" + formatted_num
-		
-		push_warning("PassiveEffect list already contains: " + unique_name + ". Incrementing unique_name to: " + new_unique_name)
-		unique_name = new_unique_name
-	
-	RomReader.passive_effects[unique_name] = self
-
 # TODO affects targeting - float - can attack 1 higher, jump 1 higher, ignore depth and terrain cost, counts as 1 higher when being targeted, chicken/frog counts as further? maybe targeting just checks sprite height var
 # TODO reflect
 # TODO undead healing -> damage
