@@ -437,7 +437,8 @@ func start_units_turn(unit: UnitData) -> void:
 	if not unit.is_defeated():
 		if unit.unit_actor != null:
 			camera_controller.follow_node = unit.unit_actor.char_body
-		unit.actions_updated.connect(update_action_buttons)
+		if not unit.actions_updated.is_connected(update_action_buttons):
+			unit.actions_updated.connect(update_action_buttons)
 	
 	await unit.start_turn()
 
