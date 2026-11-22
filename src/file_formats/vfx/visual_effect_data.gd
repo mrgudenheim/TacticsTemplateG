@@ -302,7 +302,7 @@ func init_from_file(rom_reader: RomReader) -> void:
 	# Time scale curve — packed nibbles (2 pacing values per byte, 300 bytes per region)
 	section_num = VfxSections.TIME_SCALE_CURVE
 	section_start = section_offsets[section_num]
-	if section_start != 0:
+	if time_scale_raw_ptr != 0:
 		time_scale_curve = vfx_bytes.slice(section_start, section_offsets[section_num + 1])
 		time_scale_outer.resize(600)
 		time_scale_for_each.resize(600)
