@@ -189,7 +189,11 @@ func update_ui(new_unit: UnitData) -> void:
 		equipment_grid.add_child(new_slot_label)
 
 		var new_item_button: Button = Button.new()
-		new_item_button.text = equip_slot.get_item().display_name
+		var current_item: ItemData = equip_slot.get_item()
+		if current_item == null:
+			new_item_button.text = ""
+		else:
+			new_item_button.text = current_item.display_name
 		new_item_button.pressed.connect(func() -> void: item_select_pressed.emit(new_unit, equip_slot))
 		new_item_button.custom_minimum_size = Vector2(60, 0)
 		equipment_grid.add_child(new_item_button)
