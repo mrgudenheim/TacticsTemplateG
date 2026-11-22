@@ -170,7 +170,7 @@ func process_rom() -> void:
 	# must be after fft_abilities to set secondary actions
 	items_array.resize(NUM_ITEMS)
 	for id: int in NUM_ITEMS:
-		items_array[id] = ItemData.new(id)
+		items_array[id] = FftItemImporter.create_from_rom(id, self)
 	section_start = _profile_section("items (254)", section_start)
 
 	scus_data.init_statuses(self)
