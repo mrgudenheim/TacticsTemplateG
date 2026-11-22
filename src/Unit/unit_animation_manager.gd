@@ -12,6 +12,7 @@ signal processing_opcode(index: int)
 #var animation_timer: float = 0
 var is_framerate_dependent: bool = false
 var animations: Dictionary[int, FftAnimation] = {}
+var _next_animation_id: int = 0
 var global_fft_animation: FftAnimation
 var global_texture: Texture2D
 var global_spritesheet_data: UnitSpritesheetData
@@ -88,7 +89,8 @@ func _process(delta: float) -> void:
 func start_animation(fft_animation: FftAnimation, draw_target: Sprite3D, is_playing: bool, is_looping: bool, force_loop: bool = false) -> void:
 	#if fft_animation.is_primary_anim:
 		#push_warning("Starting new animation")
-	fft_animation.id = animations.size()
+	fft_animation.id = _next_animation_id
+	_next_animation_id += 1
 	fft_animation.draw_target = draw_target
 	fft_animation.target_name = draw_target.name
 	animations[fft_animation.id] = fft_animation
