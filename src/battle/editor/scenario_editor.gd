@@ -201,6 +201,7 @@ func populate_option_lists() -> void:
 
 
 func setup_job_select(unit: UnitData) -> void:
+	desetup_job_select()
 	job_select_control.visible = true
 	for job_select_button: JobSelectButton in job_select_control.job_select_buttons:
 		job_select_button.selected.connect(func(new_job: JobData) -> void: update_unit_job(unit, new_job))
@@ -213,6 +214,7 @@ func desetup_job_select() -> void:
 
 
 func setup_item_select(unit: UnitData, slot: EquipmentSlot) -> void:
+	desetup_item_select()
 	item_select_control.visible = true
 	for item_select_button: ItemSelectButton in item_select_control.item_select_buttons:
 		if item_select_button.sprite_rect.texture.atlas == null:
@@ -238,6 +240,7 @@ func desetup_item_select() -> void:
 
 
 func setup_ability_select(unit: UnitData, slot: AbilitySlot) -> void:
+	desetup_ability_select()
 	ability_select_control.visible = true
 	for ability_select_button: AbilitySelectButton in ability_select_control.ability_select_buttons:
 		if slot.slot_types.has(ability_select_button.ability_data.slot_type):
@@ -254,6 +257,7 @@ func desetup_ability_select() -> void:
 
 
 func setup_skillset_select(unit: UnitData, skillset_idx: int) -> void:
+	desetup_skillset_select()
 	skillset_select_control.visible = true
 	for skillset_select_button: SkillsetSelectButton in skillset_select_control.skillset_select_buttons:
 		skillset_select_button.visible = true
