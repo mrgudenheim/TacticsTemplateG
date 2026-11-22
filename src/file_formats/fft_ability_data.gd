@@ -205,8 +205,8 @@ func set_normal_flags(flag_bytes: PackedInt32Array) -> void:
 
 func set_action(rom_reader: RomReader) -> void:
 	ability_action.display_name = display_name
-	ability_action.add_to_global_list()
-	ability_action.description = RomReader.fft_text.ability_descriptions[id]
+	FftRegistryHelper.register_unique(rom_reader.actions, ability_action, ability_action.display_name, "Action")
+	ability_action.description = rom_reader.fft_text.ability_descriptions[id]
 	ability_action.quote = spell_quote
 	ability_action.name_will_display = show_quote
 	
@@ -322,7 +322,7 @@ func set_action(rom_reader: RomReader) -> void:
 		# ability_action.ignores_statuses.append("reflect") # ignore reflect # TODO ignoring Reflect is handled within TriggeredAction
 		ability_action.ignore_passives.append("reflect_status")
 	
-	ability_action.set_data_from_formula_id(formula_id)
+	FftActionImporter.apply_formula_id(ability_action, formula_id, rom_reader)
 	if not is_evadeable: # set after formula
 		ability_action.applicable_evasion_type = EvadeData.EvadeType.NONE
 	
