@@ -370,6 +370,7 @@ func process_clock_tick() -> void:
 		await start_units_turn(unit) # process statuses on turn start and update actions
 		
 		if not battle_is_running:
+			_cleanup_active_unit_turn(unit)
 			return
 		
 		if not unit.is_defeated():
@@ -380,17 +381,19 @@ func process_clock_tick() -> void:
 			while not unit.is_ending_turn:
 				await get_tree().process_frame
 				if not battle_is_running:
+					_cleanup_active_unit_turn(unit)
 					return
-				if unit == null: 
+				if unit == null:
+					_cleanup_active_unit_turn(active_unit)
 					return
 			
-			clear_action_buttons()
-			unit.actions_updated.disconnect(update_action_buttons)
-			active_unit = null
+			_cleanup_active_unit_turn(unit)
 			
 			if check_end_conditions():
 				safe_to_load_map = true
 				return
+		else:
+			_cleanup_active_unit_turn(unit)
 		
 		safe_to_load_map = true
 		await get_tree().process_frame
@@ -441,6 +444,14 @@ func start_units_turn(unit: UnitData) -> void:
 			unit.actions_updated.connect(update_action_buttons)
 	
 	await unit.start_turn()
+
+
+func _cleanup_active_unit_turn(unit: UnitData) -> void:
+	clear_action_buttons()
+	if is_instance_valid(unit) and unit.actions_updated.is_connected(update_action_buttons):
+		unit.actions_updated.disconnect(update_action_buttons)
+	if active_unit == unit or not is_instance_valid(active_unit):
+		active_unit = null
 
 
 func clear_action_buttons() -> void:
