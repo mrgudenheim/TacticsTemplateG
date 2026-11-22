@@ -65,29 +65,26 @@ func bind_unit(new_unit_data: UnitData) -> void:
 	team_label.text = unit_data.team.team_name
 
 	hp_bar.bind_stat(UnitData.StatType.HP, unit_data.stats[UnitData.StatType.HP])
-	hp_bar.name_label.position.x = 5
-	hp_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	hp_bar.value_label.position.x -= (hp_bar.value_label.size.x + 10)
-	hp_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	# hp_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
+	_configure_stat_bar_labels(hp_bar)
 	
 	mp_bar.bind_stat(UnitData.StatType.MP, unit_data.stats[UnitData.StatType.MP])
 	mp_bar.fill_color = Color.INDIAN_RED
-	mp_bar.name_label.position.x = 5
-	mp_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	mp_bar.value_label.position.x -= (mp_bar.value_label.size.x + 10)
-	mp_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	# mp_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
+	_configure_stat_bar_labels(mp_bar)
 
 	ct_bar.bind_stat(UnitData.StatType.CT, unit_data.stats[UnitData.StatType.CT])
 	ct_bar.fill_color = Color.WEB_GREEN
-	ct_bar.name_label.position.x = 5
-	ct_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	ct_bar.value_label.position.x -= (ct_bar.value_label.size.x + 10)
-	ct_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	# ct_bar.value_label.grow_horizontal = GrowDirection.GROW_DIRECTION_BEGIN
+	_configure_stat_bar_labels(ct_bar)
 
 	update_ui()
+
+
+func _configure_stat_bar_labels(stat_bar: StatBar) -> void:
+	stat_bar.name_label.position.x = 5.0
+	stat_bar.name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	var value_label_width: float = stat_bar.value_label.size.x
+	stat_bar.value_label.offset_left = -(value_label_width + 5.0)
+	stat_bar.value_label.offset_right = -5.0
+	stat_bar.value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
 
 func _connect_unit_data_signals() -> void:
