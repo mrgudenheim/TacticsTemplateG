@@ -42,18 +42,18 @@ func _init(fft_texture_animation: FftMapData.TextureAnimationData = null) -> voi
 	else:
 		animation_type = AnimType.OTHER
 
-	if [1, 3].has(fft_texture_animation.anim_technique):
+	if [0x01, 0x03].has(fft_texture_animation.anim_technique):
 		anim_technique = AnimTechnique.LOOP_FORWARD
-	elif [2, 4].has(fft_texture_animation.anim_technique):
+	elif [0x02, 0x04].has(fft_texture_animation.anim_technique):
 		anim_technique = AnimTechnique.LOOP_PING_PONG
-	elif [5, 13].has(fft_texture_animation.anim_technique):
+	elif [0x05, 0x13].has(fft_texture_animation.anim_technique):
 		anim_technique = AnimTechnique.ONE_SHOT_FORWARD
-	elif [15, 0].has(fft_texture_animation.anim_technique):
+	elif [0x15, 0x00].has(fft_texture_animation.anim_technique):
 		anim_technique = AnimTechnique.ONE_SHOT_REVERSE
 	else:
 		anim_technique = AnimTechnique.OTHER
 	
-	if [0, 13, 5, 15].has(fft_texture_animation.anim_technique):
+	if [0x00, 0x13, 0x05, 0x15].has(fft_texture_animation.anim_technique):
 		is_script_animation = true
 	
 	num_frames = fft_texture_animation.num_frames
