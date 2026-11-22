@@ -47,8 +47,8 @@ func play_animations(local_map_data: MapData) -> void:
 	map_shader_material.set_shader_parameter("frame_pos", frame_positions)
 	map_shader_material.set_shader_parameter("frame_idx", frame_idxs)
 	
-	# start animations
-	var anim_fps: float = 59.0 # TODO why does 59 look too fast?
+	# start animations (frame_duration is in 1/30s ticks converted to seconds)
+	var anim_fps: float = 30.0
 	for anim_id: int in num_texture_animations:
 		var texture_animation: TextureAnimation = local_map_data.texture_animations[anim_id]
 		if texture_animation.is_script_animation:
