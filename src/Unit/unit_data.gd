@@ -692,7 +692,10 @@ func get_evade(evade_source: EvadeData.EvadeSource, evade_type: EvadeData.EvadeT
 			evade += evade_data.value
 	
 	for equip_slot: EquipmentSlot in equip_slots:
-		for evade_data: EvadeData in equip_slot.get_item().evade_datas:
+		var item: ItemData = equip_slot.get_item()
+		if item == null:
+			continue
+		for evade_data: EvadeData in item.evade_datas:
 			if (evade_data.source == evade_source 
 					and evade_data.type == evade_type
 					and evade_data.directions.has(evade_direction)):
@@ -760,16 +763,30 @@ func get_native_passive_effects(exclude_passives: PackedStringArray = []) -> Arr
 	if job_data != null:
 		native_passive_effects.append_array(job_data.get_passive_effects())
 		for ability: Ability in job_data.innate_abilities:
-			native_passive_effects.append(ability.get_passive_effect())
+			var new_passive_effect: PassiveEffect = ability.get_passive_effect()
+			if is_instance_valid(new_passive_effect):
+				native_passive_effects.append(new_passive_effect)
 	
 	for ability_slot: AbilitySlot in ability_slots:
-		native_passive_effects.append(ability_slot.get_ability().get_passive_effect())
+		var ability: Ability = ability_slot.get_ability()
+		if ability == null:
+			continue
+		var new_passive_effect: PassiveEffect = ability.get_passive_effect()
+		if is_instance_valid(new_passive_effect):
+			native_passive_effects.append(new_passive_effect)
 	
 	for equipment_slot: EquipmentSlot in equip_slots:
-		native_passive_effects.append(equipment_slot.get_item().get_passive_effect())
+		var item: ItemData = equipment_slot.get_item()
+		if item == null:
+			continue
+		var new_passive_effect: PassiveEffect = item.get_passive_effect()
+		if is_instance_valid(new_passive_effect):
+			native_passive_effects.append(new_passive_effect)
 	
 	for status: StatusEffect in current_statuses:
-		native_passive_effects.append(status.passive_effect)
+		var new_passive_effect: PassiveEffect = status.passive_effect
+		if is_instance_valid(new_passive_effect):
+			native_passive_effects.append(new_passive_effect)
 	
 	if battle_manager != null:
 		native_passive_effects.append_array(battle_manager.global_passive_effects)
@@ -936,7 +953,10 @@ func update_triggered_actions(all_passive_effects: Array[PassiveEffect]) -> void
 				triggered_action.connect_trigger(self)
 	
 	for ability_slot: AbilitySlot in ability_slots:
-		for triggered_action: TriggeredAction in ability_slot.get_ability().triggered_actions:
+		var ability: Ability = ability_slot.get_ability()
+		if ability == null:
+			continue
+		for triggered_action: TriggeredAction in ability.triggered_actions:
 			if not triggered_actions.has(triggered_action):
 				triggered_actions.append(triggered_action)
 			triggered_action.connect_trigger(self)

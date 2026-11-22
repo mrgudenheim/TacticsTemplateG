@@ -30,6 +30,7 @@ var vfx: Dictionary[String, VisualEffectData] = {}
 var shared_vfx_data: TrapEffectData
 var projectiles_gltf: Dictionary[String, Node] = {}
 var items: Dictionary[String, ItemData] = {} # [unique_name, ItemData]
+var items_by_idx: Dictionary[int, ItemData] = {}
 var status_effects: Dictionary[String, StatusEffect] = {} # [unique_name, StatusEffect]
 var jobs_data: Dictionary[String, JobData] = {} # [unique_name, JobData]
 var skillsets: Dictionary[String, Skillset] = {}
@@ -103,6 +104,7 @@ func clear_data() -> void:
 	vfx = {}
 	projectiles_gltf = {}
 	items = {} 
+	items_by_idx = {}
 	status_effects = {} 
 	jobs_data = {} 
 	actions = {} 
@@ -299,10 +301,27 @@ func get_vfx_data(unique_name: String) -> VisualEffectData:
 func get_item(unique_name: String) -> ItemData:
 	if items.has(unique_name):
 		return items[unique_name]
+	if unique_name == "":
+		return null
 	
 	var file_path: String = item_paths[unique_name]
-	items[unique_name] = ResourceLoader.load(file_path, "ItemData")
+	var loaded_item: ItemData = ResourceLoader.load(file_path, "ItemData")
+	items[unique_name] = loaded_item
+	if loaded_item != null:
+		items_by_idx[loaded_item.item_idx] = loaded_item
 	return items[unique_name]
+
+
+func get_item_by_idx(target_item_idx: int) -> ItemData:
+	if items_by_idx.has(target_item_idx):
+		return items_by_idx[target_item_idx]
+
+	for item_unique_name: String in item_paths.keys():
+		var candidate_item: ItemData = get_item(item_unique_name)
+		if candidate_item != null and candidate_item.item_idx == target_item_idx:
+			return candidate_item
+
+	return null
 
 
 func get_status_effect(unique_name: String) -> StatusEffect:
@@ -356,6 +375,8 @@ func get_triggered_action(unique_name: String) -> TriggeredAction:
 func get_passive_effect(unique_name: String) -> PassiveEffect:
 	if passive_effects.has(unique_name):
 		return passive_effects[unique_name]
+	if unique_name == "":
+		return null
 	
 	var file_path: String = passive_effect_paths[unique_name]
 	passive_effects[unique_name] = ResourceLoader.load(file_path, "PassiveEffect")
@@ -365,6 +386,8 @@ func get_passive_effect(unique_name: String) -> PassiveEffect:
 func get_ability(unique_name: String) -> Ability:
 	if abilities.has(unique_name):
 		return abilities[unique_name]
+	if unique_name == "":
+		return null
 	
 	var file_path: String = ability_paths[unique_name]
 	abilities[unique_name] = ResourceLoader.load(file_path, "Ability")
