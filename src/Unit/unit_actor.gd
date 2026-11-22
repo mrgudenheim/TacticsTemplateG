@@ -25,6 +25,7 @@ var unit_data: UnitData
 @export var icon2: Sprite3D
 @export var icon_cycle_time: float = 1.25
 var is_cycling_status_icons: bool = false
+var _status_icon_cycle_generation: int = 0
 
 @export var tile_highlights: Node3D
 var can_move: bool = true
@@ -474,10 +475,26 @@ func update_primary_weapon_visuals(primary_weapon: ItemData) -> void:
 	primary_weapon_assigned.emit(primary_weapon.unique_name)
 
 
+func _enter_tree() -> void:
+	if is_node_ready() and not is_cycling_status_icons:
+		start_cycle_status_icons()
+
+
+func _exit_tree() -> void:
+	_status_icon_cycle_generation += 1
+	is_cycling_status_icons = false
+	if is_queued_for_deletion() and unit_data != null:
+		_disconnect_unit_data_signals()
+		if unit_data.unit_actor == self:
+			unit_data.unit_actor = null
+
+
 func start_cycle_status_icons() -> void:
+	_status_icon_cycle_generation += 1
+	var cycle_generation: int = _status_icon_cycle_generation
 	var status_idx: int = 0
 	is_cycling_status_icons = true
-	while is_cycling_status_icons:
+	while is_cycling_status_icons and is_inside_tree() and cycle_generation == _status_icon_cycle_generation:
 		if unit_data != null:
 			var status: StatusEffect = null
 			if not unit_data.current_statuses.is_empty():
@@ -489,6 +506,8 @@ func start_cycle_status_icons() -> void:
 				status_idx = 0
 		
 		await Utilities.wait_seconds(icon_cycle_time)
+		if not is_instance_valid(self) or not is_inside_tree() or cycle_generation != _status_icon_cycle_generation:
+			break
 
 
 func set_sprite_by_file_name(new_spritesheet_name: String) -> void:
