@@ -73,5 +73,5 @@ func get_vector():
 			return Vector2i(roundi(x_spinbox.value), roundi(y_spinbox.value))
 
 
-func changed() -> void:
+func changed(_value: float = 0.0) -> void:
 	vector_changed.emit(get_vector())
