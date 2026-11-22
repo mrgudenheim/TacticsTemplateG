@@ -102,11 +102,13 @@ func clear_data() -> void:
 	maps_data = {}
 	map_tile_meshes = {}
 	vfx = {}
+	shared_vfx_data = null
 	projectiles_gltf = {}
 	items = {} 
 	items_by_idx = {}
 	status_effects = {} 
 	jobs_data = {} 
+	skillsets = {}
 	actions = {} 
 	triggered_actions = {}
 	passive_effects = {} 
@@ -282,6 +284,7 @@ func get_map_data(unique_name: String) -> MapData:
 	var new_map_data: MapData = ResourceLoader.load(file_path, "MapData")
 	var mesh_instance: MeshInstance3D = get_map_gltf_mesh(new_map_data.unique_name)
 	new_map_data.mesh = mesh_instance.mesh
+	mesh_instance.queue_free()
 	#new_map_data.flag_polygons_to_hide()
 	maps_data[unique_name] = new_map_data
 	return maps_data[unique_name]
