@@ -491,12 +491,6 @@ func start_cycle_status_icons() -> void:
 		await Utilities.wait_seconds(icon_cycle_time)
 
 
-func set_sprite_by_file_idx(new_sprite_file_idx: int) -> void:
-	var spr: Spr = RomReader.sprs[new_sprite_file_idx]
-	var spr_name: String = spr.file_name.to_lower().trim_suffix(".spr")
-	unit_data.set_sprite_by_file_name(spr_name)
-
-
 func set_sprite_by_file_name(new_spritesheet_name: String) -> void:
 	unit_data.spritesheet_file_name = new_spritesheet_name
 	var shp: Shp = GameData.get_spritesheet_data(new_spritesheet_name).get_shp()
@@ -540,11 +534,6 @@ func set_sprite_by_file_name(new_spritesheet_name: String) -> void:
 
 	if animation_changed:
 		animation_manager.on_animation_changed()
-
-
-func set_sprite_by_id(new_sprite_id: int) -> void:
-	var new_sprite_file_idx: int = RomReader.spr_id_file_idxs[new_sprite_id]
-	set_sprite_by_file_idx(new_sprite_file_idx)
 
 
 func set_sprite_by_job(new_job_name: String) -> void:
