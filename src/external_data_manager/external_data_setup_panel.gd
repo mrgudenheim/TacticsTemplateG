@@ -99,19 +99,21 @@ func export_data() -> void:
 	rom_path_line_edit.editable = false
 	destination_path_line_edit.editable = false
 	
-	RomReader.message.connect(show_export_message)
+	var rom_reader: RomReader = RomReader.new()
+	add_child(rom_reader)
+	rom_reader.message.connect(show_export_message)
 
 	show_export_message("Loading ROM...")
 	await get_tree().process_frame
 	await get_tree().process_frame # waiting for two frames is needed for UI to update?
-	RomReader.on_load_rom_dialog_file_selected(GameData.external_data_paths["ROM_PATH"])
+	rom_reader.on_load_rom_dialog_file_selected(GameData.external_data_paths["ROM_PATH"])
 	
 	var start_time: int = Time.get_ticks_msec()
-	await RomReader.export_data(GameData.external_data_paths["EXPORT_PATH"])
+	await rom_reader.export_data(GameData.external_data_paths["EXPORT_PATH"])
 	var export_time: String = "(%.2f sec)" % ((Time.get_ticks_msec() - start_time) / 1000.0)
 	push_warning("data export complete " + export_time + ": " + GameData.external_data_paths["EXPORT_PATH"])
 
-	RomReader.message.disconnect(show_export_message)
+	rom_reader.message.disconnect(show_export_message)
 	export_data_button.text = _default_export_button_text
 	
 	export_data_button.disabled = false

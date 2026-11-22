@@ -19,7 +19,6 @@ config/icon="uid://b05fn7pqo1rrn"
 
 [autoload]
 
-RomReader="*res://src/external_data_manager/rom_reader.gd"
 Raycaster="*res://src/utilities/raycaster.gd"
 Utilities="*res://src/utilities/utilities.gd"
 GameData="*uid://dswmqkavcf0yp"

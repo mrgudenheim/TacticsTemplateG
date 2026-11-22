@@ -76,6 +76,8 @@ var max_bytes: int = 0:
 		max_bytes = value
 		update_info_text(current_bytes, max_bytes, animations_bytes_text)
 
+var rom_reader: RomReader
+
 
 func _ready() -> void:
 	animation_id_spinbox.value_changed.connect(animation_name_options.select)
@@ -106,8 +108,8 @@ func update_info_text(current: int, max_value: int, ui: Label) -> void:
 	var type: String = seq_options.get_item_text(seq_options.selected)
 	if current > max_value:
 		ui.label_settings.font_color = Color.DARK_RED
-	elif RomReader.file_records.has(type):
-		if current == RomReader.file_records[type].size:
+	elif rom_reader != null and rom_reader.file_records.has(type):
+		if current == rom_reader.file_records[type].size:
 			ui.label_settings.font_color = Color.LIME_GREEN
 		else:
 			ui.label_settings.font_color = Color.WHITE

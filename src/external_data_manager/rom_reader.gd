@@ -1,4 +1,4 @@
-#class_name RomReader
+class_name RomReader
 extends Node
 
 signal rom_loaded
@@ -116,7 +116,7 @@ func process_rom() -> void:
 	var section_start: int = Time.get_ticks_msec()
 	var total_start: int = section_start
 
-	RomReader.spr_id_file_idxs.resize(NUM_SPRITESHEETS)
+	spr_id_file_idxs.resize(NUM_SPRITESHEETS)
 
 	# http://wiki.osdev.org/ISO_9660#Directories
 	process_file_records(DIRECTORY_DATA_SECTORS_ROOT)
@@ -125,46 +125,46 @@ func process_rom() -> void:
 	process_frame_bin()
 	section_start = _profile_section("process_frame_bin", section_start)
 
-	fft_text.init_text()
+	fft_text.init_text(self)
 	section_start = _profile_section("fft_text.init_text", section_start)
 
-	scus_data.init_from_scus()
+	scus_data.init_from_scus(self)
 	section_start = _profile_section("scus_data.init_from_scus", section_start)
 
-	battle_bin_data.init_from_battle_bin()
+	battle_bin_data.init_from_battle_bin(self)
 	section_start = _profile_section("battle_bin_data.init_from_battle_bin", section_start)
 
-	wldcore_data.init_from_wldcore()
+	wldcore_data.init_from_wldcore(self)
 	section_start = _profile_section("wldcore_data.init_from_wldcore", section_start)
 
-	attack_out_data.init_from_attack_out()
+	attack_out_data.init_from_attack_out(self)
 	section_start = _profile_section("attack_out_data.init_from_attack_out", section_start)
 
 	cache_associated_files()
 	section_start = _profile_section("cache_associated_files", section_start)
 
-	trap_effect_data.init_from_rom()
+	trap_effect_data.init_from_rom(self)
 	section_start = _profile_section("trap_effect_data.init_from_rom", section_start)
 
 	for map_idx: int in maps_array.size():
 		var map_data: FftMapData = maps_array[map_idx]
 		map_data.unique_name = map_data.file_name.trim_suffix(".GNS")
-		if map_idx != 0 and map_idx <= RomReader.fft_text.map_names.size():
-			map_data.display_name = RomReader.fft_text.map_names[map_idx - 1]
+		if map_idx != 0 and map_idx <= fft_text.map_names.size():
+			map_data.display_name = fft_text.map_names[map_idx - 1]
 			map_data.unique_name += " " + map_data.display_name
 		map_data.unique_name = map_data.unique_name.to_snake_case().remove_char('"'.unicode_at(0))
 		maps[map_data.unique_name] = map_data
 	section_start = _profile_section("map_naming", section_start)
 
 	for ability_id: int in NUM_ABILITIES:
-		var new_fft_ability: FftAbilityData = FftAbilityData.new(ability_id)
+		var new_fft_ability: FftAbilityData = FftAbilityData.new(ability_id, self)
 		fft_abilities.append(new_fft_ability)
 		var new_ability: Ability = new_fft_ability.create_ability()
-		new_ability.add_to_global_list()
+		FftRegistryHelper.register_unique(abilities, new_ability, new_ability.display_name, "Ability")
 
 	for fft_ability: FftAbilityData in fft_abilities:
 		if fft_ability.ability_type == FftAbilityData.AbilityType.NORMAL:
-			fft_ability.set_action()
+			fft_ability.set_action(self)
 	section_start = _profile_section("abilities (512 + set_action)", section_start)
 
 	# must be after fft_abilities to set secondary actions
@@ -173,7 +173,7 @@ func process_rom() -> void:
 		items_array[id] = ItemData.new(id)
 	section_start = _profile_section("items (254)", section_start)
 
-	scus_data.init_statuses()
+	scus_data.init_statuses(self)
 	section_start = _profile_section("scus_data.init_statuses", section_start)
 
 	for job_data: JobData in jobs_data.values():
@@ -192,7 +192,7 @@ func process_rom() -> void:
 	add_entds("ENTD4.ENT")
 	section_start = _profile_section("add_entds (4 files)", section_start)
 
-	var wldcore_scenarios: Array[Scenario] = wldcore_data.get_all_scenarios()
+	var wldcore_scenarios: Array[Scenario] = wldcore_data.get_all_scenarios(self)
 	for new_scenario: Scenario in wldcore_scenarios:
 		var number: int = 1
 		var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
@@ -201,9 +201,9 @@ func process_rom() -> void:
 			new_unique_name = new_scenario.unique_name + ("_%02d" % number)
 		new_scenario.unique_name = new_unique_name
 
-		RomReader.scenarios[new_scenario.unique_name] = new_scenario
+		scenarios[new_scenario.unique_name] = new_scenario
 
-	var attack_out_scenarios: Array[Scenario] = attack_out_data.get_unique_scenarios()
+	var attack_out_scenarios: Array[Scenario] = attack_out_data.get_unique_scenarios(self)
 	for new_scenario: Scenario in attack_out_scenarios:
 		var number: int = 1
 		var new_unique_name: String = new_scenario.unique_name + ("_%02d" % number)
@@ -212,7 +212,7 @@ func process_rom() -> void:
 			new_unique_name = new_scenario.unique_name + ("_%02d" % number)
 		new_scenario.unique_name = new_unique_name
 
-		RomReader.scenarios[new_scenario.unique_name] = new_scenario
+		scenarios[new_scenario.unique_name] = new_scenario
 	section_start = _profile_section("scenario_extraction", section_start)
 
 	# for status_: int in status_effects.size():
@@ -355,15 +355,15 @@ func cache_associated_files() -> void:
 		match file_name.get_extension():
 			"SPR":
 				var spr: Spr = sprs[type_index]
-				spr.set_data(get_file_data(file_name))
+				spr.set_data(self, get_file_data(file_name))
 				if file_name != "WEP.SPR":
-					spr.set_spritesheet_data(spr_file_name_to_id[file_name])
+					spr.set_spritesheet_data(spr_file_name_to_id[file_name], self)
 			"SHP":
 				var shp: Shp = shps_array[type_index]
-				shp.set_data_from_shp_bytes(get_file_data(file_name))
+				shp.set_data_from_shp_bytes(get_file_data(file_name), self)
 			"SEQ":
 				var seq: Seq = seqs_array[type_index]
-				seq.set_data_from_seq_bytes(get_file_data(file_name))
+				seq.set_data_from_seq_bytes(get_file_data(file_name), self)
 	
 	# getting effect / weapon trail / glint
 	var eff_spr_name: String = "EFF.SPR"
@@ -373,7 +373,7 @@ func cache_associated_files() -> void:
 	eff_spr_record.name = eff_spr_name
 	eff_spr_record.type_index = sprs.size()
 	file_records[eff_spr_name] = eff_spr_record
-	eff_spr.set_data(get_file_data("WEP.SPR").slice(0x8200, 0x10400))
+	eff_spr.set_data(self, get_file_data("WEP.SPR").slice(0x8200, 0x10400))
 	eff_spr.shp_name = "EFF1.SHP"
 	eff_spr.seq_name = "EFF1.SEQ"
 	sprs.append(eff_spr)
@@ -400,7 +400,7 @@ func cache_associated_files() -> void:
 	item_record.type_index = sprs.size()
 	file_records[item_record.name] = item_record
 	
-	var item_spr_data: PackedByteArray = RomReader.get_file_data(item_record.name)
+	var item_spr_data: PackedByteArray = get_file_data(item_record.name)
 	var item_spr: Spr = Spr.new(item_record.name)
 	item_spr.height = 256
 	item_spr.set_palette_data(item_spr_data.slice(0x8000, 0x8200))
@@ -632,10 +632,10 @@ func write_spritesheet_region_data(seq_index: int, shp_index: int) -> void:
 	var shp: Shp = shps_array[shp_index] # 0 - arute, 1 - cyoko, 4 - kanzen, 5 - mon, 7 - type1, 8 - type2
 
 	if not seq.is_initialized:
-		seq.set_data_from_seq_bytes(RomReader.get_file_data(seq.file_name))
+		seq.set_data_from_seq_bytes(get_file_data(seq.file_name), self)
 
 	if not shp.is_initialized:
-		shp.set_data_from_shp_bytes(RomReader.get_file_data(shp.file_name))
+		shp.set_data_from_shp_bytes(get_file_data(shp.file_name), self)
 	
 	for seq_ptr_index: int in seq.sequence_pointers.size():
 		var seq_idx: int = seq.sequence_pointers[seq_ptr_index]
@@ -811,7 +811,7 @@ func export_data(save_path: String) -> void:
 	await export_maps(save_path) # needs to be before data tables so maps will be initialized
 	await export_data_tables(save_path)
 	await export_vfx(save_path)
-	ContentValidator.validate_rom_reader_exports()
+	ContentValidator.validate_rom_reader_exports(self)
 
 
 func export_unit_spritesheets(save_path: String) -> void:
@@ -828,9 +828,9 @@ func export_unit_spritesheets(save_path: String) -> void:
 		last_frame_time = await keep_60_fps(last_frame_time, "Exporting spritesheet: " + unit_spr.file_name)
 		
 		if not unit_spr.is_initialized:
-			unit_spr.set_data()
-			var job_using_spr: JobData = jobs_data.values()[jobs_data.values().find_custom(func(job_data: JobData) -> bool: return RomReader.sprs[RomReader.spr_id_file_idxs[job_data.sprite_id]] == unit_spr)]
-			unit_spr.set_spritesheet_data(job_using_spr.sprite_id)
+			unit_spr.set_data(self, get_file_data(unit_spr.file_name))
+			var job_using_spr: JobData = jobs_data.values()[jobs_data.values().find_custom(func(job_data: JobData) -> bool: return sprs[spr_id_file_idxs[job_data.sprite_id]] == unit_spr)]
+			unit_spr.set_spritesheet_data(job_using_spr.sprite_id, self)
 
 		var spritesheet_data: UnitSpritesheetData = UnitSpritesheetData.new(unit_spr)
 		var spritesheet_data_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name.to_lower() + ".unit_spritesheet.tres")
@@ -843,7 +843,7 @@ func export_unit_spritesheets(save_path: String) -> void:
 		index_image.save_webp(unit_spritesheet_texture_webp_file_path)
 		
 		for palette_idx: int in 8:
-			var grid_image: Image = unit_spr.create_frame_grid_texture(palette_idx).get_image()
+			var grid_image: Image = unit_spr.create_frame_grid_texture(self, palette_idx).get_image()
 			var unit_grid_spritesheet_texture_webp_file_path: String = spritesheet_path.path_join(spritesheet_data.unique_name.to_lower() + "_" + str(palette_idx) + ".grid_texture.webp")
 			grid_image.save_webp(unit_grid_spritesheet_texture_webp_file_path)
 
@@ -949,8 +949,8 @@ func export_data_tables(save_path: String) -> void:
 		var map_chunk: MapChunk = scenario.map_chunks[0]
 		var map_chunk_data: FftMapData = maps[map_chunk.unique_name]
 		scenario.units_data = Scenario.transform_units_data_tile_location(scenario.units_data, map_chunk_data.terrain_tiles, Vector2(-1, 1))
-		scenario.background_gradient_bottom = RomReader.maps[scenario.map_chunks[0].unique_name].background_gradient_bottom
-		scenario.background_gradient_top = RomReader.maps[scenario.map_chunks[0].unique_name].background_gradient_top
+		scenario.background_gradient_bottom = maps[scenario.map_chunks[0].unique_name].background_gradient_bottom
+		scenario.background_gradient_top = maps[scenario.map_chunks[0].unique_name].background_gradient_top
 		GameData.export_resource(scenario, save_path)
 	for skillset: Skillset in scus_data.skillsets_data:
 		var skillset_path: String = save_path.path_join("/skillsets/")
@@ -969,25 +969,7 @@ func export_data_tables(save_path: String) -> void:
 			push_warning("error saving skillset: " + error_string(error))
 	
 	var initial_unit_data: InitialUnitData = InitialUnitData.new()
-	var initial_unit_raw_stats: Array[Dictionary] = []
-	var stat_name_lookup: Dictionary[String, int] = {
-		"HP_MAX" : 0,
-		"MP_MAX" : 1,
-		"SPEED" : 2,
-		"PHYSICAL_ATTACK" : 3,
-		"MAGIC_ATTACK" : 4,
-	}
-	for stat_basis_name: String in UnitData.StatBasis.keys():
-		var initial_stats: Dictionary[String, Vector2i] = {}
-		for stat_name: String in stat_name_lookup.keys():
-			var stat_idx: int = stat_name_lookup[stat_name]
-			
-			var stat_range: Vector2i = Vector2i.ZERO
-			stat_range.x = RomReader.scus_data.unit_base_datas[UnitData.StatBasis[stat_basis_name]][stat_idx] * 16384
-			stat_range.y = stat_range.x + (RomReader.scus_data.unit_base_stats_mods[UnitData.StatBasis[stat_basis_name]][stat_idx] * 16384)
-			initial_stats[stat_name] = stat_range
-		initial_unit_raw_stats.append(initial_stats)
-	initial_unit_data.initial_unit_raw_stats = initial_unit_raw_stats
+	initial_unit_data.initial_unit_raw_stats = build_initial_unit_raw_stats()
 
 	var initial_unit_equipment: Array[Dictionary] = []
 	var equipment_slot_name_lookup: Dictionary[String, int] = {
@@ -1003,10 +985,10 @@ func export_data_tables(save_path: String) -> void:
 		var initial_equipment: Dictionary[String, String] = {}
 		for slot_name: String in equipment_slot_name_lookup.keys():
 			var slot_idx: int = equipment_slot_name_lookup[slot_name]
-			var item_idx: int = RomReader.scus_data.unit_base_datas[UnitData.StatBasis[stat_basis_name]][slot_idx]
-			var item_name: String = RomReader.items_array[0].unique_name
+			var item_idx: int = scus_data.unit_base_datas[UnitData.StatBasis[stat_basis_name]][slot_idx]
+			var item_name: String = items_array[0].unique_name
 			if item_idx != 255:
-				item_name = RomReader.items_array[item_idx].unique_name
+				item_name = items_array[item_idx].unique_name
 			initial_equipment[slot_name] = item_name
 		initial_unit_equipment.append(initial_equipment)
 	initial_unit_data.initial_unit_equipment = initial_unit_equipment
@@ -1015,6 +997,27 @@ func export_data_tables(save_path: String) -> void:
 	error = ResourceSaver.save(initial_unit_data, initial_unit_data_file_path)
 	if error != Error.OK:
 		push_warning("error saving unit initial_unit_data: " + error_string(error))
+
+
+func build_initial_unit_raw_stats() -> Array[Dictionary]:
+	var initial_unit_raw_stats: Array[Dictionary] = []
+	var stat_name_lookup: Dictionary[String, int] = {
+		"HP_MAX" : 0,
+		"MP_MAX" : 1,
+		"SPEED" : 2,
+		"PHYSICAL_ATTACK" : 3,
+		"MAGIC_ATTACK" : 4,
+	}
+	for stat_basis_name: String in UnitData.StatBasis.keys():
+		var initial_stats: Dictionary[String, Vector2i] = {}
+		for stat_name: String in stat_name_lookup.keys():
+			var stat_idx: int = stat_name_lookup[stat_name]
+			var stat_range: Vector2i = Vector2i.ZERO
+			stat_range.x = scus_data.unit_base_datas[UnitData.StatBasis[stat_basis_name]][stat_idx] * 16384
+			stat_range.y = stat_range.x + (scus_data.unit_base_stats_mods[UnitData.StatBasis[stat_basis_name]][stat_idx] * 16384)
+			initial_stats[stat_name] = stat_range
+		initial_unit_raw_stats.append(initial_stats)
+	return initial_unit_raw_stats
 
 
 func export_text(save_path: String) -> void:
@@ -1041,7 +1044,7 @@ func export_unit_animations(save_path: String) -> void:
 	var error: Error
 	for shp: Shp in shps.values():
 		if not shp.is_initialized:
-			shp.set_data_from_shp_bytes(get_file_data(shp.file_name))
+			shp.set_data_from_shp_bytes(get_file_data(shp.file_name), self)
 
 		var shp_file_path: String = animation_dir_path.path_join(shp.file_name.to_lower().trim_suffix(".shp") + ".shp.tres")
 		error = ResourceSaver.save(shp, shp_file_path)
@@ -1050,7 +1053,7 @@ func export_unit_animations(save_path: String) -> void:
 
 	for seq: Seq in seqs.values():
 		if not seq.is_initialized:
-			seq.set_data_from_seq_bytes(get_file_data(seq.file_name))
+			seq.set_data_from_seq_bytes(get_file_data(seq.file_name), self)
 
 		var seq_file_path: String = animation_dir_path.path_join(seq.file_name.to_lower().trim_suffix(".seq") + ".seq.tres")
 		error = ResourceSaver.save(seq, seq_file_path)
@@ -1081,7 +1084,7 @@ func export_maps(save_path: String) -> void:
 func export_map(save_path: String, fft_map_data: FftMapData, export_full_color_texture: bool = false) -> void:
 	# var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3(-1.0, -1.0, 1.0), Vector3(0, -FftMapData.HEIGHT_SCALE, 0))
 	# mirror map so positive y is up, mirror x so it ends up looking un-mirrored
-	var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3(-1.0, -1.0, 1.0))
+	var new_map_node: MapChunkNodes = fft_map_data.get_map_scene(Vector3(-1.0, -1.0, 1.0), Vector3.ZERO, 0.0, self)
 	var new_map_mesh: MeshInstance3D = new_map_node.mesh_instance
 	GltfManager.save_node(new_map_mesh, save_path, fft_map_data.unique_name + ".map.glb")
 	
@@ -1111,7 +1114,7 @@ func export_vfx(save_path: String) -> void:
 	for vfx_file: VisualEffectData in vfx:
 		last_frame_time = await keep_60_fps(last_frame_time, "Exporting vfx: " + vfx_file.file_name)
 		
-		vfx_file.init_from_file()
+		vfx_file.init_from_file(self)
 		if not vfx_file.is_initialized: # skip empty vfx files
 			continue
 
@@ -1147,7 +1150,7 @@ func export_vfx(save_path: String) -> void:
 		trap_effect_data.trap_spr.get_rgba8_image().save_webp(full_color_texture_webp_file_path)
 
 	# projectiles
-	var models_data: Dictionary = RomReader.battle_bin_data.projectile_model_data
+	var models_data: Dictionary = battle_bin_data.projectile_model_data
 	for model_id: int in models_data:
 		var verts: Array[Vector3] = models_data[model_id]["vertices"]
 		var faces: Array = models_data[model_id]["faces"]

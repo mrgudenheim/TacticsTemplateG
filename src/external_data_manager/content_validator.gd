@@ -9,25 +9,25 @@ const IGNORED_PLACEHOLDER_NAMES: PackedStringArray = [
 ]
 
 
-static func validate_rom_reader_exports() -> Array[String]:
+static func validate_rom_reader_exports(rom_reader: RomReader) -> Array[String]:
 	var skillsets_by_name: Dictionary[String, Skillset] = {}
-	for skillset_item: Skillset in RomReader.scus_data.skillsets_data:
+	for skillset_item: Skillset in rom_reader.scus_data.skillsets_data:
 		if skillset_item != null and not IGNORED_PLACEHOLDER_NAMES.has(skillset_item.unique_name):
 			skillsets_by_name[skillset_item.unique_name] = skillset_item
 
 	var valid_vfx_names: Dictionary[String, bool] = {}
-	for vfx_item: VisualEffectData in RomReader.vfx:
+	for vfx_item: VisualEffectData in rom_reader.vfx:
 		if vfx_item != null and vfx_item.is_initialized and not vfx_item.unique_name.is_empty():
 			valid_vfx_names[vfx_item.unique_name] = true
 
 	var warnings: Array[String] = _validate_collections(
-		RomReader.status_effects,
-		RomReader.passive_effects,
-		RomReader.actions,
-		RomReader.triggered_actions,
-		RomReader.abilities,
-		RomReader.items,
-		RomReader.jobs_data,
+		rom_reader.status_effects,
+		rom_reader.passive_effects,
+		rom_reader.actions,
+		rom_reader.triggered_actions,
+		rom_reader.abilities,
+		rom_reader.items,
+		rom_reader.jobs_data,
 		skillsets_by_name,
 		valid_vfx_names
 	)

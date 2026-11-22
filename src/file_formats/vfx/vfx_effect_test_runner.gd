@@ -19,10 +19,10 @@ func _ready() -> void:
 
 	print("[VFX_TEST] Running effect E%03d" % effect_index)
 
-	if RomReader.is_ready:
+	if GameData.is_ready:
 		_start()
 	else:
-		RomReader.rom_loaded.connect(_start, CONNECT_ONE_SHOT)
+		GameData.data_indexed.connect(_start, CONNECT_ONE_SHOT)
 
 
 func _start() -> void:
@@ -40,20 +40,17 @@ func _start() -> void:
 				target_world_pos = tile.get_world_position()
 
 	# Load and play effect
-	if effect_index < 0 or effect_index >= RomReader.vfx.size():
-		print("[VFX_TEST] Effect index %d out of range" % effect_index)
+	var vfx_unique_name: String = "e_%03d" % effect_index
+	if not GameData.vfx_data_paths.has(vfx_unique_name):
+		print("[VFX_TEST] Effect %s not found in GameData" % vfx_unique_name)
 		get_tree().quit()
 		return
 
-	var vfx_data: VisualEffectData = RomReader.vfx[effect_index]
+	var vfx_data: VisualEffectData = GameData.get_vfx_data(vfx_unique_name)
 	if vfx_data == null:
 		print("[VFX_TEST] Effect %d is null" % effect_index)
 		get_tree().quit()
 		return
-
-	# Ensure effect data is loaded
-	if not vfx_data.is_initialized:
-		vfx_data.init_from_file()
 
 	# Print effect metadata
 	print("[VFX_TEST] Emitters: %d, Curves: %d, Framesets: %d" % [

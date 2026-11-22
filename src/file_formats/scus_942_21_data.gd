@@ -175,8 +175,8 @@ var terrain_geomancy_length: int = 0x01 # geomancy ability id
 var terrain_geomancy: Array[int] = [] # idx is terrain type, entry is ability id
 
 
-func init_from_scus() -> void:
-	var scus_bytes: PackedByteArray = RomReader.get_file_data("SCUS_942.21")
+func init_from_scus(rom_reader: RomReader) -> void:
+	var scus_bytes: PackedByteArray = rom_reader.get_file_data("SCUS_942.21")
 	
 	# status effect data https://ffhacktics.com/wiki/SCUS_942.21_Data_Tables
 	# status effects need to be loaded first to be referenced by other data
@@ -191,18 +191,18 @@ func init_from_scus() -> void:
 		new_status_effect.status_id = id
 		status_effects[id] = new_status_effect
 		
-		if RomReader.battle_bin_data.status_colors.has(id):
-			var r: int = RomReader.battle_bin_data.status_colors[id][0]
-			var g: int = RomReader.battle_bin_data.status_colors[id][1]
-			var b: int = RomReader.battle_bin_data.status_colors[id][2]
+		if rom_reader.battle_bin_data.status_colors.has(id):
+			var r: int = rom_reader.battle_bin_data.status_colors[id][0]
+			var g: int = rom_reader.battle_bin_data.status_colors[id][1]
+			var b: int = rom_reader.battle_bin_data.status_colors[id][2]
 			new_status_effect.shading_color = Color8(r, g, b)
-			new_status_effect.shading_type = RomReader.battle_bin_data.status_colors[id][3]
+			new_status_effect.shading_type = rom_reader.battle_bin_data.status_colors[id][3]
 		
-		if RomReader.battle_bin_data.status_modulate_colors.has(id):
-			new_status_effect.modulation_color = RomReader.battle_bin_data.status_modulate_colors[id]
+		if rom_reader.battle_bin_data.status_modulate_colors.has(id):
+			new_status_effect.modulation_color = rom_reader.battle_bin_data.status_modulate_colors[id]
 		
-		if RomReader.battle_bin_data.status_idle_animations.has(id):
-			new_status_effect.idle_animation_id = RomReader.battle_bin_data.status_idle_animations[id]
+		if rom_reader.battle_bin_data.status_idle_animations.has(id):
+			new_status_effect.idle_animation_id = rom_reader.battle_bin_data.status_idle_animations[id]
 		
 		
 	
@@ -241,8 +241,8 @@ func init_from_scus() -> void:
 	var unit_skillsets_bytes: PackedByteArray = scus_bytes.slice(skillsets_start, skillsets_start + (num_entries * entry_size))
 	for skillset_id: int in num_entries:
 		var skillset_data: Skillset = Skillset.new()
-		skillset_data.display_name = RomReader.fft_text.skillset_names[skillset_id]
-		skillset_data.description = RomReader.fft_text.skillset_descriptions[skillset_id]
+		skillset_data.display_name = rom_reader.fft_text.skillset_names[skillset_id]
+		skillset_data.description = rom_reader.fft_text.skillset_descriptions[skillset_id]
 		var new_unique_name: String = skillset_data.display_name.to_snake_case()
 		var num: int = 1
 		var modified_unique_name: String = new_unique_name
@@ -282,7 +282,7 @@ func init_from_scus() -> void:
 	var monster_skillsets_bytes: PackedByteArray = scus_bytes.slice(monster_skillsets_start, monster_skillsets_start + (num_entries * entry_size))
 	for skillset_id: int in num_entries:
 		var skillset_data: Skillset = Skillset.new()
-		skillset_data.display_name = RomReader.jobs_data.values()[skillset_id + 0x5e].display_name # set skillset name to monster job name
+		skillset_data.display_name = rom_reader.jobs_data.values()[skillset_id + 0x5e].display_name # set skillset name to monster job name
 		skillset_data.description = "Used by " + skillset_data.display_name + " monster"
 		var new_unique_name: String = skillset_data.display_name.to_snake_case()
 		var num: int = 1
@@ -462,14 +462,15 @@ func init_from_scus() -> void:
 		terrain_geomancy[byte_idx] = terrain_geomancy_bytes.decode_u8(byte_idx)
 
 
-func init_statuses() -> void:
+func init_statuses(rom_reader: RomReader) -> void:
 	# https://ffhacktics.com/wiki/Target_XA_affecting_Statuses_(Physical)
 	# https://ffhacktics.com/wiki/Target%27s_Status_Affecting_XA_(Magical)
 	# https://ffhacktics.com/wiki/Evasion_Changes_due_to_Statuses
 	# evade also affected by transparent, concentrate, dark or confuse, on user
 
 	for idx: int in status_effects.size():
-		status_effects[idx].ai_score_formula.values[0] = RomReader.battle_bin_data.ai_status_priorities[idx] / 128.0
+		status_effects[idx].ai_score_formula.values[0] = rom_reader.battle_bin_data.ai_status_priorities[idx] / 128.0
+		status_effects[idx].duration_icons = rom_reader.battle_bin_data.status_counter_rects.duplicate()
 	
 	# haste
 	# status_effects[28].passive_effect.ct_gain_modifier.value_formula.values = [1.5]
@@ -564,10 +565,10 @@ func init_statuses() -> void:
 	status_effects[21].other_type_index = 0
 	# blood suck
 	status_effects[13].passive_effect.ai_strategy = UnitAi.Strategy.BEST
-	status_effects[13].passive_effect.added_actions = [RomReader.fft_abilities[0x0c8].ability_action] # blood suck action
+	status_effects[13].passive_effect.added_actions = [rom_reader.fft_abilities[0x0c8].ability_action] # blood suck action
 	status_effects[13].passive_effect_name = status_effects[13].unique_name + "_status"
 	status_effects[13].passive_effect.unique_name = status_effects[13].passive_effect_name
-	RomReader.fft_abilities[0x0c8].ability_action.status_prevents_use_any.erase("blood_suck") # can use blood suck
+	rom_reader.fft_abilities[0x0c8].ability_action.status_prevents_use_any.erase("blood_suck") # can use blood suck
 	
 	# faith
 	status_effects[32].passive_effect.stat_modifiers[UnitData.StatType.FAITH] = Modifier.new("100.0", Modifier.ModifierType.SET)
@@ -603,12 +604,12 @@ func init_statuses() -> void:
 	status_effects[16].passive_effect.unique_name = status_effects[16].passive_effect_name
 	
 	# frog
-	status_effects[22].passive_effect.added_actions = [RomReader.fft_abilities[0x16f].ability_action] # frog attack action
+	status_effects[22].passive_effect.added_actions = [rom_reader.fft_abilities[0x16f].ability_action] # frog attack action
 	status_effects[22].spritesheet_file_name = "other"
 	status_effects[22].palette_idx_offset = 5 # frog is actually palettes 5-9 depending on original palette
 	status_effects[22].other_type_index = 1
-	RomReader.fft_abilities[0x16f].ability_action.status_prevents_use_any.erase("frog") # can use frog attack
-	RomReader.fft_abilities[0x01d].ability_action.status_prevents_use_any.erase("frog") # can use Frog
+	rom_reader.fft_abilities[0x16f].ability_action.status_prevents_use_any.erase("frog") # can use frog attack
+	rom_reader.fft_abilities[0x01d].ability_action.status_prevents_use_any.erase("frog") # can use Frog
 	status_effects[22].passive_effect_name = status_effects[22].unique_name + "_status"
 	status_effects[22].passive_effect.unique_name = status_effects[22].passive_effect_name
 	

@@ -55,7 +55,7 @@ var delayed_action: ActionInstance # charging
 
 @export var icon_rects: Array[Rect2i] = []
 @export var num_icon_frames: int = 1
-@export var duration_icons: Array[Rect2i] = RomReader.battle_bin_data.status_counter_rects
+@export var duration_icons: Array[Rect2i] = []
 
 @export var idle_animation_id: int = -1
 

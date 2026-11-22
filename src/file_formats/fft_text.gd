@@ -116,11 +116,11 @@ var unit_names_list: PackedStringArray = []
 var unit_names_list_filtered: PackedStringArray = []
 
 
-func init_text() -> void:
-	init_text_from_file("BATTLE.BIN")
-	init_text_from_file("WORLD.LZW")
-	init_text_from_file("HELP.LZW")
-	init_text_from_file("ATCHELP.LZW")
+func init_text(rom_reader: RomReader) -> void:
+	init_text_from_file("BATTLE.BIN", rom_reader)
+	init_text_from_file("WORLD.LZW", rom_reader)
+	init_text_from_file("HELP.LZW", rom_reader)
+	init_text_from_file("ATCHELP.LZW", rom_reader)
 	
 	job_names = battle_text.text_arrays[BattleBinTextSections.JOB_NAMES]
 	job_desriptions = attack_help_text.text_arrays[AttackHelpLzwSections.JOB_DESCRIPTIONS]
@@ -128,7 +128,7 @@ func init_text() -> void:
 	skillset_descriptions = attack_help_text.text_arrays[HelpLzwSections.SKILLSET_DESCRIPTIONS]
 	ability_names = battle_text.text_arrays[BattleBinTextSections.ABILITY_NAMES]
 	ability_descriptions = attack_help_text.text_arrays[AttackHelpLzwSections.ABILITY_DESCRIPTIONS]
-	spell_quotes = text_to_string(RomReader.get_file_data("SPELL.MES"))
+	spell_quotes = text_to_string(rom_reader.get_file_data("SPELL.MES"))
 	battle_effect_text = battle_text.text_arrays[BattleBinTextSections.BATTLE_ACTION_EFFECT]
 	item_names = battle_text.text_arrays[BattleBinTextSections.ITEM_NAMES]
 	item_descriptions = attack_help_text.text_arrays[AttackHelpLzwSections.ITEM_DESCRIPTIONS]
@@ -161,10 +161,11 @@ func init_text() -> void:
 			unit_names_list_filtered.remove_at(idx)
 
 
-func init_text_from_file(file_name: String) -> void:
+func init_text_from_file(file_name: String, rom_reader: RomReader) -> void:
 	var text_layout: FftTextFile = file_layouts[file_name]
+	var file_bytes: PackedByteArray = rom_reader.get_file_data(file_name)
 	
-	var offsets_bytes: PackedByteArray = RomReader.get_file_data(file_name).slice(text_layout.offsets_start, text_layout.offsets_end)
+	var offsets_bytes: PackedByteArray = file_bytes.slice(text_layout.offsets_start, text_layout.offsets_end)
 	for idx: int in text_layout.num_offsets:
 		text_layout.offsets[idx] = offsets_bytes.decode_u32(idx * 4) + text_layout.offsets_end
 	
@@ -174,11 +175,11 @@ func init_text_from_file(file_name: String) -> void:
 		if start_offset == text_layout.offsets_end and section_num != 0:
 			continue
 		elif section_num == text_layout.offsets.size() - 1:
-			text_layout.text_arrays[section_num] = text_to_string(RomReader.get_file_data(file_name).slice(start_offset, text_layout.text_end))
+			text_layout.text_arrays[section_num] = text_to_string(file_bytes.slice(start_offset, text_layout.text_end))
 		elif text_layout.offsets[section_num + 1] == text_layout.offsets_end:
-			text_layout.text_arrays[section_num] = text_to_string(RomReader.get_file_data(file_name).slice(start_offset, text_layout.text_end))
+			text_layout.text_arrays[section_num] = text_to_string(file_bytes.slice(start_offset, text_layout.text_end))
 		else:
-			text_layout.text_arrays[section_num] = text_to_string(RomReader.get_file_data(file_name).slice(start_offset, text_layout.offsets[section_num + 1]))
+			text_layout.text_arrays[section_num] = text_to_string(file_bytes.slice(start_offset, text_layout.offsets[section_num + 1]))
 		
 		#push_warning(str(section_num) + " " + section_name + "\n" + str(text_layout.text_arrays[section_num]))
 

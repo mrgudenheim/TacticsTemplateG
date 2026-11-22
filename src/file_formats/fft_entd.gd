@@ -14,10 +14,10 @@ func _init(bytes: PackedByteArray) -> void:
 			entd_units.append(new_entd_unit)
 
 
-func get_units_data() -> Array[UnitData]:
+func get_units_data(rom_reader: RomReader) -> Array[UnitData]:
 	var units_data: Array[UnitData] = []
 
 	for entd_unit: FftEntdUnit in entd_units:
-		units_data.append(entd_unit.get_unit_data())
+		units_data.append(entd_unit.get_unit_data(rom_reader))
 
 	return units_data

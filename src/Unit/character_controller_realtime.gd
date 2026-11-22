@@ -67,7 +67,7 @@ func _physics_process(_delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not RomReader.is_ready:
+	if not GameData.is_ready:
 		return
 	
 	# Handle jump

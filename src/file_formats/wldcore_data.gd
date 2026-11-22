@@ -47,7 +47,7 @@ class DungeonBattle:
 			entds.append(bytes.decode_u8(idx + 0x02))
 
 
-static func get_scenarios_from_random_battle(fft_random_battle: Variant) -> Array[Scenario]:
+static func get_scenarios_from_random_battle(fft_random_battle: Variant, rom_reader: RomReader) -> Array[Scenario]:
 	## fft_random_battle should be of type WldcoreData.RandomBattle or WldcoreData.DungeonBattle
 	if not (fft_random_battle is WldcoreData.RandomBattle or fft_random_battle is WldcoreData.DungeonBattle):
 		push_error("random battle data is not expected type")
@@ -56,15 +56,15 @@ static func get_scenarios_from_random_battle(fft_random_battle: Variant) -> Arra
 	var new_scenario_base: Scenario = Scenario.new()
 
 	var map_unique_name_num: String = "map_%03d" % fft_random_battle.map_id
-	var map_name_idx: int = RomReader.maps.keys().find_custom(func(map_name: String) -> bool: return map_name.begins_with(map_unique_name_num))
-	var map_unique_name: String = RomReader.maps.keys()[map_name_idx]
+	var map_name_idx: int = rom_reader.maps.keys().find_custom(func(map_name: String) -> bool: return map_name.begins_with(map_unique_name_num))
+	var map_unique_name: String = rom_reader.maps.keys()[map_name_idx]
 	
 	var new_map_chunk: MapChunk = MapChunk.new()
 	new_map_chunk.unique_name = map_unique_name
 	# new_map_chunk.set_mirror_xyz([true, true, false])
 	new_scenario_base.map_chunks.append(new_map_chunk)
-	new_scenario_base.background_gradient_bottom = RomReader.maps[map_unique_name].background_gradient_bottom
-	new_scenario_base.background_gradient_top = RomReader.maps[map_unique_name].background_gradient_top
+	new_scenario_base.background_gradient_bottom = rom_reader.maps[map_unique_name].background_gradient_bottom
+	new_scenario_base.background_gradient_top = rom_reader.maps[map_unique_name].background_gradient_top
 	
 	var unique_entds: PackedInt64Array = []
 	for entd_idx: int in fft_random_battle.entds:
@@ -73,8 +73,8 @@ static func get_scenarios_from_random_battle(fft_random_battle: Variant) -> Arra
 		unique_entds.append(entd_idx)
 
 		var new_scenario: Scenario = new_scenario_base.duplicate()
-		var scenario_entd: FftEntd = RomReader.fft_entds[entd_idx]
-		new_scenario.units_data = scenario_entd.get_units_data()
+		var scenario_entd: FftEntd = rom_reader.fft_entds[entd_idx]
+		new_scenario.units_data = scenario_entd.get_units_data(rom_reader)
 		new_scenario.unique_name = map_unique_name
 		
 		new_scenarios.append(new_scenario)
@@ -82,8 +82,8 @@ static func get_scenarios_from_random_battle(fft_random_battle: Variant) -> Arra
 	return new_scenarios
 
 
-func init_from_wldcore() -> void:
-	var wldcore_bytes: PackedByteArray = RomReader.get_file_data("WLDCORE.BIN")
+func init_from_wldcore(rom_reader: RomReader) -> void:
+	var wldcore_bytes: PackedByteArray = rom_reader.get_file_data("WLDCORE.BIN")
 	
 	var world_random_battle_bytes_length: int = world_random_battle_data_num_entries * world_random_battle_data_entry_length
 	var world_random_battle_table_bytes: PackedByteArray = wldcore_bytes.slice(world_random_battle_data_start, world_random_battle_data_start + world_random_battle_bytes_length)
@@ -102,15 +102,15 @@ func init_from_wldcore() -> void:
 		dungeon_random_battle_data.append(DungeonBattle.new(dungeon_random_battle_bytes))
 
 
-func get_all_scenarios() -> Array[Scenario]:
+func get_all_scenarios(rom_reader: RomReader) -> Array[Scenario]:
 	var new_scenarios: Array[Scenario] = []
 
 	for random_battle: RandomBattle in world_random_battle_data:
-		var random_battle_scenarios: Array[Scenario] = get_scenarios_from_random_battle(random_battle)
+		var random_battle_scenarios: Array[Scenario] = get_scenarios_from_random_battle(random_battle, rom_reader)
 		new_scenarios.append_array(random_battle_scenarios)
 	
 	for dungeon_battle: DungeonBattle in dungeon_random_battle_data:
-		var random_battle_scenarios: Array[Scenario] = get_scenarios_from_random_battle(dungeon_battle)
+		var random_battle_scenarios: Array[Scenario] = get_scenarios_from_random_battle(dungeon_battle, rom_reader)
 		new_scenarios.append_array(random_battle_scenarios)
 
 	return new_scenarios

@@ -85,15 +85,15 @@ func get_curve(index: int) -> VfxCurve:
 	return VfxCurve.new(curves[index], index)
 
 
-func init_from_file() -> void:
-	var vfx_bytes: PackedByteArray = RomReader.get_file_data(file_name)
+func init_from_file(rom_reader: RomReader) -> void:
+	var vfx_bytes: PackedByteArray = rom_reader.get_file_data(file_name)
 
 	if vfx_bytes.size() == 0:
 		push_warning(file_name + ": zero bytes in file. Skipping.")
 		return
 
 	#### header data
-	header_start = RomReader.battle_bin_data.ability_vfx_header_offsets[vfx_id]
+	header_start = rom_reader.battle_bin_data.ability_vfx_header_offsets[vfx_id]
 	var entry_size: int = 4
 	var num_entries: int = 10
 	var header_bytes: PackedByteArray = vfx_bytes.slice(header_start, header_start + (entry_size * num_entries))

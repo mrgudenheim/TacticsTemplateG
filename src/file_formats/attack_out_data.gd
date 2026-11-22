@@ -74,8 +74,8 @@ class DeploymentZoneData:
 				deployment_map.append(map_coordinates)
 
 
-func init_from_attack_out() -> void:
-	var attack_out_bytes: PackedByteArray = RomReader.get_file_data("ATTACK.OUT")
+func init_from_attack_out(rom_reader: RomReader) -> void:
+	var attack_out_bytes: PackedByteArray = rom_reader.get_file_data("ATTACK.OUT")
 	
 	var scenario_bytes_length: int = scenario_data_num_entries * scenario_data_entry_length
 	var scenario_bytes: PackedByteArray = attack_out_bytes.slice(scenario_data_start, scenario_data_start + scenario_bytes_length)
@@ -94,7 +94,7 @@ func init_from_attack_out() -> void:
 		deployment_data.append(DeploymentZoneData.new(deployment_entry_bytes))
 
 
-func get_unique_scenarios() -> Array[Scenario]:
+func get_unique_scenarios(rom_reader: RomReader) -> Array[Scenario]:
 	var all_unique_scenarios: Array[Scenario] = []
 	var checked_scenarios: Array[FftScenarioData] = []
 	for fft_scenario: FftScenarioData in scenario_data:
@@ -115,18 +115,18 @@ func get_unique_scenarios() -> Array[Scenario]:
 		var new_scenario: Scenario = Scenario.new()
 
 		var map_unique_name_num: String = "map_%03d" % fft_scenario.map_id
-		var map_name_idx: int = RomReader.maps.keys().find_custom(func(map_name: String) -> bool: return map_name.begins_with(map_unique_name_num))
-		var map_unique_name: String = RomReader.maps.keys()[map_name_idx]
+		var map_name_idx: int = rom_reader.maps.keys().find_custom(func(map_name: String) -> bool: return map_name.begins_with(map_unique_name_num))
+		var map_unique_name: String = rom_reader.maps.keys()[map_name_idx]
 
 		var new_map_chunk: MapChunk = MapChunk.new()
 		# new_map_chunk.set_mirror_xyz([true, true, false])
 		new_map_chunk.unique_name = map_unique_name
 		new_scenario.map_chunks.append(new_map_chunk)
-		new_scenario.background_gradient_bottom = RomReader.maps[map_unique_name].background_gradient_bottom
-		new_scenario.background_gradient_top = RomReader.maps[map_unique_name].background_gradient_top
+		new_scenario.background_gradient_bottom = rom_reader.maps[map_unique_name].background_gradient_bottom
+		new_scenario.background_gradient_top = rom_reader.maps[map_unique_name].background_gradient_top
 
-		var scenario_entd: FftEntd = RomReader.fft_entds[fft_scenario.entd_idx]
-		new_scenario.units_data = scenario_entd.get_units_data()
+		var scenario_entd: FftEntd = rom_reader.fft_entds[fft_scenario.entd_idx]
+		new_scenario.units_data = scenario_entd.get_units_data(rom_reader)
 
 		new_scenario.unique_name = map_unique_name
 		all_unique_scenarios.append(new_scenario)

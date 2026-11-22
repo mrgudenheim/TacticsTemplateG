@@ -24,6 +24,7 @@ var opcode_frame_offset: int = 0
 var weapon_sheathe_check1_delay: int = 0
 var weapon_sheathe_check2_delay: int = 10
 var wait_for_input_delay: int = 10
+var rom_reader: RomReader
 
 
 #func _ready() -> void:
@@ -36,18 +37,18 @@ func initialize() -> void:
 	weapon_options.clear()
 	for weapon_index: int in 0x90: # weapons + throwables (shuriken, ball) +  shields
 		var equipment_type_name: String = ""
-		if RomReader.items_array[weapon_index].item_type < RomReader.fft_text.equipment_types.size():
-			equipment_type_name = " (" + RomReader.fft_text.equipment_types[RomReader.items_array[weapon_index].item_type] + ")"
-		weapon_options.add_item(RomReader.items_array[weapon_index].unique_name + equipment_type_name)
+		if rom_reader.items_array[weapon_index].item_type < rom_reader.fft_text.equipment_types.size():
+			equipment_type_name = " (" + rom_reader.fft_text.equipment_types[rom_reader.items_array[weapon_index].item_type] + ")"
+		weapon_options.add_item(rom_reader.items_array[weapon_index].unique_name + equipment_type_name)
 	
 	weapon_options.select(unit.primary_weapon.item_idx)
 	
 	item_options.clear()
 	for item_index: int in RomReader.NUM_ITEMS:
 		var type_name: String = ""
-		if RomReader.items_array[item_index].item_type < RomReader.fft_text.equipment_types.size():
-			type_name = " (" + RomReader.fft_text.equipment_types[RomReader.items_array[item_index].item_type] + ")"
-		item_options.add_item(str(item_index) + " - " + RomReader.items_array[item_index].display_name + type_name)
+		if rom_reader.items_array[item_index].item_type < rom_reader.fft_text.equipment_types.size():
+			type_name = " (" + rom_reader.fft_text.equipment_types[rom_reader.items_array[item_index].item_type] + ")"
+		item_options.add_item(str(item_index) + " - " + rom_reader.items_array[item_index].display_name + type_name)
 	item_options.item_selected.connect(unit.animation_manager.set_item)
 	
 	is_playing_check.button_pressed = true

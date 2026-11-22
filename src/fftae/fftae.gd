@@ -5,6 +5,8 @@ static var ae: FFTae
 #static var rom: PackedByteArray = []
 static var global_fft_animation: FftAnimation = FftAnimation.new()
 
+var rom_reader: RomReader
+
 @export var ui_manager: UiManager
 @export var preview_manager: PreviewManager
 @export var load_rom_dialog: FileDialog
@@ -44,9 +46,9 @@ var seq: Seq:
 	get:
 		var file_name: String = ui_manager.seq_options.get_item_text(ui_manager.seq_options.selected)
 		
-		var new_seq: Seq = RomReader.seqs_array[RomReader.file_records[file_name].type_index]
+		var new_seq: Seq = rom_reader.seqs_array[rom_reader.file_records[file_name].type_index]
 		if not new_seq.is_initialized:
-			new_seq.set_data_from_seq_bytes(RomReader.get_file_data(new_seq.file_name))
+			new_seq.set_data_from_seq_bytes(rom_reader.get_file_data(new_seq.file_name), rom_reader)
 		
 		return new_seq
 
@@ -55,9 +57,9 @@ var shp: Shp:
 	get:
 		var file_name: String = ui_manager.shp_options.get_item_text(ui_manager.shp_options.selected)
 		
-		var new_shp: Shp = RomReader.shps_array[RomReader.file_records[file_name].type_index]
+		var new_shp: Shp = rom_reader.shps_array[rom_reader.file_records[file_name].type_index]
 		if not new_shp.is_initialized:
-			new_shp.set_data_from_shp_bytes(RomReader.get_file_data(new_shp.file_name))
+			new_shp.set_data_from_shp_bytes(rom_reader.get_file_data(new_shp.file_name), rom_reader)
 		
 		return new_shp
 
@@ -66,20 +68,26 @@ var spr: Spr:
 	get:
 		#var file_name: String = ui_manager.sprite_options.get_item_text(ui_manager.sprite_options.selected)
 		var sprite_file_index: int = ui_manager.sprite_options.selected
-		var new_spr: Spr = RomReader.sprs[sprite_file_index]
+		var new_spr: Spr = rom_reader.sprs[sprite_file_index]
 		if not new_spr.is_initialized:
-			new_spr.set_data(RomReader.get_file_data(ui_manager.sprite_options.get_item_text(sprite_file_index)))
+			new_spr.set_data(rom_reader, rom_reader.get_file_data(ui_manager.sprite_options.get_item_text(sprite_file_index)))
 			if new_spr.file_name == "OTHER.SPR":
-				new_spr.set_spritesheet_data(0)
+				new_spr.set_spritesheet_data(0, rom_reader)
 			elif new_spr.file_name != "WEP.SPR" and new_spr.file_name != "EFF.SPR":
-				new_spr.set_spritesheet_data(RomReader.spr_file_name_to_id[new_spr.file_name])
+				new_spr.set_spritesheet_data(rom_reader.spr_file_name_to_id[new_spr.file_name], rom_reader)
 		
 		return new_spr
 
 
 func _ready() -> void:
 	ae = self
-	RomReader.rom_loaded.connect(initialize_ui)
+	rom_reader = RomReader.new()
+	add_child(rom_reader)
+	if ui_manager != null:
+		ui_manager.rom_reader = rom_reader
+	if preview_manager != null:
+		preview_manager.rom_reader = rom_reader
+	rom_reader.rom_loaded.connect(initialize_ui)
 
 
 func _on_load_rom_pressed() -> void:
@@ -87,11 +95,11 @@ func _on_load_rom_pressed() -> void:
 
 
 func _on_load_rom_dialog_file_selected(path: String) -> void:
-	RomReader.on_load_rom_dialog_file_selected(path)
+	rom_reader.on_load_rom_dialog_file_selected(path)
 
 
 func initialize_ui() -> void:
-	for record: FileRecord in RomReader.file_records.values():
+	for record: FileRecord in rom_reader.file_records.values():
 		#push_warning(record.to_string())
 		match record.name.get_extension():
 			"SPR":
@@ -184,17 +192,17 @@ func get_xml() -> String:
 	
 	var files_changed: PackedStringArray = []
 	var xml_files: PackedStringArray = []
-	for seq_file: Seq in RomReader.seqs_array:
+	for seq_file: Seq in rom_reader.seqs_array:
 	#for file_name: String in seqs.keys():
-		var seq_temp: Seq = RomReader.seqs_array[RomReader.file_records[seq_file.file_name].type_index]
+		var seq_temp: Seq = rom_reader.seqs_array[rom_reader.file_records[seq_file.file_name].type_index]
 		var seq_bytes: PackedByteArray = seq_temp.get_seq_bytes()
-		if RomReader.get_file_data(seq_file.file_name) == seq_bytes or not seq_file.is_initialized:
+		if rom_reader.get_file_data(seq_file.file_name) == seq_bytes or not seq_file.is_initialized:
 			continue
 		
 		var file: String = seq_temp.file_name
 		files_changed.append(file)
-		var xml_size_location_start: String = '<Location offset="%08x" ' % (RomReader.file_records[file].record_location_offset + FileRecord.OFFSET_SIZE - BYTES_PER_SECTOR_HEADER)
-		xml_size_location_start += ('sector="%x">' % RomReader.file_records[file].record_location_sector)
+		var xml_size_location_start: String = '<Location offset="%08x" ' % (rom_reader.file_records[file].record_location_offset + FileRecord.OFFSET_SIZE - BYTES_PER_SECTOR_HEADER)
+		xml_size_location_start += ('sector="%x">' % rom_reader.file_records[file].record_location_sector)
 		var file_size_hex: String = '%08x' % seq_temp.toal_length
 		var file_size_hex_bytes: PackedStringArray = [
 			file_size_hex.substr(0,2),
@@ -456,8 +464,8 @@ func _on_delete_pointer_pressed() -> void:
 func _on_seq_file_options_item_selected(index: int, select_shp: bool = true) -> void:
 	var type: String = ui_manager.seq_options.get_item_text(index)
 	
-	if RomReader.file_records.has(type):
-		ui_manager.max_bytes = ceil(RomReader.file_records[type].size / float(DATA_BYTES_PER_SECTOR)) * DATA_BYTES_PER_SECTOR as int
+	if rom_reader.file_records.has(type):
+		ui_manager.max_bytes = ceil(rom_reader.file_records[type].size / float(DATA_BYTES_PER_SECTOR)) * DATA_BYTES_PER_SECTOR as int
 	
 	animation_list_container.get_parent().get_parent().get_parent().name = seq.file_name + " Animations"
 	
@@ -483,14 +491,14 @@ func _on_seq_file_options_item_selected(index: int, select_shp: bool = true) -> 
 	if select_shp:
 		UiManager.option_button_select_text(ui_manager.shp_options, seq.shp_name)
 		ui_manager.shp_options.item_selected.emit(ui_manager.shp_options.selected)
-	preview_manager.unit.animation_manager.global_seq = RomReader.seqs_array[index]
+	preview_manager.unit.animation_manager.global_seq = rom_reader.seqs_array[index]
 	preview_manager.unit.animation_manager._on_animation_changed()
 
 
 func _on_shp_file_options_item_selected(index: int) -> void:
 	frame_list_container.get_parent().get_parent().get_parent().name = shp.file_name + " Frames"
 	populate_frame_list(frame_list_container, shp)
-	preview_manager.unit.animation_manager.global_shp = RomReader.shps_array[index]
+	preview_manager.unit.animation_manager.global_shp = rom_reader.shps_array[index]
 	preview_manager.unit.animation_manager._on_animation_changed()
 
 
@@ -502,7 +510,8 @@ func _on_sprite_options_item_selected(index: int) -> void:
 	#UiManager.option_button_select_text(ui_manager.shp_options, spr.shp_name)
 	#ui_manager.shp_options.item_selected.emit(ui_manager.shp_options.selected)
 	
-	preview_manager.unit.set_sprite_by_file_idx(index)
+	var sprite_name: String = rom_reader.sprs[index].file_name.to_lower().trim_suffix(".spr")
+	preview_manager.unit.set_sprite_by_file_name(sprite_name)
 	preview_manager.unit.animation_manager._on_animation_changed()
 
 

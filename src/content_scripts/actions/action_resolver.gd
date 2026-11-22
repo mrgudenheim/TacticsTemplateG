@@ -10,8 +10,6 @@ static func lookup_action(action_unique_name: String) -> Action:
 		return null
 	if GameData.actions.has(action_unique_name) or GameData.action_paths.has(action_unique_name):
 		return GameData.get_action(action_unique_name)
-	if RomReader.actions.has(action_unique_name):
-		return RomReader.actions[action_unique_name]
 	return null
 
 

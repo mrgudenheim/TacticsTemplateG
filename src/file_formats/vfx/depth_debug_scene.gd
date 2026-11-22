@@ -25,10 +25,10 @@ func _ready() -> void:
 		if arg == "--screenshots":
 			_save_screenshots = true
 
-	if RomReader.is_ready:
+	if GameData.is_ready:
 		_start()
 	else:
-		RomReader.rom_loaded.connect(_start, CONNECT_ONE_SHOT)
+		GameData.data_indexed.connect(_start, CONNECT_ONE_SHOT)
 
 
 func _start() -> void:

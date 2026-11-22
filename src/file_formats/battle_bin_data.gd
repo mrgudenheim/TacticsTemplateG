@@ -142,8 +142,8 @@ var status_idle_animations: Dictionary[int, int] = { # status_id :  animation_id
 	23: 72, # critical
 }
 
-func init_from_battle_bin() -> void:
-	var battle_bytes: PackedByteArray = RomReader.get_file_data("BATTLE.BIN")
+func init_from_battle_bin(rom_reader: RomReader) -> void:
+	var battle_bytes: PackedByteArray = rom_reader.get_file_data("BATTLE.BIN")
 	
 	# ability animation charging sets
 	var entry_size: int = 2 # bytes
@@ -265,7 +265,7 @@ func init_from_battle_bin() -> void:
 		animation_layer_priorities[idx].y = data_bytes.decode_u32((idx * entry_size) + 8)
 		animation_layer_priorities[idx].z = data_bytes.decode_u32((idx * entry_size) + 12)
 	
-	_load_battle_bin_sprite_data()
+	_load_battle_bin_sprite_data(rom_reader)
 	
 	# ai status priority table
 	entry_size = 2
@@ -288,10 +288,10 @@ func init_from_battle_bin() -> void:
 		status_icon_locations[idx] = Vector2i(x, y)
 		status_icon_rects[idx] = Rect2i(Vector2i(x, y + 32), Vector2i(14, 12)) # y + 32 because image is 288 pixels tall (288-256 = 32), TODO KO stars are 16 wide
 	
-	for status_id: int in RomReader.scus_data.status_effects.size():
+	for status_id: int in rom_reader.scus_data.status_effects.size():
 		if status_icon_ids.keys().has(status_id):
 			var rect: Rect2i = status_icon_rects[status_icon_ids[status_id]]
-			RomReader.scus_data.status_effects[status_id].icon_rects.append(rect) # TODO get second frame of status icons
+			rom_reader.scus_data.status_effects[status_id].icon_rects.append(rect) # TODO get second frame of status icons
 	
 	# status counter locations
 	entry_size = 1
@@ -314,8 +314,8 @@ func init_from_battle_bin() -> void:
 
 
 # https://ffhacktics.com/wiki/BATTLE.BIN_Data_Tables#Animation_.26_Display_Related_Data
-func _load_battle_bin_sprite_data() -> void:
-	var battle_bytes: PackedByteArray = RomReader.get_file_data("BATTLE.BIN")
+func _load_battle_bin_sprite_data(rom_reader: RomReader) -> void:
+	var battle_bytes: PackedByteArray = rom_reader.get_file_data("BATTLE.BIN")
 	
 	# look up spr file_name based on LBA
 	var spritesheet_file_data_length: int = 8
@@ -325,9 +325,9 @@ func _load_battle_bin_sprite_data() -> void:
 		var spritesheet_lba: int = spritesheet_file_data_bytes.decode_u32(0)
 		var spritesheet_file_name: String = ""
 		if spritesheet_lba != 0:
-			spritesheet_file_name = RomReader.lba_to_file_name[spritesheet_lba]
-		RomReader.spr_file_name_to_id[spritesheet_file_name] = sprite_id
-		RomReader.spr_id_file_idxs[sprite_id] = RomReader.file_records[spritesheet_file_name].type_index
+			spritesheet_file_name = rom_reader.lba_to_file_name[spritesheet_lba]
+		rom_reader.spr_file_name_to_id[spritesheet_file_name] = sprite_id
+		rom_reader.spr_id_file_idxs[sprite_id] = rom_reader.file_records[spritesheet_file_name].type_index
 
 
 func _parse_projectile_models(battle_bytes: PackedByteArray) -> void:

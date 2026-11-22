@@ -115,50 +115,52 @@ var animation_speed: float = 59 # frames per second
 
 var ability_action: Action = Action.new()
 
-func _init(new_id: int = 0) -> void:
+func _init(new_id: int = 0, rom_reader: RomReader = null) -> void:
 	id = new_id
+	if rom_reader == null:
+		return
 	
-	display_name = RomReader.fft_text.ability_names[id]
-	spell_quote = RomReader.fft_text.spell_quotes[id]
-	description = RomReader.fft_text.ability_descriptions[id]
+	display_name = rom_reader.fft_text.ability_names[id]
+	spell_quote = rom_reader.fft_text.spell_quotes[id]
+	description = rom_reader.fft_text.ability_descriptions[id]
 	
 	if new_id <= 0x1c5:
-		animation_charging_set_id = RomReader.battle_bin_data.ability_animation_charging_set_ids[new_id]
-		animation_start_id = RomReader.battle_bin_data.ability_animation_start_ids[animation_charging_set_id] * 2
-		animation_charging_id = RomReader.battle_bin_data.ability_animation_charging_ids[animation_charging_set_id] * 2
-		animation_executing_id = RomReader.battle_bin_data.ability_animation_executing_ids[new_id] * 2
-		animation_text_id = RomReader.battle_bin_data.ability_animation_text_ids[new_id]
-		effect_text = RomReader.fft_text.battle_effect_text[animation_text_id]
-		vfx_id = RomReader.battle_bin_data.ability_vfx_ids[new_id]
+		animation_charging_set_id = rom_reader.battle_bin_data.ability_animation_charging_set_ids[new_id]
+		animation_start_id = rom_reader.battle_bin_data.ability_animation_start_ids[animation_charging_set_id] * 2
+		animation_charging_id = rom_reader.battle_bin_data.ability_animation_charging_ids[animation_charging_set_id] * 2
+		animation_executing_id = rom_reader.battle_bin_data.ability_animation_executing_ids[new_id] * 2
+		animation_text_id = rom_reader.battle_bin_data.ability_animation_text_ids[new_id]
+		effect_text = rom_reader.fft_text.battle_effect_text[animation_text_id]
+		vfx_id = rom_reader.battle_bin_data.ability_vfx_ids[new_id]
 		if [0x11d, 0x11f].has(vfx_id): # Ball
-			vfx_data = RomReader.vfx[0] # TODO handle special cases without vfx files, 0x11d (Ball), 0x11f (ability 0x2d)
+			vfx_data = rom_reader.vfx[0] # TODO handle special cases without vfx files, 0x11d (Ball), 0x11f (ability 0x2d)
 		elif vfx_id < RomReader.NUM_VFX:
-			RomReader.vfx[vfx_id].ability_names += display_name + " "
-			vfx_data = RomReader.vfx[vfx_id]
+			rom_reader.vfx[vfx_id].ability_names += display_name + " "
+			vfx_data = rom_reader.vfx[vfx_id]
 		elif vfx_id == 0xffff:
-			vfx_data = RomReader.vfx[0] # TODO handle when vfx_id is 0xffff
+			vfx_data = rom_reader.vfx[0] # TODO handle when vfx_id is 0xffff
 		else:
-			vfx_data = RomReader.vfx[0]
+			vfx_data = rom_reader.vfx[0]
 			#push_warning(vfx_id)
 	
-	jp_cost = RomReader.scus_data.jp_costs[new_id]
-	chance_to_learn = RomReader.scus_data.chance_to_learn[new_id]
-	ability_type = RomReader.scus_data.ability_types[new_id]
+	jp_cost = rom_reader.scus_data.jp_costs[new_id]
+	chance_to_learn = rom_reader.scus_data.chance_to_learn[new_id]
+	ability_type = rom_reader.scus_data.ability_types[new_id]
 
 	if ability_type == AbilityType.NORMAL:
-		formula_id = RomReader.scus_data.formula_id[new_id]
-		formula_x = RomReader.scus_data.formula_x[new_id]
-		formula_y = RomReader.scus_data.formula_y[new_id]
-		max_targeting_range = RomReader.scus_data.ranges[new_id]
-		area_of_effect_radius = RomReader.scus_data.area_of_effect_radius[new_id]
-		vertical_tolerance = RomReader.scus_data.vertical_tolerance[new_id]
-		inflict_status_id = RomReader.scus_data.ability_inflict_status_id[new_id]
-		ticks_charge_time = RomReader.scus_data.ct[new_id]
+		formula_id = rom_reader.scus_data.formula_id[new_id]
+		formula_x = rom_reader.scus_data.formula_x[new_id]
+		formula_y = rom_reader.scus_data.formula_y[new_id]
+		max_targeting_range = rom_reader.scus_data.ranges[new_id]
+		area_of_effect_radius = rom_reader.scus_data.area_of_effect_radius[new_id]
+		vertical_tolerance = rom_reader.scus_data.vertical_tolerance[new_id]
+		inflict_status_id = rom_reader.scus_data.ability_inflict_status_id[new_id]
+		ticks_charge_time = rom_reader.scus_data.ct[new_id]
 	
-		normal_flags_1 = RomReader.scus_data.flags1[id]
-		normal_flags_2 = RomReader.scus_data.flags2[id]
-		normal_flags_3 = RomReader.scus_data.flags3[id]
-		normal_flags_4 = RomReader.scus_data.flags4[id]
+		normal_flags_1 = rom_reader.scus_data.flags1[id]
+		normal_flags_2 = rom_reader.scus_data.flags2[id]
+		normal_flags_3 = rom_reader.scus_data.flags3[id]
+		normal_flags_4 = rom_reader.scus_data.flags4[id]
 		set_normal_flags([normal_flags_1, normal_flags_2, normal_flags_3, normal_flags_4])
 
 
@@ -201,7 +203,7 @@ func set_normal_flags(flag_bytes: PackedInt32Array) -> void:
 	no_targeting = flag_bytes[3] & 0x01 == 0x01
 
 
-func set_action() -> void:
+func set_action(rom_reader: RomReader) -> void:
 	ability_action.display_name = display_name
 	ability_action.add_to_global_list()
 	ability_action.description = RomReader.fft_text.ability_descriptions[id]
@@ -271,7 +273,7 @@ func set_action() -> void:
 	
 	
 	# inflict status data
-	var inflict_status_data: ScusData.InflictStatus = RomReader.scus_data.inflict_statuses[inflict_status_id]
+	var inflict_status_data: ScusData.InflictStatus = rom_reader.scus_data.inflict_statuses[inflict_status_id]
 	ability_action.target_status_list = inflict_status_data.status_list
 	ability_action.target_status_chance = 100
 	ability_action.will_remove_target_status = inflict_status_data.will_cancel
@@ -336,9 +338,9 @@ func set_action() -> void:
 	ability_action.vfx_id = vfx_data.vfx_id
 	ability_action.vfx_name = vfx_data.unique_name
 
-	if animation_charging_set_id < RomReader.battle_bin_data.charging_vfx_ids.size():
-		var charging_vfx_id: int = RomReader.battle_bin_data.charging_vfx_ids[animation_charging_set_id]
-		ability_action.user_shared_vfx_handler_id = RomReader.battle_bin_data.shared_vfx_handler_ids[charging_vfx_id]
+	if animation_charging_set_id < rom_reader.battle_bin_data.charging_vfx_ids.size():
+		var charging_vfx_id: int = rom_reader.battle_bin_data.charging_vfx_ids[animation_charging_set_id]
+		ability_action.user_shared_vfx_handler_id = rom_reader.battle_bin_data.shared_vfx_handler_ids[charging_vfx_id]
 	if id == 0x92: # accumulate
 		ability_action.user_shared_vfx_handler_id = 6 # red orbs
 

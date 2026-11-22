@@ -193,26 +193,27 @@ func _init(map_file_name: String = "") -> void:
 		file_name = map_file_name
 
 
-func init_map() -> void:
-	var map_gns_data: PackedByteArray = RomReader.get_file_data(file_name)
-	init_map_data(map_gns_data)
+func init_map(rom_reader: RomReader) -> void:
+	var map_gns_data: PackedByteArray = rom_reader.get_file_data(file_name)
+	init_map_data(map_gns_data, rom_reader)
 	is_initialized = true
 
 
-func init_map_data(gns_bytes: PackedByteArray) -> void:
-	map_file_records = get_associated_files(gns_bytes)
+func init_map_data(gns_bytes: PackedByteArray, rom_reader: RomReader) -> void:
+	map_file_records = get_associated_files(gns_bytes, rom_reader)
 	push_warning("MapChunkNodes Mesh File: " + primary_mesh_data_record.file_name)
 	push_warning("MapChunkNodes Texture File: " + primary_texture_record.file_name)
 	create_map(
-		RomReader.get_file_data(primary_mesh_data_record.file_name),
-		RomReader.get_file_data(primary_texture_record.file_name),
+		rom_reader.get_file_data(primary_mesh_data_record.file_name),
+		rom_reader.get_file_data(primary_texture_record.file_name),
+		rom_reader,
 	)
 
 
-func create_map(mesh_bytes: PackedByteArray, texture_bytes: PackedByteArray = []) -> void:
+func create_map(mesh_bytes: PackedByteArray, texture_bytes: PackedByteArray = [], rom_reader: RomReader = null) -> void:
 	var other_bytes: PackedByteArray = mesh_bytes
 	if file_name == "MAP053.GNS": # handle special case
-		other_bytes = RomReader.get_file_data(other_data_record.file_name)
+		other_bytes = rom_reader.get_file_data(other_data_record.file_name)
 
 	var primary_mesh_data_start: int = mesh_bytes.decode_u32(0x40)
 	var texture_palettes_data_start: int = other_bytes.decode_u32(0x44)
@@ -960,21 +961,21 @@ func set_gradient_colors(gradient_color_bytes: PackedByteArray) -> void:
 	background_gradient_bottom = Color8(bot_red, bot_green, bot_blue)
 
 
-func get_associated_files(gns_bytes: PackedByteArray) -> Array[MapFileRecord]:
+func get_associated_files(gns_bytes: PackedByteArray, rom_reader: RomReader) -> Array[MapFileRecord]:
 	var gns_record_length: int = 20
 	var new_map_records: Array[MapFileRecord] = []
 
 	if file_name == "MAP053.GNS":
-		return handle_map053(gns_bytes)
+		return handle_map053(gns_bytes, rom_reader)
 
 	var num_files: int = -1
-	for temp_file_name: String in RomReader.file_records.keys():
+	for temp_file_name: String in rom_reader.file_records.keys():
 		if temp_file_name.contains(file_name.trim_suffix(".GNS")):
 			num_files += 1
 
 	for record_index: int in num_files:
 		var record_data: PackedByteArray = gns_bytes.slice(record_index * gns_record_length, (record_index + 1) * gns_record_length)
-		var new_map_file_record: MapFileRecord = MapFileRecord.new(record_data)
+		var new_map_file_record: MapFileRecord = MapFileRecord.new(record_data, rom_reader)
 		new_map_records.append(new_map_file_record)
 
 		if new_map_file_record.file_type_indicator == 0x2e01: # MAP053's mesh data is in the 0x2f01 resource
@@ -993,18 +994,18 @@ func get_associated_files(gns_bytes: PackedByteArray) -> Array[MapFileRecord]:
 	return new_map_records
 
 
-func handle_map053(gns_bytes: PackedByteArray) -> Array[MapFileRecord]:
+func handle_map053(gns_bytes: PackedByteArray, rom_reader: RomReader) -> Array[MapFileRecord]:
 	var gns_record_length: int = 20
 	var new_map_records: Array[MapFileRecord] = []
 
 	var num_files: int = -1
-	for temp_file_name: String in RomReader.file_records.keys():
+	for temp_file_name: String in rom_reader.file_records.keys():
 		if temp_file_name.contains(file_name.trim_suffix(".GNS")):
 			num_files += 1
 
 	for record_index: int in num_files:
 		var record_data: PackedByteArray = gns_bytes.slice(record_index * gns_record_length, (record_index + 1) * gns_record_length)
-		var new_map_file_record: MapFileRecord = MapFileRecord.new(record_data)
+		var new_map_file_record: MapFileRecord = MapFileRecord.new(record_data, rom_reader)
 		new_map_records.append(new_map_file_record)
 
 		# MAP053's mesh data is in the 0x2f01 resource
@@ -1024,10 +1025,10 @@ func handle_map053(gns_bytes: PackedByteArray) -> Array[MapFileRecord]:
 	return new_map_records
 
 
-func get_map_scene(scale: Vector3 = Vector3.ONE, translation: Vector3 = Vector3.ZERO, rotation_degrees: float = 0.0) -> MapChunkNodes:
+func get_map_scene(scale: Vector3 = Vector3.ONE, translation: Vector3 = Vector3.ZERO, rotation_degrees: float = 0.0, rom_reader: RomReader = null) -> MapChunkNodes:
 	# map_scale.y = -1 # vanilla used -y as up
 	if not is_initialized:
-		init_map()
+		init_map(rom_reader)
 
 	var new_map_instance: MapChunkNodes = MapChunkNodes.instantiate()
 	new_map_instance.map_data = MapData.init_from_fft_map_data(self)

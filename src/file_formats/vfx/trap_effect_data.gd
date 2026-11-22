@@ -181,9 +181,9 @@ static func get_element_color(p_element_id: int) -> Color:
 	return Color.WHITE
 
 
-func init_from_rom() -> void:
-	var battle_bytes: PackedByteArray = RomReader.get_file_data("BATTLE.BIN")
-	var wep_bytes: PackedByteArray = RomReader.get_file_data("WEP.SPR")
+func init_from_rom(rom_reader: RomReader) -> void:
+	var battle_bytes: PackedByteArray = rom_reader.get_file_data("BATTLE.BIN")
+	var wep_bytes: PackedByteArray = rom_reader.get_file_data("WEP.SPR")
 
 	if battle_bytes.size() == 0 or wep_bytes.size() == 0:
 		push_warning("TrapEffectData: missing BATTLE.BIN or WEP.SPR data")

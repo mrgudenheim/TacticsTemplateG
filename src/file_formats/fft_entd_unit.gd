@@ -138,15 +138,15 @@ func _init(bytes: PackedByteArray) -> void:
 	x27 = bytes.decode_u8(0x27)
 
 
-func get_unit_data() -> UnitData:
+func get_unit_data(rom_reader: RomReader) -> UnitData:
 	var unit_data: UnitData = UnitData.new()
 
 	# TODO get name based on special, male, female, or monster
 	if name_idx != 0xFF:
-		unit_data.display_name = RomReader.fft_text.unit_names_list[name_idx] 
+		unit_data.display_name = rom_reader.fft_text.unit_names_list[name_idx] 
 	else:
-		var new_name_idx: int = randi_range(0, RomReader.fft_text.unit_names_list_filtered.size() - 1)
-		unit_data.display_name = RomReader.fft_text.unit_names_list_filtered[new_name_idx]
+		var new_name_idx: int = randi_range(0, rom_reader.fft_text.unit_names_list_filtered.size() - 1)
+		unit_data.display_name = rom_reader.fft_text.unit_names_list_filtered[new_name_idx]
 
 	if level <= 99:
 		unit_data.stats[UnitData.StatType.LEVEL].set_value(level)
@@ -161,20 +161,20 @@ func get_unit_data() -> UnitData:
 		unit_data.gender = UnitData.Gender.MONSTER
 	
 	unit_data.zodiac = UnitData.Zodiac.AQUARIUS # TODO should zodiac be derived from birthday?
-	unit_data.job_unique_name = RomReader.jobs_data.keys()[main_job]
+	unit_data.job_unique_name = rom_reader.jobs_data.keys()[main_job]
 	unit_data.team_idx = team_color_idx
 	unit_data.controller = UnitData.Controller.PLAYER if is_player_controlled else UnitData.Controller.AI
 	
-	var new_sprite_id: int = RomReader.jobs_data[unit_data.job_unique_name].sprite_id
+	var new_sprite_id: int = rom_reader.jobs_data[unit_data.job_unique_name].sprite_id
 	if sprite_set_id == 0x81:
 		new_sprite_id += 1
-	var new_sprite_file_name_idx: int = RomReader.spr_file_name_to_id.values().find(new_sprite_id)
-	unit_data.spritesheet_file_name = RomReader.spr_file_name_to_id.keys()[new_sprite_file_name_idx].to_lower().trim_suffix(".spr")
+	var new_sprite_file_name_idx: int = rom_reader.spr_file_name_to_id.values().find(new_sprite_id)
+	unit_data.spritesheet_file_name = rom_reader.spr_file_name_to_id.keys()[new_sprite_file_name_idx].to_lower().trim_suffix(".spr")
 	unit_data.palette_id = palette
 	if sprite_set_id < 0x80:
 		unit_data.palette_id = 0
 	if sprite_set_id == 0x82:
-		unit_data.palette_id = RomReader.jobs_data.values()[main_job].monster_palette_id
+		unit_data.palette_id = rom_reader.jobs_data.values()[main_job].monster_palette_id
 	
 	
 	if initial_direction == 0:
@@ -192,27 +192,27 @@ func get_unit_data() -> UnitData:
 
 	UnitData.generate_leveled_raw_stats(unit_data.gender as UnitData.StatBasis, unit_data.stats[UnitData.StatType.LEVEL].current_value, RomReader.jobs_data[unit_data.job_unique_name], unit_data.stats_raw, true)
 	var use_higher_stat_values: bool = unit_data.is_lucavi()
-	UnitData.calc_battle_stats(RomReader.jobs_data.values()[main_job], unit_data.stats_raw, unit_data.stats, true, use_higher_stat_values)
+	UnitData.calc_battle_stats(rom_reader.jobs_data.values()[main_job], unit_data.stats_raw, unit_data.stats, true, use_higher_stat_values)
 
 	unit_data.stats[UnitData.StatType.BRAVE].set_value(brave)
 	unit_data.stats[UnitData.StatType.FAITH].set_value(faith)
 
 	# TODO if equipment value == 0xFE, get random leveled equipment
-	unit_data.equip_slots[0].item_unique_name = get_item_name(unit_data, 0, equipment_right_hand)
-	unit_data.equip_slots[1].item_unique_name = get_item_name(unit_data, 1, equipment_left_hand)
-	unit_data.equip_slots[2].item_unique_name = get_item_name(unit_data, 2, equipment_head)
-	unit_data.equip_slots[3].item_unique_name = get_item_name(unit_data, 3, equipment_body)
-	unit_data.equip_slots[4].item_unique_name = get_item_name(unit_data, 4, equipment_accessory)
+	unit_data.equip_slots[0].item_unique_name = get_item_name(unit_data, 0, equipment_right_hand, rom_reader)
+	unit_data.equip_slots[1].item_unique_name = get_item_name(unit_data, 1, equipment_left_hand, rom_reader)
+	unit_data.equip_slots[2].item_unique_name = get_item_name(unit_data, 2, equipment_head, rom_reader)
+	unit_data.equip_slots[3].item_unique_name = get_item_name(unit_data, 3, equipment_body, rom_reader)
+	unit_data.equip_slots[4].item_unique_name = get_item_name(unit_data, 4, equipment_accessory, rom_reader)
 
 	# TODO create skillset abilities, set random if secondary_skillset == 0xFE
 	# if primary_skillset == 0xFF, ability_slots[0] set by main job
 	unit_data.skillsets_names = ["", ""]
-	unit_data.skillsets_names[0] = RomReader.jobs_data.values()[main_job].skillset_unique_name
+	unit_data.skillsets_names[0] = rom_reader.jobs_data.values()[main_job].skillset_unique_name
 
 	# TODO if ability value == 0x01FE, get random ability
-	unit_data.ability_slots[0].ability_unique_name = get_ability_name(unit_data, 0, reaction)
-	unit_data.ability_slots[1].ability_unique_name = get_ability_name(unit_data, 1, support)
-	unit_data.ability_slots[2].ability_unique_name = get_ability_name(unit_data, 2, movement)
+	unit_data.ability_slots[0].ability_unique_name = get_ability_name(unit_data, 0, reaction, rom_reader)
+	unit_data.ability_slots[1].ability_unique_name = get_ability_name(unit_data, 1, support, rom_reader)
+	unit_data.ability_slots[2].ability_unique_name = get_ability_name(unit_data, 2, movement, rom_reader)
 
 	# position
 	unit_data.tile_position = Vector3i(position_x, upper_level, position_y)
@@ -220,27 +220,27 @@ func get_unit_data() -> UnitData:
 	return unit_data
 
 
-func get_item_name(unit_data: UnitData, slot_idx: int, new_item_idx: int) -> String:
+func get_item_name(unit_data: UnitData, slot_idx: int, new_item_idx: int, rom_reader: RomReader) -> String:
 	if new_item_idx < 0xFE:
-		return RomReader.items_array[new_item_idx].unique_name
+		return rom_reader.items_array[new_item_idx].unique_name
 	if new_item_idx == 0xFF:
-		return RomReader.items_array[0].unique_name
+		return rom_reader.items_array[0].unique_name
 	
 	# TODO if equipment value == 0xFE, get random leveled equipment
 	var filtered_items: Array[ItemData] = []
-	filtered_items.assign(RomReader.items_array.filter(func(item: ItemData) -> bool: return unit_data.equip_slots[slot_idx].slot_types.has(item.slot_type)))
+	filtered_items.assign(rom_reader.items_array.filter(func(item: ItemData) -> bool: return unit_data.equip_slots[slot_idx].slot_types.has(item.slot_type)))
 	var rand_item_idx: int = randi_range(0, filtered_items.size() - 1)
 	return filtered_items[rand_item_idx].unique_name
 
 
-func get_ability_name(unit_data: UnitData, slot_idx: int, new_ability_idx: int) -> String:
+func get_ability_name(unit_data: UnitData, slot_idx: int, new_ability_idx: int, rom_reader: RomReader) -> String:
 	if new_ability_idx < 0x01FE:
-		return RomReader.abilities.values()[new_ability_idx].unique_name
+		return rom_reader.abilities.values()[new_ability_idx].unique_name
 	if new_ability_idx == 0xFF:
-		return RomReader.abilities.values()[0].unique_name
+		return rom_reader.abilities.values()[0].unique_name
 	
 	# TODO if ability value == 0x01FE, get random learned ability?
 	var filtered_abilities: Array[Ability] = []
-	filtered_abilities.assign(RomReader.abilities.values().filter(func(ability: Ability) -> bool: return unit_data.ability_slots[slot_idx].slot_types.has(ability.slot_type)))
+	filtered_abilities.assign(rom_reader.abilities.values().filter(func(ability: Ability) -> bool: return unit_data.ability_slots[slot_idx].slot_types.has(ability.slot_type)))
 	var rand_ability_idx: int = randi_range(0, filtered_abilities.size() - 1)
 	return filtered_abilities[rand_ability_idx].unique_name

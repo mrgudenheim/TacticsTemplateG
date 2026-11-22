@@ -342,7 +342,7 @@ func get_action_for_unit(reactor_unit: UnitData, initiating_action: Action) -> A
 		var looked_up_action: Action = ActionResolver.lookup_action(action_unique_name)
 		if looked_up_action != null:
 			return looked_up_action
-		push_error("Action unique_name: " + action_unique_name + " not found in GameData or RomReader. Using weapon attack.")
+		push_error("Action unique_name: " + action_unique_name + " not found in GameData. Using weapon attack.")
 		return reactor_unit.get_attack_action()
 
 

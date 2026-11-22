@@ -13,11 +13,7 @@ func _init(new_name: String = "", new_slot_types: Array[Ability.SlotType] = [], 
 
 
 func get_ability() -> Ability:
-	if GameData.ability_paths.has(ability_unique_name):
-		return GameData.get_ability(ability_unique_name)
-	
-	push_warning("can't find ability in GameData: " + ability_unique_name)
-	return Ability.new()
+	return GameData.get_ability(ability_unique_name)
 
 
 func _to_string() -> String:
