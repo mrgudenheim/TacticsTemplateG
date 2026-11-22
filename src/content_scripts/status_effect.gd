@@ -81,21 +81,6 @@ var freezes_ct: bool = false:
 		return freezes_ct
 
 
-func set_data(status_effect_bytes: PackedByteArray) -> void:
-	byte_00 = status_effect_bytes.decode_u8(0)
-	byte_01 = status_effect_bytes.decode_u8(1)
-	order = status_effect_bytes.decode_u8(2)
-	duration = status_effect_bytes.decode_u8(3)
-	checks_01 = status_effect_bytes.decode_u8(4)
-	checks_02 = status_effect_bytes.decode_u8(5)
-	status_cancels_flags = status_effect_bytes.slice(6, 11)
-	status_cant_stack_flags = status_effect_bytes.slice(11, 16)
-	removed_on_damaged = checks_01 & 0x08 == 0x08 # confusion, transparent, charm, sleep, TODO is this really what this flag does?
-	
-	if duration == 0:
-		duration_type = DurationType.INDEFINITE
-
-
 func get_icon_rect() -> Rect2i:
 	if duration_type == DurationType.TURNS:
 		if duration >= duration_icons.size() - 1:
@@ -104,30 +89,6 @@ func get_icon_rect() -> Rect2i:
 	if not icon_rects.is_empty():
 		return icon_rects[0]
 	return Rect2i(Vector2i.ZERO, Vector2i.ONE)
-
-
-# called after all StatusEffects have already been initialized since this indexes into the complete array
-func status_flags_to_status_array() -> void:
-	status_cancels = get_status_id_array(status_cancels_flags)
-	status_cant_stack = get_status_id_array(status_cant_stack_flags)
-
-
-static func get_status_id_array(status_bitflags: PackedByteArray) -> PackedStringArray:
-	var status_array: PackedStringArray = []
-	
-	#if RomReader.status_effects.is_empty():
-		#push_warning("Trying to get StatusEffects before they are loaded")
-		#return status_array
-	
-	for byte_idx: int in status_bitflags.size():
-		for bit_idx: int in range(7, -1, -1):
-			var byte: int = status_bitflags.decode_u8(byte_idx)
-			if byte & (2 ** bit_idx) != 0:
-				var status_index: int = (7 - bit_idx) + (byte_idx * 8)
-				#status_array.append(RomReader.scus_data.status_effects[status_index])
-				status_array.append(RomReader.scus_data.status_effects[status_index].unique_name)
-	
-	return status_array
 
 
 func get_ai_score(user: UnitData, target: UnitData, remove: bool = false) -> float:

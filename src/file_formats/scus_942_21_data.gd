@@ -108,15 +108,15 @@ class ItemAttribute:
 	var elemental_weakness: int = 0 # 1 byte of bitflags, elemental types
 	var elemental_strengthen: int = 0 # 1 byte of bitflags, elemental types
 	
-	func set_data(item_attribute_bytes: PackedByteArray) -> void:
+	func set_data(item_attribute_bytes: PackedByteArray, all_status_effects: Array[StatusEffect]) -> void:
 		pa_modifier = item_attribute_bytes.decode_u8(0)
 		ma_modifier = item_attribute_bytes.decode_u8(1)
 		sp_modifier = item_attribute_bytes.decode_u8(2)
 		move_modifier = item_attribute_bytes.decode_u8(3)
 		jump_modifier = item_attribute_bytes.decode_u8(4)
-		status_always = StatusEffect.get_status_id_array(item_attribute_bytes.slice(5, 10))
-		status_immune = StatusEffect.get_status_id_array(item_attribute_bytes.slice(10, 15))
-		status_start = StatusEffect.get_status_id_array(item_attribute_bytes.slice(15, 20))
+		status_always = FftStatusImporter.decode_status_id_array(item_attribute_bytes.slice(5, 10), all_status_effects)
+		status_immune = FftStatusImporter.decode_status_id_array(item_attribute_bytes.slice(10, 15), all_status_effects)
+		status_start = FftStatusImporter.decode_status_id_array(item_attribute_bytes.slice(15, 20), all_status_effects)
 		elemental_absorb = item_attribute_bytes.decode_u8(20)
 		elemental_cancel = item_attribute_bytes.decode_u8(21)
 		elemental_half = item_attribute_bytes.decode_u8(22)
@@ -143,13 +143,13 @@ class InflictStatus:
 	var status_flags: PackedByteArray = []
 	var status_list: PackedStringArray = []
 	
-	func set_data(inflict_status_bytes: PackedByteArray) -> void:
+	func set_data(inflict_status_bytes: PackedByteArray, all_status_effects: Array[StatusEffect]) -> void:
 		is_all = inflict_status_bytes.decode_u8(0) & 0x80 == 0x80
 		is_random = inflict_status_bytes.decode_u8(0) & 0x40 == 0x40
 		is_separate = inflict_status_bytes.decode_u8(0) & 0x20 == 0x20
 		will_cancel = inflict_status_bytes.decode_u8(0) & 0x10 == 0x10
 		status_flags = inflict_status_bytes.slice(1)
-		status_list = StatusEffect.get_status_id_array(status_flags)
+		status_list = FftStatusImporter.decode_status_id_array(status_flags, all_status_effects)
 
 # Inflict Status data https://ffhacktics.com/wiki/Inflict_Statuses
 var inflict_status_data_start: int = 0x63fc4 - 0xf800
@@ -184,10 +184,9 @@ func init_from_scus(rom_reader: RomReader) -> void:
 	status_effects.resize(status_effect_entries)
 	for id: int in status_effect_entries:
 		var new_status_effect_bytes: PackedByteArray = status_effect_data_bytes.slice(id * status_effect_entry_length, (id + 1) * status_effect_entry_length)
-		var new_status_effect: StatusEffect = StatusEffect.new()
-		new_status_effect.set_data(new_status_effect_bytes)
-		new_status_effect.status_effect_name = RomReader.fft_text.status_names[id]
-		new_status_effect.add_to_global_list()
+		var new_status_effect: StatusEffect = FftStatusImporter.create_from_bytes(new_status_effect_bytes, rom_reader)
+		new_status_effect.status_effect_name = rom_reader.fft_text.status_names[id]
+		FftRegistryHelper.register_unique(rom_reader.status_effects, new_status_effect, new_status_effect.status_effect_name, "StatusEffect")
 		new_status_effect.status_id = id
 		status_effects[id] = new_status_effect
 		
@@ -207,7 +206,7 @@ func init_from_scus(rom_reader: RomReader) -> void:
 		
 	
 	for status_effect: StatusEffect in status_effects:
-		status_effect.status_flags_to_status_array() # called after all StatusEffects have already been initialized since this indexes into the complete array
+		FftStatusImporter.resolve_status_flags(status_effect, status_effects) # called after all StatusEffects have already been initialized since this indexes into the complete array
 	
 	# Inflict Status data https://ffhacktics.com/wiki/Inflict_Statuses
 	# inflict status data needs to be loaded before abilities and items that reference the array
@@ -216,7 +215,7 @@ func init_from_scus(rom_reader: RomReader) -> void:
 	for id: int in inflict_status_entries:
 		var new_inflict_status_bytes: PackedByteArray = inflict_status_data_bytes.slice(id * inflict_status_entry_length, (id + 1) * inflict_status_entry_length)
 		var new_inflict_status: InflictStatus = InflictStatus.new()
-		new_inflict_status.set_data(new_inflict_status_bytes)
+		new_inflict_status.set_data(new_inflict_status_bytes, status_effects)
 		inflict_statuses[id] = new_inflict_status
 	
 	
@@ -227,10 +226,7 @@ func init_from_scus(rom_reader: RomReader) -> void:
 	jobs_data.resize(num_entries)
 	for job_id: int in num_entries:
 		var job_entry_bytes: PackedByteArray = job_bytes.slice(job_id * entry_size, (job_id * entry_size) + entry_size)
-		var job_data: JobData = JobData.new(job_id, job_entry_bytes)
-		#job_data.job_name = RomReader.fft_text.job_names[job_id]
-		#job_data.skillset_id = job_bytes.decode_u8(job_id * entry_size)
-		#job_data.monster_type = job_bytes.decode_u8((job_id * entry_size) + 0x2f)
+		var job_data: JobData = FftJobImporter.create_from_rom(job_id, job_entry_bytes, rom_reader)
 		jobs_data[job_id] = job_data
 	
 	# unit skillset data
@@ -433,7 +429,7 @@ func init_from_scus(rom_reader: RomReader) -> void:
 	for id: int in item_attribute_entries:
 		var new_item_attribute_bytes: PackedByteArray = item_attribute_data_bytes.slice(id * item_attribute_entry_length, (id + 1) * item_attribute_entry_length)
 		var new_item_attribute: ItemAttribute = ItemAttribute.new()
-		new_item_attribute.set_data(new_item_attribute_bytes)
+		new_item_attribute.set_data(new_item_attribute_bytes, status_effects)
 		item_attributes[id] = new_item_attribute
 	
 	# unit base data https://ffhacktics.com/wiki/Out_of_Battle_Unit_Generation
