@@ -26,6 +26,10 @@ extends PanelContainer
 var _default_export_button_text: String
 
 func _ready() -> void:
+	import_path_line_edit.text_changed.connect(_on_import_path_selected)
+	import_find_button.pressed.connect(func() -> void: import_file_dialog.visible = true)
+	import_file_dialog.dir_selected.connect(_on_import_path_selected)
+
 	rom_path_line_edit.text_changed.connect(_on_rom_path_selected)
 	rom_find_button.pressed.connect(func() -> void: rom_file_dialog.visible = true)
 	rom_file_dialog.file_selected.connect(_on_rom_path_selected)
@@ -66,6 +70,15 @@ func update_export_enabled() -> void:
 			export_data_button.tooltip_text += "Invalid path to ROM"
 		if not destination_path_is_valid:
 			export_data_button.tooltip_text += "Invalid path to export destination"
+
+
+func _on_import_path_selected(path: String) -> void:
+	GameData.external_data_paths["IMPORT_PATH"] = path
+	if import_path_line_edit.text != path:
+		import_path_line_edit.text = path
+	import_file_dialog.visible = false
+
+	GameData.save_data_paths()
 
 
 func _on_rom_path_selected(path: String) -> void:
