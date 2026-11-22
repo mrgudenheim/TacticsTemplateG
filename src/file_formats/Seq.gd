@@ -64,8 +64,8 @@ var shp_name: String:
 @export var name_alias: String = "default_name_alias"
 
 # section 1
-var AA: int = 0
-var BB: int = 0
+var aa: int = 0
+var bb: int = 0
 var section1_length: int = 4
 
 # section 2
@@ -108,8 +108,8 @@ func set_data_from_seq_object(seq_object: Seq) -> void:
 	name_alias = seq_object.name_alias
 
 	# section 1
-	AA = seq_object.AA
-	BB = seq_object.BB
+	aa = seq_object.aa
+	bb = seq_object.bb
 
 	# section 2
 	sequence_pointers = seq_object.sequence_pointers.duplicate()
@@ -142,12 +142,12 @@ func set_file_name(new_file_name: String) -> void:
 		name_alias = file_name
 
 
-func set_data_from_seq_bytes(bytes: PackedByteArray) -> void:
+func set_data_from_seq_bytes(bytes: PackedByteArray, rom_reader: RomReader = null) -> void:
 	if is_initialized:
 		return
 	
-	AA = bytes.decode_u16(0)
-	BB = bytes.decode_u16(2)
+	aa = bytes.decode_u16(0)
+	bb = bytes.decode_u16(2)
 	
 	# get pointers
 	sequence_pointers.clear()
@@ -188,7 +188,7 @@ func set_data_from_seq_bytes(bytes: PackedByteArray) -> void:
 	
 	for index: int in sequence_pointers.size():
 		sequence_pointers[index] = get_pointer_from_address(sequence_pointers[index])
-	set_sequence_names()
+	set_sequence_names(rom_reader)
 	
 	is_initialized = true
 
@@ -213,7 +213,7 @@ func get_pointer_from_address(address: int) -> int:
 	return index
 
 
-func set_sequence_names() -> void:
+func set_sequence_names(rom_reader: RomReader = null) -> void:
 	if seq_names.has(name_alias):
 		#push_warning(sequence_pointers)
 		#push_warning(seq_names[name_alias])
@@ -222,20 +222,23 @@ func set_sequence_names() -> void:
 			if sequences[pointer].seq_name.is_empty() and seq_names[name_alias].size() > pointer_index: # if this is the first pointer to point to the sequence
 				sequences[pointer].seq_name = seq_names[name_alias][pointer_index] # set name of the sequence
 	
+	if rom_reader == null:
+		return
+
 	# get animation names based on ability execution and job / monster type
-	for job: JobData in RomReader.scus_data.jobs_data:
-		var spr: Spr = RomReader.sprs[RomReader.get_spr_file_idx(job.sprite_id)]
+	for job: JobData in rom_reader.scus_data.jobs_data:
+		var spr: Spr = rom_reader.sprs[rom_reader.get_spr_file_idx(job.sprite_id)]
 		#spr.set_data()
-		spr.set_spritesheet_data(job.sprite_id)
+		spr.set_spritesheet_data(job.sprite_id, rom_reader)
 		if spr.seq_name != file_name:
 			continue
 		
 		var job_type_name: String = job.display_name
 		if job.job_id >= 0x5e and job.job_id <= 0x8d: # generic monsters
-			job_type_name = RomReader.fft_text.job_names[0x5e + ((job.monster_type - 1) * 3)]
+			job_type_name = rom_reader.fft_text.job_names[0x5e + ((job.monster_type - 1) * 3)]
 		
-		for ability_id: int in RomReader.scus_data.skillsets_data[job.skillset_id].action_ability_ids:
-			var ability: FftAbilityData = RomReader.fft_abilities[ability_id]
+		for ability_id: int in rom_reader.scus_data.skillsets_data[job.skillset_id].action_ability_ids:
+			var ability: FftAbilityData = rom_reader.fft_abilities[ability_id]
 			if ability_id == 0: # skip empty abilities
 				continue
 			
@@ -309,8 +312,8 @@ func get_seq_bytes() -> PackedByteArray:
 	bytes.fill(0)
 	
 	# section 1
-	bytes.encode_u16(0, AA)
-	bytes.encode_u16(2, BB)
+	bytes.encode_u16(0, aa)
+	bytes.encode_u16(2, bb)
 	
 	# section 2
 	for seq_pointer_index: int in sequence_pointers.size():
@@ -363,8 +366,8 @@ func set_data_from_cfg(filepath:String) -> void:
 	file_name = file_name.trim_suffix("_seq.cfg")
 	name_alias = cfg.get_value(file_name, "name_alias")
 	
-	AA = cfg.get_value(file_name, "AA")
-	BB = cfg.get_value(file_name, "BB")
+	aa = cfg.get_value(file_name, "aa")
+	bb = cfg.get_value(file_name, "bb")
 	sequence_pointers = cfg.get_value(file_name, "sequence_pointers")
 	
 	for seq_index:int in sequence_pointers.size():
@@ -425,8 +428,8 @@ func write_cfg() -> void:
 	var cfg: ConfigFile = ConfigFile.new()
 	cfg.set_value(file_name, "file_name", file_name)
 	cfg.set_value(file_name, "name_alias", name_alias)
-	cfg.set_value(file_name, "AA", AA)
-	cfg.set_value(file_name, "BB", BB)
+	cfg.set_value(file_name, "aa", aa)
+	cfg.set_value(file_name, "bb", bb)
 	cfg.set_value(file_name, "sequence_pointers", sequence_pointers)
 	
 	for seq_index: int in sequences.size():

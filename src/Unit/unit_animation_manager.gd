@@ -32,7 +32,7 @@ var eff_shp: Shp
 var eff_seq: Seq
 
 var item_texture: Texture2D
-var item_spr: Spr
+var current_item_data: ItemData
 
 var other_texture: Texture2D
 var other_spritesheet_data: UnitSpritesheetData
@@ -316,9 +316,11 @@ func process_seq_part(fft_animation: FftAnimation, seq_part_id: int, draw_target
 			#var assembled_image: Image = item_sheet_type.get_assembled_frame(
 					#item_frame_id, item_image, global_animation_ptr_id, unit_actor.debug_menu.other_type_options.selected, unit_actor.primary_weapon.wep_frame_v_offset, unit_actor.submerged_depth)
 			var target_sprite: Sprite3D = unit_sprites_manager.sprite_item
-			# item graphics start on 3rd row of ITEM.BIN, item graphic id does not count the blank 16th column, so need to add extra based on the row
-			@warning_ignore("integer_division")
-			target_sprite.frame = 32 + RomReader.items_array[item_frame_id].item_graphic_id + (RomReader.items_array[item_frame_id].item_graphic_id / 15) 
+			var item_data: ItemData = current_item_data if current_item_data != null else GameData.get_item_by_idx(item_frame_id)
+			if item_data != null:
+				# item graphics start on 3rd row of ITEM.BIN, item graphic id does not count the blank 16th column, so need to add extra based on the row
+				@warning_ignore("integer_division")
+				target_sprite.frame = 32 + item_data.item_graphic_id + (item_data.item_graphic_id / 15)
 		elif seq_part.opcode_name == "Wait":
 			var loop_length: int = seq_part.parameters[0]
 			if loop_length > 0:
@@ -570,7 +572,7 @@ func set_item(new_item_index: int) -> void:
 	unit_sprites_manager.sprite_item.texture = ImageTexture.create_from_image(item_spr.get_rgba8_image())
 	if unit_sprites_manager.sprite_item.frame != 32:
 		@warning_ignore("integer_division")
-		unit_sprites_manager.sprite_item.frame = 32 + RomReader.items_array[new_item_index].item_graphic_id + (RomReader.items_array[new_item_index].item_graphic_id / 15) 
+		unit_sprites_manager.sprite_item.frame = 32 + current_item_data.item_graphic_id + (current_item_data.item_graphic_id / 15)
 
 
 func get_layer_sprite3d(layer_id: int) -> Sprite3D:

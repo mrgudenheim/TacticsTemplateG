@@ -173,13 +173,13 @@ func set_data_from_shp_object(shp_object: Shp) -> void:
 	frames_submerged = shp_object.frames_submerged.duplicate()
 
 
-func set_data_from_shp_file(filepath: String) -> void:
+func set_data_from_shp_file(filepath: String, rom_reader: RomReader = null) -> void:
 	var bytes: PackedByteArray = FileAccess.get_file_as_bytes(filepath)
 	if bytes.size() == 0:
 		push_warning("Open Error: " + filepath)
 		return
 	else:
-		set_data_from_shp_bytes(bytes)
+		set_data_from_shp_bytes(bytes, rom_reader)
 
 
 func set_file_name(new_file_name: String) -> void:
@@ -196,7 +196,7 @@ func set_file_name(new_file_name: String) -> void:
 		name_alias = file_name
 
 
-func set_data_from_shp_bytes(bytes: PackedByteArray) -> void:
+func set_data_from_shp_bytes(bytes: PackedByteArray, rom_reader: RomReader = null) -> void:
 	swim_pointer = bytes.decode_u32(0)
 	attack_start_index = bytes.decode_u16(4)
 	sp_extra = bytes.decode_u16(6)
@@ -223,6 +223,7 @@ func set_data_from_shp_bytes(bytes: PackedByteArray) -> void:
 			var frame_pointer_submerged: int = bytes.decode_u32(swim_pointer + (frame_index * 4))
 			frame_pointers_submerged.append(frame_pointer_submerged)
 	
+	var subframe_sizes: PackedVector2Array = rom_reader.battle_bin_data.shp_subframe_sizes
 	var frame_data_start: int = section1_length + section2_length + 2
 	frames.clear()
 	for frame_pointer: int in frame_pointers:
@@ -231,7 +232,7 @@ func set_data_from_shp_bytes(bytes: PackedByteArray) -> void:
 			push_warning(str(frame_offset) + " > " + str(bytes.size()))
 		var num_subframes: int = 1 + (bytes.decode_u8(frame_offset) & 0b00000111)
 		var frame_length: int = 2 + (num_subframes * 4)
-		frames.append(_get_frame_data(bytes.slice(frame_offset, frame_offset + frame_length)))
+		frames.append(_get_frame_data(bytes.slice(frame_offset, frame_offset + frame_length), subframe_sizes))
 	
 	# submerged frames
 	if has_submerged_data:
@@ -241,12 +242,12 @@ func set_data_from_shp_bytes(bytes: PackedByteArray) -> void:
 			var frame_offset: int = frame_submerged_data_start + frame_pointer_submerged
 			var num_subframes: int = 1 + (bytes.decode_u8(frame_offset) & 0b00000111)
 			var frame_length: int = 2 + (num_subframes * 4)
-			frames_submerged.append(_get_frame_data(bytes.slice(frame_offset, frame_offset + frame_length)))
+			frames_submerged.append(_get_frame_data(bytes.slice(frame_offset, frame_offset + frame_length), subframe_sizes))
 	
 	is_initialized = true
 
 
-func _get_frame_data(bytes: PackedByteArray) -> FrameData:
+func _get_frame_data(bytes: PackedByteArray, subframe_sizes: PackedVector2Array) -> FrameData:
 	var frame_data: FrameData = FrameData.new()
 	
 	frame_data.num_subframes = 1 + (bytes.decode_u8(0) & 0x07)
@@ -260,12 +261,12 @@ func _get_frame_data(bytes: PackedByteArray) -> FrameData:
 	for subframe_index: int in frame_data.num_subframes:
 		var subframe_start: int = 2 + (subframe_index * 4)
 		var subframe_bytes: PackedByteArray = bytes.slice(subframe_start, subframe_start + 4)
-		frame_data.subframes.append(_get_subframe_data(subframe_bytes))
+		frame_data.subframes.append(_get_subframe_data(subframe_bytes, subframe_sizes))
 	
 	return frame_data
 
 
-func _get_subframe_data(bytes: PackedByteArray) -> SubFrameData:
+func _get_subframe_data(bytes: PackedByteArray, subframe_sizes: PackedVector2Array) -> SubFrameData:
 	var subframe: SubFrameData = SubFrameData.new()
 	
 	subframe.shift_x = bytes.decode_s8(0)
@@ -275,14 +276,16 @@ func _get_subframe_data(bytes: PackedByteArray) -> SubFrameData:
 	subframe.load_location_x = (bytes23 & 0x001F) * PIXELS_PER_TILE # pixels
 	subframe.load_location_y = ((bytes23 & 0x03E0) >> 5) * PIXELS_PER_TILE # pixels
 	var rect_size_index: int = (bytes23 & 0x3C00) >> 10
-	subframe.rect_size = RomReader.battle_bin_data.shp_subframe_sizes[rect_size_index]
+	if rect_size_index < subframe_sizes.size():
+		subframe.rect_size = subframe_sizes[rect_size_index]
 	subframe.flip_x = (bytes23 & 0x4000) != 0
 	subframe.flip_y = (bytes23 & 0x8000) != 0
 	
 	return subframe
 
 
-func write_shp(path: String = "user://FFTorama") -> void:
+func write_shp(path: String = "user://FFTorama", rom_reader: RomReader = null) -> void:
+	var subframe_sizes: PackedVector2Array = rom_reader.battle_bin_data.shp_subframe_sizes
 	var bytes: PackedByteArray = []
 	var total_size: int = section1_length + section2_length + section3_length
 	if has_submerged_data:
@@ -310,16 +313,16 @@ func write_shp(path: String = "user://FFTorama") -> void:
 		bytes.encode_u16(4, attack_start_index)
 		bytes.encode_u16(6, sp_extra)
 	
-	bytes = _write_sections23_bytes(bytes, section1_length, frame_pointers, frames, section3_length)
+	bytes = _write_sections23_bytes(bytes, section1_length, frame_pointers, frames, section3_length, subframe_sizes)
 	if swim_pointer > section2_length:
-		bytes = _write_sections23_bytes(bytes, swim_pointer, frame_pointers_submerged, frames_submerged, frames_submerged_length)
+		bytes = _write_sections23_bytes(bytes, swim_pointer, frame_pointers_submerged, frames_submerged, frames_submerged_length, subframe_sizes)
 	
 	DirAccess.make_dir_recursive_absolute(path)
 	var save_file: FileAccess = FileAccess.open(path.path_join(file_name), FileAccess.WRITE)
 	save_file.store_buffer(bytes)
 
 
-func _write_sections23_bytes(bytes: PackedByteArray,  data_start_pointer: int, pointers: Array[int], frames_list: Array[FrameData], section3data_length: int) -> PackedByteArray:
+func _write_sections23_bytes(bytes: PackedByteArray, data_start_pointer: int, pointers: Array[int], frames_list: Array[FrameData], section3data_length: int, subframe_sizes: PackedVector2Array) -> PackedByteArray:
 	# section 2
 	for frame_index: int in pointers.size():
 		bytes.encode_u32(data_start_pointer + (frame_index * 4), pointers[frame_index])	
@@ -352,7 +355,7 @@ func _write_sections23_bytes(bytes: PackedByteArray,  data_start_pointer: int, p
 			var b56: int = (subframe.load_location_x / PIXELS_PER_TILE)
 			@warning_ignore("integer_division")
 			var b56_2: int = (subframe.load_location_y / PIXELS_PER_TILE) << 5
-			var b56_3: int = RomReader.battle_bin_data.shp_subframe_sizes.find(subframe.rect_size) << 10
+			var b56_3: int = subframe_sizes.find(subframe.rect_size) << 10
 			var b56_4: int = (subframe.flip_x as int) << 14
 			var b56_5: int = (subframe.flip_y as int) << 15
 			

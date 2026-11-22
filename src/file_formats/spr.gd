@@ -59,17 +59,17 @@ func get_sub_spr(new_name: String, start_pixel: int, end_pixel: int) -> Spr:
 	return sub_spr
 
 
-func set_data(spr_file: PackedByteArray = RomReader.get_file_data(file_name), overwrite: bool = false) -> void:
+func set_data(rom_reader: RomReader, spr_file: PackedByteArray, overwrite: bool = false) -> void:
 	if is_initialized and not overwrite:
 		return
 	
 	var num_palette_bytes: int = num_colors * 2
 	var palette_bytes: PackedByteArray = spr_file.slice(0, num_palette_bytes)
 	@warning_ignore("integer_division")
-	var num_bytes_top: int = (width * 256) /2
+	var num_bytes_top: int = (width * 256) / 2
 	var top_pixels_bytes: PackedByteArray = spr_file.slice(num_palette_bytes, num_palette_bytes + num_bytes_top)
 	@warning_ignore("integer_division")
-	var num_bytes_portrait_rows: int = (width * PORTRAIT_HEIGHT) /2
+	var num_bytes_portrait_rows: int = (width * PORTRAIT_HEIGHT) / 2
 	var portrait_rows_pixels: PackedByteArray = spr_file.slice(num_palette_bytes + num_bytes_top, num_palette_bytes + num_bytes_top + num_bytes_portrait_rows)
 	var spr_compressed_bytes: PackedByteArray = spr_file.slice(0x9200) if has_compressed else PackedByteArray()
 	var spr_decompressed_bytes: PackedByteArray = decompress(spr_compressed_bytes)
@@ -85,7 +85,7 @@ func set_data(spr_file: PackedByteArray = RomReader.get_file_data(file_name), ov
 	spritesheet = get_rgba8_image()
 	
 	if not is_sp2:
-		set_sp2s()
+		set_sp2s(rom_reader)
 	
 	is_initialized = true
 
@@ -238,16 +238,16 @@ func decompress(compressed_bytes: PackedByteArray) -> PackedByteArray:
 	return decompressed_bytes
 
 
-func set_sp2s() -> void:
+func set_sp2s(rom_reader: RomReader) -> void:
 	var sp2_name_base: String = file_name.get_basename()
 	if sp2_name_base == "TETSU":
 		sp2_name_base = "IRON"
 	
 	# handle ROMs with sprs expanded by ShiShi
 	var sp2_name: String = sp2_name_base + ".SP2"
-	if RomReader.file_records.has(sp2_name):
+	if rom_reader.file_records.has(sp2_name):
 		var sp2_spr: Spr = Spr.new(sp2_name)
-		sp2_spr.set_sp2_data(self)
+		sp2_spr.set_sp2_data(self, rom_reader)
 		sp2s[sp2_name] = sp2_spr
 		
 		# append sp2 image data to base spr
@@ -256,9 +256,9 @@ func set_sp2s() -> void:
 	# handle vanilla sp2s
 	for file_num: int in range(2,6):
 		sp2_name = sp2_name_base + str(file_num) + ".SP2"
-		if RomReader.file_records.has(sp2_name):
+		if rom_reader.file_records.has(sp2_name):
 			var sp2_spr: Spr = Spr.new(sp2_name)
-			sp2_spr.set_sp2_data(self)
+			sp2_spr.set_sp2_data(self, rom_reader)
 			sp2s[sp2_name] = sp2_spr
 			
 			# append sp2 image data to base spr
@@ -267,9 +267,9 @@ func set_sp2s() -> void:
 	# handle TETSU case in ROMs with sprs expanded by ShiShi
 	for file_num: int in range(2,6):
 		sp2_name = sp2_name_base + "_" + str(file_num) + ".SP2"
-		if RomReader.file_records.has(sp2_name):
+		if rom_reader.file_records.has(sp2_name):
 			var sp2_spr: Spr = Spr.new(sp2_name)
-			sp2_spr.set_sp2_data(self)
+			sp2_spr.set_sp2_data(self, rom_reader)
 			sp2s[sp2_name] = sp2_spr
 			
 			# append sp2 image data to base spr
@@ -279,25 +279,25 @@ func set_sp2s() -> void:
 	spritesheet = get_rgba8_image()
 
 
-func set_sp2_data(base_spr: Spr) -> void:
-	var sp2_data: PackedByteArray = RomReader.get_file_data(file_name)
+func set_sp2_data(base_spr: Spr, rom_reader: RomReader) -> void:
+	var sp2_data: PackedByteArray = rom_reader.get_file_data(file_name)
 	color_indices = set_color_indices(sp2_data)
 	color_palette = base_spr.color_palette
 	set_pixel_colors()
 	spritesheet = get_rgba8_image()
 
 
-func set_spritesheet_data(new_sprite_id: int) -> void:
+func set_spritesheet_data(new_sprite_id: int, rom_reader: RomReader) -> void:
 	if file_name == "OTHER.SPR":
 		shp_name = "OTHER.SHP"
 		seq_name = "OTHER.SEQ"
 		return
 	
 	sprite_id = new_sprite_id
-	shp_id = RomReader.battle_bin_data.spritesheet_shp_id[sprite_id]
-	seq_id = RomReader.battle_bin_data.spritesheet_seq_id[sprite_id]
-	flying_flag = RomReader.battle_bin_data.spritesheet_flying[sprite_id]
-	graphic_height = RomReader.battle_bin_data.spritesheet_graphic_height[sprite_id]
+	shp_id = rom_reader.battle_bin_data.spritesheet_shp_id[sprite_id]
+	seq_id = rom_reader.battle_bin_data.spritesheet_seq_id[sprite_id]
+	flying_flag = rom_reader.battle_bin_data.spritesheet_flying[sprite_id]
+	graphic_height = rom_reader.battle_bin_data.spritesheet_graphic_height[sprite_id]
 	
 	match shp_id:
 		0:
@@ -336,12 +336,12 @@ func set_spritesheet_data(new_sprite_id: int) -> void:
 			seq_name = "KANZEN.SEQ"
 
 
-func create_frame_grid(anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: int = 0, submerged_depth: int = 0, different_shp_name: String = "") -> Image:
+func create_frame_grid(rom_reader: RomReader, anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: int = 0, submerged_depth: int = 0, different_shp_name: String = "") -> Image:
 	if different_shp_name == "":
 		different_shp_name = shp_name
-	var shp: Shp = RomReader.shps_array[RomReader.file_records[different_shp_name].type_index]
+	var shp: Shp = rom_reader.shps_array[rom_reader.file_records[different_shp_name].type_index]
 	if not shp.is_initialized:
-		shp.set_data_from_shp_bytes(RomReader.get_file_data(shp_name))
+		shp.set_data_from_shp_bytes(rom_reader.get_file_data(shp_name), rom_reader)
 	var num_cells_wide: int = 16
 	var num_cells_tall: int = 16 + (16 * sp2s.size())
 	if shp.frames.size() > 256: # WEP has more frames (related to the frame offsets per item type)
@@ -380,9 +380,9 @@ func create_frame_grid(anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: 
 	return frame_grid
 
 
-func create_frame_grid_texture(palette_idx: int = 0, anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: int = 0, submerged_depth: int = 0, different_shp_name: String = "") -> ImageTexture:
+func create_frame_grid_texture(rom_reader: RomReader, palette_idx: int = 0, anim_ptr_idx: int = 0, other_idx: int = 0, wep_v_offset: int = 0, submerged_depth: int = 0, different_shp_name: String = "") -> ImageTexture:
 	set_pixel_colors(palette_idx)
 	spritesheet = get_rgba8_image()
 	
-	var new_texture: ImageTexture = ImageTexture.create_from_image(create_frame_grid(anim_ptr_idx, other_idx, wep_v_offset, submerged_depth, different_shp_name))
+	var new_texture: ImageTexture = ImageTexture.create_from_image(create_frame_grid(rom_reader, anim_ptr_idx, other_idx, wep_v_offset, submerged_depth, different_shp_name))
 	return new_texture
