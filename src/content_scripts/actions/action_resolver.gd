@@ -47,36 +47,33 @@ static func get_evade_direction(origin_tile: TerrainTile, target: UnitData) -> E
 	return evade_direction
 
 
-static func get_total_hit_chance(
+static func _get_pre_evade_hit_chance(
 	action: Action,
 	caster: UnitData,
 	target: UnitData,
-	evade_direction: EvadeData.Directions,
-	units_override: Array[UnitData] = []
-) -> int:
-	var caster_passive_effects: Array[PassiveEffect] = caster.get_all_passive_effects(action.ignore_passives, units_override)
-	var target_passive_effects: Array[PassiveEffect] = target.get_all_passive_effects(action.ignore_passives, units_override)
-
+	caster_passive_effects: Array[PassiveEffect],
+	target_passive_effects: Array[PassiveEffect]
+) -> float:
 	if not action.required_target_job_uname.is_empty():
 		var required_jobs: PackedStringArray = action.required_target_job_uname.duplicate()
 		for passive_effect: PassiveEffect in caster_passive_effects:
 			required_jobs.append_array(passive_effect.add_applicable_target_jobs)
 		if not required_jobs.has(target.job_data.unique_name):
-			return 0
+			return 0.0
 
 	if not action.required_target_status_uname.is_empty():
 		var required_statuses: PackedStringArray = action.required_target_status_uname.duplicate()
 		for passive_effect: PassiveEffect in caster_passive_effects:
 			required_statuses.append_array(passive_effect.add_applicable_target_statuses)
 		if not Utilities.has_any_elements(target.get_current_status_ids(), required_statuses):
-			return 0
+			return 0.0
 
 	if not action.required_target_stat_basis.is_empty():
 		var required_bases: Array[UnitData.StatBasis] = action.required_target_stat_basis.duplicate()
 		for passive_effect: PassiveEffect in caster_passive_effects:
 			required_bases.append_array(passive_effect.add_applicable_target_stat_bases)
 		if not required_bases.has(target.stat_basis):
-			return 0
+			return 0.0
 
 	var base_hit_chance: float = action.base_hit_formula.get_result(caster, target, action.element)
 	var modified_hit_chance: float = base_hit_chance
@@ -90,6 +87,29 @@ static func get_total_hit_chance(
 			modified_hit_chance = passive_effect.hit_chance_modifier_user.apply(roundi(modified_hit_chance), caster, target)
 		for passive_effect: PassiveEffect in target_passive_effects:
 			modified_hit_chance = passive_effect.hit_chance_modifier_targeted.apply(roundi(modified_hit_chance), caster, target)
+
+	return modified_hit_chance
+
+
+static func get_total_hit_chance(
+	action: Action,
+	caster: UnitData,
+	target: UnitData,
+	evade_direction: EvadeData.Directions,
+	units_override: Array[UnitData] = []
+) -> int:
+	var caster_passive_effects: Array[PassiveEffect] = caster.get_all_passive_effects(action.ignore_passives, units_override)
+	var target_passive_effects: Array[PassiveEffect] = target.get_all_passive_effects(action.ignore_passives, units_override)
+
+	var pre_evade_hit_chance: float = _get_pre_evade_hit_chance(
+		action,
+		caster,
+		target,
+		caster_passive_effects,
+		target_passive_effects
+	)
+	if pre_evade_hit_chance <= 0.0:
+		return 0
 
 	var effective_evade_values: Dictionary[EvadeData.EvadeSource, int] = _get_effective_evade_values(
 		action,
@@ -105,7 +125,7 @@ static func get_total_hit_chance(
 		target_total_evade_factor = target_total_evade_factor * evade_factor
 	target_total_evade_factor = maxf(0.0, target_total_evade_factor)
 
-	return roundi(modified_hit_chance * target_total_evade_factor)
+	return roundi(pre_evade_hit_chance * target_total_evade_factor)
 
 
 static func resolve(
@@ -236,6 +256,7 @@ static func resolve(
 						simulated_caster,
 						simulated_target,
 						evade_direction,
+						hit_roll,
 						target_result,
 						active_random_generator,
 						units_override
@@ -451,6 +472,7 @@ static func _populate_miss_or_evade(
 	simulated_caster: UnitData,
 	simulated_target: UnitData,
 	evade_direction: EvadeData.Directions,
+	hit_roll: int,
 	target_result: ActionTargetResult,
 	random_generator: RandomNumberGenerator,
 	units_override: Array[UnitData] = []
@@ -461,6 +483,15 @@ static func _populate_miss_or_evade(
 
 	var caster_passive_effects: Array[PassiveEffect] = simulated_caster.get_all_passive_effects(action.ignore_passives, units_override)
 	var target_passive_effects: Array[PassiveEffect] = simulated_target.get_all_passive_effects(action.ignore_passives, units_override)
+	var pre_evade_hit_chance: int = clampi(
+		roundi(_get_pre_evade_hit_chance(action, simulated_caster, simulated_target, caster_passive_effects, target_passive_effects)),
+		0,
+		100
+	)
+	if hit_roll >= pre_evade_hit_chance:
+		target_result.hit_outcome = ActionTargetResult.HitOutcome.MISS
+		return
+
 	var evade_values: Dictionary[EvadeData.EvadeSource, int] = _get_effective_evade_values(
 		action,
 		simulated_caster,
