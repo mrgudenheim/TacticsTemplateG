@@ -398,6 +398,8 @@ func _create_mesh() -> void:
 		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, float(render_flags))
 		for vertex_index: int in 3:
 			var index: int = (i * 3) + vertex_index
+			st.set_normal(Vector3.UP)
+			st.set_uv(Vector2.ZERO)
 			st.set_color(Color.BLACK)
 			st.set_custom(0, centroid_color)
 			st.add_vertex(black_tri_vertices[index] * SCALE)
@@ -414,7 +416,7 @@ func _create_mesh() -> void:
 		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, float(render_flags))
 
 		for vert_index: int in [0, 1, 2]:
-			st.set_normal(quad_normals[vert_index] * SCALE) # TODO why is there error on MAP105 "terminate"
+			st.set_normal(quad_normals[vert_index] * SCALE)
 			st.set_uv(quad_uvs[vert_index])
 			st.set_color(Color.WHITE)
 			st.set_custom(0, centroid_color)
@@ -437,11 +439,15 @@ func _create_mesh() -> void:
 		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, float(render_flags))
 
 		for vert_index: int in [0, 1, 2]:
+			st.set_normal(Vector3.UP)
+			st.set_uv(Vector2.ZERO)
 			st.set_color(Color.BLACK)
 			st.set_custom(0, centroid_color)
 			st.add_vertex(quad_vertices[vert_index] * SCALE)
 
 		for vert_index: int in [3, 2, 1]:
+			st.set_normal(Vector3.UP)
+			st.set_uv(Vector2.ZERO)
 			st.set_color(Color.BLACK)
 			st.set_custom(0, centroid_color)
 			st.add_vertex(quad_vertices[vert_index] * SCALE)
