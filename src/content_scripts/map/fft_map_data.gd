@@ -377,7 +377,9 @@ func _create_mesh() -> void:
 		var v0: Vector3 = text_tri_vertices[i * 3] * SCALE
 		var v1: Vector3 = text_tri_vertices[i * 3 + 1] * SCALE
 		var v2: Vector3 = text_tri_vertices[i * 3 + 2] * SCALE
-		var render_flags: int = convert_render_bitflags(textured_tris_flags.decode_u16(i * 2))
+		var render_flags: int = 0
+		if not textured_tris_flags.is_empty():
+			render_flags = convert_render_bitflags(textured_tris_flags.decode_u16(i * 2))
 		var centroid: Vector3 = (v0 + v1 + v2) / 3.0
 		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, float(render_flags))
 		for vertex_index: int in 3:
@@ -393,7 +395,9 @@ func _create_mesh() -> void:
 		var v0: Vector3 = black_tri_vertices[i * 3] * SCALE
 		var v1: Vector3 = black_tri_vertices[i * 3 + 1] * SCALE
 		var v2: Vector3 = black_tri_vertices[i * 3 + 2] * SCALE
-		var render_flags: int = convert_render_bitflags(black_tris_flags.decode_u16(i * 2))
+		var render_flags: int = 0
+		if not black_tris_flags.is_empty():
+			render_flags = convert_render_bitflags(black_tris_flags.decode_u16(i * 2))
 		var centroid: Vector3 = (v0 + v1 + v2) / 3.0
 		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, float(render_flags))
 		for vertex_index: int in 3:
@@ -411,7 +415,9 @@ func _create_mesh() -> void:
 		var quad_vertices: PackedVector3Array = text_quad_vertices.slice(quad_start, quad_end)
 		var quad_normals: PackedVector3Array = text_quad_normals.slice(quad_start, quad_end)
 		var quad_uvs: PackedVector2Array = quads_uvs.slice(quad_start, quad_end)
-		var render_flags: int = convert_render_bitflags(textured_quads_flags.decode_u16(i * 2))
+		var render_flags: int = 0
+		if not textured_quads_flags.is_empty():
+			render_flags = convert_render_bitflags(textured_quads_flags.decode_u16(i * 2))
 		var centroid: Vector3 = (quad_vertices[0] + quad_vertices[1] + quad_vertices[2] + quad_vertices[3]) * SCALE / 4.0
 		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, float(render_flags))
 
@@ -434,7 +440,9 @@ func _create_mesh() -> void:
 		var quad_start: int = i * 4
 		var quad_end: int = (i + 1) * 4
 		var quad_vertices: PackedVector3Array = black_quad_vertices.slice(quad_start, quad_end)
-		var render_flags: int = convert_render_bitflags(black_quads_flags.decode_u16(i * 2))
+		var render_flags: int = 0
+		if not black_quads_flags.is_empty():
+			render_flags = convert_render_bitflags(black_quads_flags.decode_u16(i * 2))
 		var centroid: Vector3 = (quad_vertices[0] + quad_vertices[1] + quad_vertices[2] + quad_vertices[3]) * SCALE / 4.0
 		var centroid_color: Color = Color(centroid.x, centroid.y, centroid.z, float(render_flags))
 
