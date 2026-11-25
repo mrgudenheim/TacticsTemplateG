@@ -49,6 +49,7 @@ var items_array: Array[ItemData] = []
 var items: Dictionary[String, ItemData] = {} # [unique_name, ItemData]
 var status_effects: Dictionary[String, StatusEffect] = {} # [unique_name, StatusEffect]
 var jobs_data: Dictionary[String, JobData] = {} # [unique_name, JobData]
+var skillsets: Dictionary[String, Skillset] = {} # [unique_name, Skillset]
 var actions: Dictionary[String, Action] = {} # [unique_name, Action]
 var triggered_actions: Dictionary[String, TriggeredAction] = {} # [unique_name, TriggeredAction]
 var passive_effects: Dictionary[String, PassiveEffect] = {} # [unique_name, PassiveEffect]
@@ -952,10 +953,7 @@ func export_data_tables(save_path: String) -> void:
 		scenario.background_gradient_bottom = maps[scenario.map_chunks[0].unique_name].background_gradient_bottom
 		scenario.background_gradient_top = maps[scenario.map_chunks[0].unique_name].background_gradient_top
 		GameData.export_resource(scenario, save_path)
-	for skillset: Skillset in scus_data.skillsets_data:
-		var skillset_path: String = save_path.path_join("/skillsets/")
-		DirAccess.make_dir_recursive_absolute(skillset_path)
-
+	for skillset: Skillset in skillsets.values():
 		for ability_id: int in skillset.action_ability_ids:
 			if ability_id != 0:
 				skillset.ability_names.append(abilities.keys()[ability_id])
@@ -963,10 +961,7 @@ func export_data_tables(save_path: String) -> void:
 			if ability_id != 0:
 				skillset.ability_names.append(abilities.keys()[ability_id])
 
-		var skillset_file_path: String = skillset_path.path_join(skillset.unique_name + ".skillset.tres")
-		error = ResourceSaver.save(skillset, skillset_file_path)
-		if error != Error.OK:
-			push_warning("error saving skillset: " + error_string(error))
+		GameData.export_resource(skillset, save_path)
 	
 	var initial_unit_data: InitialUnitData = InitialUnitData.new()
 	initial_unit_data.initial_unit_raw_stats = build_initial_unit_raw_stats()

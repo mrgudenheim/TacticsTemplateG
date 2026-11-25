@@ -239,18 +239,7 @@ func init_from_scus(rom_reader: RomReader) -> void:
 		var skillset_data: Skillset = Skillset.new()
 		skillset_data.display_name = rom_reader.fft_text.skillset_names[skillset_id]
 		skillset_data.description = rom_reader.fft_text.skillset_descriptions[skillset_id]
-		var new_unique_name: String = skillset_data.display_name.to_snake_case()
-		var num: int = 1
-		var modified_unique_name: String = new_unique_name
-		while skillsets_data.any(func(skillset: Skillset) -> bool: 
-			if is_instance_valid(skillset):
-				return skillset.unique_name == modified_unique_name
-			return false
-		):
-			num += 1
-			var formatted_num: String = "%02d" % num
-			modified_unique_name = new_unique_name + "_" + formatted_num
-		skillset_data.unique_name = modified_unique_name
+		FftRegistryHelper.register_unique(rom_reader.skillsets, skillset_data, skillset_data.display_name, "Skillset")
 		skillset_data.action_ability_ids.resize(16)
 		skillset_data.rsm_ability_ids.resize(6)
 		for skill_slot: int in 16: # action abilities
@@ -280,18 +269,7 @@ func init_from_scus(rom_reader: RomReader) -> void:
 		var skillset_data: Skillset = Skillset.new()
 		skillset_data.display_name = rom_reader.jobs_data.values()[skillset_id + 0x5e].display_name # set skillset name to monster job name
 		skillset_data.description = "Used by " + skillset_data.display_name + " monster"
-		var new_unique_name: String = skillset_data.display_name.to_snake_case()
-		var num: int = 1
-		var modified_unique_name: String = new_unique_name
-		while skillsets_data.any(func(skillset: Skillset) -> bool: 
-			if is_instance_valid(skillset):
-				return skillset.unique_name == modified_unique_name
-			return false
-		):
-			num += 1
-			var formatted_num: String = "%02d" % num
-			modified_unique_name = new_unique_name + "_" + formatted_num
-		skillset_data.unique_name = modified_unique_name
+		FftRegistryHelper.register_unique(rom_reader.skillsets, skillset_data, skillset_data.display_name, "Skillset")
 		
 		skillset_data.action_ability_ids.resize(4)
 		for skill_slot: int in 4: # action abilities

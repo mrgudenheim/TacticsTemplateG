@@ -10,11 +10,15 @@ static func register_unique(
 	will_overwrite: bool = false
 ) -> String:
 	var current_unique_name: String = resource.unique_name
-	if ["", "unique_name", "unique_name.triggered"].has(current_unique_name):
+	if ["", "unique_name", "unique_name.triggered", "[skillset unique name]"].has(current_unique_name):
 		if fallback_display_name.is_empty():
+			current_unique_name = "_nothing"
 			push_warning("%s needs unique_name set" % resource_label)
 		else:
 			current_unique_name = fallback_display_name.to_snake_case()
+			if current_unique_name.is_empty():
+				current_unique_name = "_nothing"
+				push_warning("%s display_name '%s' produced empty unique_name" % [resource_label, fallback_display_name])
 
 	if registry.has(current_unique_name) and will_overwrite:
 		push_warning("Overwriting existing %s: %s" % [resource_label, current_unique_name])

@@ -10,11 +10,6 @@ const IGNORED_PLACEHOLDER_NAMES: PackedStringArray = [
 
 
 static func validate_rom_reader_exports(rom_reader: RomReader) -> Array[String]:
-	var skillsets_by_name: Dictionary[String, Skillset] = {}
-	for skillset_item: Skillset in rom_reader.scus_data.skillsets_data:
-		if skillset_item != null and not IGNORED_PLACEHOLDER_NAMES.has(skillset_item.unique_name):
-			skillsets_by_name[skillset_item.unique_name] = skillset_item
-
 	var valid_vfx_names: Dictionary[String, bool] = {}
 	for vfx_item: VisualEffectData in rom_reader.vfx:
 		if vfx_item != null and vfx_item.is_initialized and not vfx_item.unique_name.is_empty():
@@ -28,7 +23,7 @@ static func validate_rom_reader_exports(rom_reader: RomReader) -> Array[String]:
 		rom_reader.abilities,
 		rom_reader.items,
 		rom_reader.jobs_data,
-		skillsets_by_name,
+		rom_reader.skillsets,
 		valid_vfx_names
 	)
 	_report_warnings("RomReader export", warnings)

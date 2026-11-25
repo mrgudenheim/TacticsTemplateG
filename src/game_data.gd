@@ -61,7 +61,7 @@ func _init() -> void:
 	items = _create_registry("ItemData", ItemData.FILE_SUFFIX, _load_item)
 	status_effects = _create_registry("StatusEffect", StatusEffect.FILE_SUFFIX, ResourceLoader.load)
 	jobs = _create_registry("JobData", JobData.FILE_SUFFIX, ResourceLoader.load)
-	skillsets = _create_registry("Skillset", ".skillset.tres", ResourceLoader.load)
+	skillsets = _create_registry("Skillset", Skillset.FILE_SUFFIX, ResourceLoader.load)
 	actions = _create_registry("Action", Action.FILE_SUFFIX, _load_action)
 	triggered_actions = _create_registry("TriggeredAction", TriggeredAction.FILE_SUFFIX, ResourceLoader.load)
 	passive_effects = _create_registry("PassiveEffect", PassiveEffect.FILE_SUFFIX, ResourceLoader.load)
