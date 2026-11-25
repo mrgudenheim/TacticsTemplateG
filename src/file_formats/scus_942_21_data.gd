@@ -184,24 +184,11 @@ func init_from_scus(rom_reader: RomReader) -> void:
 	status_effects.resize(status_effect_entries)
 	for id: int in status_effect_entries:
 		var new_status_effect_bytes: PackedByteArray = status_effect_data_bytes.slice(id * status_effect_entry_length, (id + 1) * status_effect_entry_length)
-		var new_status_effect: StatusEffect = FftStatusConverter.create_from_bytes(new_status_effect_bytes, rom_reader)
+		var new_status_effect: StatusEffect = FftStatusConverter.create_from_bytes(new_status_effect_bytes)
 		new_status_effect.status_effect_name = rom_reader.fft_text.status_names[id]
 		FftRegistryHelper.register_unique(rom_reader.status_effects, new_status_effect, new_status_effect.status_effect_name, "StatusEffect")
 		new_status_effect.status_id = id
 		status_effects[id] = new_status_effect
-		
-		if rom_reader.battle_bin_data.status_colors.has(id):
-			var r: int = rom_reader.battle_bin_data.status_colors[id][0]
-			var g: int = rom_reader.battle_bin_data.status_colors[id][1]
-			var b: int = rom_reader.battle_bin_data.status_colors[id][2]
-			new_status_effect.shading_color = Color8(r, g, b)
-			new_status_effect.shading_type = rom_reader.battle_bin_data.status_colors[id][3]
-		
-		if rom_reader.battle_bin_data.status_modulate_colors.has(id):
-			new_status_effect.modulation_color = rom_reader.battle_bin_data.status_modulate_colors[id]
-		
-		if rom_reader.battle_bin_data.status_idle_animations.has(id):
-			new_status_effect.idle_animation_id = rom_reader.battle_bin_data.status_idle_animations[id]
 		
 		
 	

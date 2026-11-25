@@ -69,25 +69,6 @@ var status_bubble_locations_x_start: int = 0x949dc - 0x67000 # 22 bytes long, 1 
 var status_bubble_locations_y_start: int = 0x949f4 - 0x67000 # 22 bytes long, 1 byte each
 var status_icon_locations: Array[Vector2i] = []
 var status_icon_rects: Array[Rect2i] = []
-var status_icon_ids: Dictionary[int, int] = {
-	24 : 18, # poison
-	4 : 9, # charging - second frame is 12 pixels lower
-	10 : 2, # darkness
-	11 : 12, # confuse
-	12 : 3, # silence
-	13 : 13, # blood suck
-	16 : 19, # oil
-	18 : 10, # reraise - second frame is 12 pixels lower
-	20 : 5, # berserk
-	26 : 16, # protect
-	27 : 17, # shell
-	32 : 6, # faith
-	33 : 7, # innocent
-	34 : 4, # charm
-	35 : 1, # sleep
-	36 : 14, # don't move
-	37 : 15, # don't act
-	} # active turn is icon 8 + second frame, ko stars are icons 0, 11
 
 var status_counter_locations_x_start: int = 0x94a0c - 0x67000 # 4 bytes long, 1 byte each
 var status_counter_locations_y_start: int = 0x94a24 - 0x67000 # 4 bytes long, 1 byte each
@@ -96,51 +77,6 @@ var status_counter_rects: Array[Rect2i] = []
 
 var ai_status_priority_start: int = 0x19f308 - 0x67000 # 40 entries, 2 bytes each, signed int16s
 var ai_status_priorities: PackedInt32Array = []
-
-# https://ffhacktics.com/wiki/Palette_mod_by_status
-var status_colors_start: int = 0x822bc - 0x67000 # color RGBs per status are littered throughout routine
-var status_colors: Dictionary[int, PackedInt32Array] = { # status_id :  [R, G, B, Shade type]
-	8 : [0, 0, 0, 6], # petrify
-	13 : [3, -1, 8, 6], # blood suck
-	20 : [8, 0, 0, 4], # berserk
-	24 : [0, 8, 0, 5], # poison
-	25 : [0, 0, 8, 4], # regen
-	16 : [-4, -4, -4, 5], # oil
-	14 : [-8, -8, -8, 5], # cursed
-	3 : [4, 0, 5, 5], # undead
-}
-var status_modulate_colors: Dictionary[int, Color] = { # status_id :  [R, G, B, A]
-	8 : Color8(32, 32, 32), # petrify
-	13 : Color8(84, 87, 255), # blood suck
-	20 : Color8(255, 128, 128), # berserk
-	24 : Color8(64, 192, 64), # poison
-	25 : Color8(21, 150, 231), # regen
-	16 : Color8(64, 64, 64), # oil
-	14 : Color8(32, 32, 32), # cursed
-	3 : Color8(116, 14, 255), # undead
-	19 : Color8(255, 255, 255, 128), # tranparent
-}
-
-# https://ffhacktics.com/wiki/Set_Idle_Animation_based_on_status_(not_MON)
-# https://ffhacktics.com/wiki/More_animation_based_on_status,_death_sound_effects
-# https://ffhacktics.com/wiki/Set_Animation_Based_On_Unit_Status
-var status_idle_animations: Dictionary[int, int] = { # status_id :  animation_id
-	1 : 18, # crystal
-	15: 42, # treasure
-	2 : 52, # dead
-	30 : 2, # stop TODO facing frames (ptr_id <= 5) need to be handled differently from other animations
-	35 : 72, # sleep
-	8 : 2, # petrify TODO facing frames (ptr_id <= 5) need to be handled differently from other animations
-	11 : 74, # confusion
-	7 : 0x50, # performing - TODO use ability ID (0x50 singing or 0x52 dancing)
-	4 : 0x56, # charging - TODO use ability ID (typically 0x54 to 0x56)
-	6 : 46, # defending
-	28 : 0x08, # haste - TODO useHeight1 (14 for flying sprites)
-	29 : 0x0a, # slow - TODO useHeight2 (16 for flying sprites)
-	14 : 2, # cursed TODO facing frames (ptr_id <= 5) need to be handled differently from other animations
-	0 : 66, # blank
-	23: 72, # critical
-}
 
 func init_from_battle_bin(rom_reader: RomReader) -> void:
 	var battle_bytes: PackedByteArray = rom_reader.get_file_data("BATTLE.BIN")
@@ -287,11 +223,6 @@ func init_from_battle_bin(rom_reader: RomReader) -> void:
 		var y: int = data_bytes_y.decode_u8(idx * entry_size)
 		status_icon_locations[idx] = Vector2i(x, y)
 		status_icon_rects[idx] = Rect2i(Vector2i(x, y + 32), Vector2i(14, 12)) # y + 32 because image is 288 pixels tall (288-256 = 32), TODO KO stars are 16 wide
-	
-	for status_id: int in rom_reader.scus_data.status_effects.size():
-		if status_icon_ids.keys().has(status_id):
-			var rect: Rect2i = status_icon_rects[status_icon_ids[status_id]]
-			rom_reader.scus_data.status_effects[status_id].icon_rects.append(rect) # TODO get second frame of status icons
 	
 	# status counter locations
 	entry_size = 1
