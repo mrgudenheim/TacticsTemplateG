@@ -5,9 +5,13 @@ signal selected(job_data: JobData)
 
 var job_data: JobData:
 	get: return job_data
-	set(value):
-		job_data = value
-		update_ui(value)
+	set(value: JobData):
+		if value != job_data:
+			job_data = value
+			if value != null:
+				update_ui(value)
+			else:
+				push_error("Trying to set job button job == null")
 
 @export var button: Button
 @export var display_name: Label
@@ -121,7 +125,7 @@ func update_ui(new_job_data: JobData) -> void:
 	for child_idx: int in range(1, innate_ability_labels.size()):
 		innate_ability_labels[child_idx].queue_free()
 
-	for ability_name: String in job_data.innate_ability_names:
+	for ability_name: String in new_job_data.innate_ability_names:
 		var new_ability_label: Label = Label.new()
 		new_ability_label.text = ability_name
 		innate_abilities_list.add_child(new_ability_label)
@@ -175,10 +179,14 @@ func update_ui(new_job_data: JobData) -> void:
 	for child_idx: int in range(1, action_labels.size()):
 		action_labels[child_idx].queue_free()
 	
-	for ability_name: String in GameData.get_skillset(job_data.skillset_unique_name).ability_names:
-		var new_action_name: Label = Label.new()
-		new_action_name.text = GameData.get_ability(ability_name).display_name
-		action_list.add_child(new_action_name)
+	var skillset: Skillset = GameData.get_skillset(new_job_data.skillset_unique_name)
+	if skillset != null:
+		for ability_name: String in skillset.ability_names:
+			var ability: Ability = GameData.get_ability(ability_name)
+			if ability != null:
+				var new_action_name: Label = Label.new()
+				new_action_name.text = ability.display_name
+				action_list.add_child(new_action_name)
 
 
 func set_sprite() -> void:
