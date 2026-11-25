@@ -2,10 +2,7 @@ class_name MapChunk
 extends Resource
 
 @export var unique_name: String = "map_unique_name"
-@export var mirror_xyz: Array[bool] = [false, false, false]:
-	set(value):
-		mirror_xyz = value
-		set_mirror_xyz(mirror_xyz)
+@export var mirror_xyz: Array[bool] = [false, false, false]
 @export var corner_position: Vector3i = Vector3i.ZERO
 @export var rotation_degrees: float = 0.0 # 90 degree rotation increments
 var mirror_scale: Vector3i = Vector3i.ONE
