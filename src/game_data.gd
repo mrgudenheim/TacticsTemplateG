@@ -12,10 +12,10 @@ enum Directions {
 }
 
 const DATA_PATH_CONFIG: String = "user://external_data_paths.cfg"
-var external_data_paths: Dictionary [String, String] = {
-	"IMPORT_PATH" : "user://",
-	"ROM_PATH" : "user://",
-	"EXPORT_PATH" : "user://",
+var external_data_paths: Dictionary[String, String] = {
+	"IMPORT_PATH": "user://",
+	"ROM_PATH": "user://",
+	"EXPORT_PATH": "user://",
 }
 
 var is_ready: bool = false
