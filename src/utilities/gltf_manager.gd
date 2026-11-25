@@ -16,9 +16,9 @@ static func save_node(node_to_save: Node, save_directory: String = "user://expor
 static func import_gltf(import_path: String) -> Node:
 	var gltf_state: GLTFState = GLTFState.new()
 	var gltf_document: GLTFDocument = GLTFDocument.new()
-	var error: int = gltf_document.append_from_file(import_path, gltf_state, 0, import_path.get_base_dir())
+	var error: Error = gltf_document.append_from_file(import_path, gltf_state, 0, import_path.get_base_dir())
 	if error != 0:
-		push_warning(import_path.get_file() + " failed to import as glb: " + str(error))
+		push_warning(import_path.get_file() + " failed to import as glb: " + error_string(error))
 		return null
 	
 	var node: Node = gltf_document.generate_scene(gltf_state)
@@ -27,17 +27,29 @@ static func import_gltf(import_path: String) -> Node:
 	return node
 
 
-static func import_gltf_mesh(import_path: String) -> MeshInstance3D:
+static func import_gltf_array_mesh(import_path: String) -> ArrayMesh:
 	var gltf_state: GLTFState = GLTFState.new()
 	var gltf_document: GLTFDocument = GLTFDocument.new()
-	var error: int = gltf_document.append_from_file(import_path, gltf_state, 0, import_path.get_base_dir())
+	var error: Error = gltf_document.append_from_file(import_path, gltf_state, 0, import_path.get_base_dir())
 	if error != OK:
 		push_warning(import_path.get_file() + " failed to import as glb: " + error_string(error))
 		return null
 	
-	var gltf_mesh_resource: ImporterMesh = gltf_state.get_meshes()[0].mesh
+	var gltf_meshes: Array[GLTFMesh] = gltf_state.get_meshes()
+	if gltf_meshes.is_empty():
+		push_warning(import_path.get_file() + " contains no meshes")
+		return null
+
+	var gltf_mesh_resource: ImporterMesh = gltf_meshes[0].mesh
+	return gltf_mesh_resource.get_mesh()
+
+
+static func import_gltf_mesh(import_path: String) -> MeshInstance3D:
+	var imported_mesh: ArrayMesh = import_gltf_array_mesh(import_path)
+	if imported_mesh == null:
+		return null
+
 	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
-	mesh_instance.mesh = gltf_mesh_resource.get_mesh()
+	mesh_instance.mesh = imported_mesh
 	mesh_instance.name = import_path.get_file().get_basename()
-	
 	return mesh_instance
