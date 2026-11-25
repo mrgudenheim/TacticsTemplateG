@@ -61,10 +61,10 @@ func setup(new_unit: UnitData) -> void:
 
 	unit = new_unit
 	if new_unit.job_unique_name == "job_unique_name" or new_unit.job_data == null:
-		if not GameData.job_paths.is_empty():
-			new_unit.set_job(GameData.job_paths.keys()[0])
+		if not GameData.jobs.is_empty():
+			new_unit.set_job(GameData.jobs.get_all_ids()[0])
 		else:
-			push_error("No jobs found in GameData.job_paths")
+			push_error("No jobs found in GameData.jobs")
 	
 	unit_name_line_edit.text = new_unit.display_name
 	job_button.text = new_unit.job_data.display_name
@@ -212,7 +212,7 @@ func update_ui(new_unit: UnitData) -> void:
 		var skillset_display_name: String = ""
 		var skillset_uname: String = new_unit.skillsets_names[skillset_slot_idx]
 		if not skillset_uname.is_empty():
-			if GameData.skillset_paths.has(skillset_uname):
+			if GameData.skillsets.has(skillset_uname):
 				skillset_display_name = GameData.get_skillset(skillset_uname).display_name
 			else:
 				push_warning("GameData does not have skillset: " + skillset_uname)

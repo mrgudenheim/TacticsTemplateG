@@ -37,57 +37,39 @@ static func validate_rom_reader_exports(rom_reader: RomReader) -> Array[String]:
 
 static func validate_game_data() -> Array[String]:
 	var status_effects_by_name: Dictionary[String, StatusEffect] = {}
-	for status_name: String in GameData.status_effect_paths.keys():
+	for status_name: String in GameData.status_effects.get_all_ids():
 		status_effects_by_name[status_name] = GameData.get_status_effect(status_name)
-	for status_name: String in GameData.status_effects.keys():
-		status_effects_by_name[status_name] = GameData.status_effects[status_name]
 
 	var passive_effects_by_name: Dictionary[String, PassiveEffect] = {}
-	for passive_name: String in GameData.passive_effect_paths.keys():
+	for passive_name: String in GameData.passive_effects.get_all_ids():
 		passive_effects_by_name[passive_name] = GameData.get_passive_effect(passive_name)
-	for passive_name: String in GameData.passive_effects.keys():
-		passive_effects_by_name[passive_name] = GameData.passive_effects[passive_name]
 
 	var actions_by_name: Dictionary[String, Action] = {}
-	for action_name: String in GameData.action_paths.keys():
+	for action_name: String in GameData.actions.get_all_ids():
 		actions_by_name[action_name] = GameData.get_action(action_name)
-	for action_name: String in GameData.actions.keys():
-		actions_by_name[action_name] = GameData.actions[action_name]
 
 	var triggered_actions_by_name: Dictionary[String, TriggeredAction] = {}
-	for triggered_name: String in GameData.triggered_action_paths.keys():
+	for triggered_name: String in GameData.triggered_actions.get_all_ids():
 		triggered_actions_by_name[triggered_name] = GameData.get_triggered_action(triggered_name)
-	for triggered_name: String in GameData.triggered_actions.keys():
-		triggered_actions_by_name[triggered_name] = GameData.triggered_actions[triggered_name]
 
 	var abilities_by_name: Dictionary[String, Ability] = {}
-	for ability_name: String in GameData.ability_paths.keys():
+	for ability_name: String in GameData.abilities.get_all_ids():
 		abilities_by_name[ability_name] = GameData.get_ability(ability_name)
-	for ability_name: String in GameData.abilities.keys():
-		abilities_by_name[ability_name] = GameData.abilities[ability_name]
 
 	var items_by_name: Dictionary[String, ItemData] = {}
-	for item_name: String in GameData.item_paths.keys():
+	for item_name: String in GameData.items.get_all_ids():
 		items_by_name[item_name] = GameData.get_item(item_name)
-	for item_name: String in GameData.items.keys():
-		items_by_name[item_name] = GameData.items[item_name]
 
 	var jobs_by_name: Dictionary[String, JobData] = {}
-	for job_name: String in GameData.job_paths.keys():
+	for job_name: String in GameData.jobs.get_all_ids():
 		jobs_by_name[job_name] = GameData.get_job(job_name)
-	for job_name: String in GameData.jobs_data.keys():
-		jobs_by_name[job_name] = GameData.jobs_data[job_name]
 
 	var skillsets_by_name: Dictionary[String, Skillset] = {}
-	for skillset_name: String in GameData.skillset_paths.keys():
+	for skillset_name: String in GameData.skillsets.get_all_ids():
 		skillsets_by_name[skillset_name] = GameData.get_skillset(skillset_name)
-	for skillset_name: String in GameData.skillsets.keys():
-		skillsets_by_name[skillset_name] = GameData.skillsets[skillset_name]
 
 	var valid_vfx_names: Dictionary[String, bool] = {}
-	for vfx_name: String in GameData.vfx_data_paths.keys():
-		valid_vfx_names[vfx_name] = true
-	for vfx_name: String in GameData.vfx.keys():
+	for vfx_name: String in GameData.vfx.get_all_ids():
 		valid_vfx_names[vfx_name] = true
 
 	var warnings: Array[String] = _validate_collections(

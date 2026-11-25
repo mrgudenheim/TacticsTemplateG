@@ -21,48 +21,68 @@ var external_data_paths: Dictionary[String, String] = {
 var is_ready: bool = false
 var lazy_load_data: bool = true
 
-var shps: Dictionary[String, Shp] = {} # [unique_name (eg. filename without extension), Spr]
-var seqs: Dictionary[String, Seq] = {} # [unique_name (eg. filename without extension), Spr]
-var maps_gltf: Dictionary[String, Node] = {}
-var maps_data: Dictionary[String, MapData] = {} # var map_tiles: Dictionary[Vector2i, Array] = {} # Array[TerrainTile], palettes, animations
+# Lazy-loaded resource/asset registries
+var shps: DataRegistry
+var seqs: DataRegistry
+var map_meshes: DataRegistry
+var maps_data: DataRegistry
+var vfx: DataRegistry
+var items: DataRegistry
+var status_effects: DataRegistry
+var jobs: DataRegistry
+var skillsets: DataRegistry
+var actions: DataRegistry
+var triggered_actions: DataRegistry
+var passive_effects: DataRegistry
+var abilities: DataRegistry
+var scenarios: DataRegistry
+var textures: DataRegistry
+var unit_spritesheets: DataRegistry
+
+var _registries: Array[DataRegistry] = []
+
+# Eager-loaded / secondary / singleton data
 var map_tile_meshes: Dictionary[TerrainTile.SlopeType, ArrayMesh] = {}
-var vfx: Dictionary[String, VisualEffectData] = {}
 var shared_vfx_data: TrapEffectData
 var projectiles_gltf: Dictionary[String, Node] = {}
-var items: Dictionary[String, ItemData] = {} # [unique_name, ItemData]
 var items_by_idx: Dictionary[int, ItemData] = {}
-var status_effects: Dictionary[String, StatusEffect] = {} # [unique_name, StatusEffect]
-var jobs_data: Dictionary[String, JobData] = {} # [unique_name, JobData]
-var skillsets: Dictionary[String, Skillset] = {}
-var actions: Dictionary[String, Action] = {} # [unique_name, Action]
-var triggered_actions: Dictionary[String, TriggeredAction] = {} # [unique_name, TriggeredAction]
-var passive_effects: Dictionary[String, PassiveEffect] = {} # [unique_name, TriggeredAction]
-var abilities: Dictionary[String, Ability] = {} # [unique_name, Ability]
-var scenarios: Dictionary[String, Scenario] = {} # [unique_name, Scenario]
 var names: Dictionary[String, PackedStringArray] = {} # [name_category, possible names]
 var palettes: Dictionary[String, PackedColorArray] = {}
-var textures: Dictionary[String, Texture2D] = {}
-var unit_spritesheets_data: Dictionary[String, UnitSpritesheetData] = {}
 var animation_layer_priorities: PackedVector4Array = []
 var initial_unit_data: InitialUnitData
 
-# lazy loading
-var shp_paths: Dictionary[String, String] = {}
-var seq_paths: Dictionary[String, String] = {}
-var map_gltf_paths: Dictionary[String, String] = {}
-var map_data_paths: Dictionary[String, String] = {}
-var vfx_data_paths: Dictionary[String, String] = {}
-var item_paths: Dictionary[String, String] = {}
-var status_effect_paths: Dictionary[String, String] = {}
-var job_paths: Dictionary[String, String] = {}
-var skillset_paths: Dictionary[String, String] = {}
-var action_paths: Dictionary[String, String] = {}
-var triggered_action_paths: Dictionary[String, String] = {}
-var passive_effect_paths: Dictionary[String, String] = {}
-var ability_paths: Dictionary[String, String] = {}
-var scenario_paths: Dictionary[String, String] = {}
-var texture_paths: Dictionary[String, String] = {}
-var unit_spritesheet_data_paths: Dictionary[String, String] = {}
+
+func _init() -> void:
+	shps = _create_registry("Shp", ".shp.tres", _load_shp)
+	seqs = _create_registry("Seq", ".seq.tres", _load_seq)
+	map_meshes = _create_registry("MapMesh", ".map.glb", _load_map_mesh)
+	maps_data = _create_registry("MapData", ".map_data.tres", _load_map_data)
+	vfx = _create_registry("VisualEffectData", ".vfx_data.tres", _load_vfx_data)
+	items = _create_registry("ItemData", ItemData.FILE_SUFFIX, _load_item)
+	status_effects = _create_registry("StatusEffect", StatusEffect.FILE_SUFFIX, ResourceLoader.load)
+	jobs = _create_registry("JobData", JobData.FILE_SUFFIX, ResourceLoader.load)
+	skillsets = _create_registry("Skillset", ".skillset.tres", ResourceLoader.load)
+	actions = _create_registry("Action", Action.FILE_SUFFIX, _load_action)
+	triggered_actions = _create_registry("TriggeredAction", TriggeredAction.FILE_SUFFIX, ResourceLoader.load)
+	passive_effects = _create_registry("PassiveEffect", PassiveEffect.FILE_SUFFIX, ResourceLoader.load)
+	abilities = _create_registry("Ability", Ability.FILE_SUFFIX, ResourceLoader.load)
+	scenarios = _create_registry("Scenario", Scenario.FILE_SUFFIX, ResourceLoader.load)
+	textures = _create_registry("Texture2D", ".texture.webp", _load_texture)
+	unit_spritesheets = _create_registry("UnitSpritesheetData", ".unit_spritesheet.tres", ResourceLoader.load)
+
+
+func _create_registry(
+	resource_type_name: String,
+	file_suffix: String,
+	loader: Callable,
+) -> DataRegistry:
+	var registry: DataRegistry = DataRegistry.new(
+		resource_type_name,
+		file_suffix,
+		loader,
+	)
+	_registries.append(registry)
+	return registry
 
 
 func _ready() -> void:
@@ -74,7 +94,7 @@ func _ready() -> void:
 		#call_deferred("index_data", external_data_paths["IMPORT_PATH"])
 
 
-func _get_saved_data_paths() -> Dictionary [String, String]:
+func _get_saved_data_paths() -> Dictionary[String, String]:
 	var file: FileAccess = FileAccess.open(DATA_PATH_CONFIG, FileAccess.READ)
 	if file == null:
 		var err: Error = FileAccess.get_open_error()
@@ -82,8 +102,8 @@ func _get_saved_data_paths() -> Dictionary [String, String]:
 		return external_data_paths
 
 	var file_text: String = file.get_as_text()
-	var untyped_dict : Dictionary = JSON.parse_string(file_text)
-	var typed_dict : Dictionary[String, String] = {}
+	var untyped_dict: Dictionary = JSON.parse_string(file_text)
+	var typed_dict: Dictionary[String, String] = {}
 	typed_dict.assign(untyped_dict)
 	return typed_dict
 
@@ -96,47 +116,17 @@ func save_data_paths() -> void:
 
 func clear_data() -> void:
 	is_ready = false
-	shps = {} 
-	seqs = {} 
-	maps_gltf = {}
-	maps_data = {}
+	for registry: DataRegistry in _registries:
+		registry.clear()
+
 	map_tile_meshes = {}
-	vfx = {}
 	shared_vfx_data = null
 	projectiles_gltf = {}
-	items = {} 
 	items_by_idx = {}
-	status_effects = {} 
-	jobs_data = {} 
-	skillsets = {}
-	actions = {} 
-	triggered_actions = {}
-	passive_effects = {} 
-	abilities = {} 
-	scenarios = {} 
 	names = {}
 	palettes = {}
-	textures = {}
-	unit_spritesheets_data = {}
 	animation_layer_priorities = []
 	initial_unit_data = null
-
-	shp_paths.clear()
-	seq_paths.clear()
-	map_gltf_paths.clear()
-	map_data_paths.clear()
-	vfx_data_paths.clear()
-	item_paths.clear()
-	status_effect_paths.clear()
-	job_paths.clear()
-	skillset_paths.clear()
-	action_paths.clear()
-	triggered_action_paths.clear()
-	passive_effect_paths.clear()
-	ability_paths.clear()
-	scenario_paths.clear()
-	texture_paths.clear()
-	unit_spritesheet_data_paths.clear()
 
 
 func index_data(directory_path: String) -> void:
@@ -147,7 +137,7 @@ func index_data(directory_path: String) -> void:
 		var mesh_file_path: String = "res://src/content_scripts/map/tile_mesh_" + mesh_name + ".tres"
 		var mesh: ArrayMesh = ResourceLoader.load(mesh_file_path, "ArrayMesh")
 		map_tile_meshes[slope_type] = mesh
-	
+
 	var start_time: int = Time.get_ticks_msec()
 
 	var file_paths: PackedStringArray = Utilities.get_file_list_recursive(directory_path, false)
@@ -169,7 +159,7 @@ func index_data(directory_path: String) -> void:
 		import_progress.emit(current_file, num_files)
 
 		var elapsed_time: float = (Time.get_ticks_msec() - last_frame_time) / 1000.0
-		if current_file == 1 or elapsed_time > (1/60.0):
+		if current_file == 1 or elapsed_time > (1.0 / 60.0):
 			message.emit("Importing: " + file_path.get_file())
 			await get_tree().process_frame
 			last_frame_time = Time.get_ticks_msec()
@@ -181,50 +171,22 @@ func index_data(directory_path: String) -> void:
 			for idx: int in range(names["all_no_empty"].size() - 1, -1, -1):
 				if names["all_no_empty"][idx] == "":
 					names["all_no_empty"].remove_at(idx)
-		elif file_path.ends_with(Action.FILE_SUFFIX):
-			action_paths[file_path.get_file().trim_suffix(Action.FILE_SUFFIX)] = file_path
-		elif file_path.ends_with(Ability.FILE_SUFFIX):
-			ability_paths[file_path.get_file().trim_suffix(Ability.FILE_SUFFIX)] = file_path
-		elif file_path.ends_with(TriggeredAction.FILE_SUFFIX):
-			triggered_action_paths[file_path.get_file().trim_suffix(TriggeredAction.FILE_SUFFIX)] = file_path
-		elif file_path.ends_with(PassiveEffect.FILE_SUFFIX):
-			passive_effect_paths[file_path.get_file().trim_suffix(PassiveEffect.FILE_SUFFIX)] = file_path
-		elif file_path.ends_with(ItemData.FILE_SUFFIX):
-			item_paths[file_path.get_file().trim_suffix(ItemData.FILE_SUFFIX)] = file_path
-		elif file_path.ends_with(JobData.FILE_SUFFIX):
-			job_paths[file_path.get_file().trim_suffix(JobData.FILE_SUFFIX)] = file_path
-		elif file_path.ends_with(Scenario.FILE_SUFFIX):
-			scenario_paths[file_path.get_file().trim_suffix(Scenario.FILE_SUFFIX)] = file_path
-		elif file_path.ends_with(StatusEffect.FILE_SUFFIX):
-			status_effect_paths[file_path.get_file().trim_suffix(StatusEffect.FILE_SUFFIX)] = file_path
-		elif file_path.ends_with(".skillset.tres"):
-			skillset_paths[file_path.get_file().trim_suffix(".skillset.tres")] = file_path
 		elif file_path.ends_with(".palette.tres"):
 			var new_palette: ColorPalette = ResourceLoader.load(file_path, "ColorPalette")
 			palettes[file_path.get_file().trim_suffix(".palette.tres")] = new_palette.colors
-		elif file_path.ends_with(".unit_spritesheet.tres"):
-			unit_spritesheet_data_paths[file_path.get_file().trim_suffix(".unit_spritesheet.tres")] = file_path
-		elif file_path.ends_with(".map.glb"):
-			map_gltf_paths[file_path.get_file().trim_suffix(".map.glb")] = file_path
-		elif file_path.ends_with(".map_data.tres"):
-			map_data_paths[file_path.get_file().trim_suffix(".map_data.tres")] = file_path
-		elif file_path.ends_with(".texture.webp"):
-			texture_paths[file_path.get_file().trim_suffix(".texture.webp")] = file_path
-		elif file_path.to_lower().ends_with(".shp.tres"):
-			shp_paths[file_path.get_file().trim_suffix(".shp.tres")] = file_path
-		elif file_path.to_lower().ends_with(".seq.tres"):
-			seq_paths[file_path.get_file().trim_suffix(".seq.tres")] = file_path
 		elif file_path.ends_with("animation_data.tres"):
 			var new_animation_data: AnimationData = ResourceLoader.load(file_path, "AnimationData")
 			animation_layer_priorities = new_animation_data.animation_layer_priorities.duplicate()
-		elif file_path.to_lower().ends_with(".vfx_data.tres"):
-			vfx_data_paths[file_path.get_file().trim_suffix(".vfx_data.tres")] = file_path
 		elif file_path.to_lower().ends_with("shared_vfx.data.tres"):
 			shared_vfx_data = ResourceLoader.load(file_path, "TrapEffectData")
 		elif file_path.ends_with(".projectile.glb"):
 			projectiles_gltf[file_path.get_file().trim_suffix(".projectile.glb")] = GltfManager.import_gltf(file_path)
 		elif file_path.ends_with("initial_unit_data.tres"):
 			initial_unit_data = ResourceLoader.load(file_path, "InitialUnitData")
+		else:
+			for registry: DataRegistry in _registries:
+				if registry.index_file(file_path):
+					break
 
 	if lazy_load_data == false:
 		load_all_data()
@@ -235,91 +197,91 @@ func index_data(directory_path: String) -> void:
 	data_indexed.emit()
 
 
-## Lazy loading functions
-func get_shp(unique_name: String) -> Shp:
-	if shps.has(unique_name):
-		return shps[unique_name]
-	
-	var file_path: String = shp_paths[unique_name]
+## Custom registry loaders
+func _load_shp(file_path: String) -> Shp:
 	var new_shp: Shp = ResourceLoader.load(file_path, "Shp")
-	new_shp.is_initialized = true
-	shps[unique_name] = new_shp
-	return shps[unique_name]
+	if new_shp != null:
+		new_shp.is_initialized = true
+	return new_shp
+
+
+func _load_seq(file_path: String) -> Seq:
+	var new_seq: Seq = ResourceLoader.load(file_path, "Seq")
+	if new_seq != null:
+		new_seq.is_initialized = true
+	return new_seq
+
+
+func _load_map_mesh(file_path: String) -> ArrayMesh:
+	return GltfManager.import_gltf_array_mesh(file_path)
+
+
+func _load_map_data(file_path: String) -> MapData:
+	var new_map_data: MapData = ResourceLoader.load(file_path, "MapData")
+	if new_map_data == null:
+		return null
+	new_map_data.mesh = get_map_mesh(new_map_data.unique_name)
+	return new_map_data
+
+
+func _load_vfx_data(file_path: String) -> VisualEffectData:
+	var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")
+	if new_vfx != null:
+		new_vfx.texture = get_texture(new_vfx.unique_name)
+	return new_vfx
+
+
+func _load_item(file_path: String) -> ItemData:
+	var loaded_item: ItemData = ResourceLoader.load(file_path, "ItemData")
+	if loaded_item != null:
+		items_by_idx[loaded_item.item_idx] = loaded_item
+	return loaded_item
+
+
+func _load_action(file_path: String) -> Action:
+	var new_action: Action = ResourceLoader.load(file_path, "Action")
+	if new_action != null and new_action.vfx_name != "":
+		new_action.vfx_data = get_vfx_data(new_action.vfx_name)
+	return new_action
+
+
+func _load_texture(file_path: String) -> Texture2D:
+	var new_image: Image = Image.load_from_file(file_path)
+	if new_image == null:
+		return null
+	return ImageTexture.create_from_image(new_image)
+
+
+## Typed lazy-loading getters
+func get_shp(unique_name: String) -> Shp:
+	return shps.get_or_null(unique_name) as Shp
 
 
 func get_seq(unique_name: String) -> Seq:
-	if seqs.has(unique_name):
-		return seqs[unique_name]
-	
-	var file_path: String = seq_paths[unique_name]
-	var new_seq: Seq = ResourceLoader.load(file_path, "Seq")
-	new_seq.is_initialized = true
-	seqs[unique_name] = new_seq
-	return seqs[unique_name]
+	return seqs.get_or_null(unique_name) as Seq
 
 
-func get_map_gltf(unique_name: String) -> Node:
-	if maps_gltf.has(unique_name):
-		return maps_gltf[unique_name]
-	
-	var file_path: String = map_gltf_paths[unique_name]
-	maps_gltf[unique_name] = GltfManager.import_gltf(file_path)
-	return maps_gltf[unique_name]
-
-
-func get_map_gltf_mesh(unique_name: String) -> MeshInstance3D:
-	#if maps_gltf.has(unique_name):
-		#return maps_gltf[unique_name]
-	
-	var file_path: String = map_gltf_paths[unique_name]
-	var mesh_instance: MeshInstance3D = GltfManager.import_gltf_mesh(file_path)
-	return mesh_instance
+func get_map_mesh(unique_name: String) -> ArrayMesh:
+	return map_meshes.get_or_null(unique_name) as ArrayMesh
 
 
 func get_map_data(unique_name: String) -> MapData:
-	if maps_data.has(unique_name):
-		return maps_data[unique_name]
-	
-	var file_path: String = map_data_paths[unique_name]
-	var new_map_data: MapData = ResourceLoader.load(file_path, "MapData")
-	var mesh_instance: MeshInstance3D = get_map_gltf_mesh(new_map_data.unique_name)
-	new_map_data.mesh = mesh_instance.mesh
-	mesh_instance.queue_free()
-	#new_map_data.flag_polygons_to_hide()
-	maps_data[unique_name] = new_map_data
-	return maps_data[unique_name]
+	return maps_data.get_or_null(unique_name) as MapData
 
 
 func get_vfx_data(unique_name: String) -> VisualEffectData:
-	if vfx.has(unique_name):
-		return vfx[unique_name]
-	
-	var file_path: String = vfx_data_paths[unique_name]
-	var new_vfx: VisualEffectData = ResourceLoader.load(file_path, "VisualEffectData")
-	new_vfx.texture = get_texture(new_vfx.unique_name)
-	vfx[unique_name] = new_vfx
-	return vfx[unique_name]
+	return vfx.get_or_null(unique_name) as VisualEffectData
 
 
 func get_item(unique_name: String) -> ItemData:
-	if items.has(unique_name):
-		return items[unique_name]
-	if unique_name == "":
-		return null
-	
-	var file_path: String = item_paths[unique_name]
-	var loaded_item: ItemData = ResourceLoader.load(file_path, "ItemData")
-	items[unique_name] = loaded_item
-	if loaded_item != null:
-		items_by_idx[loaded_item.item_idx] = loaded_item
-	return items[unique_name]
+	return items.get_or_null(unique_name) as ItemData
 
 
 func get_item_by_idx(target_item_idx: int) -> ItemData:
 	if items_by_idx.has(target_item_idx):
 		return items_by_idx[target_item_idx]
 
-	for item_unique_name: String in item_paths.keys():
+	for item_unique_name: String in items.get_all_ids():
 		var candidate_item: ItemData = get_item(item_unique_name)
 		if candidate_item != null and candidate_item.item_idx == target_item_idx:
 			return candidate_item
@@ -328,142 +290,56 @@ func get_item_by_idx(target_item_idx: int) -> ItemData:
 
 
 func get_status_effect(unique_name: String) -> StatusEffect:
-	if status_effects.has(unique_name):
-		return status_effects[unique_name]
-	
-	var file_path: String = status_effect_paths[unique_name]
-	status_effects[unique_name] = ResourceLoader.load(file_path, "StatusEffect")
-	return status_effects[unique_name]
+	return status_effects.get_or_null(unique_name) as StatusEffect
 
 
 func get_job(unique_name: String) -> JobData:
-	if jobs_data.has(unique_name):
-		return jobs_data[unique_name]
-	
-	var file_path: String = job_paths[unique_name]
-	jobs_data[unique_name] = ResourceLoader.load(file_path, "JobData")
-	return jobs_data[unique_name]
+	return jobs.get_or_null(unique_name) as JobData
 
 
 func get_skillset(unique_name: String) -> Skillset:
-	if skillsets.has(unique_name):
-		return skillsets[unique_name]
-	
-	var file_path: String = skillset_paths[unique_name]
-	skillsets[unique_name] = ResourceLoader.load(file_path, "Skillset")
-	return skillsets[unique_name]
+	return skillsets.get_or_null(unique_name) as Skillset
 
 
 func get_action(unique_name: String) -> Action:
-	if actions.has(unique_name):
-		return actions[unique_name]
-	
-	var file_path: String = action_paths[unique_name]
-	var new_action: Action = ResourceLoader.load(file_path, "Action")
-	if new_action.vfx_name != "":
-		new_action.vfx_data = get_vfx_data(new_action.vfx_name)
-	actions[unique_name] = new_action
-	return actions[unique_name]
+	return actions.get_or_null(unique_name) as Action
 
 
 func get_triggered_action(unique_name: String) -> TriggeredAction:
-	if triggered_actions.has(unique_name):
-		return triggered_actions[unique_name]
-	
-	var file_path: String = triggered_action_paths[unique_name]
-	triggered_actions[unique_name] = ResourceLoader.load(file_path, "TriggeredAction")
-	return triggered_actions[unique_name]
+	return triggered_actions.get_or_null(unique_name) as TriggeredAction
 
 
 func get_passive_effect(unique_name: String) -> PassiveEffect:
-	if passive_effects.has(unique_name):
-		return passive_effects[unique_name]
-	if unique_name == "":
-		return null
-	
-	var file_path: String = passive_effect_paths[unique_name]
-	passive_effects[unique_name] = ResourceLoader.load(file_path, "PassiveEffect")
-	return passive_effects[unique_name]
+	return passive_effects.get_or_null(unique_name) as PassiveEffect
 
 
 func get_ability(unique_name: String) -> Ability:
-	if abilities.has(unique_name):
-		return abilities[unique_name]
-	if unique_name == "":
-		return null
-	
-	var file_path: String = ability_paths[unique_name]
-	abilities[unique_name] = ResourceLoader.load(file_path, "Ability")
-	return abilities[unique_name]
+	return abilities.get_or_null(unique_name) as Ability
 
 
 func get_scenario(unique_name: String) -> Scenario:
-	if scenarios.has(unique_name):
-		return scenarios[unique_name]
-	
-	var file_path: String = scenario_paths[unique_name]
-	var scenario: Scenario = ResourceLoader.load(file_path, "Scenario")
-	scenarios[unique_name] = scenario
-	return scenario
+	return scenarios.get_or_null(unique_name) as Scenario
 
 
 func get_texture(unique_name: String) -> Texture2D:
-	if textures.has(unique_name):
-		return textures[unique_name]
-	
-	var file_path: String = texture_paths[unique_name]
-	var new_image: Image = Image.load_from_file(file_path)
-	textures[unique_name] = ImageTexture.create_from_image(new_image)
-	return textures[unique_name]
+	return textures.get_or_null(unique_name) as Texture2D
 
 
 func get_spritesheet_data(unique_name: String) -> UnitSpritesheetData:
-	if unit_spritesheets_data.has(unique_name):
-		return unit_spritesheets_data[unique_name]
-	
-	var file_path: String = unit_spritesheet_data_paths[unique_name]
-	unit_spritesheets_data[unique_name] = ResourceLoader.load(file_path, "UnitSpritesheetData")
-	return unit_spritesheets_data[unique_name]
+	return unit_spritesheets.get_or_null(unique_name) as UnitSpritesheetData
 
 
 func load_all_data() -> void:
-	for file_name: String in shp_paths.keys():
-		get_shp(file_name)
-	for file_name: String in seq_paths.keys():
-		get_seq(file_name)
-	for file_name: String in map_gltf_paths.keys():
-		get_map_gltf(file_name)
-	for file_name: String in map_data_paths.keys():
-		get_map_data(file_name)
-	for file_name: String in vfx_data_paths.keys():
-		get_vfx_data(file_name)
-	for file_name: String in item_paths.keys():
-		get_item(file_name)
-	for file_name: String in status_effect_paths.keys():
-		get_status_effect(file_name)
-	for file_name: String in job_paths.keys():
-		get_job(file_name)
-	for file_name: String in skillset_paths.keys():
-		get_skillset(file_name)
-	for file_name: String in action_paths.keys():
-		get_action(file_name)
-	for file_name: String in triggered_action_paths.keys():
-		get_triggered_action(file_name)
-	for file_name: String in passive_effect_paths.keys():
-		get_passive_effect(file_name)
-	for file_name: String in ability_paths.keys():
-		get_ability(file_name)
-	for file_name: String in scenario_paths.keys():
-		get_scenario(file_name)
-	for file_name: String in texture_paths.keys():
-		get_texture(file_name)
-	for file_name: String in unit_spritesheet_data_paths.keys():
-		get_spritesheet_data(file_name)
+	for registry: DataRegistry in _registries:
+		registry.load_all()
 
 
 func export_resource(resource: Resource, save_path: String = "") -> Error:
+	if resource.unique_name.is_empty():
+		push_warning("Skipping export of resource with empty unique_name: " + str(resource.FILE_SUFFIX))
+		return ERR_INVALID_DATA
 	if save_path == "":
-		save_path = GameData.external_data_paths["EXPORT_PATH"]
+		save_path = external_data_paths["EXPORT_PATH"]
 	var resource_dir: String = save_path.path_join(resource.SAVE_FOLDER)
 	DirAccess.make_dir_recursive_absolute(resource_dir)
 	var resource_file_path: String = resource_dir.path_join(resource.unique_name + resource.FILE_SUFFIX)
@@ -471,7 +347,6 @@ func export_resource(resource: Resource, save_path: String = "") -> Error:
 	if error != OK:
 		push_error("Error saving resource: " + error_string(error) + " - " + resource.unique_name + resource.FILE_SUFFIX)
 	return error
-
 
 
 static func get_16_color_palette(palette_id: int, full_palette: PackedColorArray) -> PackedColorArray:

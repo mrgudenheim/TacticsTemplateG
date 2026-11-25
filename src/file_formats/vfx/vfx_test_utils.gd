@@ -5,7 +5,7 @@ class_name VfxTestUtils
 ## Load a map with Y-mirrored mesh (matching battle system default: mirror_xyz = [false, true, false]).
 ## Returns the MapChunkNodes added as child of `container`, or null if the map can't be loaded.
 static func load_mirrored_map(map_name: String, container: Node3D) -> MapChunkNodes:
-	if not GameData.map_data_paths.keys().has(map_name):
+	if not GameData.maps_data.has(map_name):
 		push_warning("[VfxTestUtils] Map not in GameData: " + map_name)
 		return null
 

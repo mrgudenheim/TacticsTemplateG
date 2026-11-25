@@ -7,7 +7,7 @@ var ability_select_buttons: Array[AbilitySelectButton]
 
 
 func populate_list() -> void:
-	for ability_name: String in GameData.ability_paths.keys():
+	for ability_name: String in GameData.abilities.get_all_ids():
 		var ability_data: Ability = GameData.get_ability(ability_name)
 		var ability_select_button: AbilitySelectButton = ability_select_button_scene.instantiate()
 		ability_select_button.ability_data = ability_data

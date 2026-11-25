@@ -309,7 +309,7 @@ func init_derived_properties(new_battle_manager: BattleManager, create_unit_acto
 	battle_manager = new_battle_manager
 	_connect_stats_signals()
 
-	if job_unique_name != "" and job_unique_name != "job_unique_name" and GameData.job_paths.has(job_unique_name):
+	if job_unique_name != "" and job_unique_name != "job_unique_name" and GameData.jobs.has(job_unique_name):
 		job_data = GameData.get_job(job_unique_name)
 
 	if terrain_tile_position == null and battle_manager != null:
@@ -624,7 +624,7 @@ func get_skillset_actions() -> Array[Action]:
 	for skillset: Skillset in get_skillsets():
 		for ability_name: String in skillset.ability_names:
 			var ability_is_action: bool = not [Ability.SlotType.REACTION, Ability.SlotType.SUPPORT, Ability.SlotType.MOVEMENT].has(GameData.get_ability(ability_name).slot_type)
-			if ability_is_action and GameData.action_paths.has(ability_name):
+			if ability_is_action and GameData.actions.has(ability_name):
 				var new_action: Action = GameData.get_action(ability_name)
 				action_list.append(new_action)
 	return action_list
@@ -842,7 +842,7 @@ func update_permanent_statuses(all_passive_effects: Array[PassiveEffect], units_
 	for passive_effect: PassiveEffect in all_passive_effects:
 		always_statuses.append_array(passive_effect.status_always)
 	
-	for status_unique_name: String in GameData.status_effect_paths.keys():
+	for status_unique_name: String in GameData.status_effects.get_all_ids():
 		if immune_statuses.has(status_unique_name):
 			continue
 		
@@ -1003,7 +1003,7 @@ func equip_random_abilities() -> void:
 
 
 func get_random_ability_name(ability_slot_type: Ability.SlotType) -> String:
-	var random_ability_name: String = GameData.ability_paths.keys().filter(func(ability_name: String) -> bool: return GameData.get_ability(ability_name).slot_type == ability_slot_type).pick_random()
+	var random_ability_name: String = GameData.abilities.get_all_ids().filter(func(ability_name: String) -> bool: return GameData.get_ability(ability_name).slot_type == ability_slot_type).pick_random()
 	return random_ability_name
 
 
@@ -1040,7 +1040,7 @@ func equip_items_leveled() -> void:
 func get_item_unique_name_for_slot(slot_type: ItemData.SlotType, item_level: int, random: bool = false) -> String:
 	# var valid_items: Array[ItemData] = []
 	var valid_items_names: Array[String] = []
-	valid_items_names.assign(GameData.item_paths.keys().filter(func(item_name: String) -> bool: 
+	valid_items_names.assign(GameData.items.get_all_ids().filter(func(item_name: String) -> bool: 
 		var item: ItemData = GameData.get_item(item_name)
 		var slot_type_is_valid: bool = item.slot_type == slot_type
 		var level_is_valid: bool = item.min_level <= item_level

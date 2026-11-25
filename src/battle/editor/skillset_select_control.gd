@@ -7,7 +7,7 @@ var skillset_select_buttons: Array[SkillsetSelectButton]
 
 
 func populate_list() -> void:
-	for skillset_name: String in GameData.skillset_paths.keys():
+	for skillset_name: String in GameData.skillsets.get_all_ids():
 		var skillset: Skillset = GameData.get_skillset(skillset_name)
 		var skillset_select_button: SkillsetSelectButton = skillset_select_button_scene.instantiate()
 		skillset_select_button.skillset = skillset

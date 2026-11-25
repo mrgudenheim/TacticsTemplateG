@@ -7,7 +7,7 @@ var job_select_buttons: Array[JobSelectButton]
 
 
 func populate_list() -> void:
-	for job_name: String in GameData.job_paths.keys():
+	for job_name: String in GameData.jobs.get_all_ids():
 		var job_data: JobData = GameData.get_job(job_name)
 		var job_select_button: JobSelectButton = job_select_button_scene.instantiate()
 		job_select_button.job_data = job_data

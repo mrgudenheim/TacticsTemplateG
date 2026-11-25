@@ -154,7 +154,7 @@ func _create_effect_instance() -> bool:
 		#print("[VfxTestScene] Effect index %d out of range" % current_effect_index)
 		#return false
 
-	var vfx_data: VisualEffectData = GameData.vfx[vfx_name]
+	var vfx_data: VisualEffectData = GameData.get_vfx_data(vfx_name)
 	if vfx_data == null:
 		print("[VfxTestScene] Effect %d is null" % current_effect_index)
 		return false
@@ -186,7 +186,7 @@ func _play_effect() -> void:
 		return
 
 	var vfx_name: String = "e_%03d" % current_effect_index
-	var vfx_data: VisualEffectData = GameData.vfx[vfx_name]
+	var vfx_data: VisualEffectData = GameData.get_vfx_data(vfx_name)
 
 	if debug_depth:
 		for ai in range(vfx_data.animations.size()):
@@ -460,7 +460,7 @@ func _on_effect_changed(value: float) -> void:
 
 func _update_effect_name_label() -> void:
 	var vfx_unique_name: String = "e_%03d" % current_effect_index
-	if GameData.vfx_data_paths.has(vfx_unique_name):
+	if GameData.vfx.has(vfx_unique_name):
 		var vfx_data: VisualEffectData = GameData.get_vfx_data(vfx_unique_name)
 		var ability_names_text: String = vfx_data.ability_names.strip_edges() if vfx_data else ""
 		effect_name_label.text = ability_names_text if not ability_names_text.is_empty() else "(no ability)"

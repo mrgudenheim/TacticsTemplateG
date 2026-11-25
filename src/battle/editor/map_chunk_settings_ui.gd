@@ -30,7 +30,7 @@ func _ready() -> void:
 	chunk_name_dropdown.item_selected.connect(on_chunk_selected)
 	position_edit.vector_changed.connect(set_map_chunk_position)
 	
-	for map_data_name: String in GameData.map_data_paths.keys():
+	for map_data_name: String in GameData.maps_data.get_all_ids():
 		chunk_name_dropdown.add_item(map_data_name)
 	
 	var map_index: int = Utilities.get_option_button_index_by_string(chunk_name_dropdown, map_chunk.unique_name)

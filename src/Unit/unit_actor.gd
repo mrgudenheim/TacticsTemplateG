@@ -556,7 +556,7 @@ func set_sprite_by_file_name(new_spritesheet_name: String) -> void:
 
 
 func set_sprite_by_job(new_job_name: String) -> void:
-	if not GameData.job_paths.has(new_job_name):
+	if not GameData.jobs.has(new_job_name):
 		push_warning("set_sprite_by_job called with invalid job name: " + new_job_name)
 		return
 

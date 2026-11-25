@@ -8,7 +8,7 @@ extends RefCounted
 static func lookup_action(action_unique_name: String) -> Action:
 	if action_unique_name.is_empty():
 		return null
-	if GameData.actions.has(action_unique_name) or GameData.action_paths.has(action_unique_name):
+	if GameData.actions.has(action_unique_name):
 		return GameData.get_action(action_unique_name)
 	return null
 
@@ -16,7 +16,7 @@ static func lookup_action(action_unique_name: String) -> Action:
 static func lookup_status_effect(status_unique_name: String) -> StatusEffect:
 	if status_unique_name.is_empty():
 		return null
-	if GameData.status_effects.has(status_unique_name) or GameData.status_effect_paths.has(status_unique_name):
+	if GameData.status_effects.has(status_unique_name):
 		return GameData.get_status_effect(status_unique_name)
 	return null
 

@@ -902,7 +902,7 @@ func export_all_items_full_color() -> void:
 
 		items_full_color_images[palette_idx] = new_color_items
 
-	for new_item_name: String in GameData.item_paths.keys():
+	for new_item_name: String in GameData.items.get_all_ids():
 		var new_item_data: ItemData = GameData.get_item(new_item_name)
 		var new_item_full_texture: Image = items_full_color_images[new_item_data.item_palette_id]
 

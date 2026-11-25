@@ -117,7 +117,7 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 	
 	load_scenario_button.clear()
 	load_scenario_button.add_separator("Load Scenario")
-	for scenario_unique_name: String in GameData.scenario_paths.keys():
+	for scenario_unique_name: String in GameData.scenarios.get_all_ids():
 		load_scenario_button.add_item(scenario_unique_name)
 	load_scenario_button.select(0)
 	
@@ -149,7 +149,7 @@ func init_scenario(new_scenario: Scenario = null) -> void:
 			number = int(new_scenario_num) + 1
 			
 		scenario.unique_name = "new_scenario_%02d" % number
-		while GameData.scenario_paths.has(scenario.unique_name):
+		while GameData.scenarios.has(scenario.unique_name):
 			number += 1
 			scenario.unique_name = "new_scenario_%02d" % number
 		init_random_scenario()
@@ -178,7 +178,7 @@ func init_random_scenario() -> void:
 	
 	add_map_chunk_settings()
 	# var map_chunk_data: MapData = GameData.maps_data[scenario.map_chunks[0].unique_name]
-	var random_scenario_name: String = GameData.scenario_paths.keys().pick_random()
+	var random_scenario_name: String = GameData.scenarios.get_all_ids().pick_random()
 	# random_scenario_name = "map_114_end_05"
 	var random_scenario: Scenario = GameData.get_scenario(random_scenario_name)
 	background_gradient_color_pickers[0].color = random_scenario.background_gradient_bottom
@@ -469,7 +469,7 @@ func export_scenario() -> void:
 	for unit: UnitData in battle_manager.units:
 		scenario.units_data.append(unit)
 	GameData.export_resource(scenario)
-	GameData.scenarios[scenario.unique_name] = scenario
+	GameData.scenarios.register(scenario.unique_name, scenario)
 
 
 func open_import_dialong() -> void:
@@ -484,7 +484,7 @@ func open_import_dialong() -> void:
 func import_scenario(file_path: String) -> void:
 	var new_scenario: Scenario = ResourceLoader.load(file_path, "Scenario")
 	if new_scenario != null:
-		GameData.scenarios[new_scenario.unique_name] = new_scenario
+		GameData.scenarios.register(new_scenario.unique_name, new_scenario, file_path)
 		queue_new_scenario(new_scenario)
 	else:
 		push_error("Failed to load scenario from file: " + file_path)

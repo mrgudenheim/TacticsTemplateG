@@ -41,7 +41,7 @@ func _start() -> void:
 
 	# Load and play effect
 	var vfx_unique_name: String = "e_%03d" % effect_index
-	if not GameData.vfx_data_paths.has(vfx_unique_name):
+	if not GameData.vfx.has(vfx_unique_name):
 		print("[VFX_TEST] Effect %s not found in GameData" % vfx_unique_name)
 		get_tree().quit()
 		return
