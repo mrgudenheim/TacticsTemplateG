@@ -171,11 +171,11 @@ func process_rom() -> void:
 	# must be after fft_abilities to set secondary actions
 	items_array.resize(NUM_ITEMS)
 	for id: int in NUM_ITEMS:
-		items_array[id] = FftItemImporter.create_from_rom(id, self)
+		items_array[id] = FftItemConverter.create_from_rom(id, self)
 	section_start = _profile_section("items (254)", section_start)
 
-	scus_data.init_statuses(self)
-	section_start = _profile_section("scus_data.init_statuses", section_start)
+	FftStatusConverter.configure_statuses(scus_data.status_effects, self)
+	section_start = _profile_section("FftStatusConverter.configure_statuses", section_start)
 
 	for job_data: JobData in jobs_data.values():
 		job_data.sprite_name = sprs[spr_id_file_idxs[job_data.sprite_id]].file_name.to_lower().trim_suffix(".spr")

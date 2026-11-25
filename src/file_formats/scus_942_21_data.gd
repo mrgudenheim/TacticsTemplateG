@@ -114,9 +114,9 @@ class ItemAttribute:
 		sp_modifier = item_attribute_bytes.decode_u8(2)
 		move_modifier = item_attribute_bytes.decode_u8(3)
 		jump_modifier = item_attribute_bytes.decode_u8(4)
-		status_always = FftStatusImporter.decode_status_id_array(item_attribute_bytes.slice(5, 10), all_status_effects)
-		status_immune = FftStatusImporter.decode_status_id_array(item_attribute_bytes.slice(10, 15), all_status_effects)
-		status_start = FftStatusImporter.decode_status_id_array(item_attribute_bytes.slice(15, 20), all_status_effects)
+		status_always = FftStatusConverter.decode_status_id_array(item_attribute_bytes.slice(5, 10), all_status_effects)
+		status_immune = FftStatusConverter.decode_status_id_array(item_attribute_bytes.slice(10, 15), all_status_effects)
+		status_start = FftStatusConverter.decode_status_id_array(item_attribute_bytes.slice(15, 20), all_status_effects)
 		elemental_absorb = item_attribute_bytes.decode_u8(20)
 		elemental_cancel = item_attribute_bytes.decode_u8(21)
 		elemental_half = item_attribute_bytes.decode_u8(22)
@@ -149,7 +149,7 @@ class InflictStatus:
 		is_separate = inflict_status_bytes.decode_u8(0) & 0x20 == 0x20
 		will_cancel = inflict_status_bytes.decode_u8(0) & 0x10 == 0x10
 		status_flags = inflict_status_bytes.slice(1)
-		status_list = FftStatusImporter.decode_status_id_array(status_flags, all_status_effects)
+		status_list = FftStatusConverter.decode_status_id_array(status_flags, all_status_effects)
 
 # Inflict Status data https://ffhacktics.com/wiki/Inflict_Statuses
 var inflict_status_data_start: int = 0x63fc4 - 0xf800
@@ -184,7 +184,7 @@ func init_from_scus(rom_reader: RomReader) -> void:
 	status_effects.resize(status_effect_entries)
 	for id: int in status_effect_entries:
 		var new_status_effect_bytes: PackedByteArray = status_effect_data_bytes.slice(id * status_effect_entry_length, (id + 1) * status_effect_entry_length)
-		var new_status_effect: StatusEffect = FftStatusImporter.create_from_bytes(new_status_effect_bytes, rom_reader)
+		var new_status_effect: StatusEffect = FftStatusConverter.create_from_bytes(new_status_effect_bytes, rom_reader)
 		new_status_effect.status_effect_name = rom_reader.fft_text.status_names[id]
 		FftRegistryHelper.register_unique(rom_reader.status_effects, new_status_effect, new_status_effect.status_effect_name, "StatusEffect")
 		new_status_effect.status_id = id
@@ -206,7 +206,7 @@ func init_from_scus(rom_reader: RomReader) -> void:
 		
 	
 	for status_effect: StatusEffect in status_effects:
-		FftStatusImporter.resolve_status_flags(status_effect, status_effects) # called after all StatusEffects have already been initialized since this indexes into the complete array
+		FftStatusConverter.resolve_status_flags(status_effect, status_effects) # called after all StatusEffects have already been initialized since this indexes into the complete array
 	
 	# Inflict Status data https://ffhacktics.com/wiki/Inflict_Statuses
 	# inflict status data needs to be loaded before abilities and items that reference the array
@@ -226,7 +226,7 @@ func init_from_scus(rom_reader: RomReader) -> void:
 	jobs_data.resize(num_entries)
 	for job_id: int in num_entries:
 		var job_entry_bytes: PackedByteArray = job_bytes.slice(job_id * entry_size, (job_id * entry_size) + entry_size)
-		var job_data: JobData = FftJobImporter.create_from_rom(job_id, job_entry_bytes, rom_reader)
+		var job_data: JobData = FftJobConverter.create_from_rom(job_id, job_entry_bytes, rom_reader)
 		jobs_data[job_id] = job_data
 	
 	# unit skillset data
@@ -434,218 +434,3 @@ func init_from_scus(rom_reader: RomReader) -> void:
 	terrain_geomancy.resize(terrain_geomancy_entries)
 	for byte_idx: int in terrain_geomancy_bytes.size():
 		terrain_geomancy[byte_idx] = terrain_geomancy_bytes.decode_u8(byte_idx)
-
-
-func init_statuses(rom_reader: RomReader) -> void:
-	# https://ffhacktics.com/wiki/Target_XA_affecting_Statuses_(Physical)
-	# https://ffhacktics.com/wiki/Target%27s_Status_Affecting_XA_(Magical)
-	# https://ffhacktics.com/wiki/Evasion_Changes_due_to_Statuses
-	# evade also affected by transparent, concentrate, dark or confuse, on user
-
-	for idx: int in status_effects.size():
-		status_effects[idx].ai_score_formula.values[0] = rom_reader.battle_bin_data.ai_status_priorities[idx] / 128.0
-		status_effects[idx].duration_icons = rom_reader.battle_bin_data.status_counter_rects.duplicate()
-	
-	# haste
-	# status_effects[28].passive_effect.ct_gain_modifier.value_formula.values = [1.5]
-	status_effects[28].passive_effect.ct_gain_modifier.formula_text = "value * 1.5"
-	status_effects[28].passive_effect_name = status_effects[28].unique_name + "_status"
-	status_effects[28].passive_effect.unique_name = status_effects[28].passive_effect_name
-	# slow
-	# status_effects[29].passive_effect.ct_gain_modifier.value_formula.values = [0.5]
-	status_effects[29].passive_effect.ct_gain_modifier.formula_text = "value * 0.5"
-	status_effects[29].passive_effect_name = status_effects[29].unique_name + "_status"
-	status_effects[29].passive_effect.unique_name = status_effects[29].passive_effect_name
-	
-	# freeze ct flag
-	for status: StatusEffect in status_effects:
-		if status.freezes_ct:
-			# status.passive_effect.ct_gain_modifier.value_formula.values = [0.0]
-			status.passive_effect.ct_gain_modifier.formula_text = "value * 0.0"
-		status.passive_effect.can_react = not (status.checks_02 & 0x80 == 0x80) # cant react flag
-		status.passive_effect.nullify_targeted = status.checks_02 & 0x20 == 0x20 # ignore attacks flag
-		status.passive_effect_name = status.unique_name + "_status"
-		status.passive_effect.unique_name = status.passive_effect_name
-	
-	# reflect - handled as a triggered action
-	# status_effects[38].passive_effect.hit_chance_modifier_targeted.value = 0.0
-	
-	# defending
-	# status_effects[6].passive_effect.hit_chance_modifier_targeted.value_formula.values = [0.5]
-	status_effects[6].passive_effect.hit_chance_modifier_targeted.formula_text = "value * 0.5"
-	status_effects[6].passive_effect_name = status_effects[6].unique_name + "_status"
-	status_effects[6].passive_effect.unique_name = status_effects[6].passive_effect_name
-	
-	# protect, shell
-	for idx: int in [26, 27]:
-		# status_effects[idx].passive_effect.hit_chance_modifier_targeted.value_formula.values = [0.66]
-		# status_effects[idx].passive_effect.power_modifier_targeted.value_formula.values = [0.66]
-		status_effects[idx].passive_effect.power_modifier_targeted.formula_text = "value * 0.66"
-		status_effects[idx].passive_effect_name = status_effects[idx].unique_name + "_status"
-		status_effects[idx].passive_effect.unique_name = status_effects[idx].passive_effect_name
-	
-	# chicken, frog, sleeping, charging
-	for idx: int in [21, 22, 35, 4]:
-		#status_effects[idx].passive_effect.hit_chance_modifier_targeted.value_formula.values = [1.5]
-		# status_effects[idx].passive_effect.power_modifier_targeted.value_formula.values = [1.5]
-		status_effects[idx].passive_effect.power_modifier_targeted.formula_text = "value * 1.5"
-		status_effects[idx].passive_effect_name = status_effects[idx].unique_name + "_status"
-		status_effects[idx].passive_effect.unique_name = status_effects[idx].passive_effect_name
-	
-	# dark, confuse
-	for idx: int in [10, 11]:
-		# status_effects[idx].passive_effect.hit_chance_modifier_user.value_formula.values = [0.5]
-		status_effects[idx].passive_effect.hit_chance_modifier_user.formula_text = "value * 0.5"
-		status_effects[idx].passive_effect_name = status_effects[idx].unique_name + "_status"
-		status_effects[idx].passive_effect.unique_name = status_effects[idx].passive_effect_name
-	
-	# dont act, sleep, stop, confuse, charging, performing
-	for idx: int in [37, 35, 30, 11, 4, 7]:
-		# status_effects[idx].passive_effect.evade_modifier_targeted.type = Modifier.ModifierType.SET
-		# status_effects[idx].passive_effect.evade_modifier_targeted.value = 1.0
-		status_effects[idx].passive_effect.evade_source_modifiers_targeted = {
-			EvadeData.EvadeSource.JOB: Modifier.new("0", Modifier.ModifierType.SET),
-			EvadeData.EvadeSource.SHIELD: Modifier.new("0", Modifier.ModifierType.SET),
-			EvadeData.EvadeSource.ACCESSORY: Modifier.new("0", Modifier.ModifierType.SET),
-			EvadeData.EvadeSource.WEAPON: Modifier.new("0", Modifier.ModifierType.SET),
-		}
-		status_effects[idx].passive_effect_name = status_effects[idx].unique_name + "_status"
-		status_effects[idx].passive_effect.unique_name = status_effects[idx].passive_effect_name
-	
-	# user is transparent
-	status_effects[19].passive_effect.target_can_react = false
-	# status_effects[19].passive_effect.evade_modifier_user.type = Modifier.ModifierType.SET
-	# status_effects[19].passive_effect.evade_modifier_user.value = 1.0
-	status_effects[19].passive_effect.evade_source_modifiers_user = {
-		EvadeData.EvadeSource.JOB: Modifier.new("0", Modifier.ModifierType.SET),
-		EvadeData.EvadeSource.SHIELD: Modifier.new("0", Modifier.ModifierType.SET),
-		EvadeData.EvadeSource.ACCESSORY: Modifier.new("0", Modifier.ModifierType.SET),
-		EvadeData.EvadeSource.WEAPON: Modifier.new("0", Modifier.ModifierType.SET),
-	}
-	status_effects[19].passive_effect_name = status_effects[19].unique_name + "_status"
-	status_effects[19].passive_effect.unique_name = status_effects[19].passive_effect_name
-	
-	
-	# confuse
-	status_effects[11].passive_effect.ai_strategy = UnitAi.Strategy.CONFUSED
-	# berserk
-	status_effects[20].passive_effect.ai_strategy = UnitAi.Strategy.BEST
-	status_effects[20].passive_effect_name = status_effects[20].unique_name + "_status"
-	status_effects[20].passive_effect.unique_name = status_effects[20].passive_effect_name
-	# chicken
-	status_effects[21].passive_effect.ai_strategy = UnitAi.Strategy.FLEE
-	status_effects[21].spritesheet_file_name = "other"
-	status_effects[21].palette_idx_offset = 0 # TODO chicken is actually palettes 0-4 depending on original palette
-	status_effects[21].other_type_index = 0
-	# blood suck
-	status_effects[13].passive_effect.ai_strategy = UnitAi.Strategy.BEST
-	status_effects[13].passive_effect.added_actions = [rom_reader.fft_abilities[0x0c8].ability_action] # blood suck action
-	status_effects[13].passive_effect_name = status_effects[13].unique_name + "_status"
-	status_effects[13].passive_effect.unique_name = status_effects[13].passive_effect_name
-	rom_reader.fft_abilities[0x0c8].ability_action.status_prevents_use_any.erase("blood_suck") # can use blood suck
-	
-	# faith
-	status_effects[32].passive_effect.stat_modifiers[UnitData.StatType.FAITH] = Modifier.new("100.0", Modifier.ModifierType.SET)
-	status_effects[32].passive_effect_name = status_effects[32].unique_name + "_status"
-	status_effects[32].passive_effect.unique_name = status_effects[32].passive_effect_name
-	# innocent
-	status_effects[33].passive_effect.stat_modifiers[UnitData.StatType.FAITH] = Modifier.new("0.0", Modifier.ModifierType.SET)
-	status_effects[32].passive_effect_name = status_effects[32].unique_name + "_status"
-	status_effects[32].passive_effect.unique_name = status_effects[32].passive_effect_name
-	
-	# float
-	# TODO handle ignore depth and add height
-	status_effects[17].passive_effect.element_cancel = [Action.ElementTypes.EARTH]
-	var terrain_modifier_dict: Dictionary[int, Modifier] = {
-		0x0e : Modifier.new("1", Modifier.ModifierType.SET),
-		0x0f: Modifier.new("1", Modifier.ModifierType.SET),
-		0x10 : Modifier.new("1", Modifier.ModifierType.SET),
-		0x11 : Modifier.new("1", Modifier.ModifierType.SET),
-		0x2d : Modifier.new("1", Modifier.ModifierType.SET),
-	}
-	status_effects[17].passive_effect.terrain_cost_modifiers = terrain_modifier_dict
-	status_effects[17].passive_effect.remove_prohibited_terrain = [
-		0x12,
-		0x19,
-		0x1c,
-	]
-	status_effects[17].passive_effect_name = status_effects[17].unique_name + "_status"
-	status_effects[17].passive_effect.unique_name = status_effects[17].passive_effect_name
-
-	# oil
-	status_effects[16].passive_effect.element_weakness = [Action.ElementTypes.FIRE] # TODO oil is in addition to fire weakness
-	status_effects[16].passive_effect_name = status_effects[16].unique_name + "_status"
-	status_effects[16].passive_effect.unique_name = status_effects[16].passive_effect_name
-	
-	# frog
-	status_effects[22].passive_effect.added_actions = [rom_reader.fft_abilities[0x16f].ability_action] # frog attack action
-	status_effects[22].spritesheet_file_name = "other"
-	status_effects[22].palette_idx_offset = 5 # frog is actually palettes 5-9 depending on original palette
-	status_effects[22].other_type_index = 1
-	rom_reader.fft_abilities[0x16f].ability_action.status_prevents_use_any.erase("frog") # can use frog attack
-	rom_reader.fft_abilities[0x01d].ability_action.status_prevents_use_any.erase("frog") # can use Frog
-	status_effects[22].passive_effect_name = status_effects[22].unique_name + "_status"
-	status_effects[22].passive_effect.unique_name = status_effects[22].passive_effect_name
-	
-	# crystal
-	status_effects[1].spritesheet_file_name = "other"
-	status_effects[1].palette_idx_offset = 10 # crystal is actually palettes 10-14 depending on original palette
-	status_effects[1].other_type_index = 2
-
-	# treasure
-	status_effects[15].spritesheet_file_name = "other"
-	status_effects[15].palette_idx_offset = 16 # treasure is actually palettes 16-20 depending on original palette
-	status_effects[15].other_type_index = 0
-
-	# death sentence, dead
-	for idx: int in [39, 2]:
-		status_effects[idx].duration = 3
-		status_effects[idx].duration_type = StatusEffect.DurationType.TURNS
-	
-	# dead actions
-	status_effects[2].action_on_apply = "dead_damage" # dead damage
-	status_effects[2].action_on_complete = "dead_to_crystal_treasure" # dead to crystal/treasure
-
-	# poison action
-	status_effects[24].action_on_turn_end = "poison_damage"
-
-	# regen action
-	status_effects[25].action_on_turn_end = "regeneration_heal"
-
-	# reraise triggered action
-	status_effects[18].passive_effect.added_triggered_actions_names = ["reraise_remove_dead"]
-	status_effects[18].passive_effect_name = status_effects[18].unique_name + "_status"
-	status_effects[18].passive_effect.unique_name = status_effects[18].passive_effect_name
-
-	# undead triggered action
-	status_effects[3].passive_effect.added_triggered_actions_names = ["undead_remove_dead"]
-	status_effects[3].passive_effect_name = status_effects[3].unique_name + "_status"
-	status_effects[3].passive_effect.unique_name = status_effects[3].passive_effect_name
-
-	# reflect triggered action
-	status_effects[38].passive_effect.added_triggered_actions_names = ["reflect"]
-	status_effects[38].passive_effect_name = status_effects[38].unique_name + "_status"
-	status_effects[38].passive_effect.unique_name = status_effects[38].passive_effect_name
-
-	# death sentence action
-	status_effects[39].action_on_complete = "death_sentence_to_dead"
-	
-	# TODO Invite, Charm
-	# TODO Undead reverse healing -> damage
-
-	#for status: StatusEffect in status_effects:
-		#if status.passive_effect != null:
-			#status.passive_effect.unique_name = status.unique_name
-			#Utilities.save_json(status.passive_effect)
-
-	# var default_passive_json: String = PassiveEffect.new().to_json()
-	# # Utilities.save_json(PassiveEffect.new())
-	# for idx: int in status_effects.size():
-	# 	var status_passive_json: String = status_effects[idx].passive_effect.to_json()
-	# 	if not status_passive_json == default_passive_json:
-	# 		status_effects[idx].passive_effect.unique_name = status_effects[idx].unique_name + "_status"
-	# 		status_effects[idx].passive_effect_name = status_effects[idx].passive_effect.unique_name
-	# 		status_effects[idx].passive_effect.add_to_global_list()
-	# 		Utilities.save_json(status_effects[idx].passive_effect)
-		
-	# 	Utilities.save_json(status_effects[idx])

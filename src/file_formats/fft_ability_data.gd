@@ -322,7 +322,7 @@ func set_action(rom_reader: RomReader) -> void:
 		# ability_action.ignores_statuses.append("reflect") # ignore reflect # TODO ignoring Reflect is handled within TriggeredAction
 		ability_action.ignore_passives.append("reflect_status")
 	
-	FftActionImporter.apply_formula_id(ability_action, formula_id, rom_reader)
+	FftActionConverter.apply_formula_id(ability_action, formula_id, rom_reader)
 	if not is_evadeable: # set after formula
 		ability_action.applicable_evasion_type = EvadeData.EvadeType.NONE
 	

@@ -1,4 +1,4 @@
-class_name FftJobImporter
+class_name FftJobConverter
 extends RefCounted
 
 
@@ -71,9 +71,9 @@ static func create_from_rom(
 
 	var status_effects: Array[StatusEffect] = rom_reader.scus_data.status_effects
 	var new_passive_effect: PassiveEffect = PassiveEffect.new()
-	new_passive_effect.status_always = FftStatusImporter.decode_status_id_array(job_bytes.slice(0x1a, 0x1f), status_effects)
-	new_passive_effect.status_immune = FftStatusImporter.decode_status_id_array(job_bytes.slice(0x1f, 0x24), status_effects)
-	new_passive_effect.status_start = FftStatusImporter.decode_status_id_array(job_bytes.slice(0x24, 0x29), status_effects)
+	new_passive_effect.status_always = FftStatusConverter.decode_status_id_array(job_bytes.slice(0x1a, 0x1f), status_effects)
+	new_passive_effect.status_immune = FftStatusConverter.decode_status_id_array(job_bytes.slice(0x1f, 0x24), status_effects)
+	new_passive_effect.status_start = FftStatusConverter.decode_status_id_array(job_bytes.slice(0x24, 0x29), status_effects)
 
 	new_passive_effect.element_absorb = Action.get_element_types_array([job_bytes.decode_u8(0x29)])
 	new_passive_effect.element_cancel = Action.get_element_types_array([job_bytes.decode_u8(0x2a)])

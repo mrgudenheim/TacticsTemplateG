@@ -1,4 +1,4 @@
-class_name FftActionImporter
+class_name FftActionConverter
 extends RefCounted
 
 

@@ -1,4 +1,4 @@
-class_name FftItemImporter
+class_name FftItemConverter
 extends RefCounted
 
 
