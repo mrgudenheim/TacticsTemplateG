@@ -5,7 +5,7 @@ signal selected(job_data: JobData)
 
 var job_data: JobData:
 	get: return job_data
-	set(value: JobData):
+	set(value):
 		if value != job_data:
 			job_data = value
 			if value != null:
