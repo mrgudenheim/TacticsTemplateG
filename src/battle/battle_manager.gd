@@ -212,10 +212,11 @@ func start_battle() -> void:
 
 
 func spawn_random_unit(team: Team) -> UnitData:
-	var rand_job_name: String = GameData.job_paths.keys().pick_random()
+	var job_ids: Array[String] = GameData.jobs.get_all_ids()
+	var rand_job_name: String = job_ids.pick_random()
 	var rand_job: JobData = GameData.get_job(rand_job_name)
 	while [0x2c, 0x31].has(rand_job.job_id): # prevent jobs without idle frames - 0x2c (Alma2) and 0x31 (Ajora) do not have walking frames
-		rand_job_name = GameData.job_paths.keys().pick_random()
+		rand_job_name = job_ids.pick_random()
 		rand_job = GameData.get_job(rand_job_name)
 	var tile_location: TerrainTile = get_random_stand_terrain_tile()
 	var new_unit: UnitData = spawn_unit(tile_location, rand_job.unique_name, team)
