@@ -86,8 +86,8 @@ func apply_costs_to_user() -> void:
 func apply_turn_end_flag() -> void:
 	if is_preview_only or is_reaction or is_secondary_action or not is_instance_valid(user):
 		return
-	if ends_turn:
-		user.is_ending_turn = true
+	if ends_turn and user.turn_state == UnitData.TurnState.ACTIVE:
+		user.turn_state = UnitData.TurnState.END_PENDING
 
 
 func apply_all_state_changes() -> void:

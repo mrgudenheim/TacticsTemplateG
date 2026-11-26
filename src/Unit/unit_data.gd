@@ -72,6 +72,13 @@ enum Controller {
 	PLAYER,
 }
 
+enum TurnState {
+	INACTIVE,    # Not taking a turn (initial state and after end_turn() completes)
+	ACTIVE,      # Taking turn (selecting or executing actions)
+	END_PENDING, # An action (e.g. Wait) requested ending the turn once it finishes
+	ENDING,      # Currently running end_turn() (awaiting turn-end statuses)
+}
+
 const FACING_VECTORS: Dictionary[GameData.Directions, Vector3] = {
 	GameData.Directions.NORTH: Vector3.BACK,
 	GameData.Directions.EAST: Vector3.RIGHT,
@@ -178,7 +185,7 @@ var equipable_item_types: Array[ItemData.ItemType] = []
 @export var move_points_remaining: int = 1
 @export var action_points_start: int = 1
 @export var action_points_remaining: int = 1
-var is_ending_turn: bool = false
+var turn_state: TurnState = TurnState.INACTIVE
 
 @export var move_action_name: String = "move"
 @export var wait_action_name: String = "wait"
@@ -379,7 +386,7 @@ func duplicate_for_simulation() -> UnitData:
 	simulated_unit.equipable_item_types = equipable_item_types.duplicate()
 	simulated_unit.ignore_height = ignore_height
 	simulated_unit.submerged_depth = submerged_depth
-	simulated_unit.is_ending_turn = is_ending_turn
+	simulated_unit.turn_state = turn_state
 	simulated_unit.active_action = active_action
 	simulated_unit.unit_actor = null
 	return simulated_unit
@@ -470,9 +477,9 @@ func set_submerged_depth(new_depth: int) -> void:
 
 func start_turn() -> void:
 	battle_manager.game_state_label.text = job_data.display_name + "-" + display_name + " starting turn"
-	is_ending_turn = false
+	turn_state = TurnState.ACTIVE
 
-	for status_effect: StatusEffect in current_statuses:
+	for status_effect: StatusEffect in current_statuses.duplicate():
 		if status_effect.action_on_turn_start != "":
 			var action_instance: ActionInstance = ActionInstance.new(GameData.get_action(status_effect.action_on_turn_start), self, battle_manager)
 			action_instance.submitted_targets = [terrain_tile_position] # TODO allow other targeting for status actions on turn start
@@ -487,11 +494,14 @@ func start_turn() -> void:
 
 
 func update_actions() -> void:
-	if is_ending_turn:
+	if battle_manager.active_unit != self:
+		return
+
+	if turn_state == TurnState.END_PENDING:
 		await end_turn()
 		return
-	
-	if battle_manager.active_unit != self:
+
+	if turn_state != TurnState.ACTIVE:
 		return
 	
 	battle_manager.game_state_label.text = job_data.display_name + "-" + display_name + " updating available actions"
@@ -520,7 +530,14 @@ func update_actions() -> void:
 func select_default_action() -> void:
 	# select first usable action by default (usually Move)
 	active_action = null
-	if battle_manager.active_unit != self: # TODO improve game flow to prevent this state from ever occuring
+	if battle_manager.active_unit != self:
+		return
+
+	if turn_state == TurnState.END_PENDING:
+		await end_turn()
+		return
+
+	if turn_state != TurnState.ACTIVE:
 		return
 	
 	for action_instance: ActionInstance in actions_data.values():
@@ -539,13 +556,16 @@ func select_default_action() -> void:
 
 
 func end_turn() -> void:
+	if turn_state == TurnState.ENDING or turn_state == TurnState.INACTIVE:
+		return
+	turn_state = TurnState.ENDING
 	battle_manager.game_state_label.text = job_data.display_name + "-" + display_name + " ending turn"
 	
 	if active_action != null:
 		active_action.clear()
 		active_action.stop_targeting()
 	
-	for status_effect: StatusEffect in current_statuses:
+	for status_effect: StatusEffect in current_statuses.duplicate():
 		if status_effect.action_on_turn_end != "":
 			var action_instance: ActionInstance = ActionInstance.new(GameData.get_action(status_effect.action_on_turn_end), self, battle_manager)
 			action_instance.submitted_targets = [terrain_tile_position] # TODO allow other targeting for status actions on turn end
@@ -565,7 +585,7 @@ func end_turn() -> void:
 	move_points_remaining = move_points_start
 	action_points_remaining = action_points_start
 	
-	is_ending_turn = true
+	turn_state = TurnState.INACTIVE
 	if is_instance_valid(battle_manager.active_unit) and battle_manager.active_unit != self: # prevent accidentally ending a different units turn TODO what if the next turn is also this unit?
 		push_error(job_data.display_name + "-" + display_name + " trying to end turn, but active unit is: " + battle_manager.active_unit.unit_unique_name)
 	else:
