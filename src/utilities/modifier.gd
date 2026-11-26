@@ -1,6 +1,8 @@
 class_name Modifier
 extends Resource
 
+const EXPRESSION_INPUT_NAMES: PackedStringArray = ["user", "target", "value"]
+
 enum ModifierType {
 	ADD,
 	MULT,
@@ -8,9 +10,17 @@ enum ModifierType {
 }
 
 @export var type: ModifierType = ModifierType.ADD
-@export var formula_text: String = "value + 0.0"
+@export var formula_text: String = "value + 0.0":
+	set(value):
+		if value != formula_text:
+			formula_text = value
+			_cached_expression = null
+			_cached_formula_text = ""
 @export var order: int = 1 # order to be appliede
 # TODO track modifier source?
+
+var _cached_expression: Expression = null
+var _cached_formula_text: String = ""
 
 
 func _init(new_formula_text: String = "value + 0.0", new_type: ModifierType = ModifierType.ADD, new_order: int = 1) -> void:
@@ -19,16 +29,31 @@ func _init(new_formula_text: String = "value + 0.0", new_type: ModifierType = Mo
 	formula_text = new_formula_text
 
 
-func get_expression_result(value: float, user: UnitData, target: UnitData) -> float:
+func _get_parsed_expression() -> Expression:
+	if _cached_expression != null and _cached_formula_text == formula_text:
+		return _cached_expression
+
 	var expression: Expression = Expression.new()
-	var error: Error = expression.parse(formula_text, ["user", "target", "value"])
+	var error: Error = expression.parse(formula_text, EXPRESSION_INPUT_NAMES)
 	if error != OK:
-		push_error(expression.get_error_text())
+		push_error("Modifier parse error (%s): %s" % [formula_text, expression.get_error_text()])
+		_cached_expression = null
+		_cached_formula_text = ""
+		return null
+
+	_cached_expression = expression
+	_cached_formula_text = formula_text
+	return _cached_expression
+
+
+func get_expression_result(value: float, user: UnitData, target: UnitData) -> float:
+	var expression: Expression = _get_parsed_expression()
+	if expression == null:
 		return 0.0
-	var result: float = expression.execute([user, target, value])
-	if not expression.has_execute_failed():
-		return result
-	
+	var raw_result: Variant = expression.execute([user, target, value])
+	if not expression.has_execute_failed() and raw_result != null:
+		return float(raw_result)
+
 	push_error(formula_text + " execute failed")
 	return 0.0
 
