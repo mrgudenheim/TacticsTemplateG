@@ -124,19 +124,19 @@ static func configure_statuses(status_effects: Array[StatusEffect], rom_reader: 
 	# dont act, sleep, stop, confuse, charging, performing
 	for idx: int in [37, 35, 30, 11, 4, 7]:
 		status_effects[idx].passive_effect.evade_source_modifiers_targeted = {
-			EvadeData.EvadeSource.JOB: Modifier.new("0", Modifier.ModifierType.SET),
-			EvadeData.EvadeSource.SHIELD: Modifier.new("0", Modifier.ModifierType.SET),
-			EvadeData.EvadeSource.ACCESSORY: Modifier.new("0", Modifier.ModifierType.SET),
-			EvadeData.EvadeSource.WEAPON: Modifier.new("0", Modifier.ModifierType.SET),
+			EvadeData.EvadeSource.JOB: Modifier.new("0", Modifier.ModifierOrder.SET),
+			EvadeData.EvadeSource.SHIELD: Modifier.new("0", Modifier.ModifierOrder.SET),
+			EvadeData.EvadeSource.ACCESSORY: Modifier.new("0", Modifier.ModifierOrder.SET),
+			EvadeData.EvadeSource.WEAPON: Modifier.new("0", Modifier.ModifierOrder.SET),
 		}
 
 	# user is transparent
 	status_effects[19].passive_effect.target_can_react = false
 	status_effects[19].passive_effect.evade_source_modifiers_user = {
-		EvadeData.EvadeSource.JOB: Modifier.new("0", Modifier.ModifierType.SET),
-		EvadeData.EvadeSource.SHIELD: Modifier.new("0", Modifier.ModifierType.SET),
-		EvadeData.EvadeSource.ACCESSORY: Modifier.new("0", Modifier.ModifierType.SET),
-		EvadeData.EvadeSource.WEAPON: Modifier.new("0", Modifier.ModifierType.SET),
+		EvadeData.EvadeSource.JOB: Modifier.new("0", Modifier.ModifierOrder.SET),
+		EvadeData.EvadeSource.SHIELD: Modifier.new("0", Modifier.ModifierOrder.SET),
+		EvadeData.EvadeSource.ACCESSORY: Modifier.new("0", Modifier.ModifierOrder.SET),
+		EvadeData.EvadeSource.WEAPON: Modifier.new("0", Modifier.ModifierOrder.SET),
 	}
 
 	# confuse
@@ -154,19 +154,19 @@ static func configure_statuses(status_effects: Array[StatusEffect], rom_reader: 
 	rom_reader.fft_abilities[0x0c8].ability_action.status_prevents_use_any.erase("blood_suck") # can use blood suck
 
 	# faith
-	status_effects[32].passive_effect.stat_modifiers[UnitData.StatType.FAITH] = Modifier.new("100.0", Modifier.ModifierType.SET)
+	status_effects[32].passive_effect.stat_modifiers[UnitData.StatType.FAITH] = Modifier.new("100.0", Modifier.ModifierOrder.SET)
 	# innocent
-	status_effects[33].passive_effect.stat_modifiers[UnitData.StatType.FAITH] = Modifier.new("0.0", Modifier.ModifierType.SET)
+	status_effects[33].passive_effect.stat_modifiers[UnitData.StatType.FAITH] = Modifier.new("0.0", Modifier.ModifierOrder.SET)
 
 	# float
 	# TODO handle ignore depth and add height
 	status_effects[17].passive_effect.element_cancel = [Action.ElementTypes.EARTH]
 	var terrain_modifier_dict: Dictionary[int, Modifier] = {
-		0x0e: Modifier.new("1", Modifier.ModifierType.SET),
-		0x0f: Modifier.new("1", Modifier.ModifierType.SET),
-		0x10: Modifier.new("1", Modifier.ModifierType.SET),
-		0x11: Modifier.new("1", Modifier.ModifierType.SET),
-		0x2d: Modifier.new("1", Modifier.ModifierType.SET),
+		0x0e: Modifier.new("1", Modifier.ModifierOrder.SET),
+		0x0f: Modifier.new("1", Modifier.ModifierOrder.SET),
+		0x10: Modifier.new("1", Modifier.ModifierOrder.SET),
+		0x11: Modifier.new("1", Modifier.ModifierOrder.SET),
+		0x2d: Modifier.new("1", Modifier.ModifierOrder.SET),
 	}
 	status_effects[17].passive_effect.terrain_cost_modifiers = terrain_modifier_dict
 	status_effects[17].passive_effect.remove_prohibited_terrain = [

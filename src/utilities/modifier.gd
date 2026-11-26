@@ -3,29 +3,27 @@ extends Resource
 
 const EXPRESSION_INPUT_NAMES: PackedStringArray = ["user", "target", "value"]
 
-enum ModifierType {
+enum ModifierOrder {
 	ADD,
 	MULT,
 	SET,
 }
 
-@export var type: ModifierType = ModifierType.ADD
+@export var order_type: ModifierOrder = ModifierOrder.ADD
 @export var formula_text: String = "value + 0.0":
 	set(value):
 		if value != formula_text:
 			formula_text = value
 			_cached_expression = null
 			_cached_formula_text = ""
-@export var order: int = 1 # order to be appliede
 # TODO track modifier source?
 
 var _cached_expression: Expression = null
 var _cached_formula_text: String = ""
 
 
-func _init(new_formula_text: String = "value + 0.0", new_type: ModifierType = ModifierType.ADD, new_order: int = 1) -> void:
-	type = new_type
-	order = new_order
+func _init(new_formula_text: String = "value + 0.0", new_type: ModifierOrder = ModifierOrder.ADD) -> void:
+	order_type = new_type
 	formula_text = new_formula_text
 
 

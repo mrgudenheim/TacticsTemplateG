@@ -46,8 +46,8 @@ static func create_from_rom(idx: int, rom_reader: RomReader) -> ItemData:
 		sub_index = idx - 0x90
 		item_data.hp_modifier = scus_data.armour_hp_modifier[sub_index]
 		item_data.mp_modifier = scus_data.armour_mp_modifier[sub_index]
-		item_data.passive_effect.stat_modifiers[UnitData.StatType.HP_MAX] = Modifier.new("value + " + str(item_data.hp_modifier), Modifier.ModifierType.ADD)
-		item_data.passive_effect.stat_modifiers[UnitData.StatType.MP_MAX] = Modifier.new("value + " + str(item_data.mp_modifier), Modifier.ModifierType.ADD)
+		item_data.passive_effect.stat_modifiers[UnitData.StatType.HP_MAX] = Modifier.new("value + " + str(item_data.hp_modifier), Modifier.ModifierOrder.ADD)
+		item_data.passive_effect.stat_modifiers[UnitData.StatType.MP_MAX] = Modifier.new("value + " + str(item_data.mp_modifier), Modifier.ModifierOrder.ADD)
 	elif idx < 0xf0: # accessory data
 		sub_index = idx - 0xd0
 		item_data.accessory_physical_evade = scus_data.accessory_physical_evade[sub_index]
@@ -253,11 +253,11 @@ static func _apply_item_attributes(item_data: ItemData, item_attribute: ScusData
 
 	item_data.passive_effect = PassiveEffect.new()
 
-	item_data.passive_effect.stat_modifiers[UnitData.StatType.PHYSICAL_ATTACK] = Modifier.new("value + " + str(item_attribute.pa_modifier), Modifier.ModifierType.ADD)
-	item_data.passive_effect.stat_modifiers[UnitData.StatType.MAGIC_ATTACK] = Modifier.new("value + " + str(item_attribute.ma_modifier), Modifier.ModifierType.ADD)
-	item_data.passive_effect.stat_modifiers[UnitData.StatType.SPEED] = Modifier.new("value + " + str(item_attribute.sp_modifier), Modifier.ModifierType.ADD)
-	item_data.passive_effect.stat_modifiers[UnitData.StatType.MOVE] = Modifier.new("value + " + str(item_attribute.move_modifier), Modifier.ModifierType.ADD)
-	item_data.passive_effect.stat_modifiers[UnitData.StatType.JUMP] = Modifier.new("value + " + str(item_attribute.jump_modifier), Modifier.ModifierType.ADD)
+	item_data.passive_effect.stat_modifiers[UnitData.StatType.PHYSICAL_ATTACK] = Modifier.new("value + " + str(item_attribute.pa_modifier), Modifier.ModifierOrder.ADD)
+	item_data.passive_effect.stat_modifiers[UnitData.StatType.MAGIC_ATTACK] = Modifier.new("value + " + str(item_attribute.ma_modifier), Modifier.ModifierOrder.ADD)
+	item_data.passive_effect.stat_modifiers[UnitData.StatType.SPEED] = Modifier.new("value + " + str(item_attribute.sp_modifier), Modifier.ModifierOrder.ADD)
+	item_data.passive_effect.stat_modifiers[UnitData.StatType.MOVE] = Modifier.new("value + " + str(item_attribute.move_modifier), Modifier.ModifierOrder.ADD)
+	item_data.passive_effect.stat_modifiers[UnitData.StatType.JUMP] = Modifier.new("value + " + str(item_attribute.jump_modifier), Modifier.ModifierOrder.ADD)
 
 	item_data.passive_effect.status_always = item_attribute.status_always
 	item_data.passive_effect.status_immune = item_attribute.status_immune
