@@ -355,8 +355,10 @@ func process_clock_tick() -> void:
 	for unit: UnitData in units: # increment each units ct by speed
 		if not unit.is_ct_frozen(): # check status that prevent ct gain (stop, sleep, etc.)
 			var ct_gain: int = unit.stats[UnitData.StatType.SPEED].current_value
+			var ct_gain_modifiers: Array[Modifier] = []
 			for passive_effect: PassiveEffect in unit.get_all_passive_effects():
-				ct_gain = passive_effect.ct_gain_modifier.apply(ct_gain)
+				ct_gain_modifiers.append(passive_effect.ct_gain_modifier)
+			ct_gain = Modifier.apply_all(ct_gain_modifiers, ct_gain)
 			unit.stats[UnitData.StatType.CT].add_value(ct_gain)
 
 	# execute unit turns in PriorityQueue order until all units have CT < 100

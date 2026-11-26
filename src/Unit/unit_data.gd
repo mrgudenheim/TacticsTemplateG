@@ -905,17 +905,18 @@ func update_prohibited_terrain(all_passive_effects: Array[PassiveEffect]) -> voi
 
 func update_terrain_costs(all_passive_effects: Array[PassiveEffect]) -> void:
 	var new_terrain_costs: Dictionary[int, int] = {}
-
+	var terrain_ids: Array[int] = []
 	for passive_effect: PassiveEffect in all_passive_effects:
 		for terrain_id: int in passive_effect.terrain_cost_modifiers.keys():
-			var current_cost: int = 1
-			if new_terrain_costs.has(terrain_id):
-				current_cost = new_terrain_costs[terrain_id]
-			
-			new_terrain_costs[terrain_id] = passive_effect.terrain_cost_modifiers[terrain_id].apply(current_cost)
-	
-	for terrain_id: int in new_terrain_costs.keys():
-		new_terrain_costs[terrain_id] = max(0, new_terrain_costs[terrain_id]) # move is never negative
+			if not terrain_ids.has(terrain_id):
+				terrain_ids.append(terrain_id)
+
+	for terrain_id: int in terrain_ids:
+		var terrain_modifiers: Array[Modifier] = []
+		for passive_effect: PassiveEffect in all_passive_effects:
+			if passive_effect.terrain_cost_modifiers.has(terrain_id):
+				terrain_modifiers.append(passive_effect.terrain_cost_modifiers[terrain_id])
+		new_terrain_costs[terrain_id] = maxi(0, Modifier.apply_all(terrain_modifiers, 1)) # move is never negative
 
 	terrain_costs = new_terrain_costs
 

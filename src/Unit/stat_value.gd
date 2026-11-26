@@ -17,11 +17,7 @@ func _init(new_min_value: int = 0, new_max_value: int = 100, new_current_value: 
 
 
 func get_unclampped_modified_value(preview_value: int = current_value) -> int:
-	var temp_modified_value: int = preview_value
-	for modifier: Modifier in modifiers:
-		temp_modified_value = modifier.apply(temp_modified_value) # TODO sort by add, mult, set
-	
-	return temp_modified_value
+	return Modifier.apply_all(modifiers, preview_value)
 
 
 func get_modified_value(preview_value: int = current_value) -> int:

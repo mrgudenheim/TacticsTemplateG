@@ -76,19 +76,19 @@ static func _get_pre_evade_hit_chance(
 			return 0.0
 
 	var base_hit_chance: float = action.base_hit_formula.get_result(caster, target, action.element)
-	var modified_hit_chance: float = base_hit_chance
+	var hit_modifiers: Array[Modifier] = []
 	if action.passive_power_modifier_applies_to_hit_chance:
 		for passive_effect: PassiveEffect in caster_passive_effects:
-			modified_hit_chance = passive_effect.power_modifier_user.apply(roundi(modified_hit_chance), caster, target)
+			hit_modifiers.append(passive_effect.power_modifier_user)
 		for passive_effect: PassiveEffect in target_passive_effects:
-			modified_hit_chance = passive_effect.power_modifier_targeted.apply(roundi(modified_hit_chance), caster, target)
+			hit_modifiers.append(passive_effect.power_modifier_targeted)
 	else:
 		for passive_effect: PassiveEffect in caster_passive_effects:
-			modified_hit_chance = passive_effect.hit_chance_modifier_user.apply(roundi(modified_hit_chance), caster, target)
+			hit_modifiers.append(passive_effect.hit_chance_modifier_user)
 		for passive_effect: PassiveEffect in target_passive_effects:
-			modified_hit_chance = passive_effect.hit_chance_modifier_targeted.apply(roundi(modified_hit_chance), caster, target)
+			hit_modifiers.append(passive_effect.hit_chance_modifier_targeted)
 
-	return modified_hit_chance
+	return float(Modifier.apply_all(hit_modifiers, roundi(base_hit_chance), caster, target))
 
 
 static func get_total_hit_chance(
@@ -456,12 +456,14 @@ static func _get_effective_evade_values(
 		if not target_passive_effects.any(func(passive_effect: PassiveEffect) -> bool: return passive_effect.include_evade_sources.has(evade_source)):
 			continue
 		var evade_value: int = base_evade_values[evade_source]
+		var evade_modifiers: Array[Modifier] = []
 		for passive_effect: PassiveEffect in caster_passive_effects:
 			if passive_effect.evade_source_modifiers_user.has(evade_source):
-				evade_value = passive_effect.evade_source_modifiers_user[evade_source].apply(evade_value, caster, target)
+				evade_modifiers.append(passive_effect.evade_source_modifiers_user[evade_source])
 		for passive_effect: PassiveEffect in target_passive_effects:
 			if passive_effect.evade_source_modifiers_targeted.has(evade_source):
-				evade_value = passive_effect.evade_source_modifiers_targeted[evade_source].apply(evade_value, caster, target)
+				evade_modifiers.append(passive_effect.evade_source_modifiers_targeted[evade_source])
+		evade_value = Modifier.apply_all(evade_modifiers, evade_value, caster, target)
 		effective_evade_values[evade_source] = maxi(0, evade_value)
 
 	return effective_evade_values

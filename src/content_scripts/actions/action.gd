@@ -220,10 +220,17 @@ static func get_modified_action(action_to_modify: Action, user: UnitData, units_
 	modified_action.secondary_actions2 = action_to_modify.secondary_actions2.duplicate()
 	var all_passive_effects: Array[PassiveEffect] = user.get_all_passive_effects(action_to_modify.ignore_passives, units_override)
 
+	var charge_time_modifiers: Array[Modifier] = []
+	var mp_modifiers: Array[Modifier] = []
+	var max_range_modifiers: Array[Modifier] = []
 	for passive_effect: PassiveEffect in all_passive_effects:
-		modified_action.ticks_charge_time = passive_effect.action_charge_time_modifier.apply(modified_action.ticks_charge_time)
-		modified_action.mp_cost = passive_effect.action_mp_modifier.apply(modified_action.mp_cost)
-		modified_action.max_targeting_range = passive_effect.action_max_range_modifier.apply(modified_action.max_targeting_range)
+		charge_time_modifiers.append(passive_effect.action_charge_time_modifier)
+		mp_modifiers.append(passive_effect.action_mp_modifier)
+		max_range_modifiers.append(passive_effect.action_max_range_modifier)
+
+	modified_action.ticks_charge_time = Modifier.apply_all(charge_time_modifiers, modified_action.ticks_charge_time)
+	modified_action.mp_cost = Modifier.apply_all(mp_modifiers, modified_action.mp_cost)
+	modified_action.max_targeting_range = Modifier.apply_all(max_range_modifiers, modified_action.max_targeting_range)
 
 	return modified_action
 

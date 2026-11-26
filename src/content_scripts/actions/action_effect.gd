@@ -50,10 +50,12 @@ func get_modified_value(
 	if not action.passive_power_modifier_applies_to_hit_chance:
 		var user_passive_effects: Array[PassiveEffect] = user.get_all_passive_effects(action.ignore_passives, units_override)
 		var target_passive_effects: Array[PassiveEffect] = target.get_all_passive_effects(action.ignore_passives, units_override)
+		var power_modifiers: Array[Modifier] = []
 		for passive_effect: PassiveEffect in user_passive_effects:
-			effect_value = passive_effect.power_modifier_user.apply(effect_value, user, target)
+			power_modifiers.append(passive_effect.power_modifier_user)
 		for passive_effect: PassiveEffect in target_passive_effects:
-			effect_value = passive_effect.power_modifier_targeted.apply(effect_value, user, target)
+			power_modifiers.append(passive_effect.power_modifier_targeted)
+		effect_value = Modifier.apply_all(power_modifiers, effect_value, user, target)
 	return effect_value
 
 

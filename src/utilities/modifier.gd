@@ -22,8 +22,8 @@ var _cached_expression: Expression = null
 var _cached_formula_text: String = ""
 
 
-func _init(new_formula_text: String = "value + 0.0", new_type: ModifierOrder = ModifierOrder.ADD) -> void:
-	order_type = new_type
+func _init(new_formula_text: String = "value + 0.0", new_order_type: ModifierOrder = ModifierOrder.ADD) -> void:
+	order_type = new_order_type
 	formula_text = new_formula_text
 
 
@@ -56,7 +56,24 @@ func get_expression_result(value: float, user: UnitData, target: UnitData) -> fl
 	return 0.0
 
 
-func apply(to_value: int, user: UnitData = null, target: UnitData = null) -> int:
-	# var formula_result: float = value_formula.get_base_value(user, target)
+func apply(to_value: float, user: UnitData = null, target: UnitData = null) -> float:
+	if formula_text == "value + 0.0":
+		return to_value
 	var formula_result: float = get_expression_result(to_value, user, target)
-	return roundi(formula_result)
+	return formula_result
+
+
+static func apply_all(
+	modifiers: Array[Modifier],
+	to_value: int,
+	user: UnitData = null,
+	target: UnitData = null
+) -> int:
+	if modifiers.is_empty():
+		return to_value
+	var result: float = float(to_value)
+	for order: ModifierOrder in ModifierOrder.values():
+		for modifier: Modifier in modifiers:
+			if modifier != null and modifier.order_type == order:
+				result = modifier.apply(result, user, target)
+	return roundi(result)
