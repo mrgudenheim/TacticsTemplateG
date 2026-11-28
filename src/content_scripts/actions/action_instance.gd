@@ -68,7 +68,8 @@ func is_usable() -> bool:
 			user_has_equipment_type = true
 		else:
 			for equipment_slot: EquipmentSlot in user.equip_slots:
-				if action.required_equipment_type.has(equipment_slot.get_item().item_type): # TODO allow actions that require combination of item types?
+				var slot_item: ItemData = equipment_slot.get_item()
+				if slot_item != null and action.required_equipment_type.has(slot_item.item_type): # TODO allow actions that require combination of item types?
 					user_has_equipment_type = true
 					break
 		

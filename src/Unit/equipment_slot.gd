@@ -13,7 +13,10 @@ func _init(new_name: String = "", new_slot_types: Array[ItemData.SlotType] = [],
 
 
 func _to_string() -> String:
-	return equipment_slot_name + ": " + get_item().display_name
+	var item: ItemData = get_item()
+	if item == null:
+		return equipment_slot_name + ": "
+	return equipment_slot_name + ": " + item.display_name
 
 
 func get_item() -> ItemData:

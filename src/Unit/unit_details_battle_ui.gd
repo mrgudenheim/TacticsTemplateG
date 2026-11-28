@@ -175,7 +175,9 @@ func update_ui() -> void:
 		equipment_grid.add_child(new_slot_label)
 
 		var new_item_label: Label = Label.new()
-		new_item_label.text = equip_slot.get_item().display_name
+		var slot_item: ItemData = equip_slot.get_item()
+		if slot_item != null:
+			new_item_label.text = slot_item.display_name
 		equipment_grid.add_child(new_item_label)
 
 	# update abilities
